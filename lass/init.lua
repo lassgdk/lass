@@ -148,9 +148,36 @@ end
 
 function GameScene:draw()
 
+	local drawables = {}
+	local indices = {}
+
+	--collect all drawable objects into buckets
 	for i, object in ipairs(self.gameObjects) do
-		if object.draw then object:draw() end
+		if object:isDrawable() then
+			--object:draw()
+			local bucket = drawables[object.transform.z]
+			if bucket then
+				bucket[#bucket+1] = object
+			else
+				drawables[object.transform.z] = {object}
+			end
+		end
 	end
+
+	--sort the z indices
+	for index in pairs(drawables) do
+		indices[#indices+1] = index
+	end
+	table.sort(indices)
+
+	--draw
+	for i, index in pairs(indices) do
+		for j, drawable in pairs(drawables[index]) do
+			drawable:draw()
+			-- print('blah')
+		end
+	end
+
 end
 
 function GameScene:loadSceneFile(moduleName)
@@ -223,6 +250,16 @@ function GameObject:update(dt)
 	end
 
 	self._base.update(self, dt)
+end
+
+function GameObject:isDrawable()
+	--returns true if this GameObject contains a component with a draw() function
+
+	for i, component in ipairs(self.components) do
+		if component.draw then return true end
+	end
+
+	return false
 end
 
 function GameObject:draw()
