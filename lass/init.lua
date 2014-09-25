@@ -16,9 +16,18 @@ GameEntity = class(function(self, transform, parent)
 		self.transform = {}
 	end
 
-	self.transform.x = self.transform.x or 0
-	self.transform.y = self.transform.y or 0
-	self.transform.z = self.transform.z or 0
+	--initialize position and size settings
+	for property, defaultAxisValue in pairs({position=0, size=1}) do
+		if type(self.transform[property]) ~= "table" then
+			self.transform[property] = {}
+		end
+
+		for _, axis in ipairs({"x", "y", "z"}) do
+			self.transform[property][axis] = self.transform[property][axis] or defaultAxisValue
+		end
+	end
+
+	--initialize rotation
 	self.transform.rotation = self.transform.rotation or 0
 
 	self.children = {}
@@ -52,15 +61,6 @@ end
 
 function GameEntity:removeChild(child)
 
-	-- local offset = 0
-	-- for i, entity in ipairs(self.children) do
-	-- 	if entity == child then
-	-- 		self.children[i] = nil
-	-- 		offset = 1
-	-- 	end
-	-- 	self.children[i] = self.children[i+offset]
-	-- end
-
 	local index = indexof(self.children, child)
 	if index then
 		table.remove(self.children, index)
@@ -72,11 +72,9 @@ function GameEntity:update(dt)
 	self:maintainTransform()
 
 	--update children
---	if self.children and updateChildren then
 	for i, child in ipairs(self.children) do
 		child:update(dt)
 	end
---	end
 end
 
 function GameEntity:maintainTransform()
@@ -92,13 +90,20 @@ function GameEntity:maintainTransform()
 		local angle = (p.rotation/180) * math.pi
 
 		self.globalTransform = {
-			z = t.z + p.z,
-			rotation = t.rotation + p.rotation,
+			position = {
+				z = t.position.z + p.position.z,
 
-			--adjust position based on rotation around the parent
-			--normally this formula would rotate CCW, but love2d's y-axis is reversed
-			x = p.x + (t.x * math.cos(angle)) - (t.y * math.sin(angle)),
-			y = p.y + (t.x * math.sin(angle)) + (t.y * math.cos(angle))
+				--adjust position based on rotation around the parent
+				--normally this formula would rotate CCW, but love2d's y-axis is inverted
+				x = p.position.x + (t.position.x * math.cos(angle)) - (t.position.y * math.sin(angle)),
+				y = p.position.y + (t.position.x * math.sin(angle)) + (t.position.y * math.cos(angle))
+			},
+			size = {
+				x = t.size.x * p.size.x,
+				y = t.size.y * p.size.y,
+				z = t.size.z * p.size.z,
+			},
+			rotation = t.rotation + p.rotation
 		}
 	else
 		self.globalTransform = self.transform
@@ -124,7 +129,7 @@ function GameScene:addGameObject(gameObject)
 	gameObject.gameScene = self
 	table.insert(self.gameObjects, gameObject)
 
-	print("added " .. gameObject.name .. " to scene at " .. gameObject.transform.x)
+	print("added " .. gameObject.name .. " to scene at " .. gameObject.transform.position.x)
 
 end
 
@@ -155,11 +160,11 @@ function GameScene:draw()
 	for i, object in ipairs(self.gameObjects) do
 		if object:isDrawable() then
 			--object:draw()
-			local bucket = drawables[object.transform.z]
+			local bucket = drawables[object.transform.position.z]
 			if bucket then
 				bucket[#bucket+1] = object
 			else
-				drawables[object.transform.z] = {object}
+				drawables[object.transform.position.z] = {object}
 			end
 		end
 	end
@@ -226,12 +231,12 @@ GameObject = class(GameEntity, function(self, gameScene, name, transform, parent
 	name = name or ""
 	self.name = string.format(name)
 
+	print(transform.position.x)
 	GameEntity.init(self, transform)
 
 	--if parent is specified, it must be a GameObject
 	if parent then
-		status, result = pcall(parent.is_a, parent, GameObject)
-		assert(status and result, "parent must be GameObject")
+		assert(instanceof(parent, GameObject), "parent must be GameObject")
 
 		parent:addChild(self)
 	else
@@ -321,26 +326,26 @@ function GameObject:getComponents(componentType)
 	return found
 end
 
-function GameObject:getGlobalTransform()
-	if parent then
-		p = self.parent.getGlobalTransform()
-		return {
-			x = self.transform.x + p.x,
-			y = self.transform.y + p.y,
-			z = self.transform.z + p.z,
-			rotation = self.transform.rotation + p.rotation
-		}
-	else
-		return self.transform
-	end
-end
+-- function GameObject:getGlobalTransform()
+-- 	if parent then
+-- 		p = self.parent.getGlobalTransform()
+-- 		return {
+-- 			x = self.transform.position.x + p.x,
+-- 			y = self.transform.position.y + p.y,
+-- 			z = self.transform.position.z + p.z,
+-- 			rotation = self.transform.rotation + p.rotation
+-- 		}
+-- 	else
+-- 		return self.transform
+-- 	end
+-- end
 
-function GameObject:getHighestTransform()
-	if parent then
-		return parent:getHighestTransform()
-	end
-	return self.transform
-end
+-- function GameObject:getHighestTransform()
+-- 	if parent then
+-- 		return parent:getHighestTransform()
+-- 	end
+-- 	return self.transform
+-- end
 
 function GameObject:move(x, y, z)
 
@@ -350,9 +355,9 @@ function GameObject:move(x, y, z)
 		x = x.x
 	end
 
-	self.transform.x = self.transform.x + x
-	self.transform.y = self.transform.y + y
-	self.transform.z = self.transform.z + (z or 0)
+	self.transform.position.x = self.transform.position.x + x
+	self.transform.position.y = self.transform.position.y + y
+	self.transform.position.z = self.transform.position.z + (z or 0)
 end
 
 function GameObject:moveTo(x, y, z)
@@ -362,9 +367,14 @@ function GameObject:moveTo(x, y, z)
 		y = x.y
 		x = x.x
 	end
-	self.transform.x = x
-	self.transform.y = y
-	self.transform.z = z or self.transform.z
+	self.transform.position.x = x
+	self.transform.position.y = y
+	self.transform.position.z = z or self.transform.position.z
+end
+
+function GameObject:rotate(angle)
+
+	self.transform.rotation = self.transform.rotation + angle
 end
 
 --[[
