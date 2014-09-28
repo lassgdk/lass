@@ -1,7 +1,10 @@
 -- class.lua
 -- Compatible with Lua 5.1 (not 5.0).
 -- http://lua-users.org/wiki/SimpleLuaClasses
-function class(base, init)
+
+local class = {}
+
+function class.define(base, init)
    local c = {}    -- a new class instance
    if not init and type(base) == 'function' then
       init = base
@@ -46,8 +49,7 @@ function class(base, init)
 end
 
 --instanceof function by decky coss (cosstropolis.com)
-
-function instanceof(object, class)
+function class.instanceof(object, class)
    -- check if object is an instance of class, even if it isn't a table
 
    if not object then return false end
@@ -55,3 +57,5 @@ function instanceof(object, class)
    status, result = pcall(object.is_a, object, class)
    return status and result
 end
+
+return class

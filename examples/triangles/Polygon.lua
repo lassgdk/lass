@@ -1,13 +1,12 @@
-require("lass")
-require("lass.class")
+lass = require("lass")
+class = require("lass.class")
 
-Polygon = class(Component, function(self, properties)
+Polygon = class.define(lass.Component, function(self, properties)
 	assert(properties.vertices, "must specify vertices")
 	properties.mode = properties.mode or "fill"
 	properties.color = properties.color or {0,0,0}
 
-	Component.init(self, properties)
-
+	lass.Component.init(self, properties)
 end)
 
 function Polygon:update(dt)

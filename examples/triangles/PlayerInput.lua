@@ -1,7 +1,7 @@
-require("lass")
-require("lass.class")
+lass = require("lass")
+class = require("lass.class")
 
-PlayerInput = class(Component, function(self, properties)
+PlayerInput = class.define(lass.Component, function(self, properties)
 
 	properties.speed = properties.speed or 1
 	properties.controls = properties.controls or {
@@ -17,7 +17,7 @@ PlayerInput = class(Component, function(self, properties)
 		properties.speedmode = "perFrame"
 	end
 
-	Component.init(self, properties)
+	lass.Component.init(self, properties)
 end)
 
 function PlayerInput:update(dt)

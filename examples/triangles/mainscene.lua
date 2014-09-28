@@ -21,7 +21,7 @@ return {
 				_module = "PlayerInput",
 				properties = {
 					speed = 10,
-					speedMode = "perSecond"
+					speedMode = "perFrame"
 				}
 			}
 		},

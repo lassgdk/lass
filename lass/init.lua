@@ -2,13 +2,9 @@
 -- an object/component model for love2d, inspired by unity
 -- decky coss (cosstropolis.com)
 
-require("lass.class")
+class = require("lass.class")
 
---[[
-GameEntity
-]]
-
-function getAxes(x, y, z)
+local function getAxes(x, y, z)
 
 	if type(x) == "table" then
 		z = x.z
@@ -18,7 +14,11 @@ function getAxes(x, y, z)
 	return x, y, z
 end
 
-GameEntity = class(function(self, transform, parent)
+--[[
+GameEntity
+]]
+
+local GameEntity = class.define(function(self, transform, parent)
 
 	if type(transform) == "table" then
 		self.transform = transform
@@ -51,7 +51,7 @@ end)
 
 function GameEntity:addChild(child, trackParent)
 
-	assert(instanceof(child, GameEntity), "child must be GameEntity")
+	assert(class.instanceof(child, GameEntity), "child must be GameEntity")
 	assert(child ~= self, "circular reference: cannot add self as child")
 
 	if trackParent == nil then
@@ -158,10 +158,128 @@ function GameEntity:resize(x, y, z, allowNegativeSize)
 end
 
 --[[
+Component
+]]
+
+local Component = class.define(function(self, properties) 
+
+	self.gameObject = {}
+	for k, v in pairs(properties) do
+		self[k] = v
+	end
+end)
+
+function Component:update(dt) end
+
+--[[
+GameObject
+]]
+
+local GameObject = class.define(GameEntity, function(self, gameScene, name, transform, parent)
+
+	name = name or ""
+	self.name = string.format(name)
+
+	print(transform.position.x)
+	GameEntity.init(self, transform)
+
+	--if parent is specified, it must be a GameObject
+	if parent then
+		assert(class.instanceof(parent, GameObject), "parent must be GameObject")
+
+		parent:addChild(self)
+	else
+		gameScene:addChild(self, false)
+	end
+
+	self.components = {}
+
+	gameScene:addGameObject(self)
+end)
+
+function GameObject:update(dt)
+
+	for i, component in ipairs(self.components) do
+		component:update(dt)
+	end
+
+	self._base.update(self, dt)
+end
+
+function GameObject:isDrawable()
+	--returns true if this GameObject contains a component with a draw() function
+
+	for i, component in ipairs(self.components) do
+		if component.draw then return true end
+	end
+
+	return false
+end
+
+function GameObject:draw()
+
+	for i, component in ipairs(self.components) do
+		if component.draw then component:draw() end
+	end
+end
+
+-- function GameObject:addChild(child)
+
+-- 	status, result = pcall(child.is_a, child, GameObject)
+-- 	assert(status and result, "child must be GameObject")
+
+-- 	self._base.addChild(self, child, true)
+-- end
+
+function GameObject:addChild(child)
+
+	child.gameScene:removeChild(child)
+	if class.instanceof(child.parent, GameObject) then
+		child.parent:removeChild(child)
+	end
+	self._base.addChild(self, child)
+end
+
+function GameObject:addComponent(component)
+
+	--status, result = pcall(component.is_a, component, Component)
+	-- assert(class.instanceof(component, Component), "component must be Component")
+
+	if self.components then
+		self.components[#self.components + 1] = component
+	else
+		self.components = {components}
+	end
+
+	component.gameObject = self
+end
+
+function GameObject:getComponent(componentType)
+
+	for i, component in ipairs(self.components) do
+		if component:is_a(componentType) then
+			return component
+		end
+	end
+end
+
+function GameObject:getComponents(componentType)
+
+	found = {}
+	for i, component in ipairs(self.components) do
+		if component:is_a(componentType) then
+			found[#found + 1] = component
+		end
+	end
+
+	return found
+end
+
+--[[
 GameScene
 ]]
 
-GameScene = class(GameEntity, function(self, transform)
+local GameScene = class.define(GameEntity, function(self, transform)
 
 	self.gameObjects = {}
 	GameEntity.init(self, transform)
@@ -171,7 +289,7 @@ function GameScene:addGameObject(gameObject)
 	--add a GameObject to this GameScene (call this from gameObject constructor)
 
 	--local status, result = pcall(gameObject.is_a, gameObject, GameObject)
-	assert(instanceof(gameObject, GameObject), "gameObject must be GameObject")
+	assert(class.instanceof(gameObject, GameObject), "gameObject must be GameObject")
 
 	gameObject.gameScene = self
 	table.insert(self.gameObjects, gameObject)
@@ -268,124 +386,6 @@ function GameScene:buildObjectTree(object)
 end
 
 --[[
-GameObject
-]]
-
-GameObject = class(GameEntity, function(self, gameScene, name, transform, parent)
-
-	name = name or ""
-	self.name = string.format(name)
-
-	print(transform.position.x)
-	GameEntity.init(self, transform)
-
-	--if parent is specified, it must be a GameObject
-	if parent then
-		assert(instanceof(parent, GameObject), "parent must be GameObject")
-
-		parent:addChild(self)
-	else
-		gameScene:addChild(self, false)
-	end
-
-	self.components = {}
-
-	gameScene:addGameObject(self)
-end)
-
-function GameObject:update(dt)
-
-	for i, component in ipairs(self.components) do
-		component:update(dt)
-	end
-
-	self._base.update(self, dt)
-end
-
-function GameObject:isDrawable()
-	--returns true if this GameObject contains a component with a draw() function
-
-	for i, component in ipairs(self.components) do
-		if component.draw then return true end
-	end
-
-	return false
-end
-
-function GameObject:draw()
-
-	for i, component in ipairs(self.components) do
-		if component.draw then component:draw() end
-	end
-end
-
--- function GameObject:addChild(child)
-
--- 	status, result = pcall(child.is_a, child, GameObject)
--- 	assert(status and result, "child must be GameObject")
-
--- 	self._base.addChild(self, child, true)
--- end
-
-function GameObject:addChild(child)
-
-	child.gameScene:removeChild(child)
-	if instanceof(child.parent, GameObject) then
-		child.parent:removeChild(child)
-	end
-	self._base.addChild(self, child)
-end
-
-function GameObject:addComponent(component)
-
-	status, result = pcall(component.is_a, component, Component)
-	assert(status and result, "component must be Component")
-
-	if self.components then
-		self.components[#self.components + 1] = component
-	else
-		self.components = {components}
-	end
-
-	component.gameObject = self
-end
-
-function GameObject:getComponent(componentType)
-
-	for i, component in ipairs(self.components) do
-		if component:is_a(componentType) then
-			return component
-		end
-	end
-end
-
-function GameObject:getComponents(componentType)
-
-	found = {}
-	for i, component in ipairs(self.components) do
-		if component:is_a(componentType) then
-			found[#found + 1] = component
-		end
-	end
-
-	return found
-end
-
---[[
-Component
-]]
-
-Component = class(function(self, properties) 
-
-	self.gameObject = {}
-	for k, v in pairs(properties) do
-		self[k] = v
-	end
-end)
-
-function Component:update(dt) end
-
---[[
 utils
 ]]
 
@@ -409,3 +409,10 @@ function indexof(list, value)
 		end
 	end
 end
+
+return {
+	GameEntity = GameEntity,
+	GameScene = GameScene,
+	GameObject = GameObject,
+	Component = Component
+}

@@ -1,4 +1,4 @@
-require("lass")
+lass = require("lass")
 
 scene = {}
 
@@ -6,7 +6,7 @@ function love.load()
 	love.window.setMode(800, 600)
 	love.graphics.setBackgroundColor(255,255,255)
 
-	scene = GameScene()
+	scene = lass.GameScene()
 	scene:loadSceneFile("mainscene")
 
 end
