@@ -27,7 +27,7 @@ function Polygon:draw()
 		--remember, i starts at 1...
 		if i % 2 == 0 then axis = "y" end
 
-		vertices[i] = vertexPoint
+		vertices[i] = vertexPoint * transform.size[axis]
 
 		if axis == "y" then
 			local x = vertices[i-1]

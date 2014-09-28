@@ -8,6 +8,16 @@ require("lass.class")
 GameEntity
 ]]
 
+function getAxes(x, y, z)
+
+	if type(x) == "table" then
+		z = x.z
+		y = x.y
+		x = x.x
+	end
+	return x, y, z
+end
+
 GameEntity = class(function(self, transform, parent)
 
 	if type(transform) == "table" then
@@ -110,6 +120,43 @@ function GameEntity:maintainTransform()
 	end
 end
 
+function GameEntity:move(x, y, z)
+
+	x, y, z = getAxes(x, y, z)
+
+	self.transform.position.x = self.transform.position.x + x
+	self.transform.position.y = self.transform.position.y + y
+	self.transform.position.z = self.transform.position.z + (z or 0)
+end
+
+function GameEntity:moveTo(x, y, z)
+
+	x, y, z = getAxes(x, y, z)
+
+	self.transform.position.x = x
+	self.transform.position.y = y
+	self.transform.position.z = z or self.transform.position.z
+end
+
+function GameEntity:rotate(angle)
+
+	self.transform.rotation = self.transform.rotation + angle
+end
+
+function GameEntity:resize(x, y, z, allowNegativeSize)
+
+	x, y, z = getAxes(x, y, z)
+	self.transform.size.x = self.transform.size.x + x
+	self.transform.size.y = self.transform.size.y + y
+	self.transform.size.z = self.transform.size.z + (z or 0)
+
+	if not allowNegativeSize then
+		for axis, value in pairs(self.transform.size) do
+			if value < 0 then self.transform.size[axis] = 0 end
+		end
+	end
+end
+
 --[[
 GameScene
 ]]
@@ -129,7 +176,7 @@ function GameScene:addGameObject(gameObject)
 	gameObject.gameScene = self
 	table.insert(self.gameObjects, gameObject)
 
-	print("added " .. gameObject.name .. " to scene at " .. gameObject.transform.position.x)
+	--print("added " .. gameObject.name .. " to scene at " .. gameObject.transform.position.x)
 
 end
 
@@ -159,7 +206,6 @@ function GameScene:draw()
 	--collect all drawable objects into buckets
 	for i, object in ipairs(self.gameObjects) do
 		if object:isDrawable() then
-			--object:draw()
 			local bucket = drawables[object.transform.position.z]
 			if bucket then
 				bucket[#bucket+1] = object
@@ -179,7 +225,6 @@ function GameScene:draw()
 	for i, index in pairs(indices) do
 		for j, drawable in pairs(drawables[index]) do
 			drawable:draw()
-			-- print('blah')
 		end
 	end
 
@@ -324,57 +369,6 @@ function GameObject:getComponents(componentType)
 	end
 
 	return found
-end
-
--- function GameObject:getGlobalTransform()
--- 	if parent then
--- 		p = self.parent.getGlobalTransform()
--- 		return {
--- 			x = self.transform.position.x + p.x,
--- 			y = self.transform.position.y + p.y,
--- 			z = self.transform.position.z + p.z,
--- 			rotation = self.transform.rotation + p.rotation
--- 		}
--- 	else
--- 		return self.transform
--- 	end
--- end
-
--- function GameObject:getHighestTransform()
--- 	if parent then
--- 		return parent:getHighestTransform()
--- 	end
--- 	return self.transform
--- end
-
-function GameObject:move(x, y, z)
-
-	if type(x) == "table" then
-		z = x.z
-		y = x.y
-		x = x.x
-	end
-
-	self.transform.position.x = self.transform.position.x + x
-	self.transform.position.y = self.transform.position.y + y
-	self.transform.position.z = self.transform.position.z + (z or 0)
-end
-
-function GameObject:moveTo(x, y, z)
-
-	if type(x) == "table" then
-		z = x.z
-		y = x.y
-		x = x.x
-	end
-	self.transform.position.x = x
-	self.transform.position.y = y
-	self.transform.position.z = z or self.transform.position.z
-end
-
-function GameObject:rotate(angle)
-
-	self.transform.rotation = self.transform.rotation + angle
 end
 
 --[[

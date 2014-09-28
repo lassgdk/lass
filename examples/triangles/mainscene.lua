@@ -7,7 +7,7 @@ return {
 				y = 100,
 				z = 1
 			},
-			rotation = 0
+			rotation = 0,
 		},
 		components = {
 			{
@@ -21,7 +21,7 @@ return {
 				_module = "PlayerInput",
 				properties = {
 					speed = 10,
-					speedMode = "perFrame"
+					speedMode = "perSecond"
 				}
 			}
 		},
@@ -42,13 +42,6 @@ return {
 							vertices = {-100, 0, 100, 0, 0, 100}
 						}
 					},
-					-- {
-					-- 	_module = "PlayerInput",
-					-- 	properties = {
-					-- 		speed = 10,
-					-- 		speedMode = "perFrame"
-					-- 	}
-					-- }
 				},
 				children = {
 					{
