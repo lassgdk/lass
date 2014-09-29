@@ -3,6 +3,7 @@
 -- decky coss (cosstropolis.com)
 
 class = require("lass.class")
+utils = require("lass.utils")
 
 local function getAxes(x, y, z)
 
@@ -24,7 +25,6 @@ local function assertOperandsAreVector2(a, b)
 
 	assert(type(a) == "table" and type(b) == "table", "both operands must be tables")
 	assert(a.x and a.y and b.x and b.y, "both operands must have x and y defined")
-	print("good")
 end
 
 --[[public]]
@@ -123,13 +123,19 @@ local GameEntity = class.define(function(self, transform, parent)
 
 	--initialize position and size settings
 	for property, defaultAxisValue in pairs({position=0, size=1}) do
-		if type(self.transform[property]) ~= "table" then
-			self.transform[property] = {}
+
+		local vec = {}
+
+		--account for empty tables
+		for _, axis in ipairs({"x", "y", "z"}) do
+			if type(self.transform[property]) ~= "table" then
+				vec[axis] = defaultAxisValue
+			else
+				vec[axis] = self.transform[property][axis] or defaultAxisValue
+			end
 		end
 
-		for _, axis in ipairs({"x", "y", "z"}) do
-			self.transform[property][axis] = self.transform[property][axis] or defaultAxisValue
-		end
+		self.transform[property] = Vector3(vec)
 	end
 
 	--initialize rotation
@@ -166,7 +172,7 @@ end
 
 function GameEntity:removeChild(child)
 
-	local index = indexof(self.children, child)
+	local index = utils.indexof(self.children, child)
 	if index then
 		table.remove(self.children, index)
 	end
@@ -195,19 +201,19 @@ function GameEntity:maintainTransform()
 		local angle = (p.rotation/180) * math.pi
 
 		self.globalTransform = {
-			position = {
+			position = Vector3({
 				z = t.position.z + p.position.z,
 
 				--adjust position based on rotation around the parent
 				--normally this formula would rotate CCW, but love2d's y-axis is inverted
 				x = p.position.x + (t.position.x * math.cos(angle)) - (t.position.y * math.sin(angle)),
 				y = p.position.y + (t.position.x * math.sin(angle)) + (t.position.y * math.cos(angle))
-			},
-			size = {
+			}),
+			size = Vector3({
 				x = t.size.x * p.size.x,
 				y = t.size.y * p.size.y,
 				z = t.size.z * p.size.z,
-			},
+			}),
 			rotation = t.rotation + p.rotation
 		}
 	else
@@ -216,34 +222,20 @@ function GameEntity:maintainTransform()
 end
 
 function GameEntity:move(x, y, z)
-
-	x, y, z = getAxes(x, y, z)
-
-	self.transform.position.x = self.transform.position.x + x
-	self.transform.position.y = self.transform.position.y + y
-	self.transform.position.z = self.transform.position.z + (z or 0)
+	self.transform.position = self.transform.position + Vector3(x, y, z)
 end
 
 function GameEntity:moveTo(x, y, z)
-
-	x, y, z = getAxes(x, y, z)
-
-	self.transform.position.x = x
-	self.transform.position.y = y
-	self.transform.position.z = z or self.transform.position.z
+	self.transform.position = Vector3(x, y, z)
 end
 
 function GameEntity:rotate(angle)
-
 	self.transform.rotation = self.transform.rotation + angle
 end
 
 function GameEntity:resize(x, y, z, allowNegativeSize)
 
-	x, y, z = getAxes(x, y, z)
-	self.transform.size.x = self.transform.size.x + x
-	self.transform.size.y = self.transform.size.y + y
-	self.transform.size.z = self.transform.size.z + (z or 0)
+	self.transform.size = self.transform.size + Vector3(x, y, z)
 
 	if not allowNegativeSize then
 		for axis, value in pairs(self.transform.size) do
@@ -381,7 +373,7 @@ end
 
 function GameScene:removeGameObject(gameObject)
 
-	local index = indexof(self.gameObjects, gameObject)
+	local index = utils.indexof(self.gameObjects, gameObject)
 	if index then
 		table.remove(self.gameObjects, index)
 	end
@@ -470,26 +462,16 @@ end
 utils
 ]]
 
-function distance2D(point1, point2)
+-- function distance2D(point1, point2)
 
-	for i, point in ipairs({point1, point2}) do
-		if point.x == nil then
-			point.x = point[1]
-			point.y = point[2]
-		end
-	end
-	return math.sqrt((point2.x-point1.x)^2 + (point2.y - point1.y)^2)
-end
-
-function indexof(list, value)
-	--find first index of value in numeric table
-
-	for i, entity in ipairs(list) do
-		if entity == value then
-			return i
-		end
-	end
-end
+-- 	for i, point in ipairs({point1, point2}) do
+-- 		if point.x == nil then
+-- 			point.x = point[1]
+-- 			point.y = point[2]
+-- 		end
+-- 	end
+-- 	return math.sqrt((point2.x-point1.x)^2 + (point2.y - point1.y)^2)
+-- end
 
 return {
 	Vector2 = Vector2,
