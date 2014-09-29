@@ -15,6 +15,101 @@ local function getAxes(x, y, z)
 end
 
 --[[
+Vector2
+]]
+
+--[[protected]]
+
+local function assertOperandsAreVector2(a, b)
+
+	assert(type(a) == "table" and type(b) == "table", "both operands must be tables")
+	assert(a.x and a.y and b.x and b.y, "both operands must have x and y defined")
+	print("good")
+end
+
+--[[public]]
+
+local Vector2 = class.define(function(self, x, y)
+
+	if type(x) == "table" then
+		y = x.y
+		x = x.x
+	end
+
+	self.x = x or 0
+	self.y = y or 0
+end)
+
+function Vector2.__add(a, b)
+
+	assertOperandsAreVector2(a, b)
+	return Vector2(a.x+b.x, a.y+b.y)
+end
+
+function Vector2.__sub(a, b)
+
+	assertOperandsAreVector2(a, b)
+	return Vector2(a.x-b.x, a.y-b.y)
+end
+
+--[[
+Vector3
+]]
+
+--[[protected]]
+
+local function sanitizeOperandZAxis(a, b, fallbackValue)
+	--if a.z or b.z is nil, set it to fallbackValue
+	--(assumes that you have already asserted a and b are Vector2)
+
+	fallbackValue = fallbackValue or 0
+	a.z = a.z or fallbackValue
+	b.z = b.z or fallbackValue
+	return a, b
+end
+
+--[[public]]
+
+local Vector3 = class.define(Vector2, function(self, x, y, z)
+
+	Vector2.init(self, x, y)
+
+	if type(x) == "table" then
+		z = x.z
+	end
+
+	self.z = z or 0
+end)
+
+function Vector3.__add(a, b)
+
+	assertOperandsAreVector2(a, b)
+	a, b = sanitizeOperandZAxis(a, b)
+	return Vector3(a.x+b.x, a.y+b.y, a.z+b.z)
+end
+
+function Vector3.__sub(a, b)
+
+	assertOperandsAreVector2(a, b)
+	a, b = sanitizeOperandZAxis(a, b)
+	return Vector3(a.x+b.x, a.y+b.y, a.z+b.z)
+end
+
+--[[
+Component
+]]
+
+local Component = class.define(function(self, properties) 
+
+	self.gameObject = {}
+	for k, v in pairs(properties) do
+		self[k] = v
+	end
+end)
+
+function Component:update(dt) end
+
+--[[
 GameEntity
 ]]
 
@@ -156,20 +251,6 @@ function GameEntity:resize(x, y, z, allowNegativeSize)
 		end
 	end
 end
-
---[[
-Component
-]]
-
-local Component = class.define(function(self, properties) 
-
-	self.gameObject = {}
-	for k, v in pairs(properties) do
-		self[k] = v
-	end
-end)
-
-function Component:update(dt) end
 
 --[[
 GameObject
@@ -411,6 +492,8 @@ function indexof(list, value)
 end
 
 return {
+	Vector2 = Vector2,
+	Vector3 = Vector3,
 	GameEntity = GameEntity,
 	GameScene = GameScene,
 	GameObject = GameObject,
