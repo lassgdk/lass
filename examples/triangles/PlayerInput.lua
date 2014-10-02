@@ -1,7 +1,7 @@
-lass = require("lass")
-class = require("lass.class")
+local lass = require("lass")
+local class = require("lass.class")
 
-PlayerInput = class.define(lass.Component, function(self, properties)
+local PlayerInput = class.define(lass.Component, function(self, properties)
 
 	properties.speed = properties.speed or 1
 	properties.controls = properties.controls or {

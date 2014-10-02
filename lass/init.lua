@@ -2,18 +2,8 @@
 -- an object/component model for love2d, inspired by unity
 -- decky coss (cosstropolis.com)
 
-class = require("lass.class")
-utils = require("lass.utils")
-
-local function getAxes(x, y, z)
-
-	if type(x) == "table" then
-		z = x.z
-		y = x.y
-		x = x.x
-	end
-	return x, y, z
-end
+local class = require("lass.class")
+local utils = require("lass.utils")
 
 --[[
 Vector2
@@ -21,10 +11,21 @@ Vector2
 
 --[[protected]]
 
-local function assertOperandsAreVector2(a, b)
+local function assertOperandsHaveXandY(a, b, allowOneNil)
 
-	assert(type(a) == "table" and type(b) == "table", "both operands must be tables")
-	assert(a.x and a.y and b.x and b.y, "both operands must have x and y defined")
+	local typeA, typeB = type(a), type(b)
+
+	if not allowOneNil then
+		assert(typeA == "table" and typeB == "table", "both operands must be tables")
+		assert(a.x and a.y and b.x and b.y, "both operands must have x and y defined")
+	else
+		assert(typeA == "table", "first argument must be table")
+		assert(typeB == "table" or typeB == "nil", "second argument must be table or nil")
+		assert(a.x and a.y, "non-nil arguments must have x and y defined")
+		if b then
+			assert(b.x and b.y, "non-nil arguments must have x and y defined")
+		end
+	end
 end
 
 --[[public]]
@@ -42,14 +43,31 @@ end)
 
 function Vector2.__add(a, b)
 
-	assertOperandsAreVector2(a, b)
+	assertOperandsHaveXandY(a, b)
 	return Vector2(a.x+b.x, a.y+b.y)
 end
 
 function Vector2.__sub(a, b)
 
-	assertOperandsAreVector2(a, b)
+	assertOperandsHaveXandY(a, b)
 	return Vector2(a.x-b.x, a.y-b.y)
+end
+
+function Vector2:sqrMagnitude(origin)
+	--return the square magnitude of a vector relative to origin (0,0 by default)
+	--this can also be used as a class/static function (i.e., Vector3.sqrMagnitude(a, b))
+
+	assertOperandsHaveXandY(self, origin, allowOneNil)
+	local vec = self - Vector2(origin)
+
+	return vec.x^2 + vec.y^2
+end
+
+function Vector2:magnitude(origin)
+	--return the square magnitude of a vector relative to origin (0,0 by default)
+	--this can also be used as a class/static function (i.e., Vector2.magnitude(a, b))
+
+	return math.sqrt(Vector2.sqrMagnitude(self, origin))
 end
 
 --[[
@@ -83,16 +101,33 @@ end)
 
 function Vector3.__add(a, b)
 
-	assertOperandsAreVector2(a, b)
+	assertOperandsHaveXandY(a, b)
 	a, b = sanitizeOperandZAxis(a, b)
 	return Vector3(a.x+b.x, a.y+b.y, a.z+b.z)
 end
 
 function Vector3.__sub(a, b)
 
-	assertOperandsAreVector2(a, b)
+	assertOperandsHaveXandY(a, b)
 	a, b = sanitizeOperandZAxis(a, b)
 	return Vector3(a.x+b.x, a.y+b.y, a.z+b.z)
+end
+
+function Vector3:sqrMagnitude(origin)
+	--return the square magnitude of a vector relative to origin (0,0 by default)
+	--this can also be used as a class/static function (i.e., Vector3.sqrMagnitude(a, b))
+
+	assertOperandsHaveXandY(self, origin, allowOneNil)
+	local vec = self - Vector3(origin)
+
+	return vec.x^2 + vec.y^2 + vec.z^2
+end
+
+function Vector3:magnitude(origin)
+	--return the magnitude of a vector relative to origin (0,0 by default)
+	--this can also be used as a class/static function (i.e., Vector3.magnitude(a, b))
+
+	return Vector3.sqrMagnitude(self, origin)
 end
 
 --[[
@@ -296,17 +331,11 @@ function GameObject:draw()
 	end
 end
 
--- function GameObject:addChild(child)
-
--- 	status, result = pcall(child.is_a, child, GameObject)
--- 	assert(status and result, "child must be GameObject")
-
--- 	self._base.addChild(self, child, true)
--- end
-
 function GameObject:addChild(child)
 
+	--if child is at the top of the hierarchy, push it down
 	child.gameScene:removeChild(child)
+
 	if class.instanceof(child.parent, GameObject) then
 		child.parent:removeChild(child)
 	end

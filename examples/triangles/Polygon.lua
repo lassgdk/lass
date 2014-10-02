@@ -1,7 +1,7 @@
-lass = require("lass")
-class = require("lass.class")
+local lass = require("lass")
+local class = require("lass.class")
 
-Polygon = class.define(lass.Component, function(self, properties)
+local Polygon = class.define(lass.Component, function(self, properties)
 	assert(properties.vertices, "must specify vertices")
 	properties.mode = properties.mode or "fill"
 	properties.color = properties.color or {0,0,0}

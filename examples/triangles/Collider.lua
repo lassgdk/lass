@@ -1,5 +1,5 @@
-require("lass")
-require("lass.class")
+local require("lass")
+local require("lass.class")
 
 Collider = class(Component, function(self, properties)
 
