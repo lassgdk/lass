@@ -36,7 +36,7 @@ function class.define(base, init)
    return obj
    end
    c.init = init
-   c.is_a = function(self, klass)
+   c.instanceof = function(self, klass)
       local m = getmetatable(self)
       while m do 
          if m == klass then return true end
@@ -54,7 +54,7 @@ function class.instanceof(object, class)
 
    if not object then return false end
 
-   status, result = pcall(object.is_a, object, class)
+   status, result = pcall(object.instanceof, object, class)
    return status and result
 end
 

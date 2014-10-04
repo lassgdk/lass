@@ -70,6 +70,31 @@ function Vector2:magnitude(origin)
 	return math.sqrt(Vector2.sqrMagnitude(self, origin))
 end
 
+function Vector2:rotate(angle, useRadians)
+	--return the vector rotated around the origin by [angle] degrees or radians
+
+	if not useRadians then
+		angle = (angle/180) * math.pi
+	end
+
+	return Vector2({
+		x = (self.x * math.cos(angle)) - (self.y * math.sin(angle)),
+		y = (self.x * math.sin(angle)) + (self.y * math.cos(angle))		
+	})
+end
+
+function Vector2:angle(useRadians)
+	--return the angle of this vector relative to the origin
+
+	local c = 1
+	if not useRadians then
+		c = 180/math.pi
+	end
+
+	--tangent = opposite / adjacent
+	return math.atan(self.y / self.x) * c
+end
+
 --[[
 Vector3
 ]]
@@ -127,7 +152,16 @@ function Vector3:magnitude(origin)
 	--return the magnitude of a vector relative to origin (0,0 by default)
 	--this can also be used as a class/static function (i.e., Vector3.magnitude(a, b))
 
-	return Vector3.sqrMagnitude(self, origin)
+	return math.sqrt(Vector3.sqrMagnitude(self, origin))
+end
+
+function Vector3:rotate(angle, useRadians)
+	--this is functionally identical to Vector2:rotate except it leaves in the original z value
+	--(Vector2:rotate simply discards it)
+
+	local vec = Vector2.rotate(self, angle, useRadians)
+	vec.z = self.z
+	return vec
 end
 
 --[[
@@ -233,17 +267,9 @@ function GameEntity:maintainTransform()
 	if self.parent and self.parent ~= {} then
 		local p = self.parent.globalTransform
 		local t = self.transform
-		local angle = (p.rotation/180) * math.pi
 
 		self.globalTransform = {
-			position = Vector3({
-				z = t.position.z + p.position.z,
-
-				--adjust position based on rotation around the parent
-				--normally this formula would rotate CCW, but love2d's y-axis is inverted
-				x = p.position.x + (t.position.x * math.cos(angle)) - (t.position.y * math.sin(angle)),
-				y = p.position.y + (t.position.x * math.sin(angle)) + (t.position.y * math.cos(angle))
-			}),
+			position = p.position + t.position:rotate(p.rotation),
 			size = Vector3({
 				x = t.size.x * p.size.x,
 				y = t.size.y * p.size.y,
@@ -486,21 +512,6 @@ function GameScene:buildObjectTree(object)
 
 	return gameObject
 end
-
---[[
-utils
-]]
-
--- function distance2D(point1, point2)
-
--- 	for i, point in ipairs({point1, point2}) do
--- 		if point.x == nil then
--- 			point.x = point[1]
--- 			point.y = point[2]
--- 		end
--- 	end
--- 	return math.sqrt((point2.x-point1.x)^2 + (point2.y - point1.y)^2)
--- end
 
 return {
 	Vector2 = Vector2,
