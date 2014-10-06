@@ -9,7 +9,7 @@ local utils = require("lass.utils")
 Vector2
 ]]
 
---[[protected]]
+--[[internal]]
 
 local function assertOperandsHaveXandY(a, b, allowOneNil)
 
@@ -53,6 +53,10 @@ function Vector2.__sub(a, b)
 	return Vector2(a.x-b.x, a.y-b.y)
 end
 
+function Vector2:tostring()
+	return string.format("{x=%.2f, y=%.2f}", self.x, self.y)
+end
+
 function Vector2:sqrMagnitude(origin)
 	--return the square magnitude of a vector relative to origin (0,0 by default)
 	--this can also be used as a class/static function (i.e., Vector3.sqrMagnitude(a, b))
@@ -72,9 +76,10 @@ end
 
 function Vector2:rotate(angle, useRadians)
 	--return the vector rotated around the origin by [angle] degrees or radians
+	--if the y axis is inverted (i.e., gets higher as it goes down), rotation is counterclockwise
 
 	if not useRadians then
-		angle = (angle/180) * math.pi
+		angle = -(angle/180) * math.pi
 	end
 
 	return Vector2({
@@ -99,7 +104,7 @@ end
 Vector3
 ]]
 
---[[protected]]
+--[[internal]]
 
 local function sanitizeOperandZAxis(a, b, fallbackValue)
 	--if a.z or b.z is nil, set it to fallbackValue
@@ -170,11 +175,15 @@ Component
 
 local Component = class.define(function(self, properties) 
 
-	self.gameObject = {}
+	self.gameObject = nil
 	for k, v in pairs(properties) do
 		self[k] = v
 	end
 end)
+
+function Component:awake()
+	--callback function that is invoked whenever Component is attached to a GameObject
+end
 
 function Component:update(dt) end
 
@@ -314,7 +323,6 @@ local GameObject = class.define(GameEntity, function(self, gameScene, name, tran
 	name = name or ""
 	self.name = string.format(name)
 
-	print(transform.position.x)
 	GameEntity.init(self, transform)
 
 	--if parent is specified, it must be a GameObject
@@ -380,6 +388,8 @@ function GameObject:addComponent(component)
 	end
 
 	component.gameObject = self
+
+	component:awake()
 end
 
 function GameObject:getComponent(componentType)

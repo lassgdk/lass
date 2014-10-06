@@ -14,13 +14,13 @@ return {
         _module = "Polygon",
         properties = {
           color = {0, 0, 80},
-          vertices = {-100, 0, 100, 0, 0, 100}
+          vertices = {-100, -50, 100, -50, 0, 50}
         }
       },
       {
         _module = "PlayerInput",
         properties = {
-          speed = 10,
+          rotationSpeed = 1,
           speedMode = "perFrame"
         }
       }
@@ -39,7 +39,7 @@ return {
             _module = "Polygon",
             properties = {
               color = {200, 0, 80},
-              vertices = {-100, 0, 100, 0, 0, 100}
+              vertices = {-100, -50, 100, -50, 0, 50}
             }
           },
         },
@@ -57,7 +57,7 @@ return {
                 _module = "Polygon",
                 properties = {
                   color = {200, 0, 80},
-                  vertices = {-100, 0, 100, 0, 0, 100}
+                  vertices = {-100, -50, 100, -50, 0, 50}
                 }
               },
             }
