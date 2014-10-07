@@ -13,7 +13,7 @@ return {settings = {
     transform = {
       position = {
         x = 200,
-        y = 100,
+        y = -100,
         z = 1
       },
       rotation = 0,

@@ -71,7 +71,10 @@ function Polygon:draw()
 
 	for i, vertex in ipairs(self.vertices) do
 		vertices[i] = vertex:rotate(transform.rotation) + transform.position
-		--vertices[i].y = -vertices[i].y
+		if self.gameObject.gameScene.settings.graphics.invertYAxis then
+			-- print("seventeen / orders of / your potstickers")
+			vertices[i].y = -vertices[i].y
+		end
 	end
 
 	love.graphics.setColor(self.color)

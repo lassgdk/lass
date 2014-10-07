@@ -24,6 +24,7 @@ local PlayerInput = class.define(lass.Component, function(self, properties)
 
 	--hidden variables
 	self.rotationDirection = 0
+
 end)
 
 function PlayerInput:awake()
@@ -37,6 +38,7 @@ function PlayerInput:update(dt)
 	--rotate
 	if self.rotationDirection > 0 then
 		self.gameObject:rotate(dt * self.rotationSpeed)
+		self.gameObject:move(0,1)
 	elseif self.rotationDirection < 0 then
 		self.gameObject:rotate(dt * -self.rotationSpeed)
 	end
