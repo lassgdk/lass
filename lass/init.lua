@@ -417,11 +417,92 @@ end
 GameScene
 ]]
 
+--[[internal]]
+
+local function buildObjectTree(scene, object)
+
+	--create gameObject and add it to scene
+	local gameObject = GameObject(scene, object.name, object.transform)
+
+	--create and add components
+	for i, comp in ipairs(object.components) do
+		local componentClass = require(comp._module)
+		gameObject:addComponent(componentClass(comp.properties))
+	end
+
+	--build children
+	if object.children then
+		for i, child in ipairs(object.children) do
+			gameObject:addChild(buildObjectTree(scene, child))
+		end
+	end
+
+	return gameObject
+end
+
+local function createSettingsTable(settings)
+
+	settings = settings or {}
+
+	for sectionName, section in pairs(require("lass.defaults")) do
+		if not settings[sectionName] then
+			settings[sectionName] = section
+		else
+			for optionName, option in pairs(section) do
+				settings[sectionName][optionName] = settings[sectionName][optionName] or option
+			end
+		end
+	end
+
+	return settings
+end
+
+--[[public]]
+
 local GameScene = class.define(GameEntity, function(self, transform)
 
 	self.gameObjects = {}
 	GameEntity.init(self, transform)
 end)
+
+function GameScene:load(src)
+	--load objects and settings from a table or module
+
+	local typeS = type(src)
+	local source = ""
+
+	if typeS == "string" then
+		source = src
+		src = require(src)
+	else
+		assert(typeS == "table", "src must be file name, module name, or table")
+		for k,v in pairs(src) do
+			print(k,v)
+		end
+		assert(src.gameObjects, "src.gameObjects is required")
+		assert(src.settings, "src.settings is required")
+	end
+
+	self:init()
+	self.source = source
+
+	--build game objects
+	for i, object in ipairs(src.gameObjects) do
+		buildObjectTree(self, object)
+	end
+
+	self.settings = createSettingsTable(src.settings)
+	self:applySettings()
+end
+
+function GameScene:applySettings()
+
+	--window
+	love.window.setMode(self.settings.window.width, self.settings.window.height)
+
+	--graphics
+	love.graphics.setBackgroundColor(self.settings.graphics.backgroundColor)
+end
 
 function GameScene:addGameObject(gameObject)
 	--add a GameObject to this GameScene (call this from gameObject constructor)
@@ -484,43 +565,6 @@ function GameScene:draw()
 		end
 	end
 
-end
-
-function GameScene:loadSceneFile(moduleName)
-
-	local scene = require(moduleName)
-
-	--reinvent yrself
-	for k, v in pairs(self) do
-		self[k] = nil
-	end
-	GameScene.init(self)
-
-	--build game objects
-	for i, object in ipairs(scene) do
-		self:buildObjectTree(object)
-	end
-end
-
-function GameScene:buildObjectTree(object)
-
-	--create gameObject and add it to scene
-	local gameObject = GameObject(self, object.name, object.transform)
-
-	--create and add components
-	for i, comp in ipairs(object.components) do
-		local componentClass = require(comp._module)
-		gameObject:addComponent(componentClass(comp.properties))
-	end
-
-	--build children
-	if object.children then
-		for i, child in ipairs(object.children) do
-			gameObject:addChild(self:buildObjectTree(child))
-		end
-	end
-
-	return gameObject
 end
 
 return {

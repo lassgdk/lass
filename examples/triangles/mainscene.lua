@@ -1,4 +1,13 @@
-return {
+return {settings = {
+  window = {
+    width = 800,
+    height = 600
+  },
+  graphics = {
+    backgroundColor = {255,255,255},
+    invertYAxis = true
+  }
+}, gameObjects = {
   {
     name = "Player",
     transform = {
@@ -66,4 +75,4 @@ return {
       }
     }
   }
-}
+}}

@@ -7,7 +7,7 @@ local class = require("lass.class")
 		vertices - can be an array of Vector2's (e.g., {{x=1,y=2}, {x=10, y=2}}),
 			or a flattened array of coordinates (e.g., {1, 2, 10, 2})
 		mode - draw mode, can be "fill" or "line"
-		color - rgb tuple, 0-256 (e.g., {0, 0, 200})
+		color - rgb tuple, 0-255 (e.g., {0, 0, 200})
 ]]
 
 local Polygon = class.define(lass.Component, function(self, properties)
@@ -49,11 +49,6 @@ local Polygon = class.define(lass.Component, function(self, properties)
 end)
 
 function Polygon:awake(dt)
-	-- for i, v in ipairs(self.vertices) do
-	-- 	for k, v2 in pairs(v) do
-	-- 		print(self.gameObject.name, i, k, v2)
-	-- 	end
-	-- end
 end
 
 local function verticesToFlatArray(vertices)
@@ -61,13 +56,8 @@ local function verticesToFlatArray(vertices)
 	local flat = {}
 
 	for i, v in ipairs(vertices) do
-		--print(i,v)
 		flat[i*2 - 1], flat[i*2] = v.x, v.y
 	end
-
-	-- for i, v in ipairs(flat) do
-	-- 	print(i, v)
-	-- end
 
 	return flat
 end

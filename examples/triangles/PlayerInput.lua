@@ -46,7 +46,11 @@ end
 
 function love.mousepressed(x, y, button)
 	print(x, y, button)
-	moduleSelf.rotationDirection = -1
+	if button == "l" then
+		moduleSelf.rotationDirection = -1
+	elseif button == "r" then
+		moduleSelf.rotationDirection = 1
+	end
 end
 
 return PlayerInput
