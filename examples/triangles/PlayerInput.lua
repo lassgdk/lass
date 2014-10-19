@@ -38,7 +38,6 @@ function PlayerInput:update(dt)
 	--rotate
 	if self.rotationDirection > 0 then
 		self.gameObject:rotate(dt * self.rotationSpeed)
-		self.gameObject:move(0,1)
 	elseif self.rotationDirection < 0 then
 		self.gameObject:rotate(dt * -self.rotationSpeed)
 	end

@@ -10,7 +10,7 @@ local class = require("lass.class")
 		color - rgb tuple, 0-255 (e.g., {0, 0, 200})
 ]]
 
-local Polygon = class.define(lass.Component, function(self, properties)
+local PolygonRenderer = class.define(lass.Component, function(self, properties)
 
 	local originalVType = type(properties.vertices[1])
 	assert(
@@ -48,7 +48,7 @@ local Polygon = class.define(lass.Component, function(self, properties)
 
 end)
 
-function Polygon:awake(dt)
+function PolygonRenderer:awake(dt)
 end
 
 local function verticesToFlatArray(vertices)
@@ -62,7 +62,7 @@ local function verticesToFlatArray(vertices)
 	return flat
 end
 
-function Polygon:draw()
+function PolygonRenderer:draw()
 
 	local vertices = {}
 	local transform = self.gameObject.globalTransform
@@ -72,7 +72,6 @@ function Polygon:draw()
 	for i, vertex in ipairs(self.vertices) do
 		vertices[i] = vertex:rotate(transform.rotation) + transform.position
 		if self.gameObject.gameScene.settings.graphics.invertYAxis then
-			-- print("seventeen / orders of / your potstickers")
 			vertices[i].y = -vertices[i].y
 		end
 	end
@@ -81,4 +80,4 @@ function Polygon:draw()
 	love.graphics.polygon("fill", verticesToFlatArray(vertices))
 end
 
-return Polygon
+return PolygonRenderer

@@ -20,14 +20,14 @@ return {settings = {
     },
     components = {
       {
-        _module = "Polygon",
+        script = "PolygonRenderer",
         properties = {
           color = {0, 0, 80},
           vertices = {-100, -50, 100, -50, 0, 50}
         }
       },
       {
-        _module = "PlayerInput",
+        script = "PlayerInput",
         properties = {
           rotationSpeed = 1,
           speedMode = "perFrame"
@@ -45,7 +45,7 @@ return {settings = {
         },
         components = {
           {
-            _module = "Polygon",
+            script = "PolygonRenderer",
             properties = {
               color = {200, 0, 80},
               vertices = {-100, -50, 100, -50, 0, 50}
@@ -63,7 +63,7 @@ return {settings = {
             },
             components = {
               {
-                _module = "Polygon",
+                script = "PolygonRenderer",
                 properties = {
                   color = {200, 0, 80},
                   vertices = {-100, -50, 100, -50, 0, 50}

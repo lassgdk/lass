@@ -1,5 +1,5 @@
 -- lass.lua
--- an object/component model for love2d, inspired by unity
+-- an object/component framework for love2d, inspired by unity
 -- decky coss (cosstropolis.com)
 
 local class = require("lass.class")
@@ -11,19 +11,21 @@ Vector2
 
 --[[internal]]
 
-local function assertOperandsHaveXandY(a, b, allowOneNil)
+local function assertOperandsHaveXandY(a, b, otherAllowedType, otherAllowedTypePosition)
 
 	local typeA, typeB = type(a), type(b)
 
-	if not allowOneNil then
+	if not otherAllowedType then
 		assert(typeA == "table" and typeB == "table", "both operands must be tables")
 		assert(a.x and a.y and b.x and b.y, "both operands must have x and y defined")
 	else
+		assert(type(otherAllowedType) == "string", tostring(otherAllowedType) .. " is not string")
 		assert(typeA == "table", "first argument must be table")
-		assert(typeB == "table" or typeB == "nil", "second argument must be table or nil")
-		assert(a.x and a.y, "non-nil arguments must have x and y defined")
-		if b then
-			assert(b.x and b.y, "non-nil arguments must have x and y defined")
+		assert(typeB == "table" or typeB == otherAllowedType,
+			"second argument must be table or " .. otherAllowedType)
+		assert(a.x and a.y, "table arguments must have x and y defined")
+		if typeB == "table" then
+			assert(b.x and b.y, "table arguments must have x and y defined")
 		end
 	end
 end
@@ -53,6 +55,11 @@ function Vector2.__sub(a, b)
 	return Vector2(a.x-b.x, a.y-b.y)
 end
 
+function Vector2.__mul(a, b)
+
+	assertOperandsHaveXandY(a, b, "number")
+end
+
 function Vector2:tostring()
 	return string.format("{x=%.2f, y=%.2f}", self.x, self.y)
 end
@@ -61,7 +68,7 @@ function Vector2:sqrMagnitude(origin)
 	--return the square magnitude of a vector relative to origin (0,0 by default)
 	--this can also be used as a class/static function (i.e., Vector3.sqrMagnitude(a, b))
 
-	assertOperandsHaveXandY(self, origin, allowOneNil)
+	assertOperandsHaveXandY(self, origin, "nil")
 	local vec = self - Vector2(origin)
 
 	return vec.x^2 + vec.y^2
@@ -76,7 +83,11 @@ end
 
 function Vector2:rotate(angle, useRadians)
 	--return the vector rotated around the origin by [angle] degrees or radians
-	--if the y axis is inverted (i.e., gets higher as it goes down), rotation is counterclockwise
+	--
+	--although the vector will be rotated clockwise, any graphics renderer using this vector
+	--will appear to rotate counterclockwise by default. this is because love2d's y-axis is
+	--"reversed" - y values are highest at the bottom of the screen. set invertYAxis to true
+	--in your scene settings to make the rotation appear clockwise.
 
 	if not useRadians then
 		angle = -(angle/180) * math.pi
@@ -98,6 +109,17 @@ function Vector2:angle(useRadians)
 
 	--tangent = opposite / adjacent
 	return math.atan(self.y / self.x) * c
+end
+
+function Vector2:dot(other)
+
+	return self.x * other.x + self.y * other.y
+end
+
+function Vector2:project(direction)
+	--project this vector onto a direction vector
+
+	
 end
 
 --[[
@@ -147,7 +169,7 @@ function Vector3:sqrMagnitude(origin)
 	--return the square magnitude of a vector relative to origin (0,0 by default)
 	--this can also be used as a class/static function (i.e., Vector3.sqrMagnitude(a, b))
 
-	assertOperandsHaveXandY(self, origin, allowOneNil)
+	assertOperandsHaveXandY(self, origin, "nil")
 	local vec = self - Vector3(origin)
 
 	return vec.x^2 + vec.y^2 + vec.z^2
@@ -426,7 +448,7 @@ local function buildObjectTree(scene, object)
 
 	--create and add components
 	for i, comp in ipairs(object.components) do
-		local componentClass = require(comp._module)
+		local componentClass = require(comp.script)
 		gameObject:addComponent(componentClass(comp.properties))
 	end
 
@@ -476,9 +498,6 @@ function GameScene:load(src)
 		src = require(src)
 	else
 		assert(typeS == "table", "src must be file name, module name, or table")
-		for k,v in pairs(src) do
-			print(k,v)
-		end
 		assert(src.gameObjects, "src.gameObjects is required")
 		assert(src.settings, "src.settings is required")
 	end

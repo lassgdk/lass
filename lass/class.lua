@@ -35,7 +35,7 @@ function class.define(base, init)
       end
       return obj
    end
-   c.init = init
+   c.init = init or function() end
    c.instanceof = function(self, klass)
       local m = getmetatable(self)
       while m do 
@@ -56,6 +56,10 @@ function class.instanceof(object, class)
 
    status, result = pcall(object.instanceof, object, class)
    return status and result
+end
+
+function class.super(object)
+   return object._base
 end
 
 return class
