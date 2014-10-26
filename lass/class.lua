@@ -1,6 +1,7 @@
 -- class.lua
 -- Compatible with Lua 5.1 (not 5.0).
 -- http://lua-users.org/wiki/SimpleLuaClasses
+-- with modifications by decky coss (http://cosstropolis.com)
 
 local class = {}
 
@@ -14,41 +15,50 @@ function class.define(base, init)
       for i,v in pairs(base) do
          c[i] = v
       end
-      c._base = base
+      c.base = base
    end
    -- the class will be the metatable for all its objects,
    -- and they will look up their methods in it.
    c.__index = c
 
-   -- expose a constructor which can be called by <classname>(<args>)
-   local mt = {}
-   mt.__call = function(class_tbl, ...)
-      local obj = {}
-      setmetatable(obj,c)
-      if init then
-         init(obj,...)
-      else 
+   --if there's still no init, make one
+   if not init then
+      init = function(obj, ...)
          -- make sure that any stuff from the base class is initialized!
          if base and base.init then
-         base.init(obj, ...)
+            base.init(obj, ...)
          end
       end
-      return obj
    end
-   c.init = init or function() end
+
+   -- expose a constructor which can be called by <classname>(<args>)
+   local mt = {}
+   mt.__call = function(self, ...)
+
+      --when a callable table is called, the table itself is passed as the first argument.
+      --we don't want to pass the class to its own constructor, so we erase self
+      self = {}
+      setmetatable(self,c)
+      init(self,...)
+
+      return self
+   end
+
+   c.init = init
+
    c.instanceof = function(self, klass)
       local m = getmetatable(self)
       while m do 
          if m == klass then return true end
-         m = m._base
+         m = m.base
       end
       return false
    end
+
    setmetatable(c, mt)
    return c
 end
 
---instanceof function by decky coss (cosstropolis.com)
 function class.instanceof(object, class)
    -- check if object is an instance of class, even if it isn't a table
 
@@ -59,7 +69,7 @@ function class.instanceof(object, class)
 end
 
 function class.super(object)
-   return object._base
+   return object.base
 end
 
 return class

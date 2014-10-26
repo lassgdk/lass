@@ -26,7 +26,7 @@ local PolygonCollider = class.define(lass.Component, function(self, properties)
 
 	properties.trackVerticesFrom = properties.trackVerticesFrom or ""
 
-	Component.init(self, properties)
+	self.base.init(self, properties)
 end)
 
 function PolygonCollider:update()

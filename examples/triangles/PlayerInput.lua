@@ -20,7 +20,7 @@ local PlayerInput = class.define(lass.Component, function(self, properties)
 	end
 
 	--call super constructor
-	lass.Component.init(self, properties)
+	self.base.init(self, properties)
 
 	--hidden variables
 	self.rotationDirection = 0
@@ -42,7 +42,7 @@ function PlayerInput:update(dt)
 		self.gameObject:rotate(dt * -self.rotationSpeed)
 	end
 
-	self._base.update(self, dt)
+	self.base.update(self, dt)
 end
 
 function love.mousepressed(x, y, button)

@@ -367,7 +367,7 @@ function GameObject:update(dt)
 		component:update(dt)
 	end
 
-	self._base.update(self, dt)
+	self.base.update(self, dt)
 end
 
 function GameObject:isDrawable()
@@ -395,7 +395,7 @@ function GameObject:addChild(child)
 	if class.instanceof(child.parent, GameObject) then
 		child.parent:removeChild(child)
 	end
-	self._base.addChild(self, child)
+	self.base.addChild(self, child)
 end
 
 function GameObject:addComponent(component)
@@ -551,7 +551,7 @@ end
 function GameScene:update(dt)
 
 	--update all children (top-level game objects) of the scene
-	self._base.update(self, dt)
+	self.base.update(self, dt)
 end
 
 function GameScene:draw()
