@@ -60,12 +60,13 @@ function class.define(base, init)
 end
 
 function class.instanceof(object, class)
-   -- check if object is an instance of class, even if it isn't a table
+   -- check if object/literal is an instance of class, regardless of its type
 
-   if not object then return false end
-
-   status, result = pcall(object.instanceof, object, class)
-   return status and result
+   if not (type(object) == "table" and object.instanceof) then
+      return false
+   else
+      return object:instanceof(class)
+   end
 end
 
 function class.super(object)

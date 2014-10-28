@@ -20,7 +20,7 @@ return {settings = {
     },
     components = {
       {
-        script = "PolygonRenderer",
+        script = "lass.builtins.graphics.PolygonRenderer",
         properties = {
           color = {0, 0, 80},
           vertices = {-100, -50, 100, -50, 0, 50}
@@ -45,7 +45,7 @@ return {settings = {
         },
         components = {
           {
-            script = "PolygonRenderer",
+            script = "lass.builtins.graphics.PolygonRenderer",
             properties = {
               color = {200, 0, 80},
               vertices = {-100, -50, 100, -50, 0, 50}
@@ -63,7 +63,7 @@ return {settings = {
             },
             components = {
               {
-                script = "PolygonRenderer",
+                script = "lass.builtins.graphics.PolygonRenderer",
                 properties = {
                   color = {200, 0, 80},
                   vertices = {-100, -50, 100, -50, 0, 50}

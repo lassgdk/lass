@@ -57,10 +57,23 @@ end
 
 function Vector2.__mul(a, b)
 
-	assertOperandsHaveXandY(a, b, "number")
+	local scalar = nil
+	local vector = nil
+
+	if type(a) == "table" then
+		vector = a
+		scalar = b
+	else
+		scalar = a
+		vector = b
+	end
+
+	assertOperandsHaveXandY(vector, scalar, "number")
+
+	return Vector2(vector.x * scalar, vector.y * scalar)
 end
 
-function Vector2:tostring()
+function Vector2:__tostring()
 	return string.format("{x=%.2f, y=%.2f}", self.x, self.y)
 end
 
@@ -119,7 +132,8 @@ end
 function Vector2:project(direction)
 	--project this vector onto a direction vector
 
-	
+	assertOperandsHaveXandY(self, direction)
+	return (self:dot(direction) / Vector2.dot(direction, direction)) * direction
 end
 
 --[[
@@ -340,6 +354,29 @@ end
 GameObject
 ]]
 
+--[[internal]]
+local function getComponents(self, componentType, num)
+	--shared function for finding components in a gameObject
+
+	if type(componentType) == "string" then
+		componentType = require(componentType)
+	end
+
+	found = {}
+	for i, component in ipairs(self.components) do
+		if component:instanceof(componentType) then
+			found[#found + 1] = component
+		end
+		if #found >= num then
+			return found
+		end
+	end
+
+	return found
+end
+
+--[[public]]
+
 local GameObject = class.define(GameEntity, function(self, gameScene, name, transform, parent)
 
 	name = name or ""
@@ -361,13 +398,13 @@ local GameObject = class.define(GameEntity, function(self, gameScene, name, tran
 	gameScene:addGameObject(self)
 end)
 
-function GameObject:update(dt)
+function GameObject:update(dt, firstUpdate)
 
 	for i, component in ipairs(self.components) do
-		component:update(dt)
+		component:update(dt, firstUpdate)
 	end
 
-	self.base.update(self, dt)
+	self.base.update(self, dt, firstUpdate)
 end
 
 function GameObject:isDrawable()
@@ -415,24 +452,25 @@ function GameObject:addComponent(component)
 end
 
 function GameObject:getComponent(componentType)
+	--fetch an instance of componentType that is attached to this object
+	--componentType may be a Component class, or the name of the module where the class is found
 
-	for i, component in ipairs(self.components) do
-		if component:is_a(componentType) then
-			return component
-		end
-	end
+	return getComponents(self, componentType, 1)[1]
 end
 
 function GameObject:getComponents(componentType)
+	--fetch all instances of componentType that are attached to this object
+	--componentType may be a Component class, or the name of the module where the class is found
 
-	found = {}
-	for i, component in ipairs(self.components) do
-		if component:is_a(componentType) then
-			found[#found + 1] = component
-		end
-	end
+	return getComponents(self, componentType)
+	-- found = {}
+	-- for i, component in ipairs(self.components) do
+	-- 	if component:instanceof(componentType) then
+	-- 		found[#found + 1] = component
+	-- 	end
+	-- end
 
-	return found
+	-- return found
 end
 
 --[[
@@ -549,9 +587,12 @@ function GameScene:removeGameObject(gameObject)
 end
 
 function GameScene:update(dt)
-
 	--update all children (top-level game objects) of the scene
-	self.base.update(self, dt)
+
+	self.base.update(self, dt, not self.finishedFirstUpdate)
+	if not self.finishedFirstUpdate then
+		self.finishedFirstUpdate = true
+	end
 end
 
 function GameScene:draw()
