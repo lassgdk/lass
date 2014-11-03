@@ -1,5 +1,7 @@
 local lass = require("lass")
 local class = require("lass.class")
+local PolygonCollider = require("lass.builtins.colliders.PolygonCollider")
+local PolygonRenderer = require("lass.builtins.graphics.PolygonRenderer")
 
 --this is used for love2d callback functions outside of the component scope
 local moduleSelf = {}
@@ -46,11 +48,25 @@ function PlayerInput:update(dt)
 end
 
 function love.mousepressed(x, y, button)
-	print(x, y, button)
-	if button == "l" then
-		moduleSelf.rotationDirection = -1
-	elseif button == "r" then
-		moduleSelf.rotationDirection = 1
+	-- print(x, y, button)
+
+	local collider = moduleSelf.gameObject:getComponent(PolygonCollider)
+	-- local renderer = moduleSelf.gameObject:getComponent(PolygonRenderer)
+
+	if collider:isCollidingWith({lass.Vector2(x,-y)}) then
+		if button == "l" then
+			if moduleSelf.rotationDirection == -1 then
+				moduleSelf.rotationDirection = 0
+			else
+				moduleSelf.rotationDirection = -1
+			end
+		elseif button == "r" then
+			if moduleSelf.rotationDirection == 1 then
+				moduleSelf.rotationDirection = 0
+			else
+				moduleSelf.rotationDirection = 1
+			end
+		end
 	end
 end
 

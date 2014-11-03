@@ -292,13 +292,13 @@ function GameEntity:removeChild(child)
 	end
 end
 
-function GameEntity:update(dt)
+function GameEntity:update(dt, firstUpdate )
 
 	self:maintainTransform()
 
 	--update children
 	for i, child in ipairs(self.children) do
-		child:update(dt)
+		child:update(dt, firstUpdate)
 	end
 end
 

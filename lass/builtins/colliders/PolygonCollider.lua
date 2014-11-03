@@ -39,10 +39,14 @@ function PolygonCollider:update(dt, firstUpdate)
 
 	if self._verticesSource then
 		self.vertices = self._verticesSource.vertices
+	end
+
+	if self._verticesSource and self._verticesSource.globalVertices then
 		self.globalVertices = self._verticesSource.globalVertices
 	else
+		local transform = self.gameObject.globalTransform
 		for i, vertex in ipairs(self.vertices) do
-			vertices[i] = vertex:rotate(transform.rotation) + transform.position
+			self.globalVertices[i] = vertex:rotate(transform.rotation) + transform.position
 		end
 	end
 end
@@ -53,6 +57,7 @@ function PolygonCollider:setVerticesSource(source)
 	else
 		self._verticesSource = nil
 	end
+
 end
 
 function PolygonCollider:isCollidingWith(other)
@@ -60,21 +65,73 @@ function PolygonCollider:isCollidingWith(other)
 	--other collider may be a component, or a list of vertices
 
 	if class.instanceof(other, lass.Component) then
-		other = other.vertices
+		other = other.globalVertices
 	end
+
+	assert(other, "no vertices found on other collider")
 
 	local myvertices = self.globalVertices
 
-	for _, collider in ipairs({myvertices, other}) do
+	--check against every normal of every side of both colliders
+	for icollider, collider in ipairs({myvertices, other}) do
 		local len = #collider
-		for i, vertex in ipairs(collider) do
-			local normal = lass.Vector2.rotate(collider[i+1 % len] - vertex, 90)
 
-			--project all the vertices from both colliders onto the normal
-			
-			vertex = vertex:project(normal)
+		--if the 2nd collider has only one vertex, we've already checked it
+		if len < 2 and icollider == 2 then
+			return true
+		end
+
+		--for each side of this collider
+		for i, vertex in ipairs(collider) do
+			local normal = lass.Vector2.rotate(collider[i%len + 1] - vertex, 90)
+			local minDistance = nil
+			local maxDistance = nil
+
+			--project the first collider's vertices against the normal
+			for j, vertex2 in ipairs(myvertices) do
+				local projected = vertex2:project(normal)
+				local sm = projected:sqrMagnitude()
+
+				--account for negative values
+				if projected.x < 0 or (projected.x == 0 and projected.y < 0) then
+					sm = -sm
+				end
+
+				if not minDistance or sm < minDistance then
+					minDistance = sm
+				end
+				if not maxDistance or sm > maxDistance then
+					maxDistance = sm
+				end
+			end
+
+			--project the second collider's vertices against the normal
+			local potentialCollision = false
+			for j, vertex2 in ipairs(other) do
+				local projected = vertex2:project(normal)
+				local sm = projected:sqrMagnitude()
+
+				--account for negative values
+				if projected.x < 0 or (projected.x == 0 and projected.y < 0) then
+					sm = -sm
+				end
+
+				--if the point is between minDistance and maxDistance, we're potentially colliding
+				--(we can assume min and max are not the same, b/c myvertices is never a single point)
+				if sm >= minDistance and sm <= maxDistance then
+					potentialCollision = true
+					break
+				end
+			end
+
+			if not potentialCollision then
+				return false
+			end
 		end
 	end
+
+	--if no gaps have been found, there must be a collision
+	return true
 end
 
 -- function update(dt)

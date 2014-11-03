@@ -46,9 +46,17 @@ local PolygonRenderer = class.define(lass.Component, function(self, properties)
 	--call super constructor
 	lass.Component.init(self, properties)
 
+	self.globalVertices = {}
 end)
 
-function PolygonRenderer:awake(dt)
+function PolygonRenderer:awake()
+end
+
+function PolygonRenderer:update(dt)
+	local transform = self.gameObject.globalTransform
+	for i, vertex in ipairs(self.vertices) do
+		self.globalVertices[i] = vertex:rotate(transform.rotation) + transform.position
+	end
 end
 
 local function verticesToFlatArray(vertices)
