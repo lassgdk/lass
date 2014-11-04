@@ -407,6 +407,26 @@ function GameObject:update(dt, firstUpdate)
 	self.base.update(self, dt, firstUpdate)
 end
 
+function GameObject:draw()
+	for i, component in ipairs(self.components) do
+
+		--usually this function would only be called if component.draw exists.
+		--however, it might not exist (the component might have been removed/deactivated),
+		--so we'll check
+		if component.draw then component:draw() end
+	end
+end
+
+function GameObject:mousepressed(x, y, button)
+	for i, component in ipairs(self.components) do
+		if component.mousepressed then component:mousepressed(x, y, button) end
+	end
+
+	for i, child in ipairs(self.children) do
+		child:mousepressed(x, y, button)
+	end
+end
+
 function GameObject:isDrawable()
 	--returns true if this GameObject contains a component with a draw() function
 
@@ -415,13 +435,6 @@ function GameObject:isDrawable()
 	end
 
 	return false
-end
-
-function GameObject:draw()
-
-	for i, component in ipairs(self.components) do
-		if component.draw then component:draw() end
-	end
 end
 
 function GameObject:addChild(child)
@@ -624,7 +637,12 @@ function GameScene:draw()
 			drawable:draw()
 		end
 	end
+end
 
+function GameScene:mousepressed(x, y, button)
+	for i, child in ipairs(self.children) do
+		child:mousepressed(x, y, button)
+	end
 end
 
 return {

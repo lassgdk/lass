@@ -3,9 +3,6 @@ local class = require("lass.class")
 local PolygonCollider = require("lass.builtins.colliders.PolygonCollider")
 local PolygonRenderer = require("lass.builtins.graphics.PolygonRenderer")
 
---this is used for love2d callback functions outside of the component scope
-local moduleSelf = {}
-
 local PlayerInput = class.define(lass.Component, function(self, properties)
 
 	properties.rotationSpeed = properties.rotationSpeed or 1
@@ -30,7 +27,7 @@ local PlayerInput = class.define(lass.Component, function(self, properties)
 end)
 
 function PlayerInput:awake()
-	moduleSelf = self
+	print(self.gameObject.transform.size)
 end
 
 function PlayerInput:update(dt)
@@ -47,24 +44,24 @@ function PlayerInput:update(dt)
 	self.base.update(self, dt)
 end
 
-function love.mousepressed(x, y, button)
-	-- print(x, y, button)
+function PlayerInput:mousepressed(x, y, button)
 
-	local collider = moduleSelf.gameObject:getComponent(PolygonCollider)
+	local collider = self.gameObject:getComponent(PolygonCollider)
 	-- local renderer = moduleSelf.gameObject:getComponent(PolygonRenderer)
 
 	if collider:isCollidingWith({lass.Vector2(x,-y)}) then
+
 		if button == "l" then
-			if moduleSelf.rotationDirection == -1 then
-				moduleSelf.rotationDirection = 0
+			if self.rotationDirection == -1 then
+				self.rotationDirection = 0
 			else
-				moduleSelf.rotationDirection = -1
+				self.rotationDirection = -1
 			end
 		elseif button == "r" then
-			if moduleSelf.rotationDirection == 1 then
-				moduleSelf.rotationDirection = 0
+			if self.rotationDirection == 1 then
+				self.rotationDirection = 0
 			else
-				moduleSelf.rotationDirection = 1
+				self.rotationDirection = 1
 			end
 		end
 	end

@@ -70,6 +70,7 @@ local function verticesToFlatArray(vertices)
 	return flat
 end
 
+--[[
 function PolygonRenderer:draw()
 
 	local vertices = {}
@@ -82,6 +83,26 @@ function PolygonRenderer:draw()
 		if self.gameObject.gameScene.settings.graphics.invertYAxis then
 			vertices[i].y = -vertices[i].y
 		end
+	end
+
+	love.graphics.setColor(self.color)
+	love.graphics.polygon("fill", verticesToFlatArray(vertices))
+end
+--]]
+
+function PolygonRenderer:draw()
+
+	local vertices = {}
+	local transform = self.gameObject.globalTransform
+	--angle in radians (negated for clockwise)
+	local angle = (transform.rotation/180) * math.pi
+
+	for i, vertex in ipairs(self.globalVertices) do
+		vertex = lass.Vector2(vertex) --create a new copy
+		if self.gameObject.gameScene.settings.graphics.invertYAxis then
+			vertex.y = -vertex.y
+		end
+		vertices[i] = vertex
 	end
 
 	love.graphics.setColor(self.color)

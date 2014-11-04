@@ -7,10 +7,8 @@ function love.load()
 	scene:load("mainscene")
 end
 
-function love.draw()
-	scene:draw()
-end
-
-function love.update(dt)
-	scene:update(dt)
+for i, f in ipairs({"draw", "update", "mousepressed"}) do
+	love[f] = function(...)
+		scene[f](scene, ...)
+	end
 end

@@ -13,7 +13,7 @@ return {settings = {
     transform = {
       position = {
         x = 200,
-        y = -100,
+        y = -200,
         z = 1
       },
       rotation = 0,
@@ -45,9 +45,9 @@ return {settings = {
         name = "Satellite",
         transform = {
           position = {
-            x = 100,
+            x = 200,
             y = 10
-          }
+          },
         },
         components = {
           {
@@ -55,6 +55,12 @@ return {settings = {
             properties = {
               color = {200, 0, 80},
               vertices = {-100, -50, 100, -50, 0, 50}
+            }
+          },
+          {
+            script = "lass.builtins.colliders.PolygonCollider",
+            properties = {
+              verticesSource = "lass.builtins.graphics.PolygonRenderer"
             }
           },
           {
