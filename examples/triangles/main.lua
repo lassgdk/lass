@@ -1,6 +1,6 @@
-lass = require("lass")
+local lass = require("lass")
 
-scene = {}
+local scene = {}
 
 function love.load()
 	scene = lass.GameScene()

@@ -48,6 +48,10 @@ return {settings = {
             x = 200,
             y = 10
           },
+          size = {
+            x = .5,
+            y = .5,
+          }
         },
         components = {
           {

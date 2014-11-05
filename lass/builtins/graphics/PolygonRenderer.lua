@@ -55,7 +55,10 @@ end
 function PolygonRenderer:update(dt)
 	local transform = self.gameObject.globalTransform
 	for i, vertex in ipairs(self.vertices) do
-		self.globalVertices[i] = vertex:rotate(transform.rotation) + transform.position
+		self.globalVertices[i] = lass.Vector2(vertex)
+		self.globalVertices[i].x = self.globalVertices[i].x * transform.size.x
+		self.globalVertices[i].y = self.globalVertices[i].y * transform.size.y
+		self.globalVertices[i] = self.globalVertices[i]:rotate(transform.rotation) + transform.position
 	end
 end
 
@@ -70,26 +73,6 @@ local function verticesToFlatArray(vertices)
 	return flat
 end
 
---[[
-function PolygonRenderer:draw()
-
-	local vertices = {}
-	local transform = self.gameObject.globalTransform
-	--angle in radians (negated for clockwise)
-	local angle = (transform.rotation/180) * math.pi
-
-	for i, vertex in ipairs(self.vertices) do
-		vertices[i] = vertex:rotate(transform.rotation) + transform.position
-		if self.gameObject.gameScene.settings.graphics.invertYAxis then
-			vertices[i].y = -vertices[i].y
-		end
-	end
-
-	love.graphics.setColor(self.color)
-	love.graphics.polygon("fill", verticesToFlatArray(vertices))
-end
---]]
-
 function PolygonRenderer:draw()
 
 	local vertices = {}
@@ -98,7 +81,7 @@ function PolygonRenderer:draw()
 	local angle = (transform.rotation/180) * math.pi
 
 	for i, vertex in ipairs(self.globalVertices) do
-		vertex = lass.Vector2(vertex) --create a new copy
+		vertex = lass.Vector2(vertex) --we don't want to mutate the original vertex
 		if self.gameObject.gameScene.settings.graphics.invertYAxis then
 			vertex.y = -vertex.y
 		end

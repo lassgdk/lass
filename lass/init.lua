@@ -68,6 +68,7 @@ function Vector2.__mul(a, b)
 		vector = b
 	end
 
+	--ISSUE: this allows two vectors to be multiplied - needs a fix
 	assertOperandsHaveXandY(vector, scalar, "number")
 
 	return Vector2(vector.x * scalar, vector.y * scalar)
