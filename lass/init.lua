@@ -327,7 +327,7 @@ end
 
 function GameEntity:update(dt, firstUpdate)
 
-	maintainTransform(self)
+--	maintainTransform(self)
 
 	--update children
 	for i, child in ipairs(self.children) do
@@ -458,6 +458,8 @@ local GameObject = class.define(GameEntity, function(self, gameScene, name, tran
 end)
 
 function GameObject:update(dt, firstUpdate)
+
+	maintainTransform(self)
 
 	for i, component in ipairs(self.components) do
 		component:update(dt, firstUpdate)
@@ -675,6 +677,7 @@ end
 function GameScene:update(dt)
 	--update all children (top-level game objects) of the scene
 
+	maintainTransform(self)
 	self.base.update(self, dt, not self.finishedFirstUpdate)
 	if not self.finishedFirstUpdate then
 		self.finishedFirstUpdate = true
