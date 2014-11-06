@@ -55,9 +55,7 @@ end
 function PolygonRenderer:update(dt)
 	local transform = self.gameObject.globalTransform
 	for i, vertex in ipairs(self.vertices) do
-		self.globalVertices[i] = lass.Vector2(vertex)
-		self.globalVertices[i].x = self.globalVertices[i].x * transform.size.x
-		self.globalVertices[i].y = self.globalVertices[i].y * transform.size.y
+		self.globalVertices[i] = lass.Vector2(vertex.x * transform.size.x, vertex.y * transform.size.y)
 		self.globalVertices[i] = self.globalVertices[i]:rotate(transform.rotation) + transform.position
 	end
 end

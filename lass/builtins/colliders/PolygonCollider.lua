@@ -46,7 +46,8 @@ function PolygonCollider:update(dt, firstUpdate)
 	else
 		local transform = self.gameObject.globalTransform
 		for i, vertex in ipairs(self.vertices) do
-			self.globalVertices[i] = vertex:rotate(transform.rotation) + transform.position
+			self.globalVertices[i] = lass.Vector2(vertex.x * transform.size.x, vertex.y * transform.size.y)
+			self.globalVertices[i] = self.globalVertices[i]:rotate(transform.rotation) + transform.position
 		end
 	end
 end

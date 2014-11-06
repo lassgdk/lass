@@ -12,7 +12,6 @@ Vector2
 --[[internal]]
 
 local function assertOperandsHaveXandY(a, b, otherAllowedType, otherAllowedTypePosition)
-
 	local typeA, typeB = type(a), type(b)
 
 	if not otherAllowedType then
@@ -68,8 +67,8 @@ function Vector2.__mul(a, b)
 		vector = b
 	end
 
-	--ISSUE: this allows two vectors to be multiplied - needs a fix
-	assertOperandsHaveXandY(vector, scalar, "number")
+	assertOperandsHaveXandY(vector, nil, "nil")
+	assert(type(scalar) == "number", "cannot multiply vector and " .. type(scalar))
 
 	return Vector2(vector.x * scalar, vector.y * scalar)
 end
@@ -293,7 +292,7 @@ function GameEntity:removeChild(child)
 	end
 end
 
-function GameEntity:update(dt, firstUpdate )
+function GameEntity:update(dt, firstUpdate)
 
 	self:maintainTransform()
 
@@ -347,6 +346,28 @@ function GameEntity:resize(x, y, z, allowNegativeSize)
 	if not allowNegativeSize then
 		for axis, value in pairs(self.transform.size) do
 			if value < 0 then self.transform.size[axis] = 0 end
+		end
+	end
+end
+
+--callback functions
+for i, f in ipairs({
+	"errhand",
+	"focus",
+	"keypressed",
+	"keyreleased",
+	"mousefocus",
+	"mousepressed",
+	"mousereleased",
+	"quit",
+	"resize",
+	"textinput",
+	"threaderror",
+	"visible"
+}) do
+	GameEntity[f] = function(self, ...)
+		for i, child in ipairs(self.children) do
+			child[f](child, ...)
 		end
 	end
 end
@@ -418,16 +439,6 @@ function GameObject:draw()
 	end
 end
 
-function GameObject:mousepressed(x, y, button)
-	for i, component in ipairs(self.components) do
-		if component.mousepressed then component:mousepressed(x, y, button) end
-	end
-
-	for i, child in ipairs(self.children) do
-		child:mousepressed(x, y, button)
-	end
-end
-
 function GameObject:isDrawable()
 	--returns true if this GameObject contains a component with a draw() function
 
@@ -485,6 +496,31 @@ function GameObject:getComponents(componentType)
 	-- end
 
 	-- return found
+end
+
+--callback functions
+for i, f in ipairs({
+	"errhand",
+	"focus",
+	"keypressed",
+	"keyreleased",
+	"mousefocus",
+	"mousepressed",
+	"mousereleased",
+	"quit",
+	"resize",
+	"textinput",
+	"threaderror",
+	"visible"
+}) do
+	GameObject[f] = function(self, ...)
+		for i, component in ipairs(self.components) do
+			if component[f] then
+				component[f](component, ...)
+			end
+		end
+		self.base[f](self, ...)
+	end
 end
 
 --[[
@@ -578,7 +614,6 @@ end
 function GameScene:addGameObject(gameObject)
 	--add a GameObject to this GameScene (call this from gameObject constructor)
 
-	--local status, result = pcall(gameObject.is_a, gameObject, GameObject)
 	assert(class.instanceof(gameObject, GameObject), "gameObject must be GameObject")
 
 	gameObject.gameScene = self
@@ -640,11 +675,11 @@ function GameScene:draw()
 	end
 end
 
-function GameScene:mousepressed(x, y, button)
-	for i, child in ipairs(self.children) do
-		child:mousepressed(x, y, button)
-	end
-end
+-- function GameScene:mousepressed(x, y, button)
+-- 	for i, child in ipairs(self.children) do
+-- 		child:mousepressed(x, y, button)
+-- 	end
+-- end
 
 return {
 	Vector2 = Vector2,
