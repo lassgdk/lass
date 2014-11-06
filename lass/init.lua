@@ -179,6 +179,10 @@ function Vector3.__sub(a, b)
 	return Vector3(a.x+b.x, a.y+b.y, a.z+b.z)
 end
 
+function Vector3:__tostring()
+	return string.format("{x=%.2f, y=%.2f, z=%.2f}", self.x, self.y, self.z)
+end
+
 function Vector3:sqrMagnitude(origin)
 	--return the square magnitude of a vector relative to origin (0,0 by default)
 	--this can also be used as a class/static function (i.e., Vector3.sqrMagnitude(a, b))
@@ -227,6 +231,35 @@ function Component:update(dt) end
 GameEntity
 ]]
 
+--[[internal]]
+
+function maintainTransform(self)
+	--maintain global position and rotation
+	--NOTE: only GameEntity:init() and GameEntity:update() should call this function directly
+
+	--clamp rotation between 0 and 360 degrees (e.g., -290 => 70)
+	self.transform.rotation = self.transform.rotation % 360
+
+	if self.parent and self.parent ~= {} then
+		local p = self.parent.globalTransform
+		local t = self.transform
+
+		self.globalTransform = {
+			position = p.position + t.position:rotate(p.rotation),
+			size = Vector3({
+				x = t.size.x * p.size.x,
+				y = t.size.y * p.size.y,
+				z = t.size.z * p.size.z,
+			}),
+			rotation = t.rotation + p.rotation
+		}
+	else
+		self.globalTransform = self.transform
+	end
+end
+
+--[[public]]
+
 local GameEntity = class.define(function(self, transform, parent)
 
 	if type(transform) == "table" then
@@ -261,7 +294,7 @@ local GameEntity = class.define(function(self, transform, parent)
 		parent:addChild(self)
 	end
 
-	self:maintainTransform()
+	maintainTransform(self)
 end)
 
 function GameEntity:addChild(child, trackParent)
@@ -294,7 +327,7 @@ end
 
 function GameEntity:update(dt, firstUpdate)
 
-	self:maintainTransform()
+	maintainTransform(self)
 
 	--update children
 	for i, child in ipairs(self.children) do
@@ -302,30 +335,34 @@ function GameEntity:update(dt, firstUpdate)
 	end
 end
 
-function GameEntity:maintainTransform()
-	--maintain global position and rotation
-	--NOTE: only GameEntity:init() and GameEntity:update() should call this function directly
+-- function GameEntity:maintainTransform()
+-- 	--maintain global position and rotation
+-- 	--NOTE: only GameEntity:init() and GameEntity:update() should call this function directly
 
-	--clamp rotation between 0 and 360 degrees (e.g., -290 => 70)
-	self.transform.rotation = self.transform.rotation % 360
+-- 	--clamp rotation between 0 and 360 degrees (e.g., -290 => 70)
+-- 	self.transform.rotation = self.transform.rotation % 360
 
-	if self.parent and self.parent ~= {} then
-		local p = self.parent.globalTransform
-		local t = self.transform
+-- 	if self.parent and self.parent ~= {} then
+-- 		local p = self.parent.globalTransform
+-- 		local t = self.transform
 
-		self.globalTransform = {
-			position = p.position + t.position:rotate(p.rotation),
-			size = Vector3({
-				x = t.size.x * p.size.x,
-				y = t.size.y * p.size.y,
-				z = t.size.z * p.size.z,
-			}),
-			rotation = t.rotation + p.rotation
-		}
-	else
-		self.globalTransform = self.transform
-	end
-end
+-- 		--print(p.position + t.position:rotate(p.rotation))
+
+-- 		self.globalTransform = {
+-- 			position = p.position + t.position:rotate(p.rotation),
+-- 			size = Vector3({
+-- 				x = t.size.x * p.size.x,
+-- 				y = t.size.y * p.size.y,
+-- 				z = t.size.z * p.size.z,
+-- 			}),
+-- 			rotation = t.rotation + p.rotation
+-- 		}
+-- 	else
+-- 		-- print(self.transform.position)
+-- 		self.globalTransform = self.transform
+-- 	end
+-- 	--print(self.globalTransform.position)
+-- end
 
 function GameEntity:move(x, y, z)
 	self.transform.position = self.transform.position + Vector3(x, y, z)
@@ -652,20 +689,20 @@ function GameScene:draw()
 	--collect all drawable objects into buckets
 	for i, object in ipairs(self.gameObjects) do
 		if object:isDrawable() then
-			local bucket = drawables[object.transform.position.z]
+			local bucket = drawables[object.globalTransform.position.z]
 			if bucket then
 				bucket[#bucket+1] = object
 			else
-				drawables[object.transform.position.z] = {object}
+				drawables[object.globalTransform.position.z] = {object}
 			end
 		end
 	end
 
-	--sort the z indices
+	--sort the z indices in reverse order (so highest are drawn first)
 	for index in pairs(drawables) do
 		indices[#indices+1] = index
 	end
-	table.sort(indices)
+	table.sort(indices, function(a,b) return a > b end)
 
 	--draw
 	for i, index in pairs(indices) do

@@ -46,11 +46,12 @@ return {settings = {
         transform = {
           position = {
             x = 200,
-            y = 10
+            y = 10,
+            z = 1
           },
           size = {
-            x = .5,
-            y = .5,
+            x = .9,
+            y = .9,
           }
         },
         components = {
@@ -81,7 +82,8 @@ return {settings = {
             transform = {
               position = {
                 x = 200,
-                y = 0
+                y = 0,
+                z = 1
               }
             },
             components = {

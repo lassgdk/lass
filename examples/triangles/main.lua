@@ -27,19 +27,3 @@ for i, f in ipairs({
 		scene[f](scene, ...)
 	end
 end
-
--- love.draw
---[[
-"errhand",
-"focus",
-"keypressed",
-"keyreleased",
-"mousefocus",
-"mousepressed",
-"mousereleased",
-"quit",
-"resize",
-"textinput",
-"threaderror",
-"visible",
-]]

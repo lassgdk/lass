@@ -27,10 +27,13 @@ local PlayerInput = class.define(lass.Component, function(self, properties)
 end)
 
 function PlayerInput:awake()
-	print(self.gameObject.transform.size)
 end
 
-function PlayerInput:update(dt)
+function PlayerInput:update(dt, firstUpdate)
+
+	if firstUpdate and self.gameObject.name == "Satellite" then
+		print(self.gameObject.transform.position, self.gameObject.globalTransform.position)
+	end
 
 	if self.speedMode == "perFrame" then dt = 1 end
 
