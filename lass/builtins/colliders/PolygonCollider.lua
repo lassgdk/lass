@@ -1,5 +1,6 @@
 local lass = require("lass")
 local class = require("lass.class")
+local geometry = require("lass.geometry")
 
 local PolygonCollider = class.define(lass.Component, function(self, properties)
 
@@ -13,15 +14,15 @@ local PolygonCollider = class.define(lass.Component, function(self, properties)
 			end
 
 			if originalVType == "number" and i % 2 == 1 then
-				newVerts[math.floor(i/2) + 1] = lass.Vector2(v, properties.vertices[i+1])
+				newVerts[math.floor(i/2) + 1] = geometry.Vector2(v, properties.vertices[i+1])
 			elseif originalVType == "table" then
-				newVerts[i] = lass.Vector2(v)
+				newVerts[i] = geometry.Vector2(v)
 			end
 		end
 
 		properties.vertices = newVerts
 	else
-		properties.vertices = {lass.Vector2(0,0)}
+		properties.vertices = {geometry.Vector2(0,0)}
 	end
 
 	properties.verticesSource = properties.verticesSource or ""
@@ -46,7 +47,7 @@ function PolygonCollider:update(dt, firstUpdate)
 	else
 		local transform = self.gameObject.globalTransform
 		for i, vertex in ipairs(self.vertices) do
-			self.globalVertices[i] = lass.Vector2(vertex.x * transform.size.x, vertex.y * transform.size.y)
+			self.globalVertices[i] = geometry.Vector2(vertex.x * transform.size.x, vertex.y * transform.size.y)
 			self.globalVertices[i] = self.globalVertices[i]:rotate(transform.rotation) + transform.position
 		end
 	end
@@ -84,7 +85,7 @@ function PolygonCollider:isCollidingWith(other)
 
 		--for each side of this collider
 		for i, vertex in ipairs(collider) do
-			local normal = lass.Vector2.rotate(collider[i%len + 1] - vertex, 90)
+			local normal = geometry.Vector2.rotate(collider[i%len + 1] - vertex, 90)
 			local minDistance = nil
 			local maxDistance = nil
 

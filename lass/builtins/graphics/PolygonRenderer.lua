@@ -1,5 +1,6 @@
 local lass = require("lass")
 local class = require("lass.class")
+local geometry = require("lass.geometry")
 
 --[[
 	polygon renderer
@@ -29,7 +30,7 @@ local PolygonRenderer = class.define(lass.Component, function(self, properties)
 			end
 
 			if originalVType == "number" and i % 2 == 1 then
-				newVerts[math.floor(i/2) + 1] = lass.Vector2(v, properties.vertices[i+1])
+				newVerts[math.floor(i/2) + 1] = geometry.Vector2(v, properties.vertices[i+1])
 			elseif originalVType == "table" then
 				newVerts[i] = v
 			end	
@@ -37,7 +38,7 @@ local PolygonRenderer = class.define(lass.Component, function(self, properties)
 
 		properties.vertices = newVerts
 	else
-		properties.vertices = {lass.Vector2()}
+		properties.vertices = {geometry.Vector2()}
 	end
 
 	properties.mode = properties.mode or "fill"
@@ -55,7 +56,7 @@ end
 function PolygonRenderer:update(dt)
 	local transform = self.gameObject.globalTransform
 	for i, vertex in ipairs(self.vertices) do
-		self.globalVertices[i] = lass.Vector2(vertex.x * transform.size.x, vertex.y * transform.size.y)
+		self.globalVertices[i] = geometry.Vector2(vertex.x * transform.size.x, vertex.y * transform.size.y)
 		self.globalVertices[i] = self.globalVertices[i]:rotate(transform.rotation) + transform.position
 	end
 end
@@ -79,7 +80,7 @@ function PolygonRenderer:draw()
 	local angle = (transform.rotation/180) * math.pi
 
 	for i, vertex in ipairs(self.globalVertices) do
-		vertex = lass.Vector2(vertex) --we don't want to mutate the original vertex
+		vertex = geometry.Vector2(vertex) --we don't want to mutate the original vertex
 		if self.gameObject.gameScene.settings.graphics.invertYAxis then
 			vertex.y = -vertex.y
 		end
