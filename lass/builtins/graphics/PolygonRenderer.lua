@@ -13,33 +13,8 @@ local geometry = require("lass.geometry")
 
 local PolygonRenderer = class.define(lass.Component, function(self, properties)
 
-	local originalVType = type(properties.vertices[1])
-	assert(
-		originalVType == "number" or originalVType == "table",
-		"vertices must be all nums or all tables"
-	)
-
-	--cast vertices to Vectors and ensure they are not malformed
-	if properties.vertices then
-		local newVerts = {}
-
-		for i, v in ipairs(properties.vertices) do
-			--ensure type consistency
-			if i ~= 1 then
-				assert(type(v) == originalVType, "vertices must be all nums or all tables")
-			end
-
-			if originalVType == "number" and i % 2 == 1 then
-				newVerts[math.floor(i/2) + 1] = geometry.Vector2(v, properties.vertices[i+1])
-			elseif originalVType == "table" then
-				newVerts[i] = v
-			end	
-		end
-
-		properties.vertices = newVerts
-	else
-		properties.vertices = {geometry.Vector2()}
-	end
+	properties.polygon = geometry.Polygon(properties.vertices)
+	properties.vertices = properties.polygon.vertices
 
 	properties.mode = properties.mode or "fill"
 	properties.color = properties.color or {0,0,0}
@@ -47,18 +22,15 @@ local PolygonRenderer = class.define(lass.Component, function(self, properties)
 	--call super constructor
 	lass.Component.init(self, properties)
 
-	self.globalVertices = {}
+	-- self.globalVertices = {}
 end)
 
 function PolygonRenderer:awake()
 end
 
 function PolygonRenderer:update(dt)
-	local transform = self.gameObject.globalTransform
-	for i, vertex in ipairs(self.vertices) do
-		self.globalVertices[i] = geometry.Vector2(vertex.x * transform.size.x, vertex.y * transform.size.y)
-		self.globalVertices[i] = self.globalVertices[i]:rotate(transform.rotation) + transform.position
-	end
+	self.vertices = self.polygon.vertices
+	self.globalVertices = self.polygon:globalVertices(self.gameObject.globalTransform)
 end
 
 local function verticesToFlatArray(vertices)

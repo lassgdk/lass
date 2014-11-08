@@ -4,28 +4,10 @@ local geometry = require("lass.geometry")
 
 local PolygonCollider = class.define(lass.Component, function(self, properties)
 
-	if properties.vertices then
-		local newVerts = {}
-
-		for i, v in ipairs(properties.vertices) do
-			--ensure type consistency
-			if i ~= 1 then
-				assert(type(v) == originalVType, "vertices must be all nums or all tables")
-			end
-
-			if originalVType == "number" and i % 2 == 1 then
-				newVerts[math.floor(i/2) + 1] = geometry.Vector2(v, properties.vertices[i+1])
-			elseif originalVType == "table" then
-				newVerts[i] = geometry.Vector2(v)
-			end
-		end
-
-		properties.vertices = newVerts
-	else
-		properties.vertices = {geometry.Vector2(0,0)}
-	end
-
 	properties.verticesSource = properties.verticesSource or ""
+	if not properties.verticesSource then
+		properties.polygon = geometry.Polygon(properties.vertices)
+	end
 
 	self.base.init(self, properties)
 
@@ -39,17 +21,7 @@ function PolygonCollider:update(dt, firstUpdate)
 	end
 
 	if self._verticesSource then
-		self.vertices = self._verticesSource.vertices
-	end
-
-	if self._verticesSource and self._verticesSource.globalVertices then
-		self.globalVertices = self._verticesSource.globalVertices
-	else
-		local transform = self.gameObject.globalTransform
-		for i, vertex in ipairs(self.vertices) do
-			self.globalVertices[i] = geometry.Vector2(vertex.x * transform.size.x, vertex.y * transform.size.y)
-			self.globalVertices[i] = self.globalVertices[i]:rotate(transform.rotation) + transform.position
-		end
+		self.polygon = geometry.Polygon(self._verticesSource.polygon.vertices)
 	end
 end
 
@@ -67,12 +39,12 @@ function PolygonCollider:isCollidingWith(other)
 	--other collider may be a component, or a list of vertices
 
 	if class.instanceof(other, lass.Component) then
-		other = other.globalVertices
+		other = other.polygon:globalVertices(other.gameObject.globalTransform)
 	end
 
 	assert(other, "no vertices found on other collider")
 
-	local myvertices = self.globalVertices
+	local myvertices = self.polygon:globalVertices(self.gameObject.globalTransform)
 
 	--check against every normal of every side of both colliders
 	for icollider, collider in ipairs({myvertices, other}) do
@@ -135,9 +107,5 @@ function PolygonCollider:isCollidingWith(other)
 	--if no gaps have been found, there must be a collision
 	return true
 end
-
--- function update(dt)
--- 	self.hitbox.
--- end
 
 return PolygonCollider

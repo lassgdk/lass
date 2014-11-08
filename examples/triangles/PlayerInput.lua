@@ -32,9 +32,9 @@ end
 
 function PlayerInput:update(dt, firstUpdate)
 
-	if firstUpdate and self.gameObject.name == "Satellite" then
-		print(self.gameObject.transform.position, self.gameObject.globalTransform.position)
-	end
+	-- if firstUpdate and self.gameObject.name == "Satellite" then
+	-- 	print(self.gameObject.transform.position, self.gameObject.globalTransform.position)
+	-- end
 
 	if self.speedMode == "perFrame" then dt = 1 end
 

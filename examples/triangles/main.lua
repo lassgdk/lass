@@ -10,7 +10,7 @@ end
 for i, f in ipairs({
 	"draw",
 	"update",
-	"errhand",
+--	"errhand",
 	"focus",
 	"keypressed",
 	"keyreleased",

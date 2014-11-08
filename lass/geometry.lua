@@ -204,7 +204,50 @@ function Vector3:rotate(angle, useRadians)
 	return vec
 end
 
+--[[
+Polygon
+]]
+
+local Polygon = class.define(function(self, vertices)
+
+	local originalVType = type(vertices[1])
+	local newVerts = {}
+
+	for i, v in ipairs(vertices) do
+		--ensure type consistency
+		if i ~= 1 then
+			assert(type(v) == originalVType, "vertices must be all nums or all tables")
+		end
+
+		if originalVType == "number" and i % 2 == 1 then
+			newVerts[math.floor(i/2) + 1] = Vector2(v, vertices[i+1])
+		elseif originalVType == "table" then
+			newVerts[i] = v
+		end
+	end
+	vertices = newVerts
+
+	self.vertices = vertices
+
+end)
+
+function Polygon:globalVertices(transform)
+
+	local globalVertices = {}
+	for i, vertex in ipairs(self.vertices) do
+		globalVertices[i] = Vector2(vertex.x * transform.size.x, vertex.y * transform.size.y)
+		globalVertices[i] = globalVertices[i]:rotate(transform.rotation) + transform.position
+	end
+
+	return globalVertices
+end
+
+function Polygon:isConvex()
+
+end
+
 return {
 	Vector2 = Vector2,
 	Vector3 = Vector3,
+	Polygon = Polygon
 }
