@@ -151,13 +151,12 @@ end
 
 local Vector3 = class.define(Vector2, function(self, x, y, z)
 
-	Vector2.init(self, x, y)
-
 	if type(x) == "table" then
 		z = x.z
 	end
 
 	self.z = z or 0
+	Vector2.init(self, x, y)
 end)
 
 function Vector3.__add(a, b)
@@ -205,10 +204,41 @@ function Vector3:rotate(angle, useRadians)
 end
 
 --[[
+Transform
+]]
+
+local Transform = class.define(function(self, position, rotation, size)
+
+	if position and position.position then
+		size = position.size
+		rotation = position.rotation
+		position = position.position
+	end
+
+	self.position = Vector3(position)
+	self.rotation = rotation or 0
+	if size then
+		size.x = size.x or 1
+		size.y = size.y or 1
+		size.y = size.y or 1
+		self.size = Vector3(size)
+	else
+		self.size = Vector3(1,1,1)
+	end
+end)
+
+--[[
+Shape
+]]
+
+--this is basically just an interface
+local Shape = class.define()
+
+--[[
 Polygon
 ]]
 
-local Polygon = class.define(function(self, vertices)
+local Polygon = class.define(Shape, function(self, vertices)
 
 	local originalVType = type(vertices[1])
 	local newVerts = {}
@@ -242,12 +272,330 @@ function Polygon:globalVertices(transform)
 	return globalVertices
 end
 
+function Polygon:contains(vector)
+	return intersectingPolygons(self, vector)
+end
+
 function Polygon:isConvex()
 
 end
 
+--[[Circle]]
+
+local Circle = class.define(Shape, function(self, radius, center)
+
+	assert(type(radius) == "number", "radius must be number")
+	assert(class.instanceof(center, Vector2) or not center, "center must be Vector2 or nil")
+
+	self.radius = radius
+	self.center = center or Vector2(0, 0)
+end)
+
+function Circle:area()
+	return math.pi * self.radius^2
+end
+
+function Circle:circumference()
+	return math.pi * self.radius * 2
+end
+
+function Circle:globalCenter(transform)
+	return transform.position + self.center
+end
+
+function Circle:globalCircle(transform)
+	--transform size.x is assumed to be the radius (eventually, we'll make an ellipse object)
+	return Circle(self.radius * transform.size.x, self.center + transform.position)
+end
+
+function Circle:contains(vector)
+	return vector:sqrMagnitude() <= self.radius^2
+end
+
+--[[Rectangle]]
+
+local Rectangle = class.define(Shape, function(self, width, height, origin)
+	-- origin is assumed to be bottom left (does not check for screen y-axis inversion)
+
+	assert(type(width) == "number", "width must be number")
+	assert(type(height) == "number", "height must be number")
+	assert(class.instanceof(origin, Vector2) or not origin, "origin must be Vector2 or nil")
+
+	self.width = width
+	self.height = height
+	self.origin = origin or Vector2(0, 0)
+end)
+
+function Rectangle:vertices()
+	return {
+		self.origin,
+		self.origin + Vector2(width, 0),
+		self.origin + Vector2(width, height),
+		self.origin + Vector2(0, height)
+	}
+end
+
+function Rectangle:globalVertices(transform, ignoreRotation)
+
+	local globalVertices = {}
+	for i, vertex in ipairs(self:vertices()) do
+		globalVertices[i] = Vector2(vertex.x * transform.size.x, vertex.y * transform.size.y)
+		if not ignoreRotation then
+			globalVertices[i] = globalVertices[i]:rotate(transform.rotation) + transform.position
+		end
+	end
+
+	return globalVertices
+end
+
+function Rectangle:globalRectangle(transform)
+	return Rectangle(
+		self.width * transform.size.x,
+		self.height * transform.size.y,
+		self.origin + transform.position
+	)
+end
+
+function Rectangle:toPolygon()
+	return Polygon(self:vertices())
+end
+
+function Rectangle:contains(vector)
+	return
+		vector.x >= self.origin.x and
+		vector.x <= self.origin.x + self.width and
+		vector.y >= self.origin.y and
+		vector.y <= self.origin.y + self.height
+end
+
+--[[
+intersection functions
+]]
+
+--[[internal]]
+
+local function intersectingCircles(cir1, cir2, transform1, transform2)
+	return
+		(cir1:globalCenter(transform1) - cir2:globalCenter(transform2)):magnitude() <=
+		(cir1.radius + cir2.radius)
+end
+
+local function intersectingFixedRectangles(rect1, rect2, transform1, transform2)
+	--checks intersection of two rectangles, where rotation is assumed to be 0
+
+	rect1 = rect1:globalRectangle(transform1)
+	rect2 = rect1:globalRectangle(transform2)
+
+	return
+		--is 1's left edge on, or to the left of, 2's right edge?
+		rect1.origin.x <= rect2.origin.x + rect2.width and
+		--is 1's right edge on, or to the right of, 2's left edge?
+		rect1.origin.x + rect1.width >= rect2.origin.x and
+		--is 1's top edge on or above 2's bottom edge?
+		rect1.origin.y + rect1.height >= rect2.origin.y and
+		--is 1's bottom edge on or below 2's top edge?
+		rect1.origin.y <= rect2.origin.y + rect2.height
+end
+
+local function intersectingFixedRectangleAndCircle(rect, cir, transform1, transform2)
+
+	rect = rect:globalRectangle(transform1)
+	cir = cir:globalCircle(transform2)
+
+	--is one of the rectangle's vertices inside the circle?
+	for i, vertex in ipairs(rect:vertices()) do
+		if cir:contains(vertex) then
+			return true
+		end
+	end
+
+	--or is the circle's center inside the rectangle?
+	return rect:contains(cir.center)
+end
+
+local function intersectingPolygons(poly1, poly2, transform1, transform2)
+
+	if class.instanceof(poly2, Vector2) then
+		poly2 = Polygon({poly2})
+	end
+
+	local poly1Verts = poly1:globalVertices(transform1)
+	local poly2Verts = nil
+	if class.instanceof(poly2, Vector2) then
+		poly2Verts = {poly2}
+	else
+		poly2Verts = poly2:globalVertices(transform2)
+	end
+
+	--check against every normal of every side of both colliders
+	for icollider, collider in ipairs({poly1Verts, poly2Verts}) do
+		local len = #collider
+
+		--if the 2nd collider has only one vertex, we've already checked it
+		if len < 2 and icollider == 2 then
+			return true
+		end
+
+		--for each side of this collider
+		for i, vertex in ipairs(collider) do
+			local normal = geometry.Vector2.rotate(collider[i%len + 1] - vertex, 90)
+			local minDistance = nil
+			local maxDistance = nil
+
+			--project the first collider's vertices against the normal
+			for j, vertex2 in ipairs(poly1Verts) do
+				local projected = vertex2:project(normal)
+				local sm = projected:sqrMagnitude()
+
+				--account for negative values
+				if projected.x < 0 or (projected.x == 0 and projected.y < 0) then
+					sm = -sm
+				end
+
+				if not minDistance or sm < minDistance then
+					minDistance = sm
+				end
+				if not maxDistance or sm > maxDistance then
+					maxDistance = sm
+				end
+			end
+
+			--project the second collider's vertices against the normal
+			local potentialCollision = false
+			for j, vertex2 in ipairs(other) do
+				local projected = vertex2:project(normal)
+				local sm = projected:sqrMagnitude()
+
+				--account for negative values
+				if projected.x < 0 or (projected.x == 0 and projected.y < 0) then
+					sm = -sm
+				end
+
+				--if the point is between minDistance and maxDistance, we're potentially colliding
+				--(we can assume min and max are not the same, b/c poly1Verts is never a single point)
+				if sm >= minDistance and sm <= maxDistance then
+					potentialCollision = true
+					break
+				end
+			end
+
+			if not potentialCollision then
+				return false
+			end
+		end
+	end
+
+	--if no gaps have been found, there must be a collision
+	return true
+end
+
+local function guaranteeOrder(firstValue, ...)
+
+	local arg = {...}
+
+	if arg[1] ~= firstValue then
+		local newarg = {}
+		for i = 1, #arg, 2 do
+			newarg[i] = arg[i+1]
+			newarg[i+1] = arg[i]
+		end
+		return unpack(newarg)
+	else
+		return ...
+	end
+end
+
+--[[public]]
+
+local function intersecting(fig1, fig2, transform1, transform2, ignoreRotation1, ignoreRotation2)
+
+	assert(
+		class.instanceof(fig1, Shape, Vector2) and class.instanceof(fig2, Shape, Vector2),
+		"both figures must be instances of Shape or Vector2"
+	)
+
+	transform1 = Transform(transform1)
+	transform2 = Transform(transform2)
+	local fig1Type = class.instanceof(fig1, Vector2, Rectangle, Circle, Polygon)
+	local fig2Type = class.instanceof(fig2, Vector2, Rectangle, Circle, Polygon)
+
+	-- print(fig1Type, fig2Type)
+
+	--if not ignoreRotation and rotation is nonzero, cast any rectangles to polygons
+	if ignoreRotation1 then
+		transform1.rotation = 0 
+	elseif fig1Type == Rectangle and transform1.rotation ~= 0 then
+		fig1, fig1Type = fig1:toPolygon(), Polygon
+	end
+	if ignoreRotation2 then
+		transform2.rotation = 0 
+	elseif fig1Type == Rectangle and transform2.rotation ~= 0 then
+		fig2, fig2Type = fig2:toPolygon(), Polygon
+	end
+
+	--collision between two fixed rectangles
+	if fig1Type == Rectangle and fig2Type == Rectangle then
+		return intersectingFixedRectangles(fig1, fig2, transform1, transform2)
+
+	--collision between a fixed rectangle and something else
+	elseif fig1Type == Rectangle or fig2Type == Rectangle then
+		local _, otherType, rec, other, transformRec, transformOther, ignoreRotationRec, ignoreRotationOther =
+			guaranteeOrder(
+				Rectangle,
+				fig1Type, fig2Type, fig1, fig2, transform1, transform2, ignoreRotation1, ignoreRotation2
+			)
+
+		--collision between a fixed rectangle and a vector
+		if otherType == Vector2 then
+			return rec:globalRectangle(transformRec):contains(other + transformOther.position)
+		--collision between a fixed rectangle and a circle
+		elseif otherType == Circle then
+			return intersectingFixedRectangleAndCircle(rec, other, transformRec, transformOther)
+		--collision between a fixed rectangle and a polygon
+		elseif otherType == Polygon then
+			return intersectingPolygons(rec:toPolygon(), other, transformRec, transformOther)
+		end
+
+	--collision between two circles
+	elseif fig1Type == Circle and fig2Type == Circle then
+		return intersectingCircles(fig1, fig2, transform1, transform2)
+
+	--collision between a circle and either a vector or a polygon
+	elseif fig1Type == Circle or fig2Type == Circle then
+
+		local _, otherType, cir, other, transformCir, transformOther, _, ignoreRotationOther =
+			guaranteeOrder(
+				Circle,
+				fig1Type, fig2Type, fig1, fig2, transform1, transform2, ignoreRotation1, ignoreRotation2
+			)
+
+		--collision between a circle and a vector
+		if otherType == Vector2 then
+			return cir:globalCircle(transformCir):contains(other)
+		--collision between a circle and a polygon
+		else
+			return intersectingPolygonAndCircle(polygon, circle, transformOther, transformCir)
+		end
+
+	--collision between a polygon and either a polygon or a vector
+	elseif fig1Type == Polygon or fig2Type == Polygon then
+		--we've already accounted for rotation by now
+		local _, otherType, pol, other, transformPol, transformOther =
+			guaranteeOrder(
+				Polygon, fig1Type, fig2Type, fig1, fig2, transform1, transform2
+			)
+
+		return intersectingPolygons(pol, other, transformPol, transformOther)
+	end
+end
+
 return {
+	Transform = Transform,
 	Vector2 = Vector2,
 	Vector3 = Vector3,
-	Polygon = Polygon
+	Shape = Shape,
+	Polygon = Polygon,
+	Circle = Circle,
+	Rectangle = Rectangle,
+	intersecting = intersecting
 }

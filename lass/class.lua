@@ -59,13 +59,16 @@ function class.define(base, init)
    return c
 end
 
-function class.instanceof(object, class)
-   -- check if object/literal is an instance of class, regardless of its type
+function class.instanceof(object, ...)
+   -- check if object/literal is an instance of class(es), regardless of its type
 
    if not (type(object) == "table" and object.instanceof) then
       return false
    else
-      return object:instanceof(class)
+      for _, class in pairs(arg) do
+         if object:instanceof(class) then return class end
+      end
+      return false
    end
 end
 

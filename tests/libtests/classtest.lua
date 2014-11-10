@@ -71,11 +71,32 @@ function testNilInit()
 		"class instance 'a' lost member 'x' after Class.init(instance)")
 end
 
+function testInstanceOf()
+
+	local Animal = class.define()
+	local Dog = class.define(Animal)
+	local a = Animal()
+	local dog = Dog()
+
+	assert(a.instanceof, "class instance missing instanceof method")
+	assert(a:instanceof(Animal), "a should be instance of Animal class, but isn't")
+
+	assert(dog:instanceof(Dog), "dog should be instance of Dog class, but isn't")
+	assert(dog:instanceof(Animal), "dog should be instance of Animal super class, but isn't")
+
+	local Plant = class.define()
+
+	assert(class.instanceof(dog, Dog), "dog should be instance of Dog class, but isn't")
+	assert(class.instanceof(dog, Dog, Plant), "class.instanceof fails with multiple classes specified")
+	assert(class.instanceof(dog, Plant, Dog), "class.instanceof fails with multiple classes specified")
+end
+
 function main()
 
 	testClassDefine()
 	testClassInheritance()
 	testNilInit()
+	testInstanceOf()
 
 	print("testing complete with no assertion failures")
 end
