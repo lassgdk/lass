@@ -238,6 +238,118 @@ local Shape = class.define()
 Polygon
 ]]
 
+--[[internal]]
+local function intersectingPolygonAndOther(poly1, other, transform1, transform2)
+
+	-- print("yeaH")
+
+	transform1 = transform1 or Transform()
+
+	local poly1Verts = poly1:globalVertices(transform1)
+	local otherVerts = nil
+	local otherType = class.instanceof(other, Vector2, Circle)
+	if otherType == Vector2 then
+		otherVerts = {other}
+	elseif otherType == Circle then
+		local gc = other.globalCircle(transform2)
+		otherVerts = {gc.center - gc.radius, gc.center, gc.center + gc.radius}
+	else
+		otherVerts = other:globalVertices(transform2)
+	end
+
+	--check against every axis of both colliders
+	--if collider is polygon, axis is normal of a side
+	--if collider is circle, axis is the line between the closest polygon vertex and the circle center
+	for icollider, collider in ipairs({poly1Verts, otherVerts}) do
+		local len = #collider
+
+		--if the 2nd collider has only one vertex, we've already checked it
+		if len < 2 and icollider == 2 then
+			return true
+		end
+
+		local normal = nil
+		local min, max = 0, 0
+		if icollider == 2 and otherType == Circle then
+			for i, vertex in ipairs(poly1Verts) do
+				local sm = (vertex - other:globalCenter(transform2)):sqrMagnitude()
+				if sm <= min then
+					min = sm
+				elseif sm >= max then
+					max = sm
+				end
+			end
+		end
+
+		--if this is a polygon, we will check each side
+		--if this is not a polygon, we will break at the end of the loop
+		for i, vertex in ipairs(collider) do
+			if not normal or i ~= 1 then
+				normal = Vector2.rotate(collider[i%len + 1] - vertex, 90)
+			end
+			local minDistance = nil
+			local maxDistance = nil
+
+			--project the first collider's vertices against the normal
+			for j, vertex2 in ipairs(poly1Verts) do
+				local projected = vertex2:project(normal)
+				local sm = projected:sqrMagnitude()
+
+				--account for negative values
+				if projected.x < 0 or (projected.x == 0 and projected.y < 0) then
+					sm = -sm
+				end
+
+				if not minDistance or sm < minDistance then
+					minDistance = sm
+				end
+				if not maxDistance or sm > maxDistance then
+					maxDistance = sm
+				end
+			end
+
+			--project the second collider's vertices against the normal
+			local potentialCollision = false
+			local secondCollider = otherVerts
+			if icollider == 2 then
+				secondCollider = poly1Verts
+			end
+			for j, vertex2 in ipairs(secondCollider) do
+				local projected = vertex2:project(normal)
+				local sm = projected:sqrMagnitude()
+
+				--account for negative values
+				if projected.x < 0 or (projected.x == 0 and projected.y < 0) then
+					sm = -sm
+				end
+
+				--if the point is between minDistance and maxDistance, we're potentially colliding
+				--(we can assume min and max are not the same, b/c poly1Verts is never a single point)
+				if sm >= minDistance and sm <= maxDistance then
+					potentialCollision = true
+					break
+				end
+			end
+
+			if not potentialCollision then
+				return false
+			end
+
+			--if this is a circle, there is only one "normal" to check, so we can break now
+			if icollider == 2 and otherType == Circle then
+				print("whoops")
+				break
+			end 
+		end
+	end
+
+	--if no gaps have been found, there must be a collision
+	return true
+end
+
+
+--[[public]]
+
 local Polygon = class.define(Shape, function(self, vertices)
 
 	local originalVType = type(vertices[1])
@@ -272,8 +384,13 @@ function Polygon:globalVertices(transform)
 	return globalVertices
 end
 
+function Polygon:globalPolygon(transform)
+
+	return Polygon(self:globalVertices(transform))
+end
+
 function Polygon:contains(vector)
-	return intersectingPolygons(self, vector)
+	return intersectingPolygonAndOther(self, vector)
 end
 
 function Polygon:isConvex()
@@ -309,7 +426,7 @@ function Circle:globalCircle(transform)
 end
 
 function Circle:contains(vector)
-	return vector:sqrMagnitude() <= self.radius^2
+	return (vector-self.center):magnitude() <= self.radius
 end
 
 --[[Rectangle]]
@@ -329,9 +446,9 @@ end)
 function Rectangle:vertices()
 	return {
 		self.origin,
-		self.origin + Vector2(width, 0),
-		self.origin + Vector2(width, height),
-		self.origin + Vector2(0, height)
+		self.origin + Vector2(self.width, 0),
+		self.origin + Vector2(self.width, self.height),
+		self.origin + Vector2(0, self.height)
 	}
 end
 
@@ -413,81 +530,6 @@ local function intersectingFixedRectangleAndCircle(rect, cir, transform1, transf
 	return rect:contains(cir.center)
 end
 
-local function intersectingPolygons(poly1, poly2, transform1, transform2)
-
-	if class.instanceof(poly2, Vector2) then
-		poly2 = Polygon({poly2})
-	end
-
-	local poly1Verts = poly1:globalVertices(transform1)
-	local poly2Verts = nil
-	if class.instanceof(poly2, Vector2) then
-		poly2Verts = {poly2}
-	else
-		poly2Verts = poly2:globalVertices(transform2)
-	end
-
-	--check against every normal of every side of both colliders
-	for icollider, collider in ipairs({poly1Verts, poly2Verts}) do
-		local len = #collider
-
-		--if the 2nd collider has only one vertex, we've already checked it
-		if len < 2 and icollider == 2 then
-			return true
-		end
-
-		--for each side of this collider
-		for i, vertex in ipairs(collider) do
-			local normal = geometry.Vector2.rotate(collider[i%len + 1] - vertex, 90)
-			local minDistance = nil
-			local maxDistance = nil
-
-			--project the first collider's vertices against the normal
-			for j, vertex2 in ipairs(poly1Verts) do
-				local projected = vertex2:project(normal)
-				local sm = projected:sqrMagnitude()
-
-				--account for negative values
-				if projected.x < 0 or (projected.x == 0 and projected.y < 0) then
-					sm = -sm
-				end
-
-				if not minDistance or sm < minDistance then
-					minDistance = sm
-				end
-				if not maxDistance or sm > maxDistance then
-					maxDistance = sm
-				end
-			end
-
-			--project the second collider's vertices against the normal
-			local potentialCollision = false
-			for j, vertex2 in ipairs(other) do
-				local projected = vertex2:project(normal)
-				local sm = projected:sqrMagnitude()
-
-				--account for negative values
-				if projected.x < 0 or (projected.x == 0 and projected.y < 0) then
-					sm = -sm
-				end
-
-				--if the point is between minDistance and maxDistance, we're potentially colliding
-				--(we can assume min and max are not the same, b/c poly1Verts is never a single point)
-				if sm >= minDistance and sm <= maxDistance then
-					potentialCollision = true
-					break
-				end
-			end
-
-			if not potentialCollision then
-				return false
-			end
-		end
-	end
-
-	--if no gaps have been found, there must be a collision
-	return true
-end
 
 local function guaranteeOrder(firstValue, ...)
 
@@ -513,6 +555,7 @@ local function intersecting(fig1, fig2, transform1, transform2, ignoreRotation1,
 		class.instanceof(fig1, Shape, Vector2) and class.instanceof(fig2, Shape, Vector2),
 		"both figures must be instances of Shape or Vector2"
 	)
+
 
 	transform1 = Transform(transform1)
 	transform2 = Transform(transform2)
@@ -553,7 +596,7 @@ local function intersecting(fig1, fig2, transform1, transform2, ignoreRotation1,
 			return intersectingFixedRectangleAndCircle(rec, other, transformRec, transformOther)
 		--collision between a fixed rectangle and a polygon
 		elseif otherType == Polygon then
-			return intersectingPolygons(rec:toPolygon(), other, transformRec, transformOther)
+			return intersectingPolygonAndOther(rec:toPolygon(), other, transformRec, transformOther)
 		end
 
 	--collision between two circles
@@ -574,7 +617,7 @@ local function intersecting(fig1, fig2, transform1, transform2, ignoreRotation1,
 			return cir:globalCircle(transformCir):contains(other)
 		--collision between a circle and a polygon
 		else
-			return intersectingPolygonAndCircle(polygon, circle, transformOther, transformCir)
+			return intersectingPolygonAndOther(polygon, circle, transformOther, transformCir)
 		end
 
 	--collision between a polygon and either a polygon or a vector
@@ -585,8 +628,10 @@ local function intersecting(fig1, fig2, transform1, transform2, ignoreRotation1,
 				Polygon, fig1Type, fig2Type, fig1, fig2, transform1, transform2
 			)
 
-		return intersectingPolygons(pol, other, transformPol, transformOther)
+		return intersectingPolygonAndOther(pol, other, transformPol, transformOther)
 	end
+
+	print("nothin")
 end
 
 return {

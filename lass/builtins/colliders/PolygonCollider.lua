@@ -35,6 +35,15 @@ function PolygonCollider:setVerticesSource(source)
 end
 
 function PolygonCollider:isCollidingWith(other)
+	for i, v in ipairs(self.polygon.vertices) do
+		print(i,v)
+	end
+	print(class.instanceof(self.polygon, geometry.Polygon))-- == geometry.Polygon)
+	return geometry.intersecting(self.polygon, other, self.gameObject.globalTransform)
+end
+
+--[[
+function PolygonCollider:isCollidingWith(other)
 	--check if this collider is colliding with another
 	--other collider may be a component, or a list of vertices
 
@@ -106,6 +115,6 @@ function PolygonCollider:isCollidingWith(other)
 
 	--if no gaps have been found, there must be a collision
 	return true
-end
+end--]]
 
 return PolygonCollider

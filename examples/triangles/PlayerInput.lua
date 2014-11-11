@@ -51,7 +51,7 @@ function PlayerInput:mousepressed(x, y, button)
 	local collider = self.gameObject:getComponent(PolygonCollider)
 	-- local renderer = moduleSelf.gameObject:getComponent(PolygonRenderer)
 
-	if collider:isCollidingWith({geometry.Vector2(x,-y)}) then
+	if collider:isCollidingWith(geometry.Vector2(x,-y)) then
 
 		if button == "l" then
 			if self.rotationDirection == -1 then

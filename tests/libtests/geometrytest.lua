@@ -49,6 +49,39 @@ function testIntersectingRectangleAndCircle()
 	local t1, t2 = geometry.Transform(geometry.Vector3(0,0)), geometry.Transform(geometry.Vector3(0,0))
 
 	assert(geometry.intersecting(rec, cir), "figures at same origin aren't intersecting")
+
+	t2.position.x = 4
+	assert(geometry.intersecting(rec, cir, t1, t2), "figures should be touching")
+	t2.position.x = 4.001
+	assert(not geometry.intersecting(rec, cir, t1, t2), "figures should not be touching")
+end
+
+function testIntersectingPolygonsAndVectors()
+	local p1 = geometry.Polygon({-100, -50, 100, -50, 0, 50})
+	local p2 = geometry.Polygon({-10, -5, 10, -5, 0, 5})
+	local t1 = geometry.Transform(geometry.Vector3(0,0))
+	local t2 = geometry.Transform(geometry.Vector3(0,0))
+
+	assert(geometry.intersecting(p1, p2), "polygons at same origin aren't intersecting")
+	assert(geometry.intersecting(p1, p2, t1, t2), "polygons at same origin aren't intersecting")
+
+	p2 = geometry.Polygon(p1.vertices)
+	t2.position.x = 200
+	assert(geometry.intersecting(p1, p2, t1, t2), "polygons should be touching")
+	t2.position.x = 200.001
+	assert(not geometry.intersecting(p1, p2, t1, t2), "polygons should not be touching")
+
+	assert(geometry.intersecting(p1, geometry.Vector2(0,0)), "polygon should contain vector")
+	assert(geometry.intersecting(geometry.Vector2(0,0), p1), "polygon should contain vector")
+	assert(p1:globalPolygon(t1):contains(geometry.Vector2(0,0)), "polygon should contain vector")
+
+	assert(geometry.intersecting(p1, geometry.Vector2(100,-50)), "polygon should contain vector")
+	assert(geometry.intersecting(geometry.Vector2(100,-50), p1), "polygon should contain vector")
+	assert(p1:globalPolygon(t1):contains(geometry.Vector2(100,-50)), "polygon should contain vector")
+end
+
+function testIntersectingPolygonAndCircle()
+
 end
 
 function main()
@@ -57,6 +90,8 @@ function main()
 	testCircleWithRadiusZero()
 	testIntersectingRectanglesAndVectors()
 	testIntersectingRectangleAndCircle()
+	testIntersectingPolygonsAndVectors()
+	testIntersectingPolygonAndCircle()
 
 	print("testing complete with no assertion failures")
 end

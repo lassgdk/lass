@@ -96,6 +96,9 @@ end)
 
 function GameEntity:addChild(child, trackParent)
 
+	-- for k,v in pairs(child) do print(k,v) end
+	-- print(type(GameEntity))
+
 	assert(class.instanceof(child, GameEntity), "child must be GameEntity")
 	assert(child ~= self, "circular reference: cannot add self as child")
 

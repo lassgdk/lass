@@ -65,8 +65,8 @@ function class.instanceof(object, ...)
    if not (type(object) == "table" and object.instanceof) then
       return false
    else
-      for _, class in pairs(arg) do
-         if object:instanceof(class) then return class end
+      for _, cl in ipairs({...}) do
+         if object:instanceof(cl) then return cl end
       end
       return false
    end
