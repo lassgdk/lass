@@ -234,6 +234,38 @@ Shape
 --this is basically just an interface
 local Shape = class.define()
 
+--[[Circle]]
+
+local Circle = class.define(Shape, function(self, radius, center)
+
+	assert(type(radius) == "number", "radius must be number")
+	assert(class.instanceof(center, Vector2) or not center, "center must be Vector2 or nil")
+
+	self.radius = radius
+	self.center = center or Vector2(0, 0)
+end)
+
+function Circle:area()
+	return math.pi * self.radius^2
+end
+
+function Circle:circumference()
+	return math.pi * self.radius * 2
+end
+
+function Circle:globalCenter(transform)
+	return transform.position + self.center
+end
+
+function Circle:globalCircle(transform)
+	--transform size.x is assumed to be the radius (eventually, we'll make an ellipse object)
+	return Circle(self.radius * transform.size.x, self.center + transform.position)
+end
+
+function Circle:contains(vector)
+	return (vector-self.center):magnitude() <= self.radius
+end
+
 --[[
 Polygon
 ]]
@@ -241,8 +273,7 @@ Polygon
 --[[internal]]
 local function intersectingPolygonAndOther(poly1, other, transform1, transform2)
 
-	-- print("yeaH")
-
+	-- print(other:instanceof(Circle))
 	transform1 = transform1 or Transform()
 
 	local poly1Verts = poly1:globalVertices(transform1)
@@ -251,8 +282,13 @@ local function intersectingPolygonAndOther(poly1, other, transform1, transform2)
 	if otherType == Vector2 then
 		otherVerts = {other}
 	elseif otherType == Circle then
-		local gc = other.globalCircle(transform2)
-		otherVerts = {gc.center - gc.radius, gc.center, gc.center + gc.radius}
+		local gc = other:globalCircle(transform2)
+		--we will rotate the "vertices" (center and two outmost points) on each new axis
+		otherVerts = {
+			gc.center - Vector2(gc.radius, 0),
+			gc.center,
+			gc.center + Vector2(gc.radius, 0)
+		}
 	else
 		otherVerts = other:globalVertices(transform2)
 	end
@@ -269,22 +305,25 @@ local function intersectingPolygonAndOther(poly1, other, transform1, transform2)
 		end
 
 		local normal = nil
-		local min, max = 0, 0
+		local minSm = nil
+		local closest = nil
+
+		--if the 2nd collider is a circle, we generate the "normal" here
 		if icollider == 2 and otherType == Circle then
 			for i, vertex in ipairs(poly1Verts) do
 				local sm = (vertex - other:globalCenter(transform2)):sqrMagnitude()
-				if sm <= min then
+				if not min or sm <= min then
 					min = sm
-				elseif sm >= max then
-					max = sm
+					closest = vertex
 				end
 			end
+			normal = other:globalCenter(transform2) - closest
 		end
 
 		--if this is a polygon, we will check each side
 		--if this is not a polygon, we will break at the end of the loop
 		for i, vertex in ipairs(collider) do
-			if not normal or i ~= 1 then
+			if icollider == 1 or otherType ~= Circle then
 				normal = Vector2.rotate(collider[i%len + 1] - vertex, 90)
 			end
 			local minDistance = nil
@@ -310,11 +349,10 @@ local function intersectingPolygonAndOther(poly1, other, transform1, transform2)
 
 			--project the second collider's vertices against the normal
 			local potentialCollision = false
-			local secondCollider = otherVerts
-			if icollider == 2 then
-				secondCollider = poly1Verts
-			end
-			for j, vertex2 in ipairs(secondCollider) do
+			for j, vertex2 in ipairs(otherVerts) do
+				if otherType == Circle then
+					vertex2 = vertex2:rotate(normal:angle())
+				end
 				local projected = vertex2:project(normal)
 				local sm = projected:sqrMagnitude()
 
@@ -337,7 +375,7 @@ local function intersectingPolygonAndOther(poly1, other, transform1, transform2)
 
 			--if this is a circle, there is only one "normal" to check, so we can break now
 			if icollider == 2 and otherType == Circle then
-				print("whoops")
+				-- print("whoops")
 				break
 			end 
 		end
@@ -395,38 +433,6 @@ end
 
 function Polygon:isConvex()
 
-end
-
---[[Circle]]
-
-local Circle = class.define(Shape, function(self, radius, center)
-
-	assert(type(radius) == "number", "radius must be number")
-	assert(class.instanceof(center, Vector2) or not center, "center must be Vector2 or nil")
-
-	self.radius = radius
-	self.center = center or Vector2(0, 0)
-end)
-
-function Circle:area()
-	return math.pi * self.radius^2
-end
-
-function Circle:circumference()
-	return math.pi * self.radius * 2
-end
-
-function Circle:globalCenter(transform)
-	return transform.position + self.center
-end
-
-function Circle:globalCircle(transform)
-	--transform size.x is assumed to be the radius (eventually, we'll make an ellipse object)
-	return Circle(self.radius * transform.size.x, self.center + transform.position)
-end
-
-function Circle:contains(vector)
-	return (vector-self.center):magnitude() <= self.radius
 end
 
 --[[Rectangle]]
@@ -606,7 +612,7 @@ local function intersecting(fig1, fig2, transform1, transform2, ignoreRotation1,
 	--collision between a circle and either a vector or a polygon
 	elseif fig1Type == Circle or fig2Type == Circle then
 
-		local _, otherType, cir, other, transformCir, transformOther, _, ignoreRotationOther =
+		local _, otherType, cir, other, transformCir, transformOther, __, ignoreRotationOther =
 			guaranteeOrder(
 				Circle,
 				fig1Type, fig2Type, fig1, fig2, transform1, transform2, ignoreRotation1, ignoreRotation2
@@ -617,7 +623,8 @@ local function intersecting(fig1, fig2, transform1, transform2, ignoreRotation1,
 			return cir:globalCircle(transformCir):contains(other)
 		--collision between a circle and a polygon
 		else
-			return intersectingPolygonAndOther(polygon, circle, transformOther, transformCir)
+			cir = Circle(cir.radius, cir.center)
+			return intersectingPolygonAndOther(other, cir, transformOther, transformCir)
 		end
 
 	--collision between a polygon and either a polygon or a vector
@@ -630,8 +637,6 @@ local function intersecting(fig1, fig2, transform1, transform2, ignoreRotation1,
 
 		return intersectingPolygonAndOther(pol, other, transformPol, transformOther)
 	end
-
-	print("nothin")
 end
 
 return {

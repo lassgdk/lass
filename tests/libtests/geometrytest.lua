@@ -78,10 +78,21 @@ function testIntersectingPolygonsAndVectors()
 	assert(geometry.intersecting(p1, geometry.Vector2(100,-50)), "polygon should contain vector")
 	assert(geometry.intersecting(geometry.Vector2(100,-50), p1), "polygon should contain vector")
 	assert(p1:globalPolygon(t1):contains(geometry.Vector2(100,-50)), "polygon should contain vector")
+
+	assert(not geometry.intersecting(p1, geometry.Vector2(100,-50.0001)), "polygon should not contain vector")
+	assert(not geometry.intersecting(geometry.Vector2(100,-50.0001), p1), "polygon should not contain vector")
+	assert(not p1:globalPolygon(t1):contains(geometry.Vector2(100,-50.0001)), "polygon should not contain vector")
 end
 
 function testIntersectingPolygonAndCircle()
+	local pol = geometry.Rectangle(10,3):toPolygon()
+	local cir = geometry.Circle(2)
+	local t1 = geometry.Transform(geometry.Vector3(0,0))
+	local t2 = geometry.Transform(geometry.Vector3(0,0))
 
+	for i,v in ipairs(pol.vertices) do print(i,v) end
+
+	assert(geometry.intersecting(pol, cir, t1, t2), "figures at same origin aren't intersecting")
 end
 
 function main()
