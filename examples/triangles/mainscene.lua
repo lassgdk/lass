@@ -62,12 +62,12 @@ return {settings = {
               vertices = {-100, -50, 100, -50, 0, 50}
             }
           },
-          {
-            script = "lass.builtins.colliders.PolygonCollider",
-            properties = {
-              verticesSource = "lass.builtins.graphics.PolygonRenderer"
-            }
-          },
+          -- {
+          --   script = "lass.builtins.colliders.PolygonCollider",
+          --   properties = {
+          --     verticesSource = "lass.builtins.graphics.PolygonRenderer"
+          --   }
+          -- },
           {
             script = "PlayerInput",
             properties = {

@@ -20,7 +20,15 @@ end
 function testClassInheritance()
 	--ensure that class inheritance (and self.base) works
 
-	local Animal = class.define(function(self, legs) self.legs = legs or 4 end)
+	local Being = class.define()
+	local Animal = class.define(Being, function(self, legs)
+		-- print(self.legs)
+		-- print(self.base, self.base.init, self, self.init)
+		-- assert(self.legs ~= 4)
+
+		self.legs = legs or 4
+		self.base.init(self)
+	end)
 	local Dog = class.define(Animal, function(self, legs, breed)
 		self.breed = breed or "unknown"
 		self.base.init(self, legs)
@@ -93,7 +101,7 @@ end
 
 function main()
 
-	testClassDefine()
+	-- testClassDefine()
 	testClassInheritance()
 	testNilInit()
 	testInstanceOf()

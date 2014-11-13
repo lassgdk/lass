@@ -118,6 +118,10 @@ function testIntersectingPolygonAndCircle()
 	assert(not geometry.intersecting(cir, pol, t2, t1), "figures should not be intersecting")
 end
 
+function testPolygonWithNoArguments()
+
+end
+
 function main()
 
 	testIntersectingCirclesAndVectors()

@@ -3,12 +3,12 @@ local class = require("lass.class")
 local geometry = require("lass.geometry")
 
 --[[
-	polygon renderer
-	properties:
-		vertices - can be an array of Vector2's (e.g., {{x=1,y=2}, {x=10, y=2}}),
-			or a flattened array of coordinates (e.g., {1, 2, 10, 2})
-		mode - draw mode, can be "fill" or "line"
-		color - rgb tuple, 0-255 (e.g., {0, 0, 200})
+PolygonRenderer
+properties:
+	vertices - can be an array of Vector2's (e.g., {{x=1,y=2}, {x=10, y=2}}),
+		or a flattened array of coordinates (e.g., {1, 2, 10, 2})
+	mode - draw mode, can be "fill" or "line"
+	color - rgb tuple, 0-255 (e.g., {0, 0, 200})
 ]]
 
 local PolygonRenderer = class.define(lass.Component, function(self, properties)
@@ -20,7 +20,7 @@ local PolygonRenderer = class.define(lass.Component, function(self, properties)
 	properties.color = properties.color or {0,0,0}
 
 	--call super constructor
-	lass.Component.init(self, properties)
+	self.base.init(self, properties)
 
 	-- self.globalVertices = {}
 end)

@@ -23,11 +23,13 @@ function class.define(base, init)
 
    --if there's still no init, make one
    if not init then
-      init = function(obj, ...)
-         -- make sure that any stuff from the base class is initialized!
-         if base and base.init then
+      if base and base.init then
+         init = function(obj, ...)
+            -- make sure that any stuff from the base class is initialized!
             base.init(obj, ...)
          end
+      else
+         init = function() end
       end
    end
 
@@ -44,7 +46,13 @@ function class.define(base, init)
       return self
    end
 
-   c.init = init
+   c.init = function(obj, ...)
+      --prevent infinitely recursive self.base.init() calls
+      if obj then
+         obj.base = c.base
+      end
+      init(obj, ...)
+   end
 
    c.instanceof = function(self, klass)
       local m = getmetatable(self)

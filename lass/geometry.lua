@@ -585,6 +585,13 @@ local function intersecting(fig1, fig2, transform1, transform2, ignoreRotation1,
 	local fig1Type = class.instanceof(fig1, Vector2, Rectangle, Circle, Polygon)
 	local fig2Type = class.instanceof(fig2, Vector2, Rectangle, Circle, Polygon)
 
+	--collision between two points
+	if fig1Type == Vector2 and fig2Type == Vector2 then
+		fig1 = Vector3(fig1) + transform1.position
+		fig2 = Vector3(fig2) + transform2.position
+		return fig1.x == fig2.x and fig1.y == fig2.y and fig1.z == fig2.z
+	end
+
 	--if not ignoreRotation and rotation is nonzero, cast any rectangles to polygons
 	if ignoreRotation1 then
 		transform1.rotation = 0 
