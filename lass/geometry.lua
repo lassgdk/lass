@@ -110,6 +110,13 @@ end
 function Vector2:angle(useRadians)
 	--return the angle of this vector relative to the origin
 
+	if self.x == 0 and self.y == 0 then
+		--lua uses infinity as a stand-in for NaN
+		return math.huge
+	elseif self.x == 0 then
+		return 0
+	end
+
 	local c = 1
 	if not useRadians then
 		c = 180/math.pi
@@ -273,7 +280,6 @@ Polygon
 --[[internal]]
 local function intersectingPolygonAndOther(poly1, other, transform1, transform2)
 
-	-- print(other:instanceof(Circle))
 	transform1 = transform1 or Transform()
 
 	local poly1Verts = poly1:globalVertices(transform1)
@@ -308,12 +314,12 @@ local function intersectingPolygonAndOther(poly1, other, transform1, transform2)
 		local minSm = nil
 		local closest = nil
 
-		--if the 2nd collider is a circle, we generate the "normal" here
+		--if this collider is a circle, we generate the "normal" here
 		if icollider == 2 and otherType == Circle then
 			for i, vertex in ipairs(poly1Verts) do
 				local sm = (vertex - other:globalCenter(transform2)):sqrMagnitude()
-				if not min or sm <= min then
-					min = sm
+				if not minSm or sm <= minSm then
+					minSm = sm
 					closest = vertex
 				end
 			end
@@ -326,56 +332,69 @@ local function intersectingPolygonAndOther(poly1, other, transform1, transform2)
 			if icollider == 1 or otherType ~= Circle then
 				normal = Vector2.rotate(collider[i%len + 1] - vertex, 90)
 			end
-			local minDistance = nil
-			local maxDistance = nil
+
+			--the vector might be (0,0) if the 2nd collider is a circle,
+			--and the 1st collider is touching its center
+			if normal.x == 0 and normal.y == 0 then
+				return true
+			end
+
+			local normalAngle = normal:angle()
+
+			local minPoint1 = nil
+			local maxPoint1 = nil
 
 			--project the first collider's vertices against the normal
 			for j, vertex2 in ipairs(poly1Verts) do
 				local projected = vertex2:project(normal)
-				local sm = projected:sqrMagnitude()
+				local adjustedProjected = projected:rotate(normalAngle)
 
-				--account for negative values
-				if projected.x < 0 or (projected.x == 0 and projected.y < 0) then
-					sm = -sm
+				if not minPoint1 then
+					minPoint1 = adjustedProjected
 				end
 
-				if not minDistance or sm < minDistance then
-					minDistance = sm
-				end
-				if not maxDistance or sm > maxDistance then
-					maxDistance = sm
+				if not maxPoint1 then
+					maxPoint1 = adjustedProjected
+				elseif adjustedProjected.x < minPoint1.x then
+					minPoint1 = adjustedProjected
+				elseif adjustedProjected.x > maxPoint1.x then
+					maxPoint1 = adjustedProjected
 				end
 			end
+
+			local minPoint2 = nil
+			local maxPoint2 = nil
+			local potentialCollision = false
 
 			--project the second collider's vertices against the normal
-			local potentialCollision = false
 			for j, vertex2 in ipairs(otherVerts) do
-				if otherType == Circle then
-					vertex2 = vertex2:rotate(normal:angle())
-				end
 				local projected = vertex2:project(normal)
-				local sm = projected:sqrMagnitude()
+				local adjustedProjected = projected:rotate(normalAngle)
 
-				--account for negative values
-				if projected.x < 0 or (projected.x == 0 and projected.y < 0) then
-					sm = -sm
+				if not minPoint2 then
+					minPoint2 = adjustedProjected
 				end
 
-				--if the point is between minDistance and maxDistance, we're potentially colliding
-				--(we can assume min and max are not the same, b/c poly1Verts is never a single point)
-				if sm >= minDistance and sm <= maxDistance then
-					potentialCollision = true
-					break
+				if not maxPoint2 then
+					maxPoint2 = adjustedProjected
+				elseif adjustedProjected.x < minPoint2.x then
+					minPoint2 = adjustedProjected
+				elseif adjustedProjected.x > maxPoint2.x then
+					maxPoint2 = adjustedProjected
 				end
 			end
 
-			if not potentialCollision then
+			local points = {{minPoint1,1}, {minPoint2,2}, {maxPoint1,1}, {maxPoint2,2}}
+			table.sort(points, function(a,b) return a[1].x < b[1].x end)
+
+			--if the first two sorted points are from the same collider, we've found a gap
+			--(unless the min of one is exactly the max of the other)
+			if points[1][2] == points[2][2] and points[2][1].x ~= points[3][1].x then
 				return false
 			end
 
 			--if this is a circle, there is only one "normal" to check, so we can break now
 			if icollider == 2 and otherType == Circle then
-				-- print("whoops")
 				break
 			end 
 		end
@@ -402,13 +421,12 @@ local Polygon = class.define(Shape, function(self, vertices)
 		if originalVType == "number" and i % 2 == 1 then
 			newVerts[math.floor(i/2) + 1] = Vector2(v, vertices[i+1])
 		elseif originalVType == "table" then
-			newVerts[i] = v
+			newVerts[i] = Vector2(v)
 		end
 	end
 	vertices = newVerts
 
 	self.vertices = vertices
-
 end)
 
 function Polygon:globalVertices(transform)
@@ -562,13 +580,10 @@ local function intersecting(fig1, fig2, transform1, transform2, ignoreRotation1,
 		"both figures must be instances of Shape or Vector2"
 	)
 
-
 	transform1 = Transform(transform1)
 	transform2 = Transform(transform2)
 	local fig1Type = class.instanceof(fig1, Vector2, Rectangle, Circle, Polygon)
 	local fig2Type = class.instanceof(fig2, Vector2, Rectangle, Circle, Polygon)
-
-	-- print(fig1Type, fig2Type)
 
 	--if not ignoreRotation and rotation is nonzero, cast any rectangles to polygons
 	if ignoreRotation1 then

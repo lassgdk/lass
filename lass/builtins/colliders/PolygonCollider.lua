@@ -35,10 +35,10 @@ function PolygonCollider:setVerticesSource(source)
 end
 
 function PolygonCollider:isCollidingWith(other)
-	for i, v in ipairs(self.polygon.vertices) do
-		print(i,v)
-	end
-	print(class.instanceof(self.polygon, geometry.Polygon))-- == geometry.Polygon)
+	-- for i, v in ipairs(self.polygon.vertices) do
+	-- 	print(i,v)
+	-- end
+	-- print(class.instanceof(self.polygon, geometry.Polygon))-- == geometry.Polygon)
 	return geometry.intersecting(self.polygon, other, self.gameObject.globalTransform)
 end
 
