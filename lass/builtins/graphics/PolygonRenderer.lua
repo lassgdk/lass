@@ -4,23 +4,23 @@ local geometry = require("lass.geometry")
 
 --[[
 PolygonRenderer
-properties:
+arguments:
 	vertices - can be an array of Vector2's (e.g., {{x=1,y=2}, {x=10, y=2}}),
 		or a flattened array of coordinates (e.g., {1, 2, 10, 2})
 	mode - draw mode, can be "fill" or "line"
 	color - rgb tuple, 0-255 (e.g., {0, 0, 200})
 ]]
 
-local PolygonRenderer = class.define(lass.Component, function(self, properties)
+local PolygonRenderer = class.define(lass.Component, function(self, arguments)
 
-	properties.shape = geometry.Polygon(properties.vertices)
-	properties.vertices = nil
+	arguments.shape = geometry.Polygon(arguments.vertices)
+	arguments.vertices = nil
 
-	properties.mode = properties.mode or "fill"
-	properties.color = properties.color or {0,0,0}
+	arguments.mode = arguments.mode or "fill"
+	arguments.color = arguments.color or {0,0,0}
 
 	--call super constructor
-	self.base.init(self, properties)
+	self.base.init(self, arguments)
 
 	-- self.globalVertices = {}
 end)

@@ -7,19 +7,19 @@ local Collider = require("lass.builtins.colliders.Collider")
 PolygonCollider
 ]]
 
-local PolygonCollider = class.define(Collider, function(self, properties)
+local PolygonCollider = class.define(Collider, function(self, arguments)
 
-	properties.verticesSource = properties.verticesSource or ""
-	if not properties.verticesSource then
-		properties.shape = geometry.Polygon(properties.vertices)
+	arguments.verticesSource = arguments.verticesSource or ""
+	if not arguments.verticesSource then
+		arguments.shape = geometry.Polygon(arguments.vertices)
 	else
 		--placeholder until _verticesSource exists
-		properties.shape = geometry.Polygon({})
+		arguments.shape = geometry.Polygon({})
 	end
 
-	properties.vertices = nil
+	arguments.vertices = nil
 
-	self.base.init(self, properties)
+	self.base.init(self, arguments)
 end)
 
 function PolygonCollider:update(dt, firstUpdate)

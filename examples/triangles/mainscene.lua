@@ -21,20 +21,20 @@ return {settings = {
     components = {
       {
         script = "lass.builtins.graphics.PolygonRenderer",
-        properties = {
+        arguments = {
           color = {0, 0, 80},
           vertices = {-100, -50, 100, -50, 0, 50}
         }
       },
       {
         script = "lass.builtins.colliders.PolygonCollider",
-        properties = {
+        arguments = {
           verticesSource = "lass.builtins.graphics.PolygonRenderer"
         }
       },
       {
         script = "PlayerInput",
-        properties = {
+        arguments = {
           rotationSpeed = 1,
           speedMode = "perFrame"
         }
@@ -57,20 +57,20 @@ return {settings = {
         components = {
           {
             script = "lass.builtins.graphics.PolygonRenderer",
-            properties = {
+            arguments = {
               color = {200, 0, 80},
               vertices = {-100, -50, 100, -50, 0, 50}
             }
           },
           {
             script = "lass.builtins.colliders.PolygonCollider",
-            properties = {
+            arguments = {
               verticesSource = "lass.builtins.graphics.PolygonRenderer"
             }
           },
           {
             script = "PlayerInput",
-            properties = {
+            arguments = {
               rotationSpeed = 1,
               speedMode = "perFrame"
             }
@@ -89,7 +89,7 @@ return {settings = {
             components = {
               {
                 script = "lass.builtins.graphics.PolygonRenderer",
-                properties = {
+                arguments = {
                   color = {200, 0, 80},
                   vertices = {-100, -50, 100, -50, 0, 50}
                 }

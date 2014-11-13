@@ -4,23 +4,23 @@ local geometry = require("lass.geometry")
 local PolygonCollider = require("lass.builtins.colliders.PolygonCollider")
 local PolygonRenderer = require("lass.builtins.graphics.PolygonRenderer")
 
-local PlayerInput = class.define(lass.Component, function(self, properties)
+local PlayerInput = class.define(lass.Component, function(self, arguments)
 
-	properties.rotationSpeed = properties.rotationSpeed or 1
-	properties.controls = properties.controls or {
+	arguments.rotationSpeed = arguments.rotationSpeed or 1
+	arguments.controls = arguments.controls or {
 		rotate = 1
 	}
-	if properties.speedMode then
+	if arguments.speedMode then
 		assert(
-			properties.speedMode == "perFrame" or properties.speedMode == "perSecond",
+			arguments.speedMode == "perFrame" or arguments.speedMode == "perSecond",
 			"invalid speed mode: choose 'perFrame' or 'perSecond'"
 		)
 	else
-		properties.speedmode = "perFrame"
+		arguments.speedmode = "perFrame"
 	end
 
 	--call super constructor
-	self.base.init(self, properties)
+	self.base.init(self, arguments)
 
 	--hidden variables
 	self.rotationDirection = 0

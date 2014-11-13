@@ -7,10 +7,10 @@ Collider - base class for all collider components
 do not use this as a component directly! (unless you can think of a good reason to)
 ]]
 
-local Collider = class.define(lass.Component, function(self, properties)
-	assert(class.instanceof(properties.shape, geometry.Shape), "shape must be geometry.Shape")
+local Collider = class.define(lass.Component, function(self, arguments)
+	assert(class.instanceof(arguments.shape, geometry.Shape), "shape must be geometry.Shape")
 
-	self.base.init(self, properties)
+	self.base.init(self, arguments)
 end)
 
 function Collider:isCollidingWith(other)

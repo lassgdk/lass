@@ -22,7 +22,7 @@ function Component:awake()
 	--callback function that is invoked whenever Component is attached to a GameObject
 end
 
-function Component:update(dt) end
+function Component:update(dt, firstUpdate) end
 
 --[[
 GameEntity
@@ -41,7 +41,7 @@ function maintainTransform(self)
 		local p = self.parent.globalTransform
 		local t = self.transform
 
-		self.globalTransform = {
+		self.globalTransform = geometry.Transform({
 			position = p.position + t.position:rotate(p.rotation),
 			size = geometry.Vector3({
 				x = t.size.x * p.size.x,
@@ -49,7 +49,7 @@ function maintainTransform(self)
 				z = t.size.z * p.size.z,
 			}),
 			rotation = t.rotation + p.rotation
-		}
+		})
 	else
 		self.globalTransform = self.transform
 	end
@@ -59,31 +59,11 @@ end
 
 local GameEntity = class.define(function(self, transform, parent)
 
-	if type(transform) == "table" then
+	if class.instanceof(transform, geometry.Transform) then
 		self.transform = transform
 	else
-		self.transform = {}
+		self.transform = geometry.Transform(transform)
 	end
-
-	--initialize position and size settings
-	for property, defaultAxisValue in pairs({position=0, size=1}) do
-
-		local vec = {}
-
-		--account for empty tables
-		for _, axis in ipairs({"x", "y", "z"}) do
-			if type(self.transform[property]) ~= "table" then
-				vec[axis] = defaultAxisValue
-			else
-				vec[axis] = self.transform[property][axis] or defaultAxisValue
-			end
-		end
-
-		self.transform[property] = geometry.Vector3(vec)
-	end
-
-	--initialize rotation
-	self.transform.rotation = self.transform.rotation or 0
 
 	self.children = {}
 
@@ -345,7 +325,7 @@ local function buildObjectTree(scene, object)
 	--create and add components
 	for i, comp in ipairs(object.components) do
 		local componentClass = require(comp.script)
-		gameObject:addComponent(componentClass(comp.properties))
+		gameObject:addComponent(componentClass(comp.arguments))
 	end
 
 	--build children
