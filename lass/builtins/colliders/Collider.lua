@@ -4,22 +4,18 @@ local geometry = require("lass.geometry")
 
 --[[
 Collider - base class for all collider components
-do not use this as a component directly! (unless you can think of a good reason)
+do not use this as a component directly! (unless you can think of a good reason to)
 ]]
 
 local Collider = class.define(lass.Component, function(self, properties)
-	-- assert(class.instanceof(properties.shape, geometry.Shape), "shape must be geometry.Shape")
+	assert(class.instanceof(properties.shape, geometry.Shape), "shape must be geometry.Shape")
 
-	for k,v in pairs(self.base) do
-		print(k,v)
-	end
-	print("=====", self.base == lass.Component)
 	self.base.init(self, properties)
 end)
 
 function Collider:isCollidingWith(other)
 
-	local otherType = class.instanceof(Collider, geometry.Shape, geometry.Vector2)
+	local otherType = class.instanceof(other, Collider, geometry.Shape, geometry.Vector2)
 	assert(otherType, "other must be a Collider, Shape, or Vector2")
 	if otherType == Collider then
 		return geometry.intersecting(

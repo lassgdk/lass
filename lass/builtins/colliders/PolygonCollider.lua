@@ -17,6 +17,8 @@ local PolygonCollider = class.define(Collider, function(self, properties)
 		properties.shape = geometry.Polygon({})
 	end
 
+	properties.vertices = nil
+
 	self.base.init(self, properties)
 end)
 
@@ -27,7 +29,7 @@ function PolygonCollider:update(dt, firstUpdate)
 	end
 
 	if self._verticesSource then
-		self.shape = geometry.Polygon(self._verticesSource.shape)
+		self.shape = geometry.Polygon(self._verticesSource.shape.vertices)
 	end
 end
 
@@ -39,13 +41,5 @@ function PolygonCollider:setVerticesSource(source)
 	end
 
 end
-
--- function PolygonCollider:isCollidingWith(other)
--- 	-- for i, v in ipairs(self.shape.vertices) do
--- 	-- 	print(i,v)
--- 	-- end
--- 	-- print(class.instanceof(self.shape, geometry.Polygon))-- == geometry.Polygon)
--- 	return geometry.intersecting(self.shape, other, self.gameObject.globalTransform)
--- end
 
 return PolygonCollider

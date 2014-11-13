@@ -14,7 +14,6 @@ local Component = class.define(function(self, properties)
 
 	self.gameObject = nil
 	for k, v in pairs(properties) do
-		print(k,v)
 		self[k] = v
 	end
 end)

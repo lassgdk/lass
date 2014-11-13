@@ -13,8 +13,8 @@ properties:
 
 local PolygonRenderer = class.define(lass.Component, function(self, properties)
 
-	properties.polygon = geometry.Polygon(properties.vertices)
-	properties.vertices = properties.polygon.vertices
+	properties.shape = geometry.Polygon(properties.vertices)
+	properties.vertices = nil
 
 	properties.mode = properties.mode or "fill"
 	properties.color = properties.color or {0,0,0}
@@ -29,8 +29,8 @@ function PolygonRenderer:awake()
 end
 
 function PolygonRenderer:update(dt)
-	self.vertices = self.polygon.vertices
-	self.globalVertices = self.polygon:globalVertices(self.gameObject.globalTransform)
+	-- self.vertices = self.polygon.vertices
+	-- self.globalVertices = self.polygon:globalVertices(self.gameObject.globalTransform)
 end
 
 local function verticesToFlatArray(vertices)
@@ -51,7 +51,7 @@ function PolygonRenderer:draw()
 	--angle in radians (negated for clockwise)
 	local angle = (transform.rotation/180) * math.pi
 
-	for i, vertex in ipairs(self.globalVertices) do
+	for i, vertex in ipairs(self.shape:globalVertices(transform)) do
 		vertex = geometry.Vector2(vertex) --we don't want to mutate the original vertex
 		if self.gameObject.gameScene.settings.graphics.invertYAxis then
 			vertex.y = -vertex.y
