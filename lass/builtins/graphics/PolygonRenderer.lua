@@ -26,6 +26,14 @@ local PolygonRenderer = class.define(lass.Component, function(self, arguments)
 end)
 
 function PolygonRenderer:awake()
+	-- print("COLORS")
+	-- for i,v in ipairs(self.color) do
+	-- 	print("color", i, v)
+	-- end
+	-- print("VERTICES")
+	-- for i,v in ipairs(self.shape.vertices) do
+	-- 	print("vertex", i, v)
+	-- end
 end
 
 function PolygonRenderer:update(dt)

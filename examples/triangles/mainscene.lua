@@ -10,6 +10,7 @@ return {settings = {
 }, gameObjects = {
   {
     name = "Triangle",
+    prefab = "triangleprefab",
     transform = {
       position = {
         x = 200,
@@ -18,31 +19,10 @@ return {settings = {
       },
       rotation = 0,
     },
-    components = {
-      {
-        script = "lass.builtins.graphics.PolygonRenderer",
-        arguments = {
-          color = {0, 0, 80},
-          vertices = {-100, -50, 100, -50, 0, 50}
-        }
-      },
-      {
-        script = "lass.builtins.colliders.PolygonCollider",
-        arguments = {
-          verticesSource = "lass.builtins.graphics.PolygonRenderer"
-        }
-      },
-      {
-        script = "PlayerInput",
-        arguments = {
-          rotationSpeed = 1,
-          speedMode = "perFrame"
-        }
-      }
-    },
     children = {
       {
         name = "Satellite",
+        prefab = "triangleprefab",
         transform = {
           position = {
             x = 200,
@@ -54,28 +34,34 @@ return {settings = {
             y = .9,
           }
         },
-        components = {
-          {
-            script = "lass.builtins.graphics.PolygonRenderer",
-            arguments = {
-              color = {200, 0, 80},
-              vertices = {-100, -50, 100, -50, 0, 50}
-            }
-          },
-          {
-            script = "lass.builtins.colliders.PolygonCollider",
-            arguments = {
-              verticesSource = "lass.builtins.graphics.PolygonRenderer"
-            }
-          },
-          {
-            script = "PlayerInput",
-            arguments = {
-              rotationSpeed = 1,
-              speedMode = "perFrame"
-            }
+        prefabComponents = {
+          script = "lass.builtins.graphics.PolygonRenderer",
+          arguments = {
+            color = {200, 0, 80}
           }
         },
+        -- components = {
+        --   {
+        --     script = "lass.builtins.graphics.PolygonRenderer",
+        --     arguments = {
+        --       color = {200, 0, 80},
+        --       vertices = {-100, -50, 100, -50, 0, 50}
+        --     }
+        --   },
+        --   {
+        --     script = "lass.builtins.colliders.PolygonCollider",
+        --     arguments = {
+        --       verticesSource = "lass.builtins.graphics.PolygonRenderer"
+        --     }
+        --   },
+        --   {
+        --     script = "PlayerInput",
+        --     arguments = {
+        --       rotationSpeed = 1,
+        --       speedMode = "perFrame"
+        --     }
+        --   }
+        -- },
         children = {
           {
             name = "SubSatellite",

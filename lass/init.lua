@@ -3,7 +3,7 @@
 -- decky coss (cosstropolis.com)
 
 local class = require("lass.class")
-local utils = require("lass.utils")
+local collections = require("lass.collections")
 local geometry = require("lass.geometry")
 
 --[[
@@ -37,7 +37,7 @@ function maintainTransform(self)
 	--clamp rotation between 0 and 360 degrees (e.g., -290 => 70)
 	self.transform.rotation = self.transform.rotation % 360
 
-	if self.parent and self.parent ~= {} then
+	if self.parent and next(self.parent) ~= nil then
 		local p = self.parent.globalTransform
 		local t = self.transform
 
@@ -99,7 +99,7 @@ end
 
 function GameEntity:removeChild(child)
 
-	local index = utils.indexof(self.children, child)
+	local index = collections.index(self.children, child)
 	if index then
 		table.remove(self.children, index)
 	end
@@ -317,15 +317,86 @@ GameScene
 
 --[[internal]]
 
+local function mergeComponentLists(prefabComponents, overrides)
+
+	assert(prefabComponents, "prefabComponents must be list")
+
+	local components = collections.deepcopy(prefabComponents)
+
+	print(#components)
+
+	if not overrides then
+		return components
+	end
+
+	for k,v in ipairs(overrides) do
+		print(v.script)
+		for _k, _v in pairs(v.arguments) do
+			if type(_v) == "table" then
+				for __k, __v in pairs(_v) do
+					print (_k, __k, __v)
+				end
+			else
+				print(_k, _v)
+			end
+		end
+	end
+
+	local found = {}
+
+	for i, comp in ipairs(overrides) do
+		local orig = nil
+
+		if not found[comp.script] then
+			found[comp.script] = collections.indices(components, comp.script, function(x)
+				return x.script
+			end)
+		--if we found an override for a component that doesn't exist in the original
+		elseif next(found[comp.script]) == nil then
+			error("component not found in original prefab")
+		end
+
+		orig = components[table.remove(found[comp.script], 1)]
+
+		--override settings of the first instance of this component
+		for argkey, argvalue in pairs(comp.arguments) do
+			orig[argkey] = argvalue
+		end
+	end
+	return components
+end
+
 local function buildObjectTree(scene, object)
+	--build a game object and its children
 
 	--create gameObject and add it to scene
 	local gameObject = GameObject(scene, object.name, object.transform)
 
+
+	if object.prefab and object.prefab ~= "" then
+		local pf = require(object.prefab)
+		print(gameObject.name)
+
+		for i, comp in ipairs(mergeComponentLists(pf.components, object.prefabComponents)) do
+
+			-- --debug
+			-- for k,v in pairs(comp.arguments) do
+			-- 	print(comp.script, k, v)
+			-- 	if type(v) == "table" then for _k, _v in pairs(v) do
+			-- 		print(_k, _v)
+			-- 	end end
+			-- end
+
+			gameObject:addComponent(require(comp.script)(comp.arguments))
+		end
+	end
+
 	--create and add components
-	for i, comp in ipairs(object.components) do
-		local componentClass = require(comp.script)
-		gameObject:addComponent(componentClass(comp.arguments))
+	if object.components then
+		for i, comp in ipairs(object.components) do
+			local componentClass = require(comp.script)
+			gameObject:addComponent(componentClass(comp.arguments))
+		end
 	end
 
 	--build children
@@ -413,7 +484,7 @@ end
 
 function GameScene:removeGameObject(gameObject)
 
-	local index = utils.indexof(self.gameObjects, gameObject)
+	local index = collections.index(self.gameObjects, gameObject)
 	if index then
 		table.remove(self.gameObjects, index)
 	end

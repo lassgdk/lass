@@ -24,7 +24,7 @@ local PlayerInput = class.define(lass.Component, function(self, arguments)
 
 	--hidden variables
 	self.rotationDirection = 0
-
+	print("hey", self.rotationDirection)
 end)
 
 function PlayerInput:awake()
