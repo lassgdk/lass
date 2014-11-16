@@ -14,8 +14,12 @@ return {settings = {
     transform = {
       position = {
         x = 200,
-        y = -200,
+        y = -300,
         z = 1
+      },
+      size = {
+        x = .8,
+        y = .8
       },
       rotation = 0,
     },
@@ -26,60 +30,63 @@ return {settings = {
         transform = {
           position = {
             x = 200,
-            y = 10,
             z = 1
           },
-          size = {
-            x = .9,
-            y = .9,
-          }
+          -- size = {
+          --   x = .9,
+          --   y = .9,
+          -- }
         },
         prefabComponents = {
-          script = "lass.builtins.graphics.PolygonRenderer",
-          arguments = {
-            color = {200, 0, 80}
+          {
+            script = "lass.builtins.graphics.PolygonRenderer",
+            arguments = {
+              color = {200, 0, 80}
+            }
           }
         },
-        -- components = {
-        --   {
-        --     script = "lass.builtins.graphics.PolygonRenderer",
-        --     arguments = {
-        --       color = {200, 0, 80},
-        --       vertices = {-100, -50, 100, -50, 0, 50}
-        --     }
-        --   },
-        --   {
-        --     script = "lass.builtins.colliders.PolygonCollider",
-        --     arguments = {
-        --       verticesSource = "lass.builtins.graphics.PolygonRenderer"
-        --     }
-        --   },
-        --   {
-        --     script = "PlayerInput",
-        --     arguments = {
-        --       rotationSpeed = 1,
-        --       speedMode = "perFrame"
-        --     }
-        --   }
-        -- },
         children = {
           {
             name = "SubSatellite",
+            prefab = "triangleprefab",
             transform = {
               position = {
                 x = 200,
                 y = 0,
                 z = 1
-              }
+              },
+              -- size = {
+              --   x = .8
+              -- }
             },
-            components = {
+            prefabComponents = {
               {
                 script = "lass.builtins.graphics.PolygonRenderer",
                 arguments = {
-                  color = {200, 0, 80},
-                  vertices = {-100, -50, 100, -50, 0, 50}
+                  color = {100, 200, 80}
                 }
-              },
+              }
+            },
+            children = {
+              {
+                name = "SubSubSatellite",
+                prefab = "triangleprefab",
+                transform = {
+                  position = {
+                    x = 200,
+                    y = 0,
+                    z = 1
+                  }
+                },
+                prefabComponents = {
+                  {
+                    script = "lass.builtins.graphics.PolygonRenderer",
+                    arguments = {
+                      color = {200, 0, 80}
+                    }
+                  }
+                },
+              }
             }
           }
         }

@@ -323,12 +323,13 @@ local function mergeComponentLists(prefabComponents, overrides)
 
 	local components = collections.deepcopy(prefabComponents)
 
-	print(#components)
-
 	if not overrides then
 		return components
 	end
 
+	local overrides = collections.deepcopy(overrides)
+
+	print(#overrides)
 	for k,v in ipairs(overrides) do
 		print(v.script)
 		for _k, _v in pairs(v.arguments) do
@@ -358,9 +359,14 @@ local function mergeComponentLists(prefabComponents, overrides)
 
 		orig = components[table.remove(found[comp.script], 1)]
 
+		print(i)
+		print(orig)
+
 		--override settings of the first instance of this component
 		for argkey, argvalue in pairs(comp.arguments) do
-			orig[argkey] = argvalue
+
+			print(argkey, argvalue)
+			orig.arguments[argkey] = argvalue
 		end
 	end
 	return components
@@ -375,7 +381,7 @@ local function buildObjectTree(scene, object)
 
 	if object.prefab and object.prefab ~= "" then
 		local pf = require(object.prefab)
-		print(gameObject.name)
+		print(gameObject.name, object.prefabComponents)
 
 		for i, comp in ipairs(mergeComponentLists(pf.components, object.prefabComponents)) do
 
