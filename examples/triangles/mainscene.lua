@@ -18,7 +18,7 @@ return {settings = {
         z = 1
       },
       size = {
-        x = .8,
+        x = 1.8,
         y = .8
       },
       rotation = 0,

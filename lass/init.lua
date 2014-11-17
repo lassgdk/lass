@@ -42,7 +42,7 @@ function maintainTransform(self)
 		local t = self.transform
 
 		self.globalTransform = geometry.Transform({
-			position = p.position + t.position:rotate(p.rotation),
+			position = p.position, 
 			size = geometry.Vector3({
 				x = t.size.x * p.size.x,
 				y = t.size.y * p.size.y,
@@ -50,6 +50,12 @@ function maintainTransform(self)
 			}),
 			rotation = t.rotation + p.rotation
 		})
+
+		self.globalTransform.position = self.globalTransform.position + geometry.Vector3({
+			x = t.position.x * p.size.x,
+			y = t.position.y * p.size.y,
+			z = t.position.y * p.size.y
+		}):rotate(p.rotation)
 	else
 		self.globalTransform = self.transform
 	end
