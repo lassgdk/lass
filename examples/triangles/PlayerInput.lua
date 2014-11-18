@@ -18,6 +18,7 @@ local PlayerInput = class.define(lass.Component, function(self, arguments)
 	else
 		arguments.speedmode = "perFrame"
 	end
+	arguments.resizeAmount = arguments.resizeAmount or 0
 
 	--call super constructor
 	self.base.init(self, arguments)
@@ -31,8 +32,8 @@ end
 
 function PlayerInput:update(dt, firstUpdate)
 
-	-- if firstUpdate and self.gameObject.name == "Satellite" then
-	-- 	print(self.gameObject.transform.position, self.gameObject.globalTransform.position)
+	-- if firstUpdate then
+	-- 	print(self.gameObject.name, self.gameObject.transform.position, self.gameObject.globalTransform.position)
 	-- end
 
 	if self.speedMode == "perFrame" then dt = 1 end
@@ -47,8 +48,15 @@ end
 
 function PlayerInput:mousepressed(x, y, button)
 
+	if button ~= "l" and button ~= "r" then
+		if button == "wu" and self.resizeAmount and self.resizeAmount ~= 0 then
+			self.gameObject:resize(self.resizeAmount, self.resizeAmount, 0)
+		elseif button == "wd" and self.resizeAmount and self.resizeAmount ~= 0 then
+			self.gameObject:resize(-self.resizeAmount, -self.resizeAmount, 0)
+		end
+	end
+
 	local collider = self.gameObject:getComponent(PolygonCollider)
-	-- local renderer = moduleSelf.gameObject:getComponent(PolygonRenderer)
 
 	if collider:isCollidingWith(geometry.Vector2(x,-y)) then
 

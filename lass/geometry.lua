@@ -98,7 +98,7 @@ function Vector2:rotate(angle, useRadians)
 	--in your scene settings to make the rotation appear clockwise.
 
 	if not useRadians then
-		angle = -(angle/180) * math.pi
+		angle = (angle/180) * math.pi
 	end
 
 	return Vector2({
@@ -661,6 +661,14 @@ local function intersecting(fig1, fig2, transform1, transform2, ignoreRotation1,
 	end
 end
 
+--[[
+other stuff
+]]
+
+function degreesToRadians(degrees)
+	return (degrees/180) * math.pi
+end
+
 return {
 	Transform = Transform,
 	Vector2 = Vector2,
@@ -669,5 +677,6 @@ return {
 	Polygon = Polygon,
 	Circle = Circle,
 	Rectangle = Rectangle,
-	intersecting = intersecting
+	intersecting = intersecting,
+	degreesToRadians = degreesToRadians
 }

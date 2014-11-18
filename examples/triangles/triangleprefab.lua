@@ -12,7 +12,7 @@ return {
     {
       script = "lass.builtins.graphics.PolygonRenderer",
       arguments = {
-        color = {0, 0, 80},
+        color = {6, 94, 206},
         vertices = {-100, -50, 100, -50, 0, 50}
       }
     },

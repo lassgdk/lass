@@ -37,28 +37,33 @@ function maintainTransform(self)
 	--clamp rotation between 0 and 360 degrees (e.g., -290 => 70)
 	self.transform.rotation = self.transform.rotation % 360
 
+	local t = self.transform
+	local p = nil
+
 	if self.parent and next(self.parent) ~= nil then
-		local p = self.parent.globalTransform
-		local t = self.transform
-
-		self.globalTransform = geometry.Transform({
-			position = p.position, 
-			size = geometry.Vector3({
-				x = t.size.x * p.size.x,
-				y = t.size.y * p.size.y,
-				z = t.size.z * p.size.z,
-			}),
-			rotation = t.rotation + p.rotation
-		})
-
-		self.globalTransform.position = self.globalTransform.position + geometry.Vector3({
-			x = t.position.x * p.size.x,
-			y = t.position.y * p.size.y,
-			z = t.position.y * p.size.y
-		}):rotate(p.rotation)
+		p = self.parent.globalTransform
+	elseif self.gameScene and next(self.gameScene) ~= nil then
+		p = self.gameScene.transform
 	else
 		self.globalTransform = self.transform
+		return
 	end
+
+	self.globalTransform = geometry.Transform({
+		position = p.position, 
+		size = geometry.Vector3({
+			x = t.size.x * p.size.x,
+			y = t.size.y * p.size.y,
+			z = t.size.z * p.size.z,
+		}),
+		rotation = t.rotation + p.rotation
+	})
+
+	self.globalTransform.position = self.globalTransform.position + geometry.Vector3({
+		x = t.position.x * p.size.x,
+		y = t.position.y * p.size.y,
+		z = t.position.z * p.size.z
+	}):rotate(p.rotation)
 end
 
 --[[public]]
@@ -152,7 +157,7 @@ for i, f in ipairs({
 	"mousepressed",
 	"mousereleased",
 	"quit",
-	"resize",
+	"windowresize",
 	"textinput",
 	"threaderror",
 	"visible"
@@ -302,7 +307,7 @@ for i, f in ipairs({
 	"mousepressed",
 	"mousereleased",
 	"quit",
-	"resize",
+	"windowresize",
 	"textinput",
 	"threaderror",
 	"visible"
@@ -335,20 +340,6 @@ local function mergeComponentLists(prefabComponents, overrides)
 
 	local overrides = collections.deepcopy(overrides)
 
-	print(#overrides)
-	for k,v in ipairs(overrides) do
-		print(v.script)
-		for _k, _v in pairs(v.arguments) do
-			if type(_v) == "table" then
-				for __k, __v in pairs(_v) do
-					print (_k, __k, __v)
-				end
-			else
-				print(_k, _v)
-			end
-		end
-	end
-
 	local found = {}
 
 	for i, comp in ipairs(overrides) do
@@ -365,13 +356,9 @@ local function mergeComponentLists(prefabComponents, overrides)
 
 		orig = components[table.remove(found[comp.script], 1)]
 
-		print(i)
-		print(orig)
-
 		--override settings of the first instance of this component
 		for argkey, argvalue in pairs(comp.arguments) do
 
-			print(argkey, argvalue)
 			orig.arguments[argkey] = argvalue
 		end
 	end
@@ -384,21 +371,10 @@ local function buildObjectTree(scene, object)
 	--create gameObject and add it to scene
 	local gameObject = GameObject(scene, object.name, object.transform)
 
-
 	if object.prefab and object.prefab ~= "" then
 		local pf = require(object.prefab)
-		print(gameObject.name, object.prefabComponents)
 
 		for i, comp in ipairs(mergeComponentLists(pf.components, object.prefabComponents)) do
-
-			-- --debug
-			-- for k,v in pairs(comp.arguments) do
-			-- 	print(comp.script, k, v)
-			-- 	if type(v) == "table" then for _k, _v in pairs(v) do
-			-- 		print(_k, _v)
-			-- 	end end
-			-- end
-
 			gameObject:addComponent(require(comp.script)(comp.arguments))
 		end
 	end
@@ -521,10 +497,11 @@ function GameScene:draw()
 	local drawables = {}
 	local indices = {}
 
-	--collect all drawable objects into buckets
+	--collect all drawable objects into buckets -- each bucket maps to a different z-value
 	for i, object in ipairs(self.gameObjects) do
 		if object:isDrawable() then
 			local bucket = drawables[object.globalTransform.position.z]
+			-- print(object.globalTransform.position.z)
 			if bucket then
 				bucket[#bucket+1] = object
 			else
@@ -533,15 +510,18 @@ function GameScene:draw()
 		end
 	end
 
-	--sort the z indices in reverse order (so highest are drawn first)
+	--sort the z-values (indices) in reverse order (so highest are drawn first)
 	for index in pairs(drawables) do
 		indices[#indices+1] = index
 	end
 	table.sort(indices, function(a,b) return a > b end)
 
 	--draw
-	for i, index in pairs(indices) do
+	-- print("===========")
+	for i, index in ipairs(indices) do
+		-- print(i, index)
 		for j, drawable in pairs(drawables[index]) do
+			-- print(j, drawable.name)
 			drawable:draw()
 		end
 	end
