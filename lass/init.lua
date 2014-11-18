@@ -517,11 +517,8 @@ function GameScene:draw()
 	table.sort(indices, function(a,b) return a > b end)
 
 	--draw
-	-- print("===========")
 	for i, index in ipairs(indices) do
-		-- print(i, index)
 		for j, drawable in pairs(drawables[index]) do
-			-- print(j, drawable.name)
 			drawable:draw()
 		end
 	end

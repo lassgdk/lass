@@ -97,6 +97,7 @@ function Vector2:rotate(angle, useRadians)
 	--"reversed" - y values are highest at the bottom of the screen. set invertYAxis to true
 	--in your scene settings to make the rotation appear clockwise.
 
+	angle = -angle
 	if not useRadians then
 		angle = (angle/180) * math.pi
 	end
@@ -661,14 +662,6 @@ local function intersecting(fig1, fig2, transform1, transform2, ignoreRotation1,
 	end
 end
 
---[[
-other stuff
-]]
-
-function degreesToRadians(degrees)
-	return (degrees/180) * math.pi
-end
-
 return {
 	Transform = Transform,
 	Vector2 = Vector2,
@@ -678,5 +671,5 @@ return {
 	Circle = Circle,
 	Rectangle = Rectangle,
 	intersecting = intersecting,
-	degreesToRadians = degreesToRadians
+	degreesToRadians = function(d) return (d/180) * math.pi end
 }

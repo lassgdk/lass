@@ -40,6 +40,7 @@ return {settings = {
             x = 210,
             z = 1
           },
+          size = {x=.9, y=.9}
         },
         prefabComponents = {
           {
@@ -59,9 +60,7 @@ return {settings = {
                 y = 0,
                 z = 1
               },
-              -- size = {
-              --   x = .8
-              -- }
+              size = {x=.9, y=.9}
             },
             prefabComponents = {
               {
@@ -80,7 +79,8 @@ return {settings = {
                     x = 210,
                     y = 0,
                     z = 1
-                  }
+                  },
+                  size = {x=.9, y=.9}
                 },
                 prefabComponents = {
                   {

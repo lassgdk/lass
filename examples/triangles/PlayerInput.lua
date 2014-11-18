@@ -54,6 +54,7 @@ function PlayerInput:mousepressed(x, y, button)
 		elseif button == "wd" and self.resizeAmount and self.resizeAmount ~= 0 then
 			self.gameObject:resize(-self.resizeAmount, -self.resizeAmount, 0)
 		end
+		return
 	end
 
 	local collider = self.gameObject:getComponent(PolygonCollider)
