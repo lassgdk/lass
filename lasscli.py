@@ -32,8 +32,10 @@ def buildexe(loveFileName, exeFolderName=None, exeFileName=None, dest="."):
 		os.rmdir(os.path.join(dest, exeFolderName))
 
 	shutil.copytree(DIR_BIN_WINDOWS, os.path.join(dest, exeFolderName))
+	#rename love.exe
 	os.rename(os.path.join(dest, "love.exe"), os.path.join(dest, exeFileName))
 
+	#append love file to renamed love.exe
 	with open(os.path.join(dest, exeFileName), "ab") as exeFile, open(loveFileName, "b") as loveFile:
 		exeFile.write(loveFile.read())
 
@@ -68,8 +70,8 @@ def buildgame(sendToTemp=False):
 
 		#add lass library
 		os.chdir(DIR_LASS)
-		for i, wtup in enumerate(os.walk(DIR_LASS)):
-			for j, f in wtup[2]:
+		for i, wtup in enumerate(os.walk(".")):
+			for j, f in enumerate(wtup[2]):
 				fullName = os.path.join(wtup[0], f)
 				loveFile.write(fullName, os.path.join("lass", fullName))
 

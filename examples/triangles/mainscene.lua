@@ -108,10 +108,11 @@ return {settings = {
     },
     components = {
       {
-        script = "SceneManager",
+        script = "lass.builtins.graphics.TextRenderer",
         arguments = {
-          zoomAmount = .1,
-          message = "click on a triangle to start/stop rotation\n(left button CCW, right button CW)\nzoom in and out with scrollwheel"
+          color = {240,240,240},
+          shearFactor = {x=0,y=.3},
+          text = "click on a triangle to start/stop rotation\n(left button CCW, right button CW)\nzoom in and out with scrollwheel"
         }
       }
     }
