@@ -111,7 +111,6 @@ return {settings = {
         script = "lass.builtins.graphics.TextRenderer",
         arguments = {
           color = {240,240,240},
-          shearFactor = {x=0,y=.3},
           text = "click on a triangle to start/stop rotation\n(left button CCW, right button CW)\nzoom in and out with scrollwheel"
         }
       }

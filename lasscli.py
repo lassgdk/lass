@@ -19,9 +19,9 @@ def getLoveEngineCommand():
 def buildapp(loveFileName, dest="."):
 	pass
 
-def buildexe(loveFileName, exeFolderName=None, exeFileName=None, dest="."):
+def buildexe(loveFileNameFull, exeFolderName=None, exeFileName=None, dest="."):
 
-	gameName = ".".join(loveFileName.split(".")[:-1])
+	gameName = ".".join(os.path.basename(loveFileNameFull).split(".")[:-1])
 
 	if not exeFileName:
 		exeFileName = gameName + ".exe"
@@ -29,15 +29,24 @@ def buildexe(loveFileName, exeFolderName=None, exeFileName=None, dest="."):
 		exeFolderName = gameName
 
 	if exeFolderName in os.listdir(dest):
-		os.rmdir(os.path.join(dest, exeFolderName))
+		shutil.rmtree(os.path.join(dest, exeFolderName))
 
 	shutil.copytree(DIR_BIN_WINDOWS, os.path.join(dest, exeFolderName))
+
+	exeFileNameFull = os.path.join(dest, exeFolderName, exeFileName)
+	# loveFileNameFull = os.path.join(dest, exeFolderName, exeFileName)
 	#rename love.exe
-	os.rename(os.path.join(dest, "love.exe"), os.path.join(dest, exeFileName))
+	os.rename(os.path.join(dest, exeFolderName, "love.exe"), exeFileNameFull)
+
+	# raw_input("breakpoint")
 
 	#append love file to renamed love.exe
-	with open(os.path.join(dest, exeFileName), "ab") as exeFile, open(loveFileName, "b") as loveFile:
-		exeFile.write(loveFile.read())
+	with open(exeFileNameFull, "ab") as exeFile, open(loveFileNameFull, "rb") as loveFile:
+	# print(os.path.abspath(loveFileNameFull))
+	# with open("triangles.love", "wb") as exeFile, open(loveFileNameFull, "rb") as loveFile:
+		bytes = loveFile.read()
+		# print(bytes)
+		exeFile.write(bytes)
 
 def buildgame(sendToTemp=False):
 
@@ -58,10 +67,10 @@ def buildgame(sendToTemp=False):
 		return 
 
 	projFiles = os.listdir(projPath)
-	loveFileName = os.path.join(buildPath, projName + ".love")
+	loveFileName = projName + ".love"
 	origDir = os.getcwd()
 
-	with zipfile.ZipFile(loveFileName, mode='w') as loveFile:
+	with zipfile.ZipFile(os.path.join(buildPath, loveFileName), mode='w') as loveFile:
 
 		#add project files
 		for f in projFiles:
@@ -77,7 +86,10 @@ def buildgame(sendToTemp=False):
 
 	os.chdir(origDir)
 
-	return os.path.abspath(loveFileName)
+	if not sendToTemp:
+		buildexe(os.path.join(buildPath, loveFileName), dest=buildPath)
+
+	return os.path.abspath(os.path.join(buildPath, loveFileName))
 
 def newgame():
 	pass

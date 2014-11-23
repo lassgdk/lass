@@ -271,6 +271,7 @@ function GameObject:addComponent(component)
 	end
 
 	component.gameObject = self
+	component.gameScene = self.gameScene
 
 	component:awake()
 end
@@ -440,13 +441,15 @@ function GameScene:load(src)
 	self:init()
 	self.source = source
 
+	--scene settings
+	self.settings = createSettingsTable(src.settings)
+	self:applySettings()
+
 	--build game objects
 	for i, object in ipairs(src.gameObjects) do
 		buildObjectTree(self, object)
 	end
 
-	self.settings = createSettingsTable(src.settings)
-	self:applySettings()
 end
 
 function GameScene:applySettings()
