@@ -111,6 +111,8 @@ return {settings = {
         script = "lass.builtins.graphics.TextRenderer",
         arguments = {
           color = {240,240,240},
+          boxWidth = 940,
+          align = "right",
           text = "click on a triangle to start/stop rotation\n(left button CCW, right button CW)\nzoom in and out with scrollwheel"
         }
       }

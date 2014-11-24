@@ -23,17 +23,17 @@ function TextRenderer:draw()
 
 	local gt = self.gameObject.globalTransform
 	local r = geometry.degreesToRadians(gt.rotation)
-	local yAxisSign = 1
+	local ySign = 1
 
 	if self.gameScene.settings.graphics.invertYAxis then
-		yAxisSign = -1
+		ySign = -1
 	end
 
 	love.graphics.setFont(self.font)
 	love.graphics.setColor(self.color)
 	love.graphics.printf(
-		self.text, gt.position.x, gt.position.y * yAxisSign, self.boxWidth, self.align, r,
-		gt.size.x, gt.size.y, self.offset.x, self.offset.y, self.shearFactor.x, self.shearFactor.y
+		self.text, gt.position.x, gt.position.y * ySign, self.boxWidth, self.align, r,
+		gt.size.x, gt.size.y, self.offset.x, self.offset.y * ySign, self.shearFactor.x, self.shearFactor.y
 	)
 end
 

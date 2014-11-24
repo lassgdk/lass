@@ -16,7 +16,7 @@ def getLoveEngineCommand():
 	if sys.platform.startswith("linux"):
 		return "love %s"
 
-def buildapp(loveFileName, dest="."):
+def buildapp(loveFileName, appFolderName=None, dest="."):
 	pass
 
 def buildexe(loveFileNameFull, exeFolderName=None, exeFileName=None, dest="."):
