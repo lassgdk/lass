@@ -1,4 +1,8 @@
-ignore
+dist
+*.egg-info
 build
+record.txt
+
+ignore
 update.sh
 *.sublime-*

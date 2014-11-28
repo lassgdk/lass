@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 from __future__ import print_function
 import os, sys, shutil, zipfile, argparse
 try:
@@ -5,12 +7,14 @@ try:
 except:
 	import configparser
 
-DIR_PROJECTS = "examples"
-DIR_LASS = os.path.join("lib", "lass")
-DIR_BUILD = "build"
-DIR_TEMP = "tmp"
-DIR_BIN_WINDOWS = os.path.join("bin", "love", "windows")
-DIR_BIN_OSX = os.path.join("bin", "love", "osx")
+# DIR_PROJECTS = "examples"
+# DIR_LASS = os.path.join("lib", "lass")
+# DIR_BUILD = "build"
+# DIR_TEMP = "tmp"
+# DIR_BIN_WINDOWS = os.path.join("bin", "love", "windows")
+# DIR_BIN_OSX = os.path.join("bin", "love", "osx")
+
+DIR_LASS = os.path.join()
 
 def getLoveEngineCommand():
 	if sys.platform.startswith("linux"):
