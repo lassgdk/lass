@@ -3,21 +3,50 @@
 from __future__ import print_function
 import os, sys, shutil, zipfile, argparse
 try:
-	import ConfigParser
+	import ConfigParser as configparser
 except:
 	import configparser
 
-# DIR_PROJECTS = "examples"
-# DIR_LASS = os.path.join("lib", "lass")
-# DIR_BUILD = "build"
-# DIR_TEMP = "tmp"
-# DIR_BIN_WINDOWS = os.path.join("bin", "love", "windows")
-# DIR_BIN_OSX = os.path.join("bin", "love", "osx")
+#load config file
 
-DIR_LASS = os.path.join()
+try:
+	XDG_CONFIG_HOME = os.environ["XDG_CONFIG_HOME"]
+except KeyError:
+	XDG_CONFIG_HOME = os.path.join(os.environ["HOME"], ".config")
+DIR_LASS_CONF = os.path.join(XDG_CONFIG_HOME, "Lass")
+
+cparser = configparser.ConfigParser({
+	"DIR_LASS_DATA":"$XDG_DATA_HOME/Lass",
+	"FB_DIR_LASS_DATA":"$HOME/.local/share/Lass",
+	"DIR_PROJECTS":"$HOME/Documents/Lass"
+})
+if not cparser.read(os.path.join(DIR_LASS_CONF, "lassconf.ini")):
+	raise IOError(os.path.join(DIR_LASS_CONF, "lassconf.ini") + " could not be loaded")
+
+#set global variables from config file
+
+try:
+	DIR_LASS_DATA = os.path.expandvars(cparser.get("path", "DIR_LASS_DATA"))
+	os.listdir(DIR_LASS_DATA)
+except OSError:
+	DIR_LASS_DATA = os.path.expandvars(cparser.get("path", "FB_DIR_LASS_DATA"))
+try:
+	DIR_LASS_LIB = os.path.join(sys.prefix, "local", "share", "lua", "5.1", "lass")
+	os.listdir(DIR_LASS_LIB)
+except OSError:
+	DIR_LASS_LIB = os.path.join(DIR_LASS_DATA, "lua", "5.1", "lass")
+
+DIR_PROJECTS = os.path.expandvars(cparser.get("path", "DIR_PROJECTS"))
+DIR_ENGINE_WINDOWS = os.path.join(DIR_LASS_DATA, "engine", "windows")
+DIR_ENGINE_OSX = os.path.join(DIR_LASS_DATA, "engine", "osx")
+DIR_TEMP = "/tmp"
 
 def getLoveEngineCommand():
-	if sys.platform.startswith("linux"):
+	if sys.platform.startswith("win32"):
+		return os.path.join(DIR_ENGINE_WINDOWS, "love.exe") + " %s"
+	elif sys.platform.startswith("darwin"):
+		return "open %s -a " + os.path.join(DIR_ENGINE_OSX, "love.app")
+	else:
 		return "love %s"
 
 def buildapp(loveFileName, appFolderName=None, dest="."):
@@ -35,7 +64,7 @@ def buildexe(loveFileNameFull, exeFolderName=None, exeFileName=None, dest="."):
 	if exeFolderName in os.listdir(dest):
 		shutil.rmtree(os.path.join(dest, exeFolderName))
 
-	shutil.copytree(DIR_BIN_WINDOWS, os.path.join(dest, exeFolderName))
+	shutil.copytree(DIR_ENGINE_WINDOWS, os.path.join(dest, exeFolderName))
 
 	exeFileNameFull = os.path.join(dest, exeFolderName, exeFileName)
 	# loveFileNameFull = os.path.join(dest, exeFolderName, exeFileName)
@@ -47,9 +76,7 @@ def buildexe(loveFileNameFull, exeFolderName=None, exeFileName=None, dest="."):
 	#append love file to renamed love.exe
 	with open(exeFileNameFull, "ab") as exeFile, open(loveFileNameFull, "rb") as loveFile:
 	# print(os.path.abspath(loveFileNameFull))
-	# with open("triangles.love", "wb") as exeFile, open(loveFileNameFull, "rb") as loveFile:
 		bytes = loveFile.read()
-		# print(bytes)
 		exeFile.write(bytes)
 
 def buildgame(sendToTemp=False):
@@ -59,12 +86,12 @@ def buildgame(sendToTemp=False):
 	if sendToTemp:
 		buildPath = DIR_TEMP
 	else:
-		buildPath = os.path.join(projPath, DIR_BUILD)
+		buildPath = os.path.join(projPath, "build")
 
 	try:
-		if not sendToTemp and not DIR_BUILD in os.listdir(projPath):
+		if not sendToTemp and not "build" in os.listdir(projPath):
 			os.mkdir(buildPath)
-		elif sendToTemp and not DIR_TEMP in os.listdir("."):
+		elif sendToTemp and not DIR_TEMP:
 			os.mkdir(buildPath)
 	except OSError as e:
 		print(e)
@@ -82,7 +109,7 @@ def buildgame(sendToTemp=False):
 				loveFile.write(os.path.join(projPath, f), f)
 
 		#add lass library
-		os.chdir(DIR_LASS)
+		os.chdir(DIR_LASS_LIB)
 		for i, wtup in enumerate(os.walk(".")):
 			for j, f in enumerate(wtup[2]):
 				fullName = os.path.join(wtup[0], f)

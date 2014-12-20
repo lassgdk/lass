@@ -1,8 +1,11 @@
 import os, subprocess, sys
+from distutils import log
 try:
 	from setuptools import setup
+	from setuptools.command.install import install
 except ImportError:
 	print ("ERROR: setuptools not found (https://pypi.python.org/pypi/setuptools)")
+
 
 def listAll(dir, joinBase=False, headPrefix="", filePrefix=""):
 	"""
@@ -14,6 +17,7 @@ def listAll(dir, joinBase=False, headPrefix="", filePrefix=""):
 		headPrefix: prefix for the first element of each tuple
 		filePrefix: prefix for each file of the second element of each tuple (after joinBase is applied)
 	"""
+
 	allFiles = []
 
 	for i, wtup in enumerate(os.walk(dir)):
@@ -61,11 +65,22 @@ os.chdir(os.path.join("..", "conf"))
 DATA_FILES += listAll(".", headPrefix=DIR_LASS_CONF, filePrefix="conf")
 os.chdir("..")
 
-print os.getcwd()
+#find the owner of a data file; assume for now that all data files share this owner
+UID = os.stat(DATA_FILES[0][1][0]).st_uid
+GID = os.stat(DATA_FILES[0][1][0]).st_gid
 
-print "=========="
-for d in DATA_FILES:
-	print d
+class CustomInstall(install):
+
+	def run(self):
+		install.run(self)
+
+		#ensure that the original owner, not just the root user, owns the new data files
+		for root, dirs, files in os.walk(DIR_LASS_DATA):
+			log.info("changing owner of %s to %d" % (root, UID))
+			os.chown(root, UID, GID)
+			for f in files:
+				log.info("changing owner of %s to %d" % (os.path.join(root, f), UID))
+				os.chown(os.path.join(root, f), UID, GID)
 
 setup(
     name = "lass",
@@ -75,5 +90,6 @@ setup(
     description = "A 2D game framework powered by the LOVE engine.",
     packages = [],
     scripts = [os.path.join("bin", "lasspm")],
-    data_files = DATA_FILES
+    data_files = DATA_FILES,
+    cmdclass = {"install": CustomInstall}
 )

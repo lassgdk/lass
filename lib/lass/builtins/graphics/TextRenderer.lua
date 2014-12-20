@@ -1,7 +1,6 @@
 lass = require("lass")
 class = require("lass.class")
 geometry = require("lass.geometry")
-require "naught"
 
 local TextRenderer = class.define(lass.Component, function(self, arguments)
 
