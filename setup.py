@@ -1,11 +1,20 @@
+error = ""
+
 import os, subprocess, sys
 from distutils import log
 try:
 	from setuptools import setup
 	from setuptools.command.install import install
 except ImportError:
-	print ("ERROR: setuptools not found (https://pypi.python.org/pypi/setuptools)")
+	error += "ImportError: setuptools not found (https://pypi.python.org/pypi/setuptools)\n"
+if sys.platform.startswith("win32"):
+	try:
+		import py2exe
+	except ImportError:
+		error += "ImportError: py2exe not found (http://www.py2exe.org)\n"
 
+if error:
+	sys.exit(error)
 
 def listAll(dir, joinBase=False, headPrefix="", filePrefix=""):
 	"""
@@ -34,27 +43,35 @@ def listAll(dir, joinBase=False, headPrefix="", filePrefix=""):
 
 	return allFiles
 
-try:
-	XDG_DATA_HOME = os.environ["XDG_DATA_HOME"]
-except KeyError:
-	XDG_DATA_HOME = os.path.join(os.environ["HOME"], ".local", "share")
-try:
-	XDG_CONFIG_HOME = os.environ["XDG_CONFIG_HOME"]
-except KeyError:
-	XDG_CONFIG_HOME = os.path.join(os.environ["HOME"], ".config")
-DIR_LASS_DATA = os.path.join(XDG_DATA_HOME, "Lass")
-DIR_LASS_CONF = os.path.join(XDG_CONFIG_HOME, "Lass")
+#if using posix, we'll move all data and lua files according to XDG spec
+if os.name == "posix" or sys.platform == "cygwin":
+	try:
+		XDG_DATA_HOME = os.environ["XDG_DATA_HOME"]
+	except KeyError:
+		XDG_DATA_HOME = os.path.join(os.environ["HOME"], ".local", "share")
+	try:
+		XDG_CONFIG_HOME = os.environ["XDG_CONFIG_HOME"]
+	except KeyError:
+		XDG_CONFIG_HOME = os.path.join(os.environ["HOME"], ".config")
+	DIR_LASS_DATA = os.path.join(XDG_DATA_HOME, "Lass")
+	DIR_LASS_CONF = os.path.join(XDG_CONFIG_HOME, "Lass")
 
-#if lua5.1 is installed, put lass lib in /usr
-if not subprocess.call(["which", "lua5.1"], stdout=open(os.devnull, "w"), close_fds=True) or\
-(
-	subprocess.call(["which", "lua"], stdout=open(os.devnull, "w"), close_fds=True) and
-	subprocess.check_output(["lua", "-v"]).startswith("Lua 5.1")
-):
-	DIR_LUA = os.path.join(sys.prefix, "local", "share", "lua", "5.1")
-#if lua is not installed, put lass lib in XDG_DATA_HOME
-else:
-	DIR_LUA = os.path.join(DIR_LASS_DATA, "lua", "5.1")
+	#if lua5.1 is installed, put lass lib in /usr
+	if not subprocess.call(["which", "lua5.1"], stdout=open(os.devnull, "w"), close_fds=True) or\
+	(
+		subprocess.call(["which", "lua"], stdout=open(os.devnull, "w"), close_fds=True) and
+		subprocess.check_output(["lua", "-v"]).startswith("Lua 5.1")
+	):
+		DIR_LUA = os.path.join(sys.prefix, "local", "share", "lua", "5.1")
+	#if lua is not installed, put lass lib in XDG_DATA_HOME
+	else:
+		DIR_LUA = os.path.join(DIR_LASS_DATA, "lua", "5.1")
+
+#if using windows, we'll just put everything in the program folder
+#TODO: detect if lua is installed
+elif sys.platform.startswith("win32"):
+	DIR_LASS_DATA, DIR_LASS_CONF = "", ""
+	DIR_LUA = os.path.join("lua", "5.1")
 
 DATA_FILES =\
 	reduce(lambda a,b: a + b, [listAll(x, True, DIR_LASS_DATA) for x in ("examples", "engine")])
@@ -74,6 +91,9 @@ class CustomInstall(install):
 	def run(self):
 		install.run(self)
 
+		if sys.platform.startswith("win32"):
+			sys.exit("Error: 'install' command not available for Windows. Use 'py2exe' command instead")
+
 		#ensure that the original owner, not just the root user, owns the new data files
 		for root, dirs, files in os.walk(DIR_LASS_DATA):
 			log.info("changing owner of %s to %d" % (root, UID))
@@ -82,14 +102,22 @@ class CustomInstall(install):
 				log.info("changing owner of %s to %d" % (os.path.join(root, f), UID))
 				os.chown(os.path.join(root, f), UID, GID)
 
+if sys.platform.startswith("win32"):
+	scripts = []
+	console = [os.path.join("bin", "lasspm")]
+else:
+	scripts = [os.path.join("bin", "lasspm")]
+	console = []
+
 setup(
     name = "lass",
-    version = "0.1.0dev",
+    version = "0.1.0.dev0",
     author = "Decky Coss",
     author_email = "coss@alum.hackerschool.com",
     description = "A 2D game framework powered by the LOVE engine.",
     packages = [],
-    scripts = [os.path.join("bin", "lasspm")],
+    scripts = scripts,
+    console = console,
     data_files = DATA_FILES,
     cmdclass = {"install": CustomInstall}
 )

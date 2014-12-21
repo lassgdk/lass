@@ -8,17 +8,19 @@ except:
 	import configparser
 
 #load config file
-
-try:
-	XDG_CONFIG_HOME = os.environ["XDG_CONFIG_HOME"]
-except KeyError:
-	XDG_CONFIG_HOME = os.path.join(os.environ["HOME"], ".config")
+if sys.platform == "win32":
+	XDG_CONFIG_HOME = os.path.dirname(os.path.realpath(__file__))
+else:
+	try:
+		XDG_CONFIG_HOME = os.environ["XDG_CONFIG_HOME"]
+	except KeyError:
+		XDG_CONFIG_HOME = os.path.join(os.environ["HOME"], ".config")
 DIR_LASS_CONF = os.path.join(XDG_CONFIG_HOME, "Lass")
 
 cparser = configparser.ConfigParser({
 	"DIR_LASS_DATA":"$XDG_DATA_HOME/Lass",
 	"FB_DIR_LASS_DATA":"$HOME/.local/share/Lass",
-	"DIR_PROJECTS":"$HOME/Documents/Lass"
+	# "DIR_PROJECTS":"$HOME/Documents/Lass"
 })
 if not cparser.read(os.path.join(DIR_LASS_CONF, "lassconf.ini")):
 	raise IOError(os.path.join(DIR_LASS_CONF, "lassconf.ini") + " could not be loaded")
@@ -94,8 +96,7 @@ def buildgame(sendToTemp=False):
 		elif sendToTemp and not DIR_TEMP:
 			os.mkdir(buildPath)
 	except OSError as e:
-		print(e)
-		return 
+		sys.exit(e)
 
 	projFiles = os.listdir(projPath)
 	loveFileName = projName + ".love"
