@@ -8,40 +8,51 @@ except:
 	import configparser
 
 #load config file
+#if on windows, look in directory where lasspm lives
 if sys.platform == "win32":
-	XDG_CONFIG_HOME = os.path.dirname(os.path.realpath(__file__))
+	# XDG_CONFIG_HOME = os.path.dirname(os.path.realpath(__file__))
+	DIR_LASS_CONF = os.path.dirname(os.path.realpath(__file__))
+#else, look in the $HOME directory
 else:
 	try:
 		XDG_CONFIG_HOME = os.environ["XDG_CONFIG_HOME"]
 	except KeyError:
 		XDG_CONFIG_HOME = os.path.join(os.environ["HOME"], ".config")
-DIR_LASS_CONF = os.path.join(XDG_CONFIG_HOME, "Lass")
+	DIR_LASS_CONF = os.path.join(XDG_CONFIG_HOME, "Lass")
 
 cparser = configparser.ConfigParser({
 	"DIR_LASS_DATA":"$XDG_DATA_HOME/Lass",
 	"FB_DIR_LASS_DATA":"$HOME/.local/share/Lass",
-	# "DIR_PROJECTS":"$HOME/Documents/Lass"
+	"DIR_PROJECTS":"$HOME/Documents/Lass"
 })
 if not cparser.read(os.path.join(DIR_LASS_CONF, "lassconf.ini")):
 	raise IOError(os.path.join(DIR_LASS_CONF, "lassconf.ini") + " could not be loaded")
 
-#set global variables from config file
-
-try:
-	DIR_LASS_DATA = os.path.expandvars(cparser.get("path", "DIR_LASS_DATA"))
-	os.listdir(DIR_LASS_DATA)
-except OSError:
-	DIR_LASS_DATA = os.path.expandvars(cparser.get("path", "FB_DIR_LASS_DATA"))
-try:
-	DIR_LASS_LIB = os.path.join(sys.prefix, "local", "share", "lua", "5.1", "lass")
-	os.listdir(DIR_LASS_LIB)
-except OSError:
+if sys.platform == "win32":
+	DIR_LASS_DATA = DIR_LASS_CONF
 	DIR_LASS_LIB = os.path.join(DIR_LASS_DATA, "lua", "5.1", "lass")
+	DIR_PROJECTS = os.path.join(DIR_LASS_DATA, "projects")
+	DIR_TEMP = os.path.join(DIR_LASS_DATA, "tmp")
 
-DIR_PROJECTS = os.path.expandvars(cparser.get("path", "DIR_PROJECTS"))
+#set global variables from config file
+else:
+	try:
+		DIR_LASS_DATA = os.path.expandvars(cparser.get("path", "DIR_LASS_DATA"))
+		os.listdir(DIR_LASS_DATA)
+	except OSError:
+		DIR_LASS_DATA = os.path.expandvars(cparser.get("path", "FB_DIR_LASS_DATA"))
+	try:
+		DIR_LASS_LIB = os.path.join(sys.prefix, "local", "share", "lua", "5.1", "lass")
+		os.listdir(DIR_LASS_LIB)
+	except OSError:
+		DIR_LASS_LIB = os.path.join(DIR_LASS_DATA, "lua", "5.1", "lass")
+
+	DIR_PROJECTS = os.path.expandvars(cparser.get("path", "DIR_PROJECTS"))
+	DIR_TEMP = "/tmp"
+
 DIR_ENGINE_WINDOWS = os.path.join(DIR_LASS_DATA, "engine", "windows")
 DIR_ENGINE_OSX = os.path.join(DIR_LASS_DATA, "engine", "osx")
-DIR_TEMP = "/tmp"
+DIR_EXAMPLES = os.path.join(DIR_LASS_DATA, "examples")
 
 def getLoveEngineCommand():
 	if sys.platform.startswith("win32"):
@@ -70,10 +81,9 @@ def buildexe(loveFileNameFull, exeFolderName=None, exeFileName=None, dest="."):
 
 	exeFileNameFull = os.path.join(dest, exeFolderName, exeFileName)
 	# loveFileNameFull = os.path.join(dest, exeFolderName, exeFileName)
+
 	#rename love.exe
 	os.rename(os.path.join(dest, exeFolderName, "love.exe"), exeFileNameFull)
-
-	# raw_input("breakpoint")
 
 	#append love file to renamed love.exe
 	with open(exeFileNameFull, "ab") as exeFile, open(loveFileNameFull, "rb") as loveFile:
@@ -132,14 +142,25 @@ def playgame():
 	os.remove(game)
 
 def main():
+
+	helpMsg = (
+		"usage: lasspm <command> [<args>]\n"
+		"for help regarding a specific command, use lasspm <command> --help\n"
+		"commands: build, new, play"
+	)
+
 	try:
-		{
+		command = {
 			"build": buildgame,
 			"new": newgame,
 			"play": playgame
-		}[sys.argv[1]]()
+		}[sys.argv[1]]
 	except (IndexError, KeyError):
-		print("usage: hugahgsd")
+		sys.exit(helpMsg)
+
+	parser = argparse.ArgumentParser(name = "%s %s" % (sys.argv[0], command))
+
+	command()
 
 if __name__ == "__main__":
 	main()
