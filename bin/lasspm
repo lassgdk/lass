@@ -54,6 +54,10 @@ DIR_ENGINE_WINDOWS = os.path.join(DIR_LASS_DATA, "engine", "windows")
 DIR_ENGINE_OSX = os.path.join(DIR_LASS_DATA, "engine", "osx")
 DIR_EXAMPLES = os.path.join(DIR_LASS_DATA, "examples")
 
+ID_WINDOWS = "w"
+ID_LINUX = "l"
+ID_OSX = "o"
+
 def getLoveEngineCommand():
 	if sys.platform.startswith("win32"):
 		return os.path.join(DIR_ENGINE_WINDOWS, "love.exe") + " %s"
@@ -105,6 +109,9 @@ def buildgame(sendToTemp=False):
 			os.mkdir(buildPath)
 		elif sendToTemp and not DIR_TEMP:
 			os.mkdir(buildPath)
+
+		if not "main.lua" in os.listdir(projPath):
+			sys.exit("Cannot find main.lua in project")
 	except OSError as e:
 		sys.exit(e)
 
@@ -134,6 +141,7 @@ def buildgame(sendToTemp=False):
 	return os.path.abspath(os.path.join(buildPath, loveFileName))
 
 def newgame():
+	print("This function doesn't exist yet, but it will soon")
 	pass
 
 def playgame():
@@ -149,18 +157,81 @@ def main():
 		"commands: build, new, play"
 	)
 
+	if sys.platform == "win32":
+		pl = "w"
+	elif sys.platform == "darwin":
+		pl = "o"
+	elif os.name == "posix" or sys.platform == "cygwin":
+		pl = "l"
+	else:
+		sys.exit("OS Error: Operating system not supported")
+
+	projects_help = "search for game in default projects folder (currently %s). takes precedence over -e"
+
+	commands = {
+		"build": (buildgame, [
+			(("game",), {"type":str, "help":"name of game project directory"}),
+			(("-t", "--target"),{
+				"type":str,
+				"default":pl,
+				"help":"ID(s) of target platform(s) combined into a string. valid IDs: w, l, o"
+			}),
+			(("-l", "--love-only"), {
+				"action":"store_true",
+				"default":False,
+				"help":"create lovefile only (equivalent to -t l)"
+			}),
+			(("-p", "--projects"), {
+				"action":"store_true",
+				"default":False,
+				"help":projects_help % DIR_PROJECTS
+			}),
+			(("-e", "--examples"), {
+				"action":"store_true",
+				"default":False,
+				"help":"search for game in examples folder"
+			})
+		]),
+		"new": (newgame, [
+			(("game",), {"type":str, "help":"name of new game project directory"}),
+			(("-p", "--projects"), {
+				"action":"store_true",
+				"default":False,
+				"help":"create game in default projects folder (currently %s)" % DIR_PROJECTS
+			}),
+		]),
+		"play": (playgame, [
+			(("game",), {"type":str, "help":"name of game project directory"}),
+			(("-p", "--projects"), {
+				"action":"store_true",
+				"default":False,
+				"help":projects_help % DIR_PROJECTS
+			}),
+			(("-e", "--examples"), {
+				"action":"store_true",
+				"default":False,
+				"help":"search for game in examples folder"
+			})
+		]),
+	}
 	try:
-		command = {
-			"build": buildgame,
-			"new": newgame,
-			"play": playgame
-		}[sys.argv[1]]
+		command = commands[sys.argv[1]]
 	except (IndexError, KeyError):
 		sys.exit(helpMsg)
 
-	parser = argparse.ArgumentParser(name = "%s %s" % (sys.argv[0], command))
+	sys.argv[0] = os.path.basename(sys.argv[0])
+	parser = argparse.ArgumentParser(prog = "%s %s" % tuple(sys.argv[:2]))
+	for argument in command[1]:
+		parser.add_argument(*argument[0], **argument[1])
 
-	command()
+	#use [2:] to avoid the command being treated as a positional argument
+	args = parser.parse_args(sys.argv[2:])
+
+	if args.love_only:
+		args.target = "l"
+
+	# print(args.__dict__)
+	# command[0](**args.__dict__)
 
 if __name__ == "__main__":
 	main()

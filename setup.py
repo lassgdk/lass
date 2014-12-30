@@ -73,6 +73,9 @@ elif sys.platform.startswith("win32"):
 	DIR_LASS_DATA, DIR_LASS_CONF = "", ""
 	DIR_LUA = os.path.join("lua", "5.1")
 
+else:
+	sys.exit("OS Error: Operating system not supported")
+
 DATA_FILES =\
 	reduce(lambda a,b: a + b, [listAll(x, True, DIR_LASS_DATA) for x in ("examples", "engine")])
 
