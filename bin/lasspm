@@ -141,6 +141,10 @@ def buildgame(game, sendToTemp=False, projects=False, examples=False, target="l"
 
 	if sendToTemp:
 		buildPath = DIR_TEMP
+		try:
+			os.listdir(DIR_TEMP)
+		except OSError:
+			os.mkdir(DIR_TEMP)
 	else:
 		buildPath = os.path.join(projPath, "build")
 
