@@ -92,10 +92,10 @@ GID = os.stat(DATA_FILES[0][1][0]).st_gid
 class CustomInstall(install):
 
 	def run(self):
-		install.run(self)
-
 		if sys.platform.startswith("win32"):
 			sys.exit("Error: 'install' command not available for Windows. Use 'py2exe' command instead")
+
+		install.run(self)
 
 		#ensure that the original owner, not just the root user, owns the new data files
 		for root, dirs, files in os.walk(DIR_LASS_DATA):

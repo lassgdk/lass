@@ -28,13 +28,14 @@ cparser = configparser.ConfigParser({
 if not cparser.read(os.path.join(DIR_LASS_CONF, "lassconf.ini")):
 	raise IOError(os.path.join(DIR_LASS_CONF, "lassconf.ini") + " could not be loaded")
 
+#if windows, put everything in the program folder
 if sys.platform == "win32":
 	DIR_LASS_DATA = DIR_LASS_CONF
 	DIR_LASS_LIB = os.path.join(DIR_LASS_DATA, "lua", "5.1", "lass")
 	DIR_PROJECTS = os.path.join(DIR_LASS_DATA, "projects")
 	DIR_TEMP = os.path.join(DIR_LASS_DATA, "tmp")
 
-#set global variables from config file
+#else, set global variables from config file
 else:
 	try:
 		DIR_LASS_DATA = os.path.expandvars(cparser.get("path", "DIR_LASS_DATA"))
@@ -95,28 +96,66 @@ def buildexe(loveFileNameFull, exeFolderName=None, exeFileName=None, dest="."):
 		bytes = loveFile.read()
 		exeFile.write(bytes)
 
-def buildgame(sendToTemp=False):
+def findgame(game, *folders):
+	"""
+	search through list of folders until game project is found
+	(assumes game is a relative path)
+	"""
 
-	projName = sys.argv[2]
-	projPath = os.path.join(DIR_PROJECTS, projName)
+	if hasattr(folders[0], "__iter__"):
+		folders = folders[0]
+
+	for f in folders:
+		if game in os.listdir(f):
+			return os.path.join(os.path.abspath(f), game)
+
+def buildgame(game, sendToTemp=False, projects=False, examples=False, target="l"):
+	"""
+	build a .love file, plus optional binary distributions
+
+	args:
+		game: name of game project
+		sendToTemp: store compiled game in temp folder
+		projects: search for project in projects folder
+		examples: search for project in examples folder, if not found in projects
+		target: target platform--must be combination of w, l, o
+	"""
+
+	if not (projects or examples):
+		if os.path.isabs(game):
+			projPath = game
+		else:
+			projPath = os.path.join(os.getcwd(), game)
+	else:
+		if os.path.isabs(game):
+			sys.exit("OS Error: Can't use -p or -e options with absolute path")
+		dirs = []
+		if projects:
+			dirs.append(DIR_PROJECTS)
+		if examples:
+			dirs.append(DIR_EXAMPLES)
+		projPath = findgame(game, dirs)
+
+	#in case game is '.', find the 'real' name
+	game = os.path.basename(os.path.abspath(projPath))
+
 	if sendToTemp:
 		buildPath = DIR_TEMP
 	else:
 		buildPath = os.path.join(projPath, "build")
 
+	#make sure project exists and can be compiled
 	try:
-		if not sendToTemp and not "build" in os.listdir(projPath):
-			os.mkdir(buildPath)
-		elif sendToTemp and not DIR_TEMP:
-			os.mkdir(buildPath)
-
 		if not "main.lua" in os.listdir(projPath):
-			sys.exit("Cannot find main.lua in project")
+			sys.exit("Build Error: Cannot find main.lua in project")
 	except OSError as e:
-		sys.exit(e)
+		sys.exit("OS Error: Cannot find " + projPath)
+
+	if not sendToTemp and not "build" in os.listdir(projPath):
+		os.mkdir(buildPath)
 
 	projFiles = os.listdir(projPath)
-	loveFileName = projName + ".love"
+	loveFileName = game + ".love"
 	origDir = os.getcwd()
 
 	with zipfile.ZipFile(os.path.join(buildPath, loveFileName), mode='w') as loveFile:
@@ -136,7 +175,8 @@ def buildgame(sendToTemp=False):
 	os.chdir(origDir)
 
 	if not sendToTemp:
-		buildexe(os.path.join(buildPath, loveFileName), dest=buildPath)
+		if "w" in target:
+			buildexe(os.path.join(buildPath, loveFileName), dest=buildPath)
 
 	return os.path.abspath(os.path.join(buildPath, loveFileName))
 
@@ -144,8 +184,8 @@ def newgame():
 	print("This function doesn't exist yet, but it will soon")
 	pass
 
-def playgame():
-	game = buildgame(True)
+def playgame(game, **kwargs):
+	game = buildgame(game, sendToTemp=True, **kwargs)
 	os.system(getLoveEngineCommand() % game)
 	os.remove(game)
 
@@ -227,11 +267,13 @@ def main():
 	#use [2:] to avoid the command being treated as a positional argument
 	args = parser.parse_args(sys.argv[2:])
 
-	if args.love_only:
-		args.target = "l"
+	if hasattr(args, "love_only"):
+		if args.love_only:
+			args.target = "l"
+		args.__dict__.pop("love_only")
 
 	# print(args.__dict__)
-	# command[0](**args.__dict__)
+	command[0](**args.__dict__)
 
 if __name__ == "__main__":
 	main()
