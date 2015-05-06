@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 from __future__ import print_function
 import os, sys, shutil, zipfile, argparse
@@ -121,6 +121,8 @@ def buildgame(game, sendToTemp=False, projects=False, examples=False, target="l"
 		target: target platform--must be combination of w, l, o
 	"""
 
+	# print(game)
+
 	if not (projects or examples):
 		if os.path.isabs(game):
 			projPath = game
@@ -181,6 +183,8 @@ def buildgame(game, sendToTemp=False, projects=False, examples=False, target="l"
 	if not sendToTemp:
 		if "w" in target:
 			buildexe(os.path.join(buildPath, loveFileName), dest=buildPath)
+		elif "o" in target:
+			buildapp(os.path.join(buildPath, loveFileName), dest=buildPath)
 
 	return os.path.abspath(os.path.join(buildPath, loveFileName))
 
@@ -214,7 +218,12 @@ def main():
 
 	commands = {
 		"build": (buildgame, [
-			(("game",), {"type":str, "help":"name of game project directory"}),
+			(("game",), {
+				"type":str,
+				"default":".",
+				"nargs":"?",
+				"help":"name of game project directory"
+			}),
 			(("-t", "--target"),{
 				"type":str,
 				"default":pl,
@@ -237,7 +246,11 @@ def main():
 			})
 		]),
 		"new": (newgame, [
-			(("game",), {"type":str, "help":"name of new game project directory"}),
+			(("game",), {
+				"type":str,
+				"default":".",
+				"help":"name of new game project directory"
+			}),
 			(("-p", "--projects"), {
 				"action":"store_true",
 				"default":False,
@@ -245,7 +258,12 @@ def main():
 			}),
 		]),
 		"play": (playgame, [
-			(("game",), {"type":str, "help":"name of game project directory"}),
+			(("game",), {
+				"type":str,
+				"default":".",
+				"nargs":"?",
+				"help":"name of game project directory"
+			}),
 			(("-p", "--projects"), {
 				"action":"store_true",
 				"default":False,

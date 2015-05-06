@@ -10,10 +10,6 @@ function love.load()
 	scene:load("mainscene")
 end
 
-function love.resize(...)
-	scene:windowresize(...)
-end
-
 for i, f in ipairs({
 	"draw",
 	"update",
@@ -29,7 +25,13 @@ for i, f in ipairs({
 	"threaderror",
 	"visible"
 }) do
-	love[f] = function(...)
-		scene[f](scene, ...)
+	if f == "resize" then
+		love[f] = function(...)
+			scene.windowresize(scene, ...)
+		end
+	else
+		love[f] = function(...)
+			scene[f](scene, ...)
+		end
 	end
 end

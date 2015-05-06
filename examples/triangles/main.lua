@@ -17,7 +17,6 @@ end
 for i, f in ipairs({
 	"draw",
 	"update",
---	"errhand",
 	"focus",
 	"keypressed",
 	"keyreleased",
@@ -30,7 +29,13 @@ for i, f in ipairs({
 	"threaderror",
 	"visible"
 }) do
-	love[f] = function(...)
-		scene[f](scene, ...)
+	if f == "resize" then
+		love[f] = function(...)
+			scene.windowresize(scene, ...)
+		end
+	else
+		love[f] = function(...)
+			scene[f](scene, ...)
+		end
 	end
 end

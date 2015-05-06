@@ -4,7 +4,7 @@ local geometry = require("lass.geometry")
 
 --[[
 PolygonRenderer
-arguments:
+arguments (optional):
 	vertices - can be an array of Vector2's (e.g., {{x=1,y=2}, {x=10, y=2}}),
 		or a flattened array of coordinates (e.g., {1, 2, 10, 2})
 	mode - draw mode, can be "fill" or "line"
@@ -26,19 +26,9 @@ local PolygonRenderer = class.define(lass.Component, function(self, arguments)
 end)
 
 function PolygonRenderer:awake()
-	-- print("COLORS")
-	-- for i,v in ipairs(self.color) do
-	-- 	print("color", i, v)
-	-- end
-	-- print("VERTICES")
-	-- for i,v in ipairs(self.shape.vertices) do
-	-- 	print("vertex", i, v)
-	-- end
 end
 
 function PolygonRenderer:update(dt)
-	-- self.vertices = self.polygon.vertices
-	-- self.globalVertices = self.polygon:globalVertices(self.gameObject.globalTransform)
 end
 
 local function verticesToFlatArray(vertices)
@@ -68,7 +58,7 @@ function PolygonRenderer:draw()
 	end
 
 	love.graphics.setColor(self.color)
-	love.graphics.polygon("fill", verticesToFlatArray(vertices))
+	love.graphics.polygon(self.mode, verticesToFlatArray(vertices))
 end
 
 return PolygonRenderer

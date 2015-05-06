@@ -454,7 +454,9 @@ function Polygon:isConvex()
 
 end
 
---[[Rectangle]]
+--[[
+Rectangle
+]]
 
 local Rectangle = class.define(Shape, function(self, width, height, origin)
 	-- origin is assumed to be bottom left (does not check for screen y-axis inversion)

@@ -57,9 +57,8 @@ if os.name == "posix" or sys.platform == "cygwin":
 	DIR_LASS_CONF = os.path.join(XDG_CONFIG_HOME, "Lass")
 
 	#if lua5.1 is installed, put lass lib in /usr
-	if not subprocess.call(["which", "lua5.1"], stdout=open(os.devnull, "w"), close_fds=True) or\
-	(
-		subprocess.call(["which", "lua"], stdout=open(os.devnull, "w"), close_fds=True) and
+	if not subprocess.call(["which", "lua5.1"], stdout=open(os.devnull, "w"), close_fds=True) or (
+		not subprocess.call(["which", "lua"], stdout=open(os.devnull, "w"), close_fds=True) and
 		subprocess.check_output(["lua", "-v"]).startswith("Lua 5.1")
 	):
 		DIR_LUA = os.path.join(sys.prefix, "local", "share", "lua", "5.1")

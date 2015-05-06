@@ -15,8 +15,8 @@ return {settings = {
       position = {
         x = 0,
         y = -10,
-	  }
-	},
+      }
+    },
     components = {
       {
         script = "lass.builtins.graphics.TextRenderer",
@@ -32,5 +32,5 @@ return {settings = {
         }
       }
     }
-  }
+  },
 }}
