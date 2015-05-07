@@ -456,6 +456,7 @@ function GameScene:applySettings()
 
 	--window
 	love.window.setMode(self.settings.window.width, self.settings.window.height)
+	love.window.setTitle(self.settings.window.title or "Untitled")
 
 	--graphics
 	love.graphics.setBackgroundColor(self.settings.graphics.backgroundColor)

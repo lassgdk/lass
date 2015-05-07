@@ -1,7 +1,8 @@
 return {settings = {
   window = {
     width = 320,
-    height = 224
+    height = 224,
+    title = "hello"
   },
   graphics = {
     backgroundColor = {255,255,255},

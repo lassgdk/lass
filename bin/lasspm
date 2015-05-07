@@ -150,17 +150,20 @@ def buildgame(game, sendToTemp=False, projects=False, examples=False, target="l"
 	else:
 		buildPath = os.path.join(projPath, "build")
 
+	sourcePath = os.path.join(projPath, "src")
+
 	#make sure project exists and can be compiled
 	try:
-		if not "main.lua" in os.listdir(projPath):
+		if not "main.lua" in os.listdir(sourcePath):
 			sys.exit("Build Error: Cannot find main.lua in project")
 	except OSError as e:
-		sys.exit("OS Error: Cannot find " + projPath)
+		sys.exit("OS Error: Cannot find " + sourcePath)
 
 	if not sendToTemp and not "build" in os.listdir(projPath):
 		os.mkdir(buildPath)
 
-	projFiles = os.listdir(projPath)
+	projFiles = os.listdir(sourcePath)
+	print(projFiles)
 	loveFileName = game + ".love"
 	origDir = os.getcwd()
 
@@ -169,7 +172,7 @@ def buildgame(game, sendToTemp=False, projects=False, examples=False, target="l"
 		#add project files
 		for f in projFiles:
 			if f != "build":
-				loveFile.write(os.path.join(projPath, f), f)
+				loveFile.write(os.path.join(sourcePath, f), f)
 
 		#add lass library
 		os.chdir(DIR_LASS_LIB)
