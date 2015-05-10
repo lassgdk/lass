@@ -10,7 +10,7 @@ return {settings = {
 }, gameObjects = {
   {
     name = "Triangle",
-    prefab = "triangleprefab",
+    prefab = "triangleprefab.lua",
     transform = {
       position = {
         x = 180,
@@ -34,7 +34,7 @@ return {settings = {
     children = {
       {
         name = "Satellite",
-        prefab = "triangleprefab",
+        prefab = "triangleprefab.lua",
         transform = {
           position = {
             x = 210,
@@ -53,7 +53,7 @@ return {settings = {
         children = {
           {
             name = "SubSatellite",
-            prefab = "triangleprefab",
+            prefab = "triangleprefab.lua",
             transform = {
               position = {
                 x = 210,
@@ -73,7 +73,7 @@ return {settings = {
             children = {
               {
                 name = "SubSubSatellite",
-                prefab = "triangleprefab",
+                prefab = "triangleprefab.lua",
                 transform = {
                   position = {
                     x = 210,

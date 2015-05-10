@@ -373,7 +373,8 @@ local function buildObjectTree(scene, object)
 	local gameObject = GameObject(scene, object.name, object.transform)
 
 	if object.prefab and object.prefab ~= "" then
-		local pf = require(object.prefab)
+		local pf = love.filesystem.load(object.prefab)()
+		-- local pf = require(object.prefab)
 
 		for i, comp in ipairs(mergeComponentLists(pf.components, object.prefabComponents)) do
 			gameObject:addComponent(require(comp.script)(comp.arguments))
@@ -398,16 +399,22 @@ local function buildObjectTree(scene, object)
 	return gameObject
 end
 
-local function createSettingsTable(settings)
+local function createSettingsTable(settings, defaults)
 
 	settings = settings or {}
+	defaults = defaults or require("lass.defaults")
 
-	for sectionName, section in pairs(require("lass.defaults")) do
+	for sectionName, section in pairs(defaults) do
 		if not settings[sectionName] then
 			settings[sectionName] = section
 		else
-			for optionName, option in pairs(section) do
-				settings[sectionName][optionName] = settings[sectionName][optionName] or option
+			if type(section) == "table" then
+				for optionName, option in pairs(section) do
+					settings[sectionName][optionName] = settings[sectionName][optionName] or option
+				end
+			--some "sections" are actually fields
+			else
+				settings[sectionName] = settings[sectionName] or section
 			end
 		end
 	end
@@ -423,6 +430,11 @@ local GameScene = class.define(GameEntity, function(self, transform)
 	GameEntity.init(self, transform)
 end)
 
+function GameScene:loadSettings(settingsFile)
+
+	self.settings = createSettingsTable(love.filesystem.load(settingsFile)())
+end
+
 function GameScene:load(src)
 	--load objects and settings from a table or module
 
@@ -431,7 +443,10 @@ function GameScene:load(src)
 
 	if typeS == "string" then
 		source = src
-		src = require(src)
+		src = love.filesystem.load(src)()
+	elseif typeS == "nil" then
+		source = self.settings.firstScene
+		src = love.filesystem.load(source)()
 	else
 		assert(typeS == "table", "src must be file name, module name, or table")
 		assert(src.gameObjects, "src.gameObjects is required")
@@ -441,8 +456,8 @@ function GameScene:load(src)
 	self:init()
 	self.source = source
 
-	--scene settings
-	self.settings = createSettingsTable(src.settings)
+	--scene settings (overrides settings.lua)
+	self.settings = createSettingsTable(src.settings, self.settings)
 	self:applySettings()
 
 	--build game objects

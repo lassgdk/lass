@@ -1,4 +1,5 @@
 return {
+  firstScene = "",
   window = {
     width = 800,
     height = 600

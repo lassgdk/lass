@@ -7,7 +7,9 @@ local scene = {}
 
 function love.load()
 	scene = lass.GameScene()
-	scene:load("mainscene")
+	scene:loadSettings("settings.lua")
+	scene:load()
+	-- scene:load(love.filesystem.load("settings.lua")().firstScene)
 end
 
 for i, f in ipairs({

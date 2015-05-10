@@ -163,7 +163,6 @@ def buildgame(game, sendToTemp=False, projects=False, examples=False, target="l"
 		os.mkdir(buildPath)
 
 	projFiles = os.listdir(sourcePath)
-	print(projFiles)
 	loveFileName = game + ".love"
 	origDir = os.getcwd()
 
@@ -191,9 +190,33 @@ def buildgame(game, sendToTemp=False, projects=False, examples=False, target="l"
 
 	return os.path.abspath(os.path.join(buildPath, loveFileName))
 
-def newgame():
-	print("This function doesn't exist yet, but it will soon")
-	pass
+def newgame(game, projects=False):
+
+	if projects and game==".":
+		sys.exit(
+			"Error: Cannot initiate project in %s - try supplying project name" % os.path.join(DIR_PROJECTS, game)
+		)
+	elif projects:
+		projPath = os.path.join(DIR_PROJECTS, game)
+	else:
+		projPath = os.path.abspath(game)
+
+	#make project directory
+	if game!=".":
+		try:
+			os.mkdir(projPath)
+		except OSError as e:
+			sys.exit("OS Error: Cannot create directory %s" % projPath)
+
+	#make project subdirectories
+	os.chdir(projPath)
+
+	for folder in ["build", "include", "src"]:
+		try:
+			os.mkdir(folder)
+			print("Created %s folder" % folder)
+		except OSError:
+			print("Could not create %s folder")
 
 def playgame(game, **kwargs):
 	game = buildgame(game, sendToTemp=True, **kwargs)
@@ -252,6 +275,7 @@ def main():
 			(("game",), {
 				"type":str,
 				"default":".",
+				"nargs":"?",
 				"help":"name of new game project directory"
 			}),
 			(("-p", "--projects"), {

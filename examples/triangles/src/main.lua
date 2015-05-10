@@ -7,7 +7,7 @@ local scene = {}
 
 function love.load()
 	scene = lass.GameScene()
-	scene:load("mainscene")
+	scene:load("mainscene.lua")
 end
 
 function love.resize(...)
