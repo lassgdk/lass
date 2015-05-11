@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 error = ""
 
 import os, subprocess, sys
@@ -76,7 +78,7 @@ else:
 	sys.exit("OS Error: Operating system not supported")
 
 DATA_FILES =\
-	reduce(lambda a,b: a + b, [listAll(x, True, DIR_LASS_DATA) for x in ("examples", "engine")])
+	reduce(lambda a,b: a + b, [listAll(x, True, DIR_LASS_DATA) for x in ("examples", "engine", "templates")])
 
 os.chdir("lib")
 DATA_FILES += listAll("lass", True, headPrefix=DIR_LUA, filePrefix="lib")
@@ -119,6 +121,7 @@ setup(
     author_email = "coss@alum.hackerschool.com",
     description = "A 2D game framework powered by the LOVE engine.",
     packages = [],
+    install_requires = ["jinja2"],
     scripts = scripts,
     console = console,
     data_files = DATA_FILES,

@@ -54,6 +54,7 @@ else:
 DIR_ENGINE_WINDOWS = os.path.join(DIR_LASS_DATA, "engine", "windows")
 DIR_ENGINE_OSX = os.path.join(DIR_LASS_DATA, "engine", "osx")
 DIR_EXAMPLES = os.path.join(DIR_LASS_DATA, "examples")
+DIR_TEMPLATES_LUA = os.path.join(DIR_LASS_DATA, "templates", "lua")
 
 ID_WINDOWS = "w"
 ID_LINUX = "l"
@@ -217,6 +218,9 @@ def newgame(game, projects=False):
 			print("Created %s folder" % folder)
 		except OSError:
 			print("Could not create %s folder")
+
+	for t in ["main.lua", "settings.lua", "mainscene.lua"]:
+		shutil.copy(os.path.join(DIR_TEMPLATES_LUA, t), "src")
 
 def playgame(game, **kwargs):
 	game = buildgame(game, sendToTemp=True, **kwargs)
