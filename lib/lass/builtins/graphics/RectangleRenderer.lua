@@ -2,6 +2,16 @@ local lass = require("lass")
 local class = require("lass.class")
 local geometry = require("lass.geometry")
 
+--[[
+RectangleRenderer
+arguments:
+	width - number
+	height - number
+arguments (optional):
+	mode - draw mode, can be "fill" or "line"
+	color - rgb tuple, 0-255 (e.g., {0, 0, 200})
+]]
+
 local RectangleRenderer = class.define(lass.Component, function(self, arguments)
 
 	arguments.shape = geometry.Rectangle(arguments.width, arguments.height, arguments.origin)

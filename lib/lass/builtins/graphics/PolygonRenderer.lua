@@ -25,12 +25,6 @@ local PolygonRenderer = class.define(lass.Component, function(self, arguments)
 	-- self.globalVertices = {}
 end)
 
-function PolygonRenderer:awake()
-end
-
-function PolygonRenderer:update(dt)
-end
-
 local function verticesToFlatArray(vertices)
 
 	local flat = {}

@@ -674,6 +674,26 @@ local function intersecting(fig1, fig2, transform1, transform2, ignoreRotation1,
 	end
 end
 
+--[[
+graph functions
+]]
+
+local functions = {}
+
+function functions.sine(x)
+	return math.sin(x)
+end
+
+function functions.pulse(x, pulseWidth)
+
+	pulseWidth = pulseWidth or .5
+	if (x % (math.pi*2)) / (math.pi*2) < pulseWidth then
+		return 1
+	else
+		return -1
+	end
+end
+
 return {
 	Transform = Transform,
 	Vector2 = Vector2,
@@ -684,5 +704,6 @@ return {
 	Rectangle = Rectangle,
 	intersecting = intersecting,
 	degreesToRadians = function(d) return (d/180) * math.pi end,
-	flattenedVector2Array = flattenedVector2Array
+	flattenedVector2Array = flattenedVector2Array,
+	functions = functions
 }

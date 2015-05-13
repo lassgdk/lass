@@ -7,6 +7,8 @@ try:
 except:
 	import configparser
 
+#set a bunch of global constants
+
 #load config file
 #if on windows, look in directory where lasspm lives
 if sys.platform == "win32":
@@ -28,13 +30,12 @@ cparser = configparser.ConfigParser({
 if not cparser.read(os.path.join(DIR_LASS_CONF, "lassconf.ini")):
 	raise IOError(os.path.join(DIR_LASS_CONF, "lassconf.ini") + " could not be loaded")
 
-#if windows, put everything in the program folder
+#if windows, assume everything lives in the program folder
 if sys.platform == "win32":
 	DIR_LASS_DATA = DIR_LASS_CONF
 	DIR_LASS_LIB = os.path.join(DIR_LASS_DATA, "lua", "5.1", "lass")
 	DIR_PROJECTS = os.path.join(DIR_LASS_DATA, "projects")
 	DIR_TEMP = os.path.join(DIR_LASS_DATA, "tmp")
-
 #else, set global variables from config file
 else:
 	try:
@@ -60,55 +61,7 @@ ID_WINDOWS = "w"
 ID_LINUX = "l"
 ID_OSX = "o"
 
-def getLoveEngineCommand():
-	if sys.platform.startswith("win32"):
-		return os.path.join(DIR_ENGINE_WINDOWS, "love.exe") + " %s"
-	elif sys.platform.startswith("darwin"):
-		return "open %s -a " + os.path.join(DIR_ENGINE_OSX, "love.app")
-	else:
-		return "love %s"
-
-def buildapp(loveFileName, appFolderName=None, dest="."):
-	pass
-
-def buildexe(loveFileNameFull, exeFolderName=None, exeFileName=None, dest="."):
-
-	gameName = ".".join(os.path.basename(loveFileNameFull).split(".")[:-1])
-
-	if not exeFileName:
-		exeFileName = gameName + ".exe"
-	if not exeFolderName:
-		exeFolderName = gameName
-
-	if exeFolderName in os.listdir(dest):
-		shutil.rmtree(os.path.join(dest, exeFolderName))
-
-	shutil.copytree(DIR_ENGINE_WINDOWS, os.path.join(dest, exeFolderName))
-
-	exeFileNameFull = os.path.join(dest, exeFolderName, exeFileName)
-	# loveFileNameFull = os.path.join(dest, exeFolderName, exeFileName)
-
-	#rename love.exe
-	os.rename(os.path.join(dest, exeFolderName, "love.exe"), exeFileNameFull)
-
-	#append love file to renamed love.exe
-	with open(exeFileNameFull, "ab") as exeFile, open(loveFileNameFull, "rb") as loveFile:
-	# print(os.path.abspath(loveFileNameFull))
-		bytes = loveFile.read()
-		exeFile.write(bytes)
-
-def findgame(game, *folders):
-	"""
-	search through list of folders until game project is found
-	(assumes game is a relative path)
-	"""
-
-	if hasattr(folders[0], "__iter__"):
-		folders = folders[0]
-
-	for f in folders:
-		if game in os.listdir(f):
-			return os.path.join(os.path.abspath(f), game)
+#main functions
 
 def buildgame(game, sendToTemp=False, projects=False, examples=False, target="l"):
 	"""
@@ -117,18 +70,17 @@ def buildgame(game, sendToTemp=False, projects=False, examples=False, target="l"
 	args:
 		game: name of game project
 		sendToTemp: store compiled game in temp folder
-		projects: search for project in projects folder
+		projects: search for project in default projects folder
 		examples: search for project in examples folder, if not found in projects
 		target: target platform--must be combination of w, l, o
 	"""
-
-	# print(game)
 
 	if not (projects or examples):
 		if os.path.isabs(game):
 			projPath = game
 		else:
 			projPath = os.path.join(os.getcwd(), game)
+	#search for game in projects folder first, then examples
 	else:
 		if os.path.isabs(game):
 			sys.exit("OS Error: Can't use -p or -e options with absolute path")
@@ -192,6 +144,13 @@ def buildgame(game, sendToTemp=False, projects=False, examples=False, target="l"
 	return os.path.abspath(os.path.join(buildPath, loveFileName))
 
 def newgame(game, projects=False):
+	"""
+	create a new Lass project
+
+	args:
+		game: name of new project
+		projects: set location of new project to default projects folder
+	"""
 
 	if projects and game==".":
 		sys.exit(
@@ -223,9 +182,71 @@ def newgame(game, projects=False):
 		shutil.copy(os.path.join(DIR_TEMPLATES_LUA, t), "src")
 
 def playgame(game, **kwargs):
+	"""
+	temporarily build and play a Lass project
+
+	args:
+		projects: search for project in default projects folder
+		examples: search for project in examples folder, if not found in projects
+	"""
+
 	game = buildgame(game, sendToTemp=True, **kwargs)
 	os.system(getLoveEngineCommand() % game)
 	os.remove(game)
+
+#helper functions
+
+def findgame(game, *folders):
+	"""
+	search through list of folders until game project is found
+	(assumes game is a relative path)
+	"""
+
+	if hasattr(folders[0], "__iter__"):
+		folders = folders[0]
+
+	for f in folders:
+		if game in os.listdir(f):
+			return os.path.join(os.path.abspath(f), game)
+
+def getLoveEngineCommand():
+	if sys.platform.startswith("win32"):
+		return os.path.join(DIR_ENGINE_WINDOWS, "love.exe") + " %s"
+	elif sys.platform.startswith("darwin"):
+		return "open %s -a " + os.path.join(DIR_ENGINE_OSX, "love.app")
+	else:
+		return "love %s"
+
+def buildapp(loveFileName, appFolderName=None, dest="."):
+	pass
+
+def buildexe(loveFileNameFull, exeFolderName=None, exeFileName=None, dest="."):
+
+	gameName = ".".join(os.path.basename(loveFileNameFull).split(".")[:-1])
+
+	if not exeFileName:
+		exeFileName = gameName + ".exe"
+	if not exeFolderName:
+		exeFolderName = gameName
+
+	if exeFolderName in os.listdir(dest):
+		shutil.rmtree(os.path.join(dest, exeFolderName))
+
+	shutil.copytree(DIR_ENGINE_WINDOWS, os.path.join(dest, exeFolderName))
+
+	exeFileNameFull = os.path.join(dest, exeFolderName, exeFileName)
+	# loveFileNameFull = os.path.join(dest, exeFolderName, exeFileName)
+
+	#rename love.exe
+	os.rename(os.path.join(dest, exeFolderName, "love.exe"), exeFileNameFull)
+
+	#append love file to renamed love.exe
+	with open(exeFileNameFull, "ab") as exeFile, open(loveFileNameFull, "rb") as loveFile:
+	# print(os.path.abspath(loveFileNameFull))
+		bytes = loveFile.read()
+		exeFile.write(bytes)
+
+#command parser
 
 def main():
 

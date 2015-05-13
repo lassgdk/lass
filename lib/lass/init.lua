@@ -385,6 +385,7 @@ local function buildObjectTree(scene, object)
 	if object.components then
 		for i, comp in ipairs(object.components) do
 			local componentClass = require(comp.script)
+			assert(class.subclassof(componentClass, Component), "script does not return a Component")
 			gameObject:addComponent(componentClass(comp.arguments))
 		end
 	end

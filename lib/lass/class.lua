@@ -68,13 +68,28 @@ function class.define(base, init)
 end
 
 function class.instanceof(object, ...)
-   -- check if object/literal is an instance of class(es), regardless of its type
+   -- check if object/literal is an instance of class(es), regardless of its type.
+   -- returns false or the first match found
 
    if not (type(object) == "table" and object.instanceof) then
       return false
    else
       for _, cl in ipairs({...}) do
          if object:instanceof(cl) then return cl end
+      end
+      return false
+   end
+end
+
+function class.subclassof(object, ...)
+   -- check if object/literal is a subclass of class(es), regardless of its type.
+   -- reeturns false or the first match found
+
+   if not (type(object) == "table" and object.base) then
+      return false
+   else
+      for _, cl in ipairs({...}) do
+         if object.base == cl then return cl end
       end
       return false
    end
