@@ -14,7 +14,7 @@ arguments (optional):
 
 local RectangleRenderer = class.define(lass.Component, function(self, arguments)
 
-	arguments.shape = geometry.Rectangle(arguments.width, arguments.height, arguments.origin)
+	arguments.shape = geometry.Rectangle(arguments.width, arguments.height, geometry.Vector2(arguments.origin))
 	arguments.color = arguments.color or {0,0,0}
 	arguments.mode = arguments.mode or "fill"
 
@@ -41,7 +41,7 @@ function RectangleRenderer:draw()
 		love.graphics.rectangle(
 			self.mode,
 			shape.origin.x+position.x,
-			(shape.origin.y+position.y) * ySign,
+			(shape.origin.y + position.y) * ySign,
 			shape.width * globalTransform.size.x,
 			shape.height * globalTransform.size.y
 		)
@@ -53,6 +53,7 @@ function RectangleRenderer:draw()
 				verts[i] = verts[i] * ySign
 			end
 		end
+
 		love.graphics.polygon(self.mode, verts)
 	end
 end

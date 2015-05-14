@@ -1,7 +1,32 @@
-lass = require("lass")
-class = require("lass.class")
-geometry = require("lass.geometry")
-collections = require("lass.collections")
+local lass = require("lass")
+local class = require("lass.class")
+local geometry = require("lass.geometry")
+local collections = require("lass.collections")
+
+--[[
+PeriodicInterpolator - a class for smoothly and periodically modifying gameObject parameters.
+	TODO: more type checking?
+
+arguments:
+	ifunction - a unary function, or a string reference to a lass.geometry unary function.
+		the value (hereafter referred to as X) passed to it will increase linearly with time.
+		the output of ifunction shall be hereafter referred to as Y.
+		example: function(x) return x^2 end
+arguments (optional):
+	target (list, default={}) - the target parameter to modify using Y.
+		it should be constructed as a "chain" of keys; the first key will be indexed from self. each
+		key can refer to either a table or a binary function; the last key can refer to a value of
+		any type. if it refers to a function, the table the function belongs to will be passed as
+		the first argument, and the value of the next key will be passed as the second argument.
+		example: {"gameObject", "transform", "position", "x"}
+		example 2: {"gameObject", "getComponent", "MyComponent", "myvar"}
+	amplitude (number, default=1) - amplitude by which to multiply Y
+	offset (Vector2, default={0,0}) - the amounts to add to X and Y
+	sampleLength - the highest possible value of X (minus offset.x). can be infinite.
+	period (number, default=1) - duration of the interpolation in seconds.
+		or, if sampleLength is infinite, rate at which X increases.
+]]
+
 
 local PeriodicInterpolator = class.define(lass.Component, function(self, arguments)
 
@@ -9,6 +34,11 @@ local PeriodicInterpolator = class.define(lass.Component, function(self, argumen
 		collections.index({"string", "function"}, type(arguments.ifunction)),
 		"ifunction must be string or function"
 	)
+	if type(arguments.ifunction) == "string" then
+		arguments.ifunction = geometry.functions[ifunction]
+	end
+
+	arguments.target = arguments.target or {}
 	arguments.amplitude = arguments.amplitude or 1
 	arguments.offset = geometry.Vector2(arguments.offset)
 	arguments.period = arguments.period or 1 --in seconds

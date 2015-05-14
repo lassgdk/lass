@@ -469,7 +469,7 @@ Rectangle
 ]]
 
 local Rectangle = class.define(Shape, function(self, width, height, origin)
-	-- origin is assumed to be bottom left (does not check for screen y-axis inversion)
+	-- origin is assumed to be top left
 
 	assert(type(width) == "number", "width must be number")
 	assert(type(height) == "number", "height must be number")
@@ -484,8 +484,8 @@ function Rectangle:vertices()
 	return {
 		self.origin,
 		self.origin + Vector2(self.width, 0),
-		self.origin + Vector2(self.width, self.height),
-		self.origin + Vector2(0, self.height)
+		self.origin + Vector2(self.width, -self.height),
+		self.origin + Vector2(0, -self.height)
 	}
 end
 
@@ -518,8 +518,8 @@ function Rectangle:contains(vector)
 	return
 		vector.x >= self.origin.x and
 		vector.x <= self.origin.x + self.width and
-		vector.y >= self.origin.y and
-		vector.y <= self.origin.y + self.height
+		vector.y <= self.origin.y and
+		vector.y >= self.origin.y - self.height
 end
 
 --[[

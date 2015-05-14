@@ -217,6 +217,51 @@ local GameObject = class.define(GameEntity, function(self, gameScene, name, tran
 	gameScene:addGameObject(self)
 end)
 
+local function buildObjectTree(scene, object)
+	--build a game object and its children
+
+	--create gameObject and add it to scene
+	local gameObject = GameObject(scene, object.name, object.transform)
+
+	-- for k,v in pairs(object) do print(k,v) end
+
+	if object.prefab and object.prefab ~= "" then
+		local pf = love.filesystem.load(object.prefab)()
+		-- local pf = require(object.prefab)
+
+		for i, comp in ipairs(mergeComponentLists(pf.components, object.prefabComponents)) do
+			gameObject:addComponent(require(comp.script)(comp.arguments))
+		end
+	end
+
+	--create and add components
+	if object.components then
+		for i, comp in ipairs(object.components) do
+			local componentClass = require(comp.script)
+
+			-- print("hey", comp.script)
+			-- for k,v in pairs(comp.arguments) do print(k,v) end
+
+			assert(class.subclassof(componentClass, Component), "script does not return a Component")
+			gameObject:addComponent(componentClass(comp.arguments))
+		end
+	end
+
+	--build children
+	if object.children then
+		for i, child in ipairs(object.children) do
+			gameObject:addChild(buildObjectTree(scene, child))
+		end
+	end
+
+	return gameObject
+end
+
+--dot, not colon
+function GameObject.fromPrefab(scene, prefab)
+	return buildObjectTree(scene, prefab)
+end
+
 function GameObject:update(dt, firstUpdate)
 
 	maintainTransform(self)
@@ -364,40 +409,6 @@ local function mergeComponentLists(prefabComponents, overrides)
 		end
 	end
 	return components
-end
-
-local function buildObjectTree(scene, object)
-	--build a game object and its children
-
-	--create gameObject and add it to scene
-	local gameObject = GameObject(scene, object.name, object.transform)
-
-	if object.prefab and object.prefab ~= "" then
-		local pf = love.filesystem.load(object.prefab)()
-		-- local pf = require(object.prefab)
-
-		for i, comp in ipairs(mergeComponentLists(pf.components, object.prefabComponents)) do
-			gameObject:addComponent(require(comp.script)(comp.arguments))
-		end
-	end
-
-	--create and add components
-	if object.components then
-		for i, comp in ipairs(object.components) do
-			local componentClass = require(comp.script)
-			assert(class.subclassof(componentClass, Component), "script does not return a Component")
-			gameObject:addComponent(componentClass(comp.arguments))
-		end
-	end
-
-	--build children
-	if object.children then
-		for i, child in ipairs(object.children) do
-			gameObject:addChild(buildObjectTree(scene, child))
-		end
-	end
-
-	return gameObject
 end
 
 local function createSettingsTable(settings, defaults)

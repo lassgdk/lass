@@ -40,8 +40,8 @@ function testIntersectingRectanglesAndVectors()
 	t2.position.y = 2.00001
 	assert(not geometry.intersecting(r1, r2, t1, t2, true, true), "rectangles should not be touching")
 
-	assert(geometry.intersecting(r1, geometry.Vector2(0.5, 1)), "rectangle should contain vector")
-	assert(not geometry.intersecting(r1, geometry.Vector2(-0.5, 1)), "rectangle should not contain vector")
+	assert(geometry.intersecting(r1, geometry.Vector2(0.5, -1)), "rectangle should contain vector")
+	assert(not geometry.intersecting(r1, geometry.Vector2(0.5, 1)), "rectangle should not contain vector")
 end
 
 function testIntersectingRectangleAndCircle()
