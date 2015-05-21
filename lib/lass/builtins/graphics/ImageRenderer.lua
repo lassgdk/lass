@@ -8,7 +8,7 @@ ImageRenderer
 arguments:
 	filename - string
 arguments (optional):
-	origin - Vector2
+	origin (Vector2, default={x=0,y=0}) - location of top left corner
 	color - rgb tuple, 0-255 (e.g., {0, 0, 200})
 ]]
 
@@ -35,8 +35,8 @@ function ImageRenderer:draw()
 		(globalTransform.rotation/180) * math.pi,
 		globalTransform.size.x,
 		globalTransform.size.y,
-		self.origin.x,
-		self.origin.y * ySign
+		-self.origin.x,
+		-self.origin.y * ySign
 	)
 end
 

@@ -35,10 +35,10 @@ local PeriodicInterpolator = class.define(lass.Component, function(self, argumen
 		"ifunction must be string or function"
 	)
 	if type(arguments.ifunction) == "string" then
-		arguments.ifunction = geometry.functions[ifunction]
+		arguments.ifunction = geometry.functions[arguments.ifunction]
 	end
 
-	arguments.target = arguments.target or {}
+	arguments.targets = arguments.targets or {}
 	arguments.amplitude = arguments.amplitude or 1
 	arguments.offset = geometry.Vector2(arguments.offset)
 	arguments.period = arguments.period or 1 --in seconds
@@ -82,7 +82,10 @@ end
 
 function PeriodicInterpolator:awake()
 
-	self.target = getTarget(self, self.target)
+	-- self.targets = getTarget(self, self.targets)
+	for i, t in ipairs(self.targets) do
+		self.targets[i] = getTarget(self, t)
+	end
 	self.lastY = 0
 	self:seek(0)
 
@@ -116,7 +119,10 @@ function PeriodicInterpolator:update(dt)
 	end
 
 	self.y = (self.ifunction(self.x) * self.amplitude) + self.offset.y
-	self.target[1][self.target[2]] = self.target[1][self.target[2]] + (self.y - self.lastY)
+
+	for i, target in ipairs(self.targets) do
+		target[1][target[2]] = target[1][target[2]] + (self.y - self.lastY)
+	end
 
 	self.lastY = self.y
 end

@@ -257,7 +257,7 @@ local Shape = class.define()
 local Circle = class.define(Shape, function(self, radius, center)
 
 	assert(type(radius) == "number", "radius must be number")
-	assert(class.instanceof(center, Vector2) or not center, "center must be Vector2 or nil")
+	assert(class.instanceof(center, Vector2) or center == nil, "center must be Vector2 or nil")
 
 	self.radius = radius
 	self.center = center or Vector2(0, 0)
@@ -473,7 +473,7 @@ local Rectangle = class.define(Shape, function(self, width, height, origin)
 
 	assert(type(width) == "number", "width must be number")
 	assert(type(height) == "number", "height must be number")
-	assert(class.instanceof(origin, Vector2) or not origin, "origin must be Vector2 or nil")
+	assert(class.instanceof(origin, Vector2) or origin == nil, "origin must be Vector2 or nil")
 
 	self.width = width
 	self.height = height

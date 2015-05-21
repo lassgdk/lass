@@ -16,6 +16,8 @@ local Component = class.define(function(self, properties)
 	for k, v in pairs(properties) do
 		self[k] = v
 	end
+
+	self.globals = {}
 end)
 
 function Component:awake()
@@ -23,6 +25,10 @@ function Component:awake()
 end
 
 function Component:update(dt, firstUpdate) end
+
+function Component:globals()
+	return self.gameObject.gameScene.globals
+end
 
 --[[
 GameEntity
@@ -174,6 +180,7 @@ GameObject
 ]]
 
 --[[internal]]
+
 local function getComponents(self, componentType, num)
 	--shared function for finding components in a gameObject
 
@@ -192,6 +199,43 @@ local function getComponents(self, componentType, num)
 	end
 
 	return found
+end
+
+local function mergeComponentLists(prefabComponents, overrides)
+
+	assert(prefabComponents, "prefabComponents must be list")
+
+	local components = collections.deepcopy(prefabComponents)
+
+	if not overrides then
+		return components
+	end
+
+	local overrides = collections.deepcopy(overrides)
+
+	local found = {}
+
+	for i, comp in ipairs(overrides) do
+		local orig = nil
+
+		if not found[comp.script] then
+			found[comp.script] = collections.indices(components, comp.script, function(x)
+				return x.script
+			end)
+		--if we found an override for a component that doesn't exist in the original
+		elseif next(found[comp.script]) == nil then
+			error("component not found in original prefab")
+		end
+
+		orig = components[table.remove(found[comp.script], 1)]
+
+		--override settings of the first instance of this component
+		for argkey, argvalue in pairs(comp.arguments) do
+
+			orig.arguments[argkey] = argvalue
+		end
+	end
+	return components
 end
 
 --[[public]]
@@ -317,6 +361,7 @@ function GameObject:addComponent(component)
 
 	component.gameObject = self
 	component.gameScene = self.gameScene
+	component.globals = self.gameScene.globals
 
 	component:awake()
 end
@@ -374,43 +419,6 @@ GameScene
 
 --[[internal]]
 
-local function mergeComponentLists(prefabComponents, overrides)
-
-	assert(prefabComponents, "prefabComponents must be list")
-
-	local components = collections.deepcopy(prefabComponents)
-
-	if not overrides then
-		return components
-	end
-
-	local overrides = collections.deepcopy(overrides)
-
-	local found = {}
-
-	for i, comp in ipairs(overrides) do
-		local orig = nil
-
-		if not found[comp.script] then
-			found[comp.script] = collections.indices(components, comp.script, function(x)
-				return x.script
-			end)
-		--if we found an override for a component that doesn't exist in the original
-		elseif next(found[comp.script]) == nil then
-			error("component not found in original prefab")
-		end
-
-		orig = components[table.remove(found[comp.script], 1)]
-
-		--override settings of the first instance of this component
-		for argkey, argvalue in pairs(comp.arguments) do
-
-			orig.arguments[argkey] = argvalue
-		end
-	end
-	return components
-end
-
 local function createSettingsTable(settings, defaults)
 
 	settings = settings or {}
@@ -439,6 +447,7 @@ end
 local GameScene = class.define(GameEntity, function(self, transform)
 
 	self.gameObjects = {}
+	self.globals = {}
 	GameEntity.init(self, transform)
 end)
 
@@ -565,5 +574,5 @@ return {
 	GameEntity = GameEntity,
 	GameScene = GameScene,
 	GameObject = GameObject,
-	Component = Component
+	Component = Component,
 }
