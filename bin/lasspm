@@ -181,7 +181,7 @@ def newgame(game, projects=False):
 	for t in ["main.lua", "settings.lua", "mainscene.lua"]:
 		shutil.copy(os.path.join(DIR_TEMPLATES_LUA, t), "src")
 
-def playgame(game, **kwargs):
+def playgame(game, scene="", **kwargs):
 	"""
 	temporarily build and play a Lass project
 
@@ -191,7 +191,12 @@ def playgame(game, **kwargs):
 	"""
 
 	game = buildgame(game, sendToTemp=True, **kwargs)
-	os.system(getLoveEngineCommand() % game)
+
+	argString = ""
+	if scene:
+		argString += "--scene=" + scene
+
+	os.system(getLoveEngineCommand().format(game, argString))
 	os.remove(game)
 
 #helper functions
@@ -211,11 +216,11 @@ def findgame(game, *folders):
 
 def getLoveEngineCommand():
 	if sys.platform.startswith("win32"):
-		return os.path.join(DIR_ENGINE_WINDOWS, "love.exe") + " %s"
+		return os.path.join(DIR_ENGINE_WINDOWS, "love.exe") + " {0} {1}"
 	elif sys.platform.startswith("darwin"):
-		return "open %s -a " + os.path.join(DIR_ENGINE_OSX, "love.app")
+		return "open {0} -a " + os.path.join(DIR_ENGINE_OSX, "love.app") + " --args {1}"
 	else:
-		return "love %s"
+		return "love {0} {1}"
 
 def buildapp(loveFileName, appFolderName=None, dest="."):
 	pass
@@ -325,6 +330,11 @@ def main():
 				"action":"store_true",
 				"default":False,
 				"help":"search for game in examples folder"
+			}),
+			(("-s", "--scene"), {
+				"type":str,
+				"default":"",
+				"help":"name of scene to play"
 			})
 		]),
 	}

@@ -286,7 +286,7 @@ local function buildObjectTree(scene, object)
 			-- print("hey", comp.script)
 			-- for k,v in pairs(comp.arguments) do print(k,v) end
 
-			assert(class.subclassof(componentClass, Component), "script does not return a Component")
+			assert(class.subclassof(componentClass, Component), comp.script.."does not return a Component")
 			gameObject:addComponent(componentClass(comp.arguments))
 		end
 	end
@@ -461,13 +461,17 @@ function GameScene:load(src)
 
 	local typeS = type(src)
 	local source = ""
+	local r
 
 	if typeS == "string" then
 		source = src
-		src = love.filesystem.load(src)()
+		-- load the module file and attempt to execute it
+		r, src = pcall(love.filesystem.load(source))
+		assert(r, "could not load " .. source)
 	elseif typeS == "nil" then
 		source = self.settings.firstScene
-		src = love.filesystem.load(source)()
+		r, src = pcall(love.filesystem.load(source))
+		assert(r, "could not load " .. source)
 	else
 		assert(typeS == "table", "src must be file name, module name, or table")
 		assert(src.gameObjects, "src.gameObjects is required")

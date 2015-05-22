@@ -18,9 +18,11 @@ function Collider:isCollidingWith(other)
 	local otherType = class.instanceof(other, Collider, geometry.Shape, geometry.Vector2)
 	assert(otherType, "other must be a Collider, Shape, or Vector2")
 	if otherType == Collider then
-		return geometry.intersecting(
-			self.shape, other.shape, self.gameObject.globalTransform, other.gameObject.globalTransform
-		)
+		return 
+			self.gameObject.transform.position.z == other.gameObject.transform.position.z and
+			geometry.intersecting(
+				self.shape, other.shape, self.gameObject.globalTransform, other.gameObject.globalTransform
+			)
 	else
 		return geometry.intersecting(self.shape, other, self.gameObject.globalTransform)
 	end

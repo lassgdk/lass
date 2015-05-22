@@ -63,7 +63,7 @@ local function deepcopy(t, found)
 
 			return _copy
 		else
-			print (index(found, t), t)
+			-- print (index(found, t), t)
 			return nil
 		end
 
