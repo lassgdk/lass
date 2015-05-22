@@ -8,19 +8,20 @@ arguments:
 	width - number
 	height - number
 arguments (optional):
+	offset - location of top-left corner
 	mode - draw mode, can be "fill" or "line"
 	color - rgb tuple, 0-255 (e.g., {0, 0, 200})
 ]]
 
 local RectangleRenderer = class.define(lass.Component, function(self, arguments)
 
-	arguments.shape = geometry.Rectangle(arguments.width, arguments.height, geometry.Vector2(arguments.origin))
+	arguments.shape = geometry.Rectangle(arguments.width, arguments.height, geometry.Vector2(arguments.offset))
 	arguments.color = arguments.color or {0,0,0}
 	arguments.mode = arguments.mode or "fill"
 
 	arguments.width = nil
 	arguments.height = nil
-	arguments.origin = nil
+	arguments.offset = nil
 
 	self.base.init(self, arguments)
 end)

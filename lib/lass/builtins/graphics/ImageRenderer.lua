@@ -8,13 +8,13 @@ ImageRenderer
 arguments:
 	filename - string
 arguments (optional):
-	origin (Vector2, default={x=0,y=0}) - location of top left corner
+	offset (Vector2, default={x=0,y=0}) - location of top left corner
 	color - rgb tuple, 0-255 (e.g., {0, 0, 200})
 ]]
 
 local ImageRenderer = class.define(lass.Component, function(self, arguments)
 	arguments.image = love.graphics.newImage(arguments.filename)
-	arguments.origin = geometry.Vector2(arguments.origin)
+	arguments.offset = geometry.Vector2(arguments.offset)
 	arguments.color = arguments.color or {255,255,255}
 
 	self.base.init(self, arguments)
@@ -35,8 +35,8 @@ function ImageRenderer:draw()
 		(globalTransform.rotation/180) * math.pi,
 		globalTransform.size.x,
 		globalTransform.size.y,
-		-self.origin.x,
-		-self.origin.y * ySign
+		-self.offset.x,
+		-self.offset.y * ySign
 	)
 end
 
