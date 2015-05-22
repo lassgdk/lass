@@ -22,24 +22,32 @@ local PolygonCollider = class.define(Collider, function(self, arguments)
 	self.base.init(self, arguments)
 end)
 
-function PolygonCollider:update(dt, firstUpdate)
+function PolygonCollider:awake()
 
-	if firstUpdate and self.verticesSource and self.verticesSource ~= "" then
-		self:setVerticesSource(self.verticesSource)
-	end
-
-	if self._verticesSource then
-		self.shape = geometry.Polygon(self._verticesSource.shape.vertices)
+	if self.verticesSource then
+		self.verticesSource = self.gameObject:getComponent(self.verticesSource)
+		self.shape = self.verticesSource.shape
 	end
 end
 
-function PolygonCollider:setVerticesSource(source)
-	if source then
-		self._verticesSource = self.gameObject:getComponent(source)
-	else
-		self._verticesSource = nil
-	end
+-- function PolygonCollider:update(dt, firstUpdate)
 
-end
+-- 	if firstUpdate and self.verticesSource and self.verticesSource ~= "" then
+-- 		self:setVerticesSource(self.verticesSource)
+-- 	end
+
+-- 	if self._verticesSource then
+-- 		self.shape = geometry.Polygon(self._verticesSource.shape.vertices)
+-- 	end
+-- end
+
+-- function PolygonCollider:setVerticesSource(source)
+-- 	if source then
+-- 		self._verticesSource = self.gameObject:getComponent(source)
+-- 	else
+-- 		self._verticesSource = nil
+-- 	end
+
+-- end
 
 return PolygonCollider

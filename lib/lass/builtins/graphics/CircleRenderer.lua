@@ -24,13 +24,17 @@ end)
 function CircleRenderer:draw()
 
 	local pos = self.gameObject.globalTransform.position + self.shape.center
+
+	--eventually we will allow for ovals -- in the meantime, x affects the overall radius
+	local size = self.gameObject.globalTransform.size.x
+
 	local sign = 1
 	if self.gameObject.gameScene.settings.graphics.invertYAxis then
 		sign = -1
 	end
 
 	love.graphics.setColor(self.color)
-	love.graphics.circle(self.mode, pos.x, sign * pos.y, self.shape.radius)
+	love.graphics.circle(self.mode, pos.x, sign * pos.y, self.shape.radius * size)
 end
 
 return CircleRenderer

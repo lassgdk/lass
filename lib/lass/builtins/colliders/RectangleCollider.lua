@@ -1,28 +1,27 @@
-local lass = require("lass")
 local class = require("lass.class")
 local geometry = require("lass.geometry")
 local Collider = require("lass.builtins.colliders.Collider")
 
 --[[
-CircleCollider
+RectangleCollider
 ]]
 
-local CircleCollider = class.define(Collider, function(self, arguments)
+local RectangleCollider = class.define(Collider, function(self, arguments)
 
 	arguments.shapeSource = arguments.shapeSource or ""
 	if not arguments.shapeSource then
-		arguments.shape = geometry.Circle(arguments.radius, arguments.center)
+		arguments.shape = geometry.Rectangle(arguments.width, arguments.height, arguments.offset)
 	else
 		--placeholder until shapeSource exists
-		arguments.shape = geometry.Circle(0)
+		arguments.shape = geometry.Rectangle(0,0)
 	end
 
-	arguments.radius, arguments.center = nil, nil
+	arguments.width, arguments.height = nil, nil
 
 	self.base.init(self, arguments)
 end)
 
-function CircleCollider:awake()
+function RectangleCollider:awake()
 
 	if self.shapeSource then
 		self.shapeSource = self.gameObject:getComponent(self.shapeSource)
@@ -30,4 +29,4 @@ function CircleCollider:awake()
 	end
 end
 
-return CircleCollider
+return RectangleCollider
