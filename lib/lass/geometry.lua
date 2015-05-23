@@ -111,20 +111,39 @@ end
 function Vector2:angle(useRadians)
 	--return the angle of this vector relative to the origin
 
-	if self.x == 0 and self.y == 0 then
-		--lua uses infinity as a stand-in for NaN
-		return math.huge
-	elseif self.x == 0 then
-		return 0
-	end
 
 	local c = 1
 	if not useRadians then
 		c = 180/math.pi
 	end
 
+	if self.x == 0 and self.y == 0 then
+		--lua uses infinity as a stand-in for NaN
+		return math.huge
+	elseif self.x == 0 then
+		if self.y > 0 then
+			return 0.5 * math.pi * c
+		else -- y < 0
+			return 1.5 * math.pi * c
+		end
+	end
+
 	--tangent = opposite / adjacent
-	return math.atan(self.y / self.x) * c
+	local ang =  math.atan(self.y / self.x)
+
+	-- right now the angle doesn't tell us which quadrant the vector is in
+
+	-- top-left quadrant should be between 90 and 180;
+	-- bottom-left quadrant should be between 180 and 270
+	if self.x < 0 then
+		return (ang + math.pi) * c
+	-- bottom-right quadrant should be between 270 and 0 (360)
+	elseif self.y < 0 then
+		return (ang + (2 * math.pi)) * c
+	-- top-right quadrant should be unaltered
+	else
+		return ang * c
+	end
 end
 
 function Vector2:dot(other)
@@ -292,6 +311,10 @@ Polygon
 local function intersectingPolygonAndOther(poly1, other, transform1, transform2)
 
 	transform1 = transform1 or Transform()
+	local gc = nil
+
+	-- print(transform1.rotation)
+	-- for i, v in ipairs(poly1:globalVertices(transform1)) do print(i,v) end
 
 	local poly1Verts = poly1:globalVertices(transform1)
 	local otherVerts = nil
@@ -299,12 +322,12 @@ local function intersectingPolygonAndOther(poly1, other, transform1, transform2)
 	if otherType == Vector2 then
 		otherVerts = {other}
 	elseif otherType == Circle then
-		local gc = other:globalCircle(transform2)
+		gc = other:globalCircle(transform2)
 		--we will rotate the "vertices" (center and two outmost points) on each new axis
 		otherVerts = {
-			gc.center - Vector2(gc.radius, 0),
+			-- gc.center - Vector2(gc.radius, 0),
 			gc.center,
-			gc.center + Vector2(gc.radius, 0)
+			-- gc.center + Vector2(gc.radius, 0)
 		}
 	else
 		otherVerts = other:globalVertices(transform2)
@@ -315,9 +338,10 @@ local function intersectingPolygonAndOther(poly1, other, transform1, transform2)
 	--if collider is circle, axis is the line between the closest polygon vertex and the circle center
 	for icollider, collider in ipairs({poly1Verts, otherVerts}) do
 		local len = #collider
+		-- print("len", len)
 
 		--if the 2nd collider has only one vertex, we've already checked it
-		if len < 2 and icollider == 2 then
+		if otherType == Vector2 and icollider == 2 then
 			return true
 		end
 
@@ -327,6 +351,9 @@ local function intersectingPolygonAndOther(poly1, other, transform1, transform2)
 
 		--if this collider is a circle, we generate the "normal" here
 		if icollider == 2 and otherType == Circle then
+
+			-- naively find the point on the polygon that is closest to the circle
+			-- TODO: find the point by using voronoi regions instead
 			for i, vertex in ipairs(poly1Verts) do
 				local sm = (vertex - other:globalCenter(transform2)):sqrMagnitude()
 				if not minSm or sm <= minSm then
@@ -356,8 +383,11 @@ local function intersectingPolygonAndOther(poly1, other, transform1, transform2)
 			local maxPoint1 = nil
 
 			--project the first collider's vertices against the normal
+
+			--we 'adjust' the projections along a horizontal line, to make them easier to sort
 			for j, vertex2 in ipairs(poly1Verts) do
 				local projected = vertex2:project(normal)
+				-- local adjustedProjected = projected
 				local adjustedProjected = projected:rotate(normalAngle)
 
 				if not minPoint1 then
@@ -380,20 +410,44 @@ local function intersectingPolygonAndOther(poly1, other, transform1, transform2)
 			--project the second collider's vertices against the normal
 			for j, vertex2 in ipairs(otherVerts) do
 				local projected = vertex2:project(normal)
+				-- local adjustedProjected = projected
 				local adjustedProjected = projected:rotate(normalAngle)
 
-				if not minPoint2 then
-					minPoint2 = adjustedProjected
-				end
 
-				if not maxPoint2 then
-					maxPoint2 = adjustedProjected
-				elseif adjustedProjected.x < minPoint2.x then
-					minPoint2 = adjustedProjected
-				elseif adjustedProjected.x > maxPoint2.x then
-					maxPoint2 = adjustedProjected
+				if otherType == Circle then
+
+					minPoint2 = adjustedProjected - Vector2(gc.radius, 0)
+					maxPoint2 = adjustedProjected + Vector2(gc.radius, 0)
+
+					-- local ang = projected:angle()
+					-- -- {x=0, y=0} means an undefined or infinite angle
+					-- if ang == math.huge then
+					-- 	ang = 0
+					-- end
+
+					-- -- rotate point to be on horizontal axis, subtract radius, rotate back to normal
+					-- minPoint2 = projected:rotate(ang) - Vector2(gc.radius, 0)
+					-- minPoint2 = minPoint2:rotate(ang)
+
+					-- -- same, but this time we add radius
+					-- maxPoint2 = projected:rotate(ang) + Vector2(gc.radius, 0)
+					-- maxPoint2 = maxPoint2:rotate(ang)
+
+				else
+					if not minPoint2 then
+						minPoint2 = adjustedProjected
+					end
+
+					if not maxPoint2 then
+						maxPoint2 = adjustedProjected
+					elseif adjustedProjected.x < minPoint2.x then
+						minPoint2 = adjustedProjected
+					elseif adjustedProjected.x > maxPoint2.x then
+						maxPoint2 = adjustedProjected
+					end
 				end
 			end
+			-- print(minPoint1, maxPoint1, minPoint2, maxPoint2)
 
 			local points = {{minPoint1,1}, {minPoint2,2}, {maxPoint1,1}, {maxPoint2,2}}
 			table.sort(points, function(a,b) return a[1].x < b[1].x end)
@@ -598,8 +652,6 @@ local function intersecting(fig1, fig2, transform1, transform2, ignoreRotation1,
 	local fig1Type = class.instanceof(fig1, Vector2, Rectangle, Circle, Polygon)
 	local fig2Type = class.instanceof(fig2, Vector2, Rectangle, Circle, Polygon)
 
-	-- print(fig1Type==Circle, fig2Type==Circle)
-
 	--collision between two points
 	if fig1Type == Vector2 and fig2Type == Vector2 then
 		fig1 = Vector3(fig1) + transform1.position
@@ -615,7 +667,7 @@ local function intersecting(fig1, fig2, transform1, transform2, ignoreRotation1,
 	end
 	if ignoreRotation2 then
 		transform2.rotation = 0 
-	elseif fig1Type == Rectangle and transform2.rotation ~= 0 then
+	elseif fig2Type == Rectangle and transform2.rotation ~= 0 then
 		fig2, fig2Type = fig2:toPolygon(), Polygon
 	end
 
