@@ -1,6 +1,7 @@
 local lass = require("lass")
 local class = require("lass.class")
 local geometry = require("lass.geometry")
+local Renderer = require("lass.builtins.graphics.Renderer")
 
 --[[
 RectangleRenderer
@@ -13,7 +14,7 @@ arguments (optional):
 	color - rgb tuple, 0-255 (e.g., {0, 0, 200})
 ]]
 
-local RectangleRenderer = class.define(lass.Component, function(self, arguments)
+local RectangleRenderer = class.define(Renderer, function(self, arguments)
 
 	arguments.shape = geometry.Rectangle(arguments.width, arguments.height, geometry.Vector2(arguments.offset))
 	arguments.color = arguments.color or {0,0,0}

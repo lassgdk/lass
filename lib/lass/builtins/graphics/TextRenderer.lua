@@ -1,8 +1,9 @@
-lass = require("lass")
-class = require("lass.class")
-geometry = require("lass.geometry")
+local lass = require("lass")
+local class = require("lass.class")
+local geometry = require("lass.geometry")
+local Renderer = require("lass.builtins.graphics.Renderer")
 
-local TextRenderer = class.define(lass.Component, function(self, arguments)
+local TextRenderer = class.define(Renderer, function(self, arguments)
 
 	arguments.text = arguments.text or ""
 	arguments.color = arguments.color or {0,0,0}

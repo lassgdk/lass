@@ -1,6 +1,7 @@
 local lass = require("lass")
 local class = require("lass.class")
 local geometry = require("lass.geometry")
+local Renderer = require("lass.builtins.graphics.Renderer")
 
 --[[
 CircleRenderer
@@ -11,7 +12,7 @@ arguments (optional):
 	color - rgb tuple, 0-255 (e.g., {0, 0, 200})
 ]]
 
-local CircleRenderer = class.define(lass.Component, function(self, arguments)
+local CircleRenderer = class.define(Renderer, function(self, arguments)
 
 	arguments.shape = geometry.Circle(arguments.radius or 0, arguments.center)
 	arguments.radius = nil

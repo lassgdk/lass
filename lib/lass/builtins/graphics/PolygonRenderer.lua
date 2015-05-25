@@ -1,5 +1,6 @@
 local lass = require("lass")
 local class = require("lass.class")
+local Renderer = require("lass.builtins.graphics.Renderer")
 local geometry = require("lass.geometry")
 
 --[[
@@ -11,7 +12,7 @@ arguments (optional):
 	color - rgb tuple, 0-255 (e.g., {0, 0, 200})
 ]]
 
-local PolygonRenderer = class.define(lass.Component, function(self, arguments)
+local PolygonRenderer = class.define(Renderer, function(self, arguments)
 
 	arguments.shape = geometry.Polygon(arguments.vertices)
 	arguments.vertices = nil

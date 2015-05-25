@@ -91,6 +91,7 @@ local GameEntity = class.define(function(self, transform, parent)
 	maintainTransform(self)
 end)
 
+-- trackParent should normally be false if GameEntity is scene and child is GameObject
 function GameEntity:addChild(child, trackParent)
 
 	-- for k,v in pairs(child) do print(k,v) end
@@ -388,6 +389,15 @@ function GameObject:getComponents(componentType)
 	-- return found
 end
 
+function GameObject:detach()
+
+	for i, component in ipairs(self.component) do
+		if component.detach then
+			component:detach()
+		end
+	end
+end
+
 --callback functions
 for i, f in ipairs({
 	"errhand",
@@ -448,6 +458,7 @@ local GameScene = class.define(GameEntity, function(self, transform)
 
 	self.gameObjects = {}
 	self.globals = {}
+	self.globals.drawables = {}
 	GameEntity.init(self, transform)
 end)
 
@@ -514,16 +525,27 @@ function GameScene:addGameObject(gameObject)
 
 end
 
-function GameScene:removeGameObject(gameObject)
+function GameScene:removeGameObject(gameObject, removeDescendants)
 
 	local index = collections.index(self.gameObjects, gameObject)
 	if index then
 		table.remove(self.gameObjects, index)
 	end
 
-	for k,v in pairs(gameObject) do
-		gameObject[k] = nil
+	if removeDescendants == true then
+		for i, child in ipairs(gameObject.children) do
+			self:removeGameObject(child, true)
+		end
+	-- if this object has no parent, its children must become children of the scene
+	elseif not class.instanceof(gameObject.parent, GameObject) then
+		for i, child in ipairs(gameObject.children) do
+			self:addChild(child, false)
+		end
 	end
+
+	-- for k,v in pairs(gameObject) do
+	-- 	gameObject[k] = nil
+	-- end
 end
 
 function GameScene:update(dt)
@@ -542,8 +564,9 @@ function GameScene:draw()
 	local indices = {}
 
 	--collect all drawable objects into buckets -- each bucket maps to a different z-value
-	for i, object in ipairs(self.gameObjects) do
-		if object:isDrawable() then
+	--self.globals.drawables is an unordered set
+	for object in pairs(self.globals.drawables) do
+		-- if object:isDrawable() then
 			local bucket = drawables[object.globalTransform.position.z]
 			-- print(object.globalTransform.position.z)
 			if bucket then
@@ -551,7 +574,7 @@ function GameScene:draw()
 			else
 				drawables[object.globalTransform.position.z] = {object}
 			end
-		end
+		-- end
 	end
 
 	--sort the z-values (indices) in reverse order (so highest are drawn first)

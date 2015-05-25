@@ -129,6 +129,8 @@ function testIntersectingPolygonAndCircle()
 	t2.position.y = 24
 	assert(geometry.intersecting(pol, cir, t1, t2), "figures should be intersecting")
 
+	t2.position.y = -25
+	assert(geometry.intersecting(pol, cir, t1, t2), "figures should be intersecting")
 end
 
 function testPolygonWithNoArguments()

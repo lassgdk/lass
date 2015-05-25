@@ -10,6 +10,8 @@ do not use this as a component directly! (unless you can think of a good reason 
 local Collider = class.define(lass.Component, function(self, arguments)
 	assert(class.instanceof(arguments.shape, geometry.Shape), "shape must be geometry.Shape")
 
+	arguments.ignoreZ = arguments.ignoreZ or false
+
 	self.base.init(self, arguments)
 end)
 
@@ -19,7 +21,11 @@ function Collider:isCollidingWith(other)
 	assert(otherType, "other must be a Collider, Shape, or Vector2")
 	if otherType == Collider then
 		return 
-			self.gameObject.transform.position.z == other.gameObject.transform.position.z and
+			(
+				self.gameObject.transform.position.z == other.gameObject.transform.position.z or
+				self.ignoreZ or
+				other.ignoreZ
+			) and
 			geometry.intersecting(
 				self.shape, other.shape, self.gameObject.globalTransform, other.gameObject.globalTransform
 			)

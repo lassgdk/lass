@@ -1,6 +1,7 @@
 local lass = require("lass")
 local class = require("lass.class")
 local geometry = require("lass.geometry")
+local Renderer = require("lass.builtins.graphics.Renderer")
 
 --[[
 ImageRenderer
@@ -12,7 +13,8 @@ arguments (optional):
 	color - rgb tuple, 0-255 (e.g., {0, 0, 200})
 ]]
 
-local ImageRenderer = class.define(lass.Component, function(self, arguments)
+local ImageRenderer = class.define(Renderer, function(self, arguments)
+
 	arguments.image = love.graphics.newImage(arguments.filename)
 	arguments.offset = geometry.Vector2(arguments.offset)
 	arguments.color = arguments.color or {255,255,255}
