@@ -28,6 +28,8 @@ function CircleCollider:awake()
 		self.shapeSource = self.gameObject:getComponent(self.shapeSource)
 		self.shape = self.shapeSource.shape
 	end
+
+	self.base.awake(self)
 end
 
 return CircleCollider

@@ -28,6 +28,7 @@ function PolygonCollider:awake()
 		self.verticesSource = self.gameObject:getComponent(self.verticesSource)
 		self.shape = self.verticesSource.shape
 	end
+	self.base.awake(self)
 end
 
 -- function PolygonCollider:update(dt, firstUpdate)

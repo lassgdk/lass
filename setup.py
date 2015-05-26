@@ -100,12 +100,14 @@ class CustomInstall(install):
 		install.run(self)
 
 		#ensure that the original owner, not just the root user, owns the new data files
+		log.info("changing owner of data files to %s" % UID)
 		for root, dirs, files in os.walk(DIR_LASS_DATA):
-			log.info("changing owner of %s to %d" % (root, UID))
+			# log.info("changing owner of %s to %d" % (root, UID))
 			os.chown(root, UID, GID)
 			for f in files:
-				log.info("changing owner of %s to %d" % (os.path.join(root, f), UID))
+				# log.info("changing owner of %s to %d" % (os.path.join(root, f), UID))
 				os.chown(os.path.join(root, f), UID, GID)
+		log.info("done")
 
 if sys.platform.startswith("win32"):
 	scripts = []

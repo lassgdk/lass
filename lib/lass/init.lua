@@ -411,15 +411,27 @@ for i, f in ipairs({
 	"windowresize",
 	"textinput",
 	"threaderror",
-	"visible"
+	"visible",
+
+	{"collisionenter", false},
+	{"collisionexit", false}
 }) do
+	if type(f) == "table" then
+		f = f[1]
+		local super = f[2]
+	else
+		local super = true
+	end
+
 	GameObject[f] = function(self, ...)
 		for i, component in ipairs(self.components) do
 			if component[f] then
 				component[f](component, ...)
 			end
 		end
-		self.base[f](self, ...)
+		if super then
+			self.base[f](self, ...)
+		end
 	end
 end
 
@@ -459,6 +471,7 @@ local GameScene = class.define(GameEntity, function(self, transform)
 	self.gameObjects = {}
 	self.globals = {}
 	self.globals.drawables = {}
+	self.globals.colliders = {}
 	GameEntity.init(self, transform)
 end)
 
@@ -552,6 +565,78 @@ function GameScene:update(dt)
 	--update all children (top-level game objects) of the scene
 
 	maintainTransform(self)
+
+	--collision stuff
+	local collisionData = {}
+	for layerName, layer in pairs(self.globals.colliders) do
+
+		-- local colliders = {}
+
+		-- -- turn unordered set into an ordered list
+		-- for collider in pairs(layer) do
+		-- 	colliders[#colliders] = collider
+		-- end
+
+		-- use "staircase" method to check each collider against all subsequent colliders
+		for i, collider in ipairs(layer) do
+			-- print(i)
+
+			if not collisionData[collider] then
+				collisionData[collider] = {colliding={}, notColliding={}}
+			end
+
+			-- if j > #layer, the loop will be skipped
+			for j = i+1, #layer do
+
+				if not collisionData[layer[j]] then
+					collisionData[layer[j]] = {colliding={}, notColliding={}}
+				end
+
+				if collider:isCollidingWith(layer[j]) then
+
+					-- if two colliders on multiple, identical layers collide with each other,
+					-- the collision would be registered more than once. we use sets instead of
+					-- lists so we don't have to worry about these duplicates.
+					collisionData[collider].colliding[layer[j]] = true
+					collisionData[layer[j]].colliding[collider] = true
+				else
+					collisionData[collider].notColliding[layer[j]] = true
+					collisionData[layer[j]].notColliding[collider] = true
+				end
+			end
+		end
+	end
+
+	for collider, others in pairs(collisionData) do
+		local enter = {}
+		local exit = {}
+
+		-- check collisions
+		for other in pairs(others.colliding) do
+			-- collision just started
+			if not collider.collidingWith[other] then
+				enter[#enter + 1] = other
+			end
+		end
+
+		-- check non-collisions
+		for other in pairs(others.notColliding) do
+			-- collision just ended
+			if collider.collidingWith[other] then
+				exit[#exit + 1] = other
+			end
+		end
+
+		collider.collidingWith = collections.copy(others.colliding)
+		if next(enter) then
+			collider.gameObject:collisionenter(collections.copy(enter))
+		end
+		if next(exit) then
+			local noCollisionsLeft = not next(enter)
+			collider.gameObject:collisionexit(collections.copy(exit), noCollisionsLeft)
+		end
+	end
+
 	self.base.update(self, dt, not self.finishedFirstUpdate)
 	if not self.finishedFirstUpdate then
 		self.finishedFirstUpdate = true
