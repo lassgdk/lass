@@ -81,15 +81,24 @@ function class.instanceof(object, ...)
    end
 end
 
-function class.subclassof(object, ...)
-   -- check if object/literal is a subclass of class(es), regardless of its type.
+function class.subclassof(myclass, ...)
+   -- check if class is a subclass of class(es), regardless of its type.
    -- reeturns false or the first match found
 
-   if not (type(object) == "table" and object.base) then
+   if not (type(myclass) == "table" and myclass.base) then
       return false
    else
+      local originalClass = myclass
       for _, cl in ipairs({...}) do
-         if object.base == cl then return cl end
+
+         myclass = originalClass
+         while myclass.base ~= nil do
+            if myclass.base == cl then
+               return cl
+            else
+               myclass = myclass.base
+            end
+         end
       end
       return false
    end

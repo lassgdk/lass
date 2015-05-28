@@ -35,9 +35,9 @@ function testIntersectingRectanglesAndVectors()
 	assert(geometry.intersecting(r1, r2), "rectangles at same origin aren't intersecting")
 	assert(geometry.intersecting(r1, r2, t1, t2, true, true), "rectangles at same origin aren't intersecting")
 
-	t2.position.y = 2
+	t2.position.y = 3
 	assert(geometry.intersecting(r1, r2, t1, t2, true, true), "rectangles should be touching")
-	t2.position.y = 2.00001
+	t2.position.y = 3.00001
 	assert(not geometry.intersecting(r1, r2, t1, t2, true, true), "rectangles should not be touching")
 
 	assert(geometry.intersecting(r1, geometry.Vector2(0.5, -1)), "rectangle should contain vector")

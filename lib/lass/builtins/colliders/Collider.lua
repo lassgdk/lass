@@ -13,6 +13,7 @@ local Collider = class.define(lass.Component, function(self, arguments)
 
 	arguments.ignoreZ = arguments.ignoreZ or false
 	arguments.layers = arguments.layers or {"main"}
+	arguments.solid = arguments.solid or false
 
 	self.base.init(self, arguments)
 end)
@@ -24,18 +25,26 @@ function Collider:awake()
 		local layer = self.globals.colliders[layerName]
 		if layer then
 			layer[#layer + 1] = self
-			print(#layer)
+			self.globalColliderIndex = #layer
 		else
 			self.globals.colliders[layerName] = {self}
+			self.globalColliderIndex = 1
 			-- self.globals.colliders[layerName][self] = true
 		end
 	end
+
 end
 
 function Collider:isCollidingWith(other)
 
 	local otherType = class.instanceof(other, Collider, geometry.Shape, geometry.Vector2)
 	assert(otherType, "other must be a Collider, Shape, or Vector2")
+
+	-- if self.gameObject.name == "Floor" or other.gameObject.name == "Floor" then
+	-- 	print("trying")
+	-- else
+	-- 	print("not trying")
+	-- end
 	if otherType == Collider then
 		return 
 			(

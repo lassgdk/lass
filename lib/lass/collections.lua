@@ -83,9 +83,20 @@ local function deepcopy(t, found)
 	end
 end
 
+local function set(l)
+
+	s = {}
+	for i, v in ipairs(l) do
+		s[v] = true
+	end
+
+	return s
+end
+
 return {
 	copy = copy,
 	deepcopy = deepcopy,
 	index = index,
-	indices = indices
+	indices = indices,
+	set = set
 }

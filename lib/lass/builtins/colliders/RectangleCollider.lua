@@ -17,7 +17,6 @@ local RectangleCollider = class.define(Collider, function(self, arguments)
 	end
 
 	arguments.width, arguments.height = nil, nil
-
 	self.base.init(self, arguments)
 end)
 

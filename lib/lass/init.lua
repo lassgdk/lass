@@ -36,9 +36,8 @@ GameEntity
 
 --[[internal]]
 
-function maintainTransform(self)
+local function maintainTransform(self)
 	--maintain global position and rotation
-	--NOTE: only GameEntity:init() and GameEntity:update() should call this function directly
 
 	--clamp rotation between 0 and 360 degrees (e.g., -290 => 70)
 	self.transform.rotation = self.transform.rotation % 360
@@ -283,11 +282,13 @@ local function buildObjectTree(scene, object)
 	if object.components then
 		for i, comp in ipairs(object.components) do
 			local componentClass = require(comp.script)
+			-- print(componentClass, require("lass.builtins.graphics.RectangleRenderer"))
 
 			-- print("hey", comp.script)
 			-- for k,v in pairs(comp.arguments) do print(k,v) end
 
-			assert(class.subclassof(componentClass, Component), comp.script.."does not return a Component")
+			-- print("checking inheritance for " .. object.name)
+			assert(class.subclassof(componentClass, Component), comp.script.." does not return a Component")
 			gameObject:addComponent(componentClass(comp.arguments))
 		end
 	end
@@ -398,6 +399,142 @@ function GameObject:detach()
 	end
 end
 
+function GameObject:move(x, y, z, stopOnCollide)
+
+	local oldPosition = geometry.Vector3(self.transform.position)
+	local newPosition
+
+	if type(y) == "boolean" then
+		newPosition = geometry.Vector3(x) + self.transform.position
+		stopOnCollide = y
+	else
+		newPosition = geometry.Vector3(x, y, z) + self.transform.position
+		stopOnCollide = stopOnCollide or false
+	end
+
+	self.transform.position = newPosition
+
+	if not stopOnCollide then
+		return
+	end
+
+	-- print(newPosition, oldPosition)
+
+	local collider = self:getComponent("lass.builtins.colliders.Collider")
+	-- print(collider, collider.solid)
+	if collider and collider.solid then
+		local others = {}
+		local collisions = {}
+
+		-- we need to update the global transform for the collision detection to work immediately
+		maintainTransform(self)
+
+		for i, layer in ipairs(collider.layers) do
+			-- print(#self.gameScene.globals.colliders[layer])
+			others[layer] = collections.copy(self.gameScene.globals.colliders[layer])
+		end
+
+		for layerName, layer in pairs(others) do
+			-- print("checking others")
+			for i, other in ipairs(layer) do
+				-- print(self.name, other.gameObject.name, collider:isCollidingWith(other))
+				if
+					other ~= collider and
+					other.solid and
+					collider:isCollidingWith(other) and
+					-- if we were already colliding with other, nothing can be done
+					not collider.collidingWith[other]
+				then
+					collisions[#collisions + 1] = other
+				end
+			end
+		end
+
+		if #collisions < 1 then
+			return
+		end
+
+		-- print("collisions")
+
+		local backward = true
+		local lastBackward = backward
+		local skip = newPosition - oldPosition
+		local oldSkip
+
+		skip = geometry.Vector2(skip.x/2, skip.y/2)
+		for i, a in ipairs({"x", "y"}) do
+			if skip[a] < 0 then
+				skip[a] = math.ceil(skip[a])
+			else
+				skip[a] = math.floor(skip[a])
+			end
+		end
+		local done = false
+		local maintainSkip = false
+		local counter = 0
+
+		while not done do
+			if backward then
+				self.transform.position = self.transform.position - skip
+			else
+				self.transform.position = self.transform.position + skip
+			end
+
+			self.transform.position.x = math.floor(self.transform.position.x)
+			self.transform.position.y = math.floor(self.transform.position.y)
+
+			maintainTransform(self)
+
+			lastBackward = backward
+			for i,c in ipairs(collisions) do
+				if collider:isCollidingWith(c) then
+					-- print("colliding")
+					backward = true
+					break
+				end
+				backward = false
+			end
+
+			local axesLessThanOne = 0
+			if not maintainSkip then
+				oldSkip = skip
+				skip = geometry.Vector2(skip.x/2, skip.y/2)
+				for i, a in ipairs({"x", "y"}) do
+					if skip[a] < 0 then
+						skip[a] = math.ceil(skip[a])
+						if skip[a] > -1 then
+							-- skip[a] = -1
+							axesLessThanOne = axesLessThanOne + 1
+						end
+					elseif skip[a] > 0 then
+						skip[a] = math.floor(skip[a])
+						if skip[a] < 1 then
+							-- skip[a] = 1
+							axesLessThanOne = axesLessThanOne + 1
+						end
+					else
+						axesLessThanOne = axesLessThanOne + 1
+					end
+				end
+			end
+
+			if axesLessThanOne == 2 then
+				skip = oldSkip
+				maintainSkip = true
+			end
+			if maintainSkip and backward and not lastBackward then
+				done = true
+			end
+
+		end
+
+		self.done = true
+		return collisions
+
+		-- print('finished', self.transform.position)
+	end
+end
+
 --callback functions
 for i, f in ipairs({
 	"errhand",
@@ -444,24 +581,123 @@ GameScene
 local function createSettingsTable(settings, defaults)
 
 	settings = settings or {}
-	defaults = defaults or require("lass.defaults")
+	defaultsFallback = require("lass.defaults")
+	defaults = defaults or defaultsFallback
 
-	for sectionName, section in pairs(defaults) do
+	for sectionName, section in pairs(defaultsFallback) do
+
 		if not settings[sectionName] then
-			settings[sectionName] = section
+			-- use defaults
+			if defaults[sectionName] then
+				settings[sectionName] = collections.deepcopy(defaults[sectionName])
+			-- use defaults fallback, if different from defaults
+			else
+				settings[sectionName] = collections.deepcopy(section)
+			end
+
 		else
 			if type(section) == "table" then
 				for optionName, option in pairs(section) do
-					settings[sectionName][optionName] = settings[sectionName][optionName] or option
+					local def
+					if defaults[sectionName] then
+						def = defaults[sectionName][optionName]
+					end
+					settings[sectionName][optionName] =	settings[sectionName][optionName] or def or option
 				end
 			--some "sections" are actually fields
 			else
-				settings[sectionName] = settings[sectionName] or section
+				settings[sectionName] = settings[sectionName] or defaults[sectionName] or section
 			end
 		end
 	end
 
 	return settings
+end
+
+local function maintainCollisions(self, colliderToCheck)
+
+	--collision stuff
+	local collisionData = {}
+	local layers
+
+	if colliderToCheck then
+		layers = collections.set(colliderToCheck.layers)
+	else
+		layers = self.globals.colliders
+	end
+
+	for layerName, layer in pairs(layers) do
+
+		-- local colliders = {}
+
+		-- -- turn unordered set into an ordered list
+		-- for collider in pairs(layer) do
+		-- 	colliders[#colliders] = collider
+		-- end
+
+		if colliderToCheck then
+			layer = self.globals.colliders[layerName]
+		end
+
+		-- use "staircase" method to check each collider against all subsequent colliders
+		for i, collider in ipairs(layer) do
+			-- print(i, collider.gameObject.name)
+
+			if not collisionData[collider] then
+				collisionData[collider] = {colliding={}, notColliding={}}
+			end
+
+			-- if j > #layer, the loop will be skipped
+			for j = i+1, #layer do
+
+				if not collisionData[layer[j]] then
+					collisionData[layer[j]] = {colliding={}, notColliding={}}
+				end
+
+				if collider:isCollidingWith(layer[j]) then
+
+					-- if two colliders on multiple, identical layers collide with each other,
+					-- the collision would be registered more than once. we use sets instead of
+					-- lists so we don't have to worry about these duplicates.
+					collisionData[collider].colliding[layer[j]] = true
+					collisionData[layer[j]].colliding[collider] = true
+				else
+					collisionData[collider].notColliding[layer[j]] = true
+					collisionData[layer[j]].notColliding[collider] = true
+				end
+			end
+		end
+	end
+
+	for collider, others in pairs(collisionData) do
+		local enter = {}
+		local exit = {}
+
+		-- check collisions
+		for other in pairs(others.colliding) do
+			-- collision just started
+			if not collider.collidingWith[other] then
+				enter[#enter + 1] = other
+			end
+		end
+
+		-- check non-collisions
+		for other in pairs(others.notColliding) do
+			-- collision just ended
+			if collider.collidingWith[other] then
+				exit[#exit + 1] = other
+			end
+		end
+
+		collider.collidingWith = collections.copy(others.colliding)
+		if next(enter) then
+			collider.gameObject:collisionenter(collections.copy(enter))
+		end
+		if next(exit) then
+			local noCollisionsLeft = not next(enter)
+			collider.gameObject:collisionexit(collections.copy(exit), noCollisionsLeft)
+		end
+	end
 end
 
 --[[public]]
@@ -524,6 +760,9 @@ function GameScene:applySettings()
 
 	--graphics
 	love.graphics.setBackgroundColor(self.settings.graphics.backgroundColor)
+
+	--physics
+	self.globals.gravity = geometry.Vector2(self.settings.physics.gravity)
 end
 
 function GameScene:addGameObject(gameObject)
@@ -565,78 +804,7 @@ function GameScene:update(dt)
 	--update all children (top-level game objects) of the scene
 
 	maintainTransform(self)
-
-	--collision stuff
-	local collisionData = {}
-	for layerName, layer in pairs(self.globals.colliders) do
-
-		-- local colliders = {}
-
-		-- -- turn unordered set into an ordered list
-		-- for collider in pairs(layer) do
-		-- 	colliders[#colliders] = collider
-		-- end
-
-		-- use "staircase" method to check each collider against all subsequent colliders
-		for i, collider in ipairs(layer) do
-			-- print(i)
-
-			if not collisionData[collider] then
-				collisionData[collider] = {colliding={}, notColliding={}}
-			end
-
-			-- if j > #layer, the loop will be skipped
-			for j = i+1, #layer do
-
-				if not collisionData[layer[j]] then
-					collisionData[layer[j]] = {colliding={}, notColliding={}}
-				end
-
-				if collider:isCollidingWith(layer[j]) then
-
-					-- if two colliders on multiple, identical layers collide with each other,
-					-- the collision would be registered more than once. we use sets instead of
-					-- lists so we don't have to worry about these duplicates.
-					collisionData[collider].colliding[layer[j]] = true
-					collisionData[layer[j]].colliding[collider] = true
-				else
-					collisionData[collider].notColliding[layer[j]] = true
-					collisionData[layer[j]].notColliding[collider] = true
-				end
-			end
-		end
-	end
-
-	for collider, others in pairs(collisionData) do
-		local enter = {}
-		local exit = {}
-
-		-- check collisions
-		for other in pairs(others.colliding) do
-			-- collision just started
-			if not collider.collidingWith[other] then
-				enter[#enter + 1] = other
-			end
-		end
-
-		-- check non-collisions
-		for other in pairs(others.notColliding) do
-			-- collision just ended
-			if collider.collidingWith[other] then
-				exit[#exit + 1] = other
-			end
-		end
-
-		collider.collidingWith = collections.copy(others.colliding)
-		if next(enter) then
-			collider.gameObject:collisionenter(collections.copy(enter))
-		end
-		if next(exit) then
-			local noCollisionsLeft = not next(enter)
-			collider.gameObject:collisionexit(collections.copy(exit), noCollisionsLeft)
-		end
-	end
-
+	maintainCollisions(self)
 	self.base.update(self, dt, not self.finishedFirstUpdate)
 	if not self.finishedFirstUpdate then
 		self.finishedFirstUpdate = true

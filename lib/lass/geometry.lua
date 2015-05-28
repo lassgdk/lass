@@ -592,7 +592,7 @@ local function intersectingFixedRectangles(rect1, rect2, transform1, transform2)
 	--checks intersection of two rectangles, where rotation is assumed to be 0
 
 	rect1 = rect1:globalRectangle(transform1)
-	rect2 = rect1:globalRectangle(transform2)
+	rect2 = rect2:globalRectangle(transform2)
 
 	return
 		--is 1's left edge on, or to the left of, 2's right edge?
@@ -600,9 +600,9 @@ local function intersectingFixedRectangles(rect1, rect2, transform1, transform2)
 		--is 1's right edge on, or to the right of, 2's left edge?
 		rect1.origin.x + rect1.width >= rect2.origin.x and
 		--is 1's top edge on or above 2's bottom edge?
-		rect1.origin.y + rect1.height >= rect2.origin.y and
+		rect1.origin.y >= rect2.origin.y - rect2.height and
 		--is 1's bottom edge on or below 2's top edge?
-		rect1.origin.y <= rect2.origin.y + rect2.height
+		rect1.origin.y - rect1.height <= rect2.origin.y
 end
 
 local function intersectingFixedRectangleAndCircle(rect, cir, transform1, transform2)
