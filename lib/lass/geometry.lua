@@ -333,6 +333,8 @@ local function intersectingPolygonAndOther(poly1, other, transform1, transform2)
 		otherVerts = other:globalVertices(transform2)
 	end
 
+	local minDistance = nil
+
 	--check against every axis of both colliders
 	--if collider is polygon, axis is normal of a side
 	--if collider is circle, axis is the line between the closest polygon vertex and the circle center
@@ -374,7 +376,7 @@ local function intersectingPolygonAndOther(poly1, other, transform1, transform2)
 			--the vector might be (0,0) if the 2nd collider is a circle,
 			--and the 1st collider is touching its center
 			if normal.x == 0 and normal.y == 0 then
-				return true
+				return true, other.radius
 			end
 
 			local normalAngle = normal:angle()
@@ -384,10 +386,9 @@ local function intersectingPolygonAndOther(poly1, other, transform1, transform2)
 
 			--project the first collider's vertices against the normal
 
-			--we 'adjust' the projections along a horizontal line, to make them easier to sort
+			--we 'adjust' the projections by rotating them to y=0, to make them easier to sort
 			for j, vertex2 in ipairs(poly1Verts) do
 				local projected = vertex2:project(normal)
-				-- local adjustedProjected = projected
 				local adjustedProjected = projected:rotate(normalAngle)
 
 				if not minPoint1 then
@@ -405,34 +406,16 @@ local function intersectingPolygonAndOther(poly1, other, transform1, transform2)
 
 			local minPoint2 = nil
 			local maxPoint2 = nil
-			local potentialCollision = false
 
 			--project the second collider's vertices against the normal
 			for j, vertex2 in ipairs(otherVerts) do
 				local projected = vertex2:project(normal)
-				-- local adjustedProjected = projected
 				local adjustedProjected = projected:rotate(normalAngle)
 
 
 				if otherType == Circle then
-
 					minPoint2 = adjustedProjected - Vector2(gc.radius, 0)
 					maxPoint2 = adjustedProjected + Vector2(gc.radius, 0)
-
-					-- local ang = projected:angle()
-					-- -- {x=0, y=0} means an undefined or infinite angle
-					-- if ang == math.huge then
-					-- 	ang = 0
-					-- end
-
-					-- -- rotate point to be on horizontal axis, subtract radius, rotate back to normal
-					-- minPoint2 = projected:rotate(ang) - Vector2(gc.radius, 0)
-					-- minPoint2 = minPoint2:rotate(ang)
-
-					-- -- same, but this time we add radius
-					-- maxPoint2 = projected:rotate(ang) + Vector2(gc.radius, 0)
-					-- maxPoint2 = maxPoint2:rotate(ang)
-
 				else
 					if not minPoint2 then
 						minPoint2 = adjustedProjected
@@ -458,6 +441,16 @@ local function intersectingPolygonAndOther(poly1, other, transform1, transform2)
 				return false
 			end
 
+			--calculate the lowest distance at which the shapes overlap
+			if not minDistance then
+				minDistance = points[3][1].x - points[2][1].x
+			else
+				local d = points[3][1].x - points[2][1].x
+				if d < minDistance then
+					minDistance = d
+				end
+			end
+
 			--if this is a circle, there is only one "normal" to check, so we can break now
 			if icollider == 2 and otherType == Circle then
 				break
@@ -466,7 +459,7 @@ local function intersectingPolygonAndOther(poly1, other, transform1, transform2)
 	end
 
 	--if no gaps have been found, there must be a collision
-	return true
+	return true, minDistance
 end
 
 
@@ -583,26 +576,56 @@ intersection functions
 --[[internal]]
 
 local function intersectingCircles(cir1, cir2, transform1, transform2)
-	return
-		Vector2(cir1:globalCenter(transform1) - cir2:globalCenter(transform2)):magnitude() <=
-		(cir1.radius + cir2.radius)
+
+	local distance = Vector2(cir1:globalCenter(transform1) - cir2:globalCenter(transform2)):magnitude()
+	local intersecting = distance <= cir1.radius + cir2.radius
+
+	if not intersecting then
+		distance = nil
+	end
+
+	return intersecting, distance
 end
 
 local function intersectingFixedRectangles(rect1, rect2, transform1, transform2)
 	--checks intersection of two rectangles, where rotation is assumed to be 0
 
-	rect1 = rect1:globalRectangle(transform1)
-	rect2 = rect2:globalRectangle(transform2)
+	local rect1 = rect1:globalRectangle(transform1)
+	local rect2 = rect2:globalRectangle(transform2)
 
-	return
+	-- return
+	-- 	--is 1's left edge on, or to the left of, 2's right edge?
+	-- 	rect1.origin.x <= rect2.origin.x + rect2.width and
+	-- 	--is 1's right edge on, or to the right of, 2's left edge?
+	-- 	rect1.origin.x + rect1.width >= rect2.origin.x and
+	-- 	--is 1's top edge on or above 2's bottom edge?
+	-- 	rect1.origin.y >= rect2.origin.y - rect2.height and
+	-- 	--is 1's bottom edge on or below 2's top edge?
+	-- 	rect1.origin.y - rect1.height <= rect2.origin.y
+
+	local overlaps = {
 		--is 1's left edge on, or to the left of, 2's right edge?
-		rect1.origin.x <= rect2.origin.x + rect2.width and
+		rect1.origin.x - (rect2.origin.x + rect2.width),
 		--is 1's right edge on, or to the right of, 2's left edge?
-		rect1.origin.x + rect1.width >= rect2.origin.x and
+		rect2.origin.x - (rect1.origin.x + rect1.width),
 		--is 1's top edge on or above 2's bottom edge?
-		rect1.origin.y >= rect2.origin.y - rect2.height and
+		(rect2.origin.y - rect2.height) - rect1.origin.y,
 		--is 1's bottom edge on or below 2's top edge?
-		rect1.origin.y - rect1.height <= rect2.origin.y
+		(rect1.origin.y - rect1.height) - rect2.origin.y
+	}
+	local minDistance = nil
+
+	for i, o in ipairs(overlaps) do
+		if o > 0 then
+			return false
+		elseif not minDistance then
+			minDistance = math.abs(o)
+		elseif math.abs(o) < minDistance then
+			minDistance = math.abs(o)
+		end
+	end
+
+	return true, minDistance
 end
 
 local function intersectingFixedRectangleAndCircle(rect, cir, transform1, transform2)

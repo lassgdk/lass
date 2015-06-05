@@ -415,10 +415,16 @@ function GameObject:move(x, y, z, stopOnCollide)
 	self.transform.position = newPosition
 
 	if not stopOnCollide then
-		return
+		return true
 	end
 
-	-- print(newPosition, oldPosition)
+	if
+		oldPosition.x == newPosition.x and
+		oldPosition.y == newPosition.y and
+		oldPosition.z == newPosition.z
+	then
+		return false
+	end
 
 	local collider = self:getComponent("lass.builtins.colliders.Collider")
 	-- print(collider, collider.solid)
@@ -435,26 +441,26 @@ function GameObject:move(x, y, z, stopOnCollide)
 		end
 
 		for layerName, layer in pairs(others) do
-			-- print("checking others")
 			for i, other in ipairs(layer) do
-				-- print(self.name, other.gameObject.name, collider:isCollidingWith(other))
-				if
-					other ~= collider and
-					other.solid and
-					collider:isCollidingWith(other) and
-					-- if we were already colliding with other, nothing can be done
-					not collider.collidingWith[other]
-				then
-					collisions[#collisions + 1] = other
+				local r, d = collider:isCollidingWith(other)
+
+				if other ~= collider and other.solid and r then
+					-- if we were already colliding with other, check if overlap distance has increased
+					if collider.collidingWith[other] and collider.collidingWith[other] < d then
+						self.transform.position = oldPosition
+						maintainTransform(self)
+						return false
+					-- only add colliders that we weren't already colliding with
+					elseif not collider.collidingWith[other] then
+						collisions[#collisions + 1] = other
+					end
 				end
 			end
 		end
 
 		if #collisions < 1 then
-			return
+			return true
 		end
-
-		-- print("collisions")
 
 		local backward = true
 		local lastBackward = backward
@@ -472,6 +478,12 @@ function GameObject:move(x, y, z, stopOnCollide)
 		local done = false
 		local maintainSkip = false
 		local counter = 0
+
+		if skip.x == 0 and skip.y == 0 then
+			self.transform.position = oldPosition
+			maintainTransform(self)
+			return false
+		end
 
 		while not done do
 			if backward then
@@ -529,9 +541,8 @@ function GameObject:move(x, y, z, stopOnCollide)
 		end
 
 		self.done = true
-		return collisions
+		return true, collisions
 
-		-- print('finished', self.transform.position)
 	end
 end
 
@@ -654,13 +665,10 @@ local function maintainCollisions(self, colliderToCheck)
 					collisionData[layer[j]] = {colliding={}, notColliding={}}
 				end
 
-				if collider:isCollidingWith(layer[j]) then
-
-					-- if two colliders on multiple, identical layers collide with each other,
-					-- the collision would be registered more than once. we use sets instead of
-					-- lists so we don't have to worry about these duplicates.
-					collisionData[collider].colliding[layer[j]] = true
-					collisionData[layer[j]].colliding[collider] = true
+				local r, d = collider:isCollidingWith(layer[j])
+				if r then
+					collisionData[collider].colliding[layer[j]] = d
+					collisionData[layer[j]].colliding[collider] = d
 				else
 					collisionData[collider].notColliding[layer[j]] = true
 					collisionData[layer[j]].notColliding[collider] = true
@@ -777,7 +785,7 @@ function GameScene:addGameObject(gameObject)
 
 end
 
-function GameScene:removeGameObject(gameObject, removeDescendants)
+function GameScene:removeGameObject(gameObject, removeDescendants, destroy)
 
 	local index = collections.index(self.gameObjects, gameObject)
 	if index then
@@ -786,7 +794,7 @@ function GameScene:removeGameObject(gameObject, removeDescendants)
 
 	if removeDescendants == true then
 		for i, child in ipairs(gameObject.children) do
-			self:removeGameObject(child, true)
+			self:removeGameObject(child, true, destroy)
 		end
 	-- if this object has no parent, its children must become children of the scene
 	elseif not class.instanceof(gameObject.parent, GameObject) then
@@ -795,19 +803,23 @@ function GameScene:removeGameObject(gameObject, removeDescendants)
 		end
 	end
 
-	-- for k,v in pairs(gameObject) do
-	-- 	gameObject[k] = nil
-	-- end
+	if destroy then
+		for k,v in pairs(gameObject) do
+			gameObject[k] = nil
+		end
+	end
 end
 
 function GameScene:update(dt)
 	--update all children (top-level game objects) of the scene
 
-	maintainTransform(self)
-	maintainCollisions(self)
-	self.base.update(self, dt, not self.finishedFirstUpdate)
-	if not self.finishedFirstUpdate then
-		self.finishedFirstUpdate = true
+	if not self.paused then
+		maintainTransform(self)
+		maintainCollisions(self)
+		self.base.update(self, dt, not self.finishedFirstUpdate)
+		if not self.finishedFirstUpdate then
+			self.finishedFirstUpdate = true
+		end
 	end
 end
 

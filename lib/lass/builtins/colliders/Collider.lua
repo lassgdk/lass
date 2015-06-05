@@ -46,15 +46,17 @@ function Collider:isCollidingWith(other)
 	-- 	print("not trying")
 	-- end
 	if otherType == Collider then
-		return 
-			(
-				self.gameObject.transform.position.z == other.gameObject.transform.position.z or
-				self.ignoreZ or
-				other.ignoreZ
-			) and
-			geometry.intersecting(
+		if not (
+			self.gameObject.transform.position.z == other.gameObject.transform.position.z or
+			self.ignoreZ or
+			other.ignoreZ
+		) then
+			return false
+		else
+			return geometry.intersecting(
 				self.shape, other.shape, self.gameObject.globalTransform, other.gameObject.globalTransform
 			)
+		end
 	else
 		return geometry.intersecting(self.shape, other, self.gameObject.globalTransform)
 	end

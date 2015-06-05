@@ -45,7 +45,6 @@ local PeriodicInterpolator = class.define(lass.Component, function(self, argumen
 	arguments.sampleLength = arguments.sampleLength or math.pi*2 --math.huge is valid
 
 	self.base.init(self, arguments)
-
 end)
 
 --"gameObject","transform","position","x"
@@ -83,27 +82,33 @@ end
 function PeriodicInterpolator:awake()
 
 	-- self.targets = getTarget(self, self.targets)
-	for i, t in ipairs(self.targets) do
-		self.targets[i] = getTarget(self, t)
-	end
+	-- for i, t in ipairs(self.targets) do
+	-- 	self.targets[i] = getTarget(self, t)
+	-- end
 	self.lastY = 0
 	self:seek(0)
 
 	if self.autoplay then
 		self.playing = true
 	end
+
 end
 
 function PeriodicInterpolator:seek(x)
 
-	if sampleLength ~= math.huge then
+	if self.sampleLength ~= math.huge then
 		self.x = (x % self.sampleLength) + self.offset.x
 	else
-		self.x = x + offsetX
+		self.x = x + self.offset.x
 	end
 end
 
 function PeriodicInterpolator:update(dt)
+
+	local targets = {}
+	for i, t in ipairs(self.targets) do
+		targets[i] = getTarget(self, t)
+	end
 
 	if not self.playing or self.period <= 0 then
 		return
@@ -120,8 +125,12 @@ function PeriodicInterpolator:update(dt)
 
 	self.y = (self.ifunction(self.x) * self.amplitude) + self.offset.y
 
-	for i, target in ipairs(self.targets) do
-		target[1][target[2]] = target[1][target[2]] + (self.y - self.lastY)
+	for i, target in ipairs(targets) do
+		if type(target[2]) == "function" then
+			target[1]:target[2](self.y - self.lastY)
+		else
+			target[1][target[2]] = target[1][target[2]] + (self.y - self.lastY)
+		end
 	end
 
 	self.lastY = self.y

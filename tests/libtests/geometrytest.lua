@@ -31,14 +31,22 @@ end
 function testIntersectingRectanglesAndVectors()
 	local r1, r2 = geometry.Rectangle(1,2), geometry.Rectangle(1,3)
 	local t1, t2 = geometry.Transform(geometry.Vector3(0,0)), geometry.Transform(geometry.Vector3(0,0))
+	local colliding, distance
 
 	assert(geometry.intersecting(r1, r2), "rectangles at same origin aren't intersecting")
 	assert(geometry.intersecting(r1, r2, t1, t2, true, true), "rectangles at same origin aren't intersecting")
 
 	t2.position.y = 3
-	assert(geometry.intersecting(r1, r2, t1, t2, true, true), "rectangles should be touching")
+	colliding, distance = geometry.intersecting(r1, r2, t1, t2, true, true)
+	assert(colliding and distance == 0, "rectangles should be touching with overlap of 0")
+
 	t2.position.y = 3.00001
-	assert(not geometry.intersecting(r1, r2, t1, t2, true, true), "rectangles should not be touching")
+	colliding, distance = geometry.intersecting(r1, r2, t1, t2, true, true)
+	assert(not colliding, "rectangles should not be touching")
+
+	t2.position.y = 2
+	colliding, distance = geometry.intersecting(r1, r2, t1, t2, true, true)
+	assert(colliding and distance == 1, "rectangles should be touching with overlap of 1")
 
 	assert(geometry.intersecting(r1, geometry.Vector2(0.5, -1)), "rectangle should contain vector")
 	assert(not geometry.intersecting(r1, geometry.Vector2(0.5, 1)), "rectangle should not contain vector")
@@ -85,37 +93,37 @@ function testIntersectingPolygonsAndVectors()
 end
 
 function testIntersectingPolygonAndCircle()
+
 	local pol = geometry.Rectangle(10,3):toPolygon()
 	local cir = geometry.Circle(2)
 	local t1 = geometry.Transform(geometry.Vector3(0,0))
 	local t2 = geometry.Transform(geometry.Vector3(0,0))
+	local r, d
 
-
-	-- assert(geometry.intersecting(pol, cir), "figures at same origin aren't intersecting")
-	-- assert(geometry.intersecting(pol, cir, t1, t2), "figures at same origin aren't intersecting")
+	assert(geometry.intersecting(pol, cir), "figures at same origin aren't intersecting")
+	assert(geometry.intersecting(pol, cir, t1, t2), "figures at same origin aren't intersecting")
 	t1.position.x = 0.01
-	-- assert(geometry.intersecting(pol, cir, t1, t2), "figures should be intersecting")
+	assert(geometry.intersecting(pol, cir, t1, t2), "figures should be intersecting")
 
 	t1.position.x = 0
 	t2.position.x = 12
-	-- assert(geometry.intersecting(pol, cir, t1, t2), "figures should be intersecting")
-	-- assert(geometry.intersecting(cir, pol, t2, t1), "figures should be intersecting")
+	assert(geometry.intersecting(pol, cir, t1, t2), "figures should be intersecting")
+	assert(geometry.intersecting(cir, pol, t2, t1), "figures should be intersecting")
 	t2.position.x = 12.001
-	-- assert(not geometry.intersecting(pol, cir, t1, t2), "figures should not be intersecting")
-	-- assert(not geometry.intersecting(cir, pol, t2, t1), "figures should not be intersecting")
+	assert(not geometry.intersecting(pol, cir, t1, t2), "figures should not be intersecting")
+	assert(not geometry.intersecting(cir, pol, t2, t1), "figures should not be intersecting")
 
 	pol = geometry.Polygon({{x=-100, y=-50}, {x=100, y=-50}, {x=0, y=50}})
 	t2.position.x = 102
 	t2.position.y = -50
 
-	-- print(cir:globalCircle(t2).center, cir:globalCircle(t2).radius)
-	-- assert(geometry.intersecting(pol, cir, t1), "figures should be intersecting")
-	-- assert(geometry.intersecting(cir, pol, t2, t1), "figures should be intersecting")
+	assert(geometry.intersecting(pol, cir, t1), "figures should be intersecting")
+	assert(geometry.intersecting(cir, pol, t2, t1), "figures should be intersecting")
 
 
 	t2.position.x = 102.001
-	-- assert(not geometry.intersecting(pol, cir, t1, t2), "figures should not be intersecting")
-	-- assert(not geometry.intersecting(cir, pol, t2, t1), "figures should not be intersecting")
+	assert(not geometry.intersecting(pol, cir, t1, t2), "figures should not be intersecting")
+	assert(not geometry.intersecting(cir, pol, t2, t1), "figures should not be intersecting")
 
 	pol = geometry.Polygon({{x=0, y=0}, {x=25, y=-25}, {x=0, y=-50}, {x=-25, y=-25}})
 	cir.radius = 25
@@ -123,14 +131,16 @@ function testIntersectingPolygonAndCircle()
 	t1.position.x = 0
 	t1.position.y = 0
 	t2.position.x = 0
-	t2.position.y = 26
+	t2.position.y = 25.0001
 	assert(not geometry.intersecting(pol, cir, t1, t2), "figures should not be intersecting")
 
-	t2.position.y = 24
-	assert(geometry.intersecting(pol, cir, t1, t2), "figures should be intersecting")
+	t2.position.y = 25
+	r, d = geometry.intersecting(pol, cir, t1, t2)
+	assert(r and d == 0, "figures should be intersecting with overlap of 0")
 
-	t2.position.y = -25
-	assert(geometry.intersecting(pol, cir, t1, t2), "figures should be intersecting")
+	t2.position.y = 0
+	r, d = geometry.intersecting(pol, cir, t1, t2)
+	assert(r and d == cir.radius, "figures should be intersecting with overlap of " .. cir.radius)
 end
 
 function testPolygonWithNoArguments()
