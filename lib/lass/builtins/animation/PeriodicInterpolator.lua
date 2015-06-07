@@ -127,7 +127,7 @@ function PeriodicInterpolator:update(dt)
 
 	for i, target in ipairs(targets) do
 		if type(target[2]) == "function" then
-			target[1]:target[2](self.y - self.lastY)
+			target[1][target[2]](target[1], self.y - self.lastY)
 		else
 			target[1][target[2]] = target[1][target[2]] + (self.y - self.lastY)
 		end

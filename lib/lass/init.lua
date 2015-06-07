@@ -426,8 +426,7 @@ function GameObject:move(x, y, z, stopOnCollide)
 		return false
 	end
 
-	local collider = self:getComponent("lass.builtins.colliders.Collider")
-	-- print(collider, collider.solid)
+	local collider = self:getComponent("lass.builtins.collision.Collider")
 	if collider and collider.solid then
 		local others = {}
 		local collisions = {}
@@ -564,11 +563,10 @@ for i, f in ipairs({
 	{"collisionenter", false},
 	{"collisionexit", false}
 }) do
+	local super = true
 	if type(f) == "table" then
 		f = f[1]
-		local super = f[2]
-	else
-		local super = true
+		super = f[2]
 	end
 
 	GameObject[f] = function(self, ...)

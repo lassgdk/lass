@@ -1,7 +1,7 @@
 local lass = require("lass")
 local class = require("lass.class")
 local geometry = require("lass.geometry")
-local Collider = require("lass.builtins.colliders.Collider")
+local Collider = require("lass.builtins.collision.Collider")
 
 --[[
 PolygonCollider

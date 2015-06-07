@@ -17,7 +17,7 @@ return {
       }
     },
     {
-      script = "lass.builtins.colliders.PolygonCollider",
+      script = "lass.builtins.collision.PolygonCollider",
       arguments = {
         verticesSource = "lass.builtins.graphics.PolygonRenderer"
       }

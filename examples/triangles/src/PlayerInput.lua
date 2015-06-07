@@ -1,7 +1,7 @@
 local lass = require("lass")
 local class = require("lass.class")
 local geometry = require("lass.geometry")
-local PolygonCollider = require("lass.builtins.colliders.PolygonCollider")
+local PolygonCollider = require("lass.builtins.collision.PolygonCollider")
 local PolygonRenderer = require("lass.builtins.graphics.PolygonRenderer")
 
 local PlayerInput = class.define(lass.Component, function(self, arguments)
@@ -27,9 +27,6 @@ local PlayerInput = class.define(lass.Component, function(self, arguments)
 	self.rotationDirection = 0
 end)
 
-function PlayerInput:awake()
-end
-
 function PlayerInput:update(dt, firstUpdate)
 
 	-- if firstUpdate then
@@ -44,6 +41,7 @@ function PlayerInput:update(dt, firstUpdate)
 	elseif self.rotationDirection < 0 then
 		self.gameObject:rotate(dt * -self.rotationSpeed)
 	end
+
 end
 
 function PlayerInput:mousepressed(x, y, button)
@@ -58,7 +56,6 @@ function PlayerInput:mousepressed(x, y, button)
 	end
 
 	local collider = self.gameObject:getComponent(PolygonCollider)
-
 	if collider:isCollidingWith(geometry.Vector2(x,-y)) then
 
 		if button == "l" then
