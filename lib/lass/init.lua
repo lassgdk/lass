@@ -2,6 +2,12 @@
 -- an object/component framework for love2d, inspired by unity
 -- decky coss (cosstropolis.com)
 
+debug.log = function(msg, info)
+
+	info = info or debug.getinfo(2)
+	print(msg, "(" .. info.short_src .. ", line " .. info.currentline .. ")")
+end
+
 local class = require("lass.class")
 local collections = require("lass.collections")
 local geometry = require("lass.geometry")
@@ -449,8 +455,8 @@ function GameObject:move(x, y, z, stopOnCollide)
 						self.transform.position = oldPosition
 						maintainTransform(self)
 						return false
-					-- only add colliders that we weren't already colliding with
-					elseif not collider.collidingWith[other] then
+					-- only add colliders that we weren't already colliding with, and have non-zero overlap
+					elseif not collider.collidingWith[other] and d ~= 0 then
 						collisions[#collisions + 1] = other
 					end
 				end
@@ -829,15 +835,12 @@ function GameScene:draw()
 	--collect all drawable objects into buckets -- each bucket maps to a different z-value
 	--self.globals.drawables is an unordered set
 	for object in pairs(self.globals.drawables) do
-		-- if object:isDrawable() then
-			local bucket = drawables[object.globalTransform.position.z]
-			-- print(object.globalTransform.position.z)
-			if bucket then
-				bucket[#bucket+1] = object
-			else
-				drawables[object.globalTransform.position.z] = {object}
-			end
-		-- end
+		local bucket = drawables[object.globalTransform.position.z]
+		if bucket then
+			bucket[#bucket+1] = object
+		else
+			drawables[object.globalTransform.position.z] = {object}
+		end
 	end
 
 	--sort the z-values (indices) in reverse order (so highest are drawn first)
@@ -847,6 +850,12 @@ function GameScene:draw()
 	table.sort(indices, function(a,b) return a > b end)
 
 	--draw
+	if self.globals.camera then
+		-- directly call draw on the Camera component instead of the game object.
+		-- does not account for camera object being in drawables, although Renderer
+		-- class tries to prevent this from happening.
+		self.globals.camera:draw()
+	end
 	for i, index in ipairs(indices) do
 		for j, drawable in pairs(drawables[index]) do
 			drawable:draw()

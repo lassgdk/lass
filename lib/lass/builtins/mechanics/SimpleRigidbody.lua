@@ -17,11 +17,15 @@ function SimpleRigidbody:update(dt)
 	self.velocity = self.velocity - self.globals.gravity
 
 	local breakAfterY = true
+	local results = {}
 	for i, axis in ipairs({"x", "y", "x"}) do
+
 		local moveBy = geometry.Vector2()
 		moveBy[axis] = self.velocity[axis] * dt
 
 		local r = self.gameObject:move(moveBy, true)
+		results[axis] = r
+
 		if r == false then
 			-- if collision happened during horizontal movement, try again after vertical movement
 			if i == 1 then
@@ -32,8 +36,16 @@ function SimpleRigidbody:update(dt)
 		end
 
 		-- even if not breakAfterY, there's no point in trying again if vertical movement was 0
-		if i == 2 and (breakAfterY or moveBy[axis] == 0) then
-			break
+		if i == 2 then
+			if breakAfterY then
+				break
+			-- if we break before resetting velocity.x, it will continue to accelerate
+			elseif moveBy[axis] == 0 then
+				if results.x == false then
+					self.velocity.x = 0
+				end
+				break
+			end
 		end
 	end
 

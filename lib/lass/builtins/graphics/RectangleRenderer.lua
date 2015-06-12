@@ -39,6 +39,7 @@ function RectangleRenderer:draw()
 	end
 
 	love.graphics.setColor(self.color)
+	love.graphics.setLineWidth(1)
 	if globalTransform.rotation == 0 then
 		love.graphics.rectangle(
 			self.mode,

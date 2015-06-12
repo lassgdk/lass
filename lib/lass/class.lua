@@ -68,7 +68,7 @@ function class.define(base, init)
 end
 
 function class.instanceof(object, ...)
-   -- check if object/literal is an instance of class(es), regardless of its type.
+   -- check if object is an instance of class(es), regardless of its type.
    -- returns false or the first match found
 
    if not (type(object) == "table" and object.instanceof) then
@@ -82,7 +82,7 @@ function class.instanceof(object, ...)
 end
 
 function class.subclassof(myclass, ...)
-   -- check if class is a subclass of class(es), regardless of its type.
+   -- check if myclass is a subclass of class(es), regardless of its type.
    -- reeturns false or the first match found
 
    if not (type(myclass) == "table" and myclass.base) then
