@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from __future__ import print_function
-import os, sys, shutil, zipfile, argparse
+import os, sys, shutil, zipfile, argparse, subprocess
 try:
 	import ConfigParser as configparser
 except:
@@ -196,7 +196,13 @@ def playgame(game, scene="", **kwargs):
 	if scene:
 		argString += "--scene=" + scene
 
-	os.system(getLoveEngineCommand().format(game, argString))
+	# os.system(getLoveEngineCommand().format(game, argString))
+	proc = subprocess.Popen(["love", game], stdout=subprocess.PIPE)
+	while proc.poll() == None:
+		out = proc.stdout.readline()
+		sys.stdout.write(out)
+		sys.stdout.flush()
+
 	os.remove(game)
 
 #helper functions

@@ -553,7 +553,10 @@ function Rectangle:globalRectangle(transform)
 	return Rectangle(
 		self.width * transform.size.x,
 		self.height * transform.size.y,
-		self.origin + transform.position
+		Vector2(
+			(self.origin.x * transform.size.x) + transform.position.x,
+			(self.origin.y * transform.size.y) + transform.position.y
+		)
 	)
 end
 

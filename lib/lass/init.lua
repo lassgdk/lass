@@ -2,10 +2,18 @@
 -- an object/component framework for love2d, inspired by unity
 -- decky coss (cosstropolis.com)
 
-debug.log = function(msg, info)
+table.pack = function(...)
+	return { n = select("#", ...), ... }
+end
 
-	info = info or debug.getinfo(2)
-	print(msg, "(" .. info.short_src .. ", line " .. info.currentline .. ")")
+debug.log = function(...)
+
+	local info = debug.getinfo(2)
+	local a = table.pack(...)
+	a[#a + 1] = "(" .. info.short_src .. ", line " .. info.currentline .. ")"
+	print(unpack(a))
+	-- print(...)
+	io.flush()
 end
 
 local class = require("lass.class")
@@ -276,11 +284,25 @@ local function buildObjectTree(scene, object)
 	-- for k,v in pairs(object) do print(k,v) end
 
 	if object.prefab and object.prefab ~= "" then
-		local pf = love.filesystem.load(object.prefab)()
+		local pf = object.prefab
+		if type(object.prefab) == "string" then
+			pf = love.filesystem.load(pf)()
+		end
 		-- local pf = require(object.prefab)
 
 		for i, comp in ipairs(mergeComponentLists(pf.components, object.prefabComponents)) do
 			gameObject:addComponent(require(comp.script)(comp.arguments))
+		end
+
+		if pf.children then
+			for i, pfChild in ipairs(pf.children) do
+				if object.prefabChildren and object.prefabChildren[i] then
+					object.prefabChildren[i].prefab = pfChild
+					gameObject:addChild(buildObjectTree(scene, object.prefabChildren[i].prefab))
+				else
+					gameObject:addChild(buildObjectTree(scene, pfChild))
+				end
+			end
 		end
 	end
 

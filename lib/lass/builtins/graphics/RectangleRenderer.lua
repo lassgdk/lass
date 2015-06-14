@@ -38,15 +38,28 @@ function RectangleRenderer:draw()
 		ySign = -1
 	end
 
+	-- if self.gameObject.name == "Arrow" then
+	-- 	debug.log(position, self.gameObject.name)
+	-- end
+
 	love.graphics.setColor(self.color)
 	love.graphics.setLineWidth(1)
 	if globalTransform.rotation == 0 then
+		local rect = shape:globalRectangle(globalTransform)
+
+		if self.gameObject.name == "Arrow" then
+			-- debug.log(rect.origin)
+		end
 		love.graphics.rectangle(
 			self.mode,
-			shape.origin.x+position.x,
-			(shape.origin.y + position.y) * ySign,
-			shape.width * globalTransform.size.x,
-			shape.height * globalTransform.size.y
+			-- shape.origin.x+position.x,
+			-- (shape.origin.y + position.y) * ySign,
+			rect.origin.x,
+			rect.origin.y * ySign,
+			-- shape.width * globalTransform.size.x,
+			-- shape.height * globalTransform.size.y
+			rect.width,
+			rect.height
 		)
 	else
 		local verts = geometry.flattenedVector2Array(self.shape:globalVertices(globalTransform))
