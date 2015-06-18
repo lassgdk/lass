@@ -281,8 +281,6 @@ local function buildObjectTree(scene, object)
 	--create gameObject and add it to scene
 	local gameObject = GameObject(scene, object.name, object.transform)
 
-	-- for k,v in pairs(object) do print(k,v) end
-
 	if object.prefab and object.prefab ~= "" then
 		local pf = object.prefab
 		if type(object.prefab) == "string" then
@@ -291,7 +289,9 @@ local function buildObjectTree(scene, object)
 		-- local pf = require(object.prefab)
 
 		for i, comp in ipairs(mergeComponentLists(pf.components, object.prefabComponents)) do
-			gameObject:addComponent(require(comp.script)(comp.arguments))
+			local componentClass = require(comp.script)
+			assert(class.subclassof(componentClass, Component), comp.script.." does not return a Component")
+			gameObject:addComponent(componentClass(comp.arguments))
 		end
 
 		if pf.children then
@@ -333,6 +333,7 @@ end
 
 --dot, not colon
 function GameObject.fromPrefab(scene, prefab)
+
 	return buildObjectTree(scene, prefab)
 end
 
@@ -462,24 +463,27 @@ function GameObject:move(x, y, z, stopOnCollide)
 		-- we need to update the global transform for the collision detection to work immediately
 		maintainTransform(self)
 
-		for i, layer in ipairs(collider.layers) do
+		for i, layer in ipairs(collider.layersToCheck) do
 			-- print(#self.gameScene.globals.colliders[layer])
 			others[layer] = collections.copy(self.gameScene.globals.colliders[layer])
 		end
 
 		for layerName, layer in pairs(others) do
 			for i, other in ipairs(layer) do
-				local r, d = collider:isCollidingWith(other)
 
-				if other ~= collider and other.solid and r then
-					-- if we were already colliding with other, check if overlap distance has increased
-					if collider.collidingWith[other] and collider.collidingWith[other] < d then
-						self.transform.position = oldPosition
-						maintainTransform(self)
-						return false
-					-- only add colliders that we weren't already colliding with, and have non-zero overlap
-					elseif not collider.collidingWith[other] and d ~= 0 then
-						collisions[#collisions + 1] = other
+				if other ~= collider and other.solid then
+					local r, d = collider:isCollidingWith(other)
+
+					if r then
+						-- if we were already colliding with other, check if overlap distance has increased
+						if collider.collidingWith[other] and collider.collidingWith[other] < d then
+							self.transform.position = oldPosition
+							maintainTransform(self)
+							return false
+						-- only add colliders that we weren't already colliding with, and have non-zero overlap
+						elseif not collider.collidingWith[other] and d ~= 0 then
+							collisions[#collisions + 1] = other
+						end
 					end
 				end
 			end
@@ -673,8 +677,10 @@ local function maintainCollisions(self, colliderToCheck)
 		-- end
 
 		if colliderToCheck then
-			layer = self.globals.colliders[layerName]
+			layer = collections.copy(self.globals.colliders[layerName])
 		end
+
+		table.sort(layer, function(a,b) return a.layersToCheck[layerName] ~= nil end)
 
 		-- use "staircase" method to check each collider against all subsequent colliders
 		for i, collider in ipairs(layer) do
@@ -684,20 +690,48 @@ local function maintainCollisions(self, colliderToCheck)
 				collisionData[collider] = {colliding={}, notColliding={}}
 			end
 
-			-- if j > #layer, the loop will be skipped
-			for j = i+1, #layer do
+			for i, layerNameToCheck in ipairs(collider.layersToCheck) do
+				if layerNameToCheck == layerName then
+					-- if j > #layer, the loop will be skipped
+					for j = i+1, #layer do
 
-				if not collisionData[layer[j]] then
-					collisionData[layer[j]] = {colliding={}, notColliding={}}
-				end
-
-				local r, d = collider:isCollidingWith(layer[j])
-				if r then
-					collisionData[collider].colliding[layer[j]] = d
-					collisionData[layer[j]].colliding[collider] = d
+						if not collisionData[layer[j]] then
+							collisionData[layer[j]] = {colliding={}, notColliding={}}
+						end
+						if (
+							not collisionData[collider].colliding[layer[j]] and
+							not collisionData[collider].notColliding[layer[j]]
+						) then
+							local r, d = collider:isCollidingWith(layer[j])
+							if r then
+								collisionData[collider].colliding[layer[j]] = d
+								collisionData[layer[j]].colliding[collider] = d
+							else
+								collisionData[collider].notColliding[layer[j]] = true
+								collisionData[layer[j]].notColliding[collider] = true
+							end
+						end
+					end
 				else
-					collisionData[collider].notColliding[layer[j]] = true
-					collisionData[layer[j]].notColliding[collider] = true
+					for i, other in ipairs(self.globals.colliders[layerNameToCheck]) do
+						if not collisionData[other] then
+							collisionData[other] = {colliding={}, notColliding={}}
+						end
+						if (
+							collider ~= other and
+							not collisionData[collider].colliding[other] and
+							not collisionData[collider].notColliding[other]
+						) then
+							local r, d = collider:isCollidingWith(other)
+							if r then
+								collisionData[collider].colliding[other] = d
+								collisionData[other].colliding[collider] = d
+							else
+								collisionData[collider].notColliding[other] = true
+								collisionData[other].notColliding[collider] = true
+							end
+						end
+					end
 				end
 			end
 		end
@@ -789,8 +823,14 @@ end
 function GameScene:applySettings()
 
 	--window
-	love.window.setMode(self.settings.window.width, self.settings.window.height)
-	love.window.setTitle(self.settings.window.title or "Untitled")
+	local x, y, d = love.window.getPosition()
+	local width, height = love.window.getMode()
+
+	if self.settings.window.width ~= width or self.settings.window.height ~= height then
+		love.window.setMode(self.settings.window.width, self.settings.window.height)
+	end
+	love.window.setTitle(self.settings.window.title or "Untitled Lass Game")
+	love.window.setPosition(x, y, d)
 
 	--graphics
 	love.graphics.setBackgroundColor(self.settings.graphics.backgroundColor)

@@ -246,7 +246,7 @@ Transform
 
 local Transform = class.define(function(self, position, rotation, size)
 
-	if position and position.position then
+	if position and (position.position or position.rotation or position.size) then
 		size = position.size
 		rotation = position.rotation
 		position = position.position
@@ -550,14 +550,44 @@ function Rectangle:globalVertices(transform, ignoreRotation)
 end
 
 function Rectangle:globalRectangle(transform)
-	return Rectangle(
-		self.width * transform.size.x,
-		self.height * transform.size.y,
-		Vector2(
-			(self.origin.x * transform.size.x) + transform.position.x,
-			(self.origin.y * transform.size.y) + transform.position.y
-		)
-	)
+
+	local r = transform.rotation					--180
+	local width = self.width * transform.size.x		--40 * 1
+	local height = self.height * transform.size.y	--15 * 1
+	local origin = Vector2(self.origin)				--0,0
+
+	if r % 90 == 0 and r % 360 ~= 0 then
+		local tmp
+
+		-- rotate 180; bottom right becomes origin
+		if r % 180 == 0 then
+			origin = (origin + Vector2(self.width, -self.height)):rotate(r)	--0,0 +
+
+		-- rotate 90 cw; bottom left becomes origin
+		elseif r == 90 or r == -270 then
+			origin = (origin + Vector2(0, -self.height)):rotate(r)
+			tmp = width
+			width = height
+			height = tmp
+
+		-- rotate 90 ccw; top right becomes origin
+		else
+			origin = (origin + Vector2(self.width, 0)):rotate(r)
+			tmp = width
+			width = height
+			height = tmp
+		end
+	end
+
+	origin.x = origin.x * transform.size.x + transform.position.x
+	origin.y = origin.y * transform.size.y + transform.position.y
+
+	-- if r ~= 0 then
+	-- 	debug.log("=====")
+	-- 	debug.log(self.width,self.height,self.origin)
+	-- 	debug.log(width,height,origin)
+	-- end
+	return Rectangle(width, height, origin)
 end
 
 function Rectangle:toPolygon()
@@ -688,12 +718,12 @@ local function intersecting(fig1, fig2, transform1, transform2, ignoreRotation1,
 	--if not ignoreRotation and rotation is nonzero, cast any rectangles to polygons
 	if ignoreRotation1 then
 		transform1.rotation = 0 
-	elseif fig1Type == Rectangle and transform1.rotation ~= 0 then
+	elseif fig1Type == Rectangle and transform1.rotation % 90 ~= 0 then
 		fig1, fig1Type = fig1:toPolygon(), Polygon
 	end
 	if ignoreRotation2 then
 		transform2.rotation = 0 
-	elseif fig2Type == Rectangle and transform2.rotation ~= 0 then
+	elseif fig2Type == Rectangle and transform2.rotation % 90 ~= 0 then
 		fig2, fig2Type = fig2:toPolygon(), Polygon
 	end
 
