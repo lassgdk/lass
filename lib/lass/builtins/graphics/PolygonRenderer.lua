@@ -52,6 +52,8 @@ function PolygonRenderer:draw()
 		vertices[i] = vertex
 	end
 
+	self:resetCanvas()
+
 	love.graphics.setColor(self.color)
 	love.graphics.polygon(self.mode, verticesToFlatArray(vertices))
 end

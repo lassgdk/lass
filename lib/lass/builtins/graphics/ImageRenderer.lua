@@ -29,6 +29,10 @@ function ImageRenderer:draw()
 	if self.gameObject.gameScene.settings.graphics.invertYAxis then
 		ySign = -1
 	end
+
+	-- love.graphics.setCanvas(self.globals.canvases[self.canvas])
+	self:resetCanvas()
+
 	love.graphics.setColor(self.color)
 	love.graphics.draw(
 		self.image,

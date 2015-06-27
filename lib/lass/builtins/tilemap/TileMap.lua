@@ -21,25 +21,52 @@ function TileMap:awake()
 			else
 				prefabs[k] = v
 			end
+
+			if not prefabs[k].transform then
+				prefabs[k].transform = {}
+			end
 		end
 	end
+
+	self:load(prefabs)	
+end
+
+function TileMap:load(prefabs)
 
 	local ySign = 1
 	if self.gameObject.gameScene.settings.graphics.invertYAxis then
 		ySign = -1
 	end
 
+	if #self.gameObject.children > 0 then
+		self:clear()
+	end
+
 	for i, row in ipairs(self.map) do
 		for j, tile in ipairs(row) do
-			-- print(prefabs[tile])
 			if tile ~= 0 then
-				local g = lass.GameObject.fromPrefab(self.gameObject.gameScene, collections.deepcopy(prefabs[tile]))
+
+				local p = collections.deepcopy(prefabs[tile])
+				p.transform.position = {
+					x = (j-1) * self.tileSize.x,
+					y = (i-1) * self.tileSize.y * ySign,
+				}
+
+				local g = lass.GameObject.fromPrefab(self.gameObject.gameScene, p)
 				self.gameObject:addChild(g)
 				g.name = g.name .. " " .. tostring(j) .. " " .. tostring(i)
 			
-				g:moveTo((j-1) * self.tileSize.x, (i-1) * self.tileSize.y * ySign, g.transform.position.z)
+				-- g:moveTo((j-1) * self.tileSize.x, (i-1) * self.tileSize.y * ySign, g.transform.position.z)
 			end
 		end
+	end
+end
+
+function TileMap:clear()
+
+	for i, child in ipairs(self.gameObject.children) do
+		-- remove and destroy all children of the tile map
+		self.gameScene:removeGameObject(child, false, true)
 	end
 end
 

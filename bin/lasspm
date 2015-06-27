@@ -115,9 +115,25 @@ def buildgame(game, sendToTemp=False, projects=False, examples=False, target="l"
 	if not sendToTemp and not "build" in os.listdir(projPath):
 		os.mkdir(buildPath)
 
-	projFiles = os.listdir(sourcePath)
-	loveFileName = game + ".love"
 	origDir = os.getcwd()
+
+	# projFiles = os.listdir(sourcePath)
+	projFiles = []
+	os.chdir(sourcePath)
+
+	for layer in os.walk("."):
+		pr = layer[0]
+		if pr == ".":
+			pr = ""
+
+		for d in layer[1]:
+			projFiles.append(os.path.join(pr, d))
+		for f in layer[2]:
+			projFiles.append(os.path.join(pr, f))
+
+	os.chdir(origDir)
+
+	loveFileName = game + ".love"
 
 	with zipfile.ZipFile(os.path.join(buildPath, loveFileName), mode='w') as loveFile:
 

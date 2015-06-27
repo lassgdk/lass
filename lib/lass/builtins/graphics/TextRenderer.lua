@@ -30,6 +30,7 @@ function TextRenderer:draw()
 		ySign = -1
 	end
 
+	self:resetCanvas()
 	love.graphics.setFont(self.font)
 	love.graphics.setColor(self.color)
 	love.graphics.printf(

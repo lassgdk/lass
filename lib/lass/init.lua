@@ -10,9 +10,25 @@ debug.log = function(...)
 
 	local info = debug.getinfo(2)
 	local a = table.pack(...)
-	a[#a + 1] = "(" .. info.short_src .. ", line " .. info.currentline .. ")"
-	print(unpack(a))
-	-- print(...)
+	local sep = "\t"
+
+	a[a.n + 1] = "(" .. info.short_src .. ", line " .. info.currentline .. ")"
+	a.n = a.n + 1
+
+	for i = 1, a.n do
+		if a[i] == nil then
+			io.write("nil")
+		else
+			io.write(a[i])
+		end
+
+		if i < a.n then
+			io.write(sep)
+		end
+	end
+
+	print() -- newline
+
 	io.flush()
 end
 
@@ -43,6 +59,42 @@ function Component:update(dt, firstUpdate) end
 function Component:globals()
 	return self.gameObject.gameScene.globals
 end
+
+--[[
+Event
+]]
+
+local Event = class.define(function(self, name)
+
+	self.name = name
+
+	self.listeners = {}
+end)
+
+for i, f in ipairs({"play", "stop", "pause", "seek"}) do
+	Event[f] = function(self, source, data)
+		self:post(f, source, data)
+	end
+end
+
+function Event:post(action, source, data)
+
+	for i, listener in ipairs(self.listeners) do
+		for j, component in ipairs(listener.components) do
+			local callback = component.events[self.name][action]
+			if callback then
+				callback(component, source, data)
+			end
+		end
+	end
+end
+
+-- function Event:pause(source, data)
+
+-- 	self.playing = false
+-- 	for i, listener in ipairs(self.listeners) do
+-- 		listener.events[self.name].play(source, data)
+-- 	end
 
 --[[
 GameEntity
@@ -130,7 +182,14 @@ end
 
 function GameEntity:removeChild(child)
 
-	local index = collections.index(self.children, child)
+	local index
+	if type(child) == "number" then
+		index = child
+		child = self.children[index]
+	else
+		index = collections.index(self.children, child)
+	end
+
 	if index then
 		table.remove(self.children, index)
 	end
@@ -328,6 +387,13 @@ local function buildObjectTree(scene, object)
 		end
 	end
 
+	--set up events
+	if object.events then
+		for i, event in ipairs(object.events) do
+			scene:addEventListener(event, gameObject)
+		end
+	end
+
 	return gameObject
 end
 
@@ -349,24 +415,21 @@ function GameObject:update(dt, firstUpdate)
 end
 
 function GameObject:draw()
-	for i, component in ipairs(self.components) do
 
-		--usually this function would only be called if component.draw exists.
-		--however, it might not exist (the component might have been removed/deactivated),
-		--so we'll check
+	for i, component in ipairs(self.components) do
 		if component.draw then component:draw() end
 	end
 end
 
-function GameObject:isDrawable()
-	--returns true if this GameObject contains a component with a draw() function
+-- function GameObject:isDrawable()
+-- 	--returns true if this GameObject contains a component with a draw() function
 
-	for i, component in ipairs(self.components) do
-		if component.draw then return true end
-	end
+-- 	for i, component in ipairs(self.components) do
+-- 		if component.draw then return true end
+-- 	end
 
-	return false
-end
+-- 	return false
+-- end
 
 function GameObject:addChild(child)
 
@@ -409,24 +472,16 @@ function GameObject:getComponents(componentType)
 	--componentType may be a Component class, or the name of the module where the class is found
 
 	return getComponents(self, componentType)
-	-- found = {}
-	-- for i, component in ipairs(self.components) do
-	-- 	if component:instanceof(componentType) then
-	-- 		found[#found + 1] = component
-	-- 	end
-	-- end
-
-	-- return found
 end
 
-function GameObject:detach()
+-- function GameObject:detach()
 
-	for i, component in ipairs(self.component) do
-		if component.detach then
-			component:detach()
-		end
-	end
-end
+-- 	for i, component in ipairs(self.component) do
+-- 		if component.detach then
+-- 			component:detach()
+-- 		end
+-- 	end
+-- end
 
 function GameObject:move(x, y, z, stopOnCollide)
 
@@ -776,6 +831,8 @@ local GameScene = class.define(GameEntity, function(self, transform)
 	self.globals = {}
 	self.globals.drawables = {}
 	self.globals.colliders = {}
+	self.globals.canvases = {}
+	self.globals.events = {}
 	GameEntity.init(self, transform)
 end)
 
@@ -923,6 +980,35 @@ function GameScene:draw()
 			drawable:draw()
 		end
 	end
+
+	for k, canvas in pairs(self.globals.canvases) do
+		love.graphics.setCanvas()
+		love.graphics.setColor(255,255,255)
+		love.graphics.draw(canvas)
+
+		-- let drawables take care of setting and clearing the canvas
+	end
+end
+
+function GameScene:addEvent(eventName)
+
+	local e = Event(eventName)
+	self.globals.events[eventName] = e
+	return e
+
+	-- {
+	-- 	play = function(source, data)
+	-- 		for i, listener in ipairs(self.listeners) do
+	-- 			listener.events[eventName].play(listener, source, data)
+	-- 		end
+	-- 	end,
+	-- }
+end
+
+function GameScene:addEventListener(eventName, listener)
+
+	local e = self.globals.events[eventName] or self:addEvent(eventName)
+	e.listeners[listener] = true
 end
 
 -- function GameScene:mousepressed(x, y, button)

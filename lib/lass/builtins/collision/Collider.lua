@@ -48,7 +48,7 @@ function Collider:isCollidingWith(other)
 	-- end
 	if otherType == Collider then
 		if not (
-			self.gameObject.transform.position.z == other.gameObject.transform.position.z or
+			self.gameObject.globalTransform.position.z == other.gameObject.globalTransform.position.z or
 			self.ignoreZ or
 			other.ignoreZ
 		) then

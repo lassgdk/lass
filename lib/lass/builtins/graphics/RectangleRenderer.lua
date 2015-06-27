@@ -42,14 +42,13 @@ function RectangleRenderer:draw()
 	-- 	debug.log(position, self.gameObject.name)
 	-- end
 
+	self:resetCanvas()
+
 	love.graphics.setColor(self.color)
 	love.graphics.setLineWidth(1)
 	if globalTransform.rotation == 0 then
 		local rect = shape:globalRectangle(globalTransform)
 
-		if self.gameObject.name == "Arrow" then
-			-- debug.log(rect.origin)
-		end
 		love.graphics.rectangle(
 			self.mode,
 			-- shape.origin.x+position.x,

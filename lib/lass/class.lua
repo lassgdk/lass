@@ -41,13 +41,15 @@ function class.define(base, init)
       --we don't want to pass the class to its own constructor, so we erase self
       self = {}
       setmetatable(self,c)
+      self.class = c
       init(self,...)
 
       return self
    end
 
    c.init = function(obj, ...)
-      --prevent infinitely recursive self.base.init() calls
+      --prevent infinitely recursive self.base.init() calls,
+      --and give the object a reference to its class's superclass
       if obj then
          obj.base = c.base
       end

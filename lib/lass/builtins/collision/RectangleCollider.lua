@@ -8,7 +8,6 @@ RectangleCollider
 
 local RectangleCollider = class.define(Collider, function(self, arguments)
 
-	arguments.shapeSource = arguments.shapeSource or ""
 	if not arguments.shapeSource then
 		arguments.shape = geometry.Rectangle(arguments.width, arguments.height, arguments.offset)
 	else
@@ -16,7 +15,7 @@ local RectangleCollider = class.define(Collider, function(self, arguments)
 		arguments.shape = geometry.Rectangle(0,0)
 	end
 
-	arguments.width, arguments.height = nil, nil
+	arguments.width, arguments.height, arguments.offset = nil, nil, nil
 	self.base.init(self, arguments)
 end)
 
