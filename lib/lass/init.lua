@@ -114,6 +114,8 @@ GameEntity
 local function maintainTransform(self)
 	--maintain global position and rotation
 
+	-- debug.log(self.name)
+
 	--clamp rotation between 0 and 360 degrees (e.g., -290 => 70)
 	self.transform.rotation = self.transform.rotation % 360
 
@@ -162,7 +164,7 @@ local GameEntity = class.define(function(self, transform, parent)
 		parent:addChild(self)
 	end
 
-	maintainTransform(self)
+	-- maintainTransform(self)
 end)
 
 -- trackParent should normally be false if GameEntity is scene and child is GameObject
@@ -187,6 +189,8 @@ function GameEntity:addChild(child, trackParent)
 	if trackParent then
 		child.parent = self
 	end
+
+	maintainTransform(child)
 end
 
 function GameEntity:removeChild(child)
@@ -344,11 +348,11 @@ local GameObject = class.define(GameEntity, function(self, gameScene, name, tran
 	gameScene:addGameObject(self)
 end)
 
-local function buildObjectTree(scene, object)
+local function buildObjectTree(scene, object, parent)
 	--build a game object and its children
 
 	--create gameObject and add it to scene
-	local gameObject = GameObject(scene, object.name, object.transform)
+	local gameObject = GameObject(scene, object.name, object.transform, parent)
 
 	if object.prefab and object.prefab ~= "" then
 		local pf = object.prefab
@@ -408,9 +412,9 @@ local function buildObjectTree(scene, object)
 end
 
 --dot, not colon
-function GameObject.fromPrefab(scene, prefab)
+function GameObject.fromPrefab(scene, prefab, parent)
 
-	return buildObjectTree(scene, prefab)
+	return buildObjectTree(scene, prefab, parent)
 end
 
 function GameObject:update(dt, firstUpdate)
@@ -544,6 +548,9 @@ function GameObject:move(x, y, z, stopOnCollide)
 			for i, other in ipairs(layer) do
 
 				if other ~= collider and other.solid then
+					if other.gameObject.globalTransform.position.z ~= self.globalTransform.position.z then
+						debug.log("uhoh", i, other.gameObject.name, other.gameObject.globalTransform.position)
+					end
 					local r, d = collider:isCollidingWith(other)
 
 					if r then

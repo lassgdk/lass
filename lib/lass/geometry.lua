@@ -253,7 +253,7 @@ local Transform = class.define(function(self, position, rotation, size)
 	end
 
 	self.position = Vector3(position)
-	self.rotation = rotation or 0
+	self.rotation = (rotation or 0) % 360
 	if size then
 		size.x = size.x or 1
 		size.y = size.y or 1

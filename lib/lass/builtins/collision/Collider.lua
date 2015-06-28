@@ -41,11 +41,6 @@ function Collider:isCollidingWith(other)
 	local otherType = class.instanceof(other, Collider, geometry.Shape, geometry.Vector2)
 	assert(otherType, "other must be a Collider, Shape, or Vector2")
 
-	-- if self.gameObject.name == "Floor" or other.gameObject.name == "Floor" then
-	-- 	print("trying")
-	-- else
-	-- 	print("not trying")
-	-- end
 	if otherType == Collider then
 		if not (
 			self.gameObject.globalTransform.position.z == other.gameObject.globalTransform.position.z or
