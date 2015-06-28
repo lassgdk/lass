@@ -16,11 +16,12 @@ debug.log = function(...)
 	a.n = a.n + 1
 
 	for i = 1, a.n do
-		if a[i] == nil then
-			io.write("nil")
-		else
-			io.write(a[i])
-		end
+		-- if a[i] == nil then
+		-- 	io.write("nil")
+		-- else
+		-- 	io.write(a[i])
+		-- end
+		io.write(tostring(a[i]))
 
 		if i < a.n then
 			io.write(sep)
@@ -35,30 +36,6 @@ end
 local class = require("lass.class")
 local collections = require("lass.collections")
 local geometry = require("lass.geometry")
-
---[[
-Component
-]]
-
-local Component = class.define(function(self, properties) 
-
-	self.gameObject = nil
-	for k, v in pairs(properties) do
-		self[k] = v
-	end
-
-	self.globals = {}
-end)
-
-function Component:awake()
-	--callback function that is invoked whenever Component is attached to a GameObject
-end
-
-function Component:update(dt, firstUpdate) end
-
-function Component:globals()
-	return self.gameObject.gameScene.globals
-end
 
 --[[
 Event
@@ -79,22 +56,54 @@ end
 
 function Event:post(action, source, data)
 
-	for i, listener in ipairs(self.listeners) do
+	debug.log("posting")
+
+	for listener in pairs(self.listeners) do
 		for j, component in ipairs(listener.components) do
-			local callback = component.events[self.name][action]
-			if callback then
-				callback(component, source, data)
+			if component.events[self.name] and component.events[self.name][action] then
+				component.events[self.name][action](component, source, data)
 			end
 		end
 	end
 end
 
--- function Event:pause(source, data)
+--[[
+EventResponseTable
+]]
 
--- 	self.playing = false
--- 	for i, listener in ipairs(self.listeners) do
--- 		listener.events[self.name].play(source, data)
--- 	end
+local EventResponseTable = class.define()
+
+function EventResponseTable:__call(...)
+	for i, e in ipairs(table.pack(...)) do
+		self[e] = {}
+	end
+end
+
+--[[
+Component
+]]
+
+local Component = class.define(function(self, arguments) 
+
+	self.gameObject = nil
+	for k, v in pairs(arguments) do
+		self[k] = v
+	end
+
+	self.globals = {}
+end)
+
+function Component:awake()
+	--callback function that is invoked whenever Component is attached to a GameObject
+end
+
+function Component:update(dt, firstUpdate) end
+
+function Component:globals()
+	return self.gameObject.gameScene.globals
+end
+
+class.addkey(Component, "events", EventResponseTable(), false)
 
 --[[
 GameEntity
@@ -330,6 +339,7 @@ local GameObject = class.define(GameEntity, function(self, gameScene, name, tran
 	end
 
 	self.components = {}
+	self.events = {}
 
 	gameScene:addGameObject(self)
 end)
@@ -456,6 +466,10 @@ function GameObject:addComponent(component)
 	component.gameObject = self
 	component.gameScene = self.gameScene
 	component.globals = self.gameScene.globals
+	component.events = {}
+	for i, eventName in ipairs(self.events) do
+		component.events[eventName] = {}
+	end
 
 	component:awake()
 end
@@ -485,6 +499,7 @@ end
 
 function GameObject:move(x, y, z, stopOnCollide)
 
+
 	local oldPosition = geometry.Vector3(self.transform.position)
 	local newPosition
 
@@ -495,6 +510,8 @@ function GameObject:move(x, y, z, stopOnCollide)
 		newPosition = geometry.Vector3(x, y, z) + self.transform.position
 		stopOnCollide = stopOnCollide or false
 	end
+
+	-- debug.log("moving", self.name, newPosition)
 
 	self.transform.position = newPosition
 
@@ -722,6 +739,8 @@ local function maintainCollisions(self, colliderToCheck)
 		layers = self.globals.colliders
 	end
 
+	-- local D = {}
+
 	for layerName, layer in pairs(layers) do
 
 		-- local colliders = {}
@@ -781,6 +800,7 @@ local function maintainCollisions(self, colliderToCheck)
 							if r then
 								collisionData[collider].colliding[other] = d
 								collisionData[other].colliding[collider] = d
+								-- D[#D+1] = d
 							else
 								collisionData[collider].notColliding[other] = true
 								collisionData[other].notColliding[collider] = true
@@ -814,6 +834,7 @@ local function maintainCollisions(self, colliderToCheck)
 
 		collider.collidingWith = collections.copy(others.colliding)
 		if next(enter) then
+			-- for i,v in ipairs(D) do debug.log("entering", D[i]) end
 			collider.gameObject:collisionenter(collections.copy(enter))
 		end
 		if next(exit) then
@@ -995,31 +1016,20 @@ function GameScene:addEvent(eventName)
 	local e = Event(eventName)
 	self.globals.events[eventName] = e
 	return e
-
-	-- {
-	-- 	play = function(source, data)
-	-- 		for i, listener in ipairs(self.listeners) do
-	-- 			listener.events[eventName].play(listener, source, data)
-	-- 		end
-	-- 	end,
-	-- }
 end
 
 function GameScene:addEventListener(eventName, listener)
 
 	local e = self.globals.events[eventName] or self:addEvent(eventName)
 	e.listeners[listener] = true
+	listener.events[#listener.events + 1] = eventName
 end
-
--- function GameScene:mousepressed(x, y, button)
--- 	for i, child in ipairs(self.children) do
--- 		child:mousepressed(x, y, button)
--- 	end
--- end
 
 return {
 	GameEntity = GameEntity,
 	GameScene = GameScene,
 	GameObject = GameObject,
 	Component = Component,
+	Event = Event,
+	EventResponseTable = EventResponseTable
 }
