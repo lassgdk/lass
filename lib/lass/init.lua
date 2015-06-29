@@ -56,8 +56,6 @@ end
 
 function Event:post(action, source, data)
 
-	debug.log("posting")
-
 	for listener in pairs(self.listeners) do
 		for j, component in ipairs(listener.components) do
 			if component.events[self.name] and component.events[self.name][action] then
@@ -237,6 +235,10 @@ function GameEntity:resize(x, y, z, allowNegativeSize)
 			if value < 0 then self.transform.size[axis] = 0 end
 		end
 	end
+end
+
+function GameEntity:hasParent()
+	return self.parent and next(self.parent) ~= nil
 end
 
 --callback functions
@@ -470,7 +472,6 @@ function GameObject:addComponent(component)
 	component.gameObject = self
 	component.gameScene = self.gameScene
 	component.globals = self.gameScene.globals
-	component.events = {}
 	for i, eventName in ipairs(self.events) do
 		component.events[eventName] = {}
 	end
@@ -507,7 +508,7 @@ function GameObject:move(x, y, z, stopOnCollide)
 	local oldPosition = geometry.Vector3(self.transform.position)
 	local newPosition
 
-	if type(y) == "boolean" then
+	if type(y) == "boolean" or y == nil then
 		newPosition = geometry.Vector3(x) + self.transform.position
 		stopOnCollide = y
 	else
@@ -520,6 +521,7 @@ function GameObject:move(x, y, z, stopOnCollide)
 	self.transform.position = newPosition
 
 	if not stopOnCollide then
+		debug.log("not bothering")
 		return true
 	end
 
@@ -654,6 +656,24 @@ function GameObject:move(x, y, z, stopOnCollide)
 		return true, collisions
 
 	end
+end
+
+function GameObject:moveGlobal(x, y, z, stopOnCollide)
+
+	if not self:hasParent() then
+		return self:move(x, y, z, stopOnCollide)
+	end
+
+	if type(y) ~= "number" then
+		stopOnCollide = y or false
+		z, y, x = x.z, x.y, x.x
+	end
+
+	local r = self.parent.globalTransform.rotation
+	local rotated = geometry.Vector2(x,y):rotate(-r)
+	rotated.z = z
+
+	return self:move(rotated, stopOnCollide)
 end
 
 --callback functions

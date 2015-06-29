@@ -23,7 +23,7 @@ function SimpleRigidbody:update(dt)
 		local moveBy = geometry.Vector2()
 		moveBy[axis] = self.velocity[axis] * dt
 
-		local r = self.gameObject:move(moveBy, true)
+		local r = self.gameObject:moveGlobal(moveBy, true)
 		results[axis] = r
 
 		if r == false then
