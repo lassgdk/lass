@@ -16,11 +16,6 @@ debug.log = function(...)
 	a.n = a.n + 1
 
 	for i = 1, a.n do
-		-- if a[i] == nil then
-		-- 	io.write("nil")
-		-- else
-		-- 	io.write(a[i])
-		-- end
 		io.write(tostring(a[i]))
 
 		if i < a.n then
@@ -30,6 +25,12 @@ debug.log = function(...)
 
 	print() -- newline
 
+	io.flush()
+end
+
+local oldPrint = print
+print = function(...)
+	oldPrint(...)
 	io.flush()
 end
 
@@ -71,10 +72,16 @@ EventResponseTable
 
 local EventResponseTable = class.define()
 
-function EventResponseTable:__call(...)
-	for i, e in ipairs(table.pack(...)) do
-		self[e] = {}
-	end
+-- function EventResponseTable:__call(...)
+-- 	for i, e in ipairs(table.pack(...)) do
+-- 		self[e] = {}
+-- 	end
+-- end
+
+function EventResponseTable:__index(key)
+
+	self[key] = {}
+	return self[key]
 end
 
 --[[
