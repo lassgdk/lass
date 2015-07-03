@@ -38,10 +38,6 @@ function RectangleRenderer:draw()
 		ySign = -1
 	end
 
-	-- if self.gameObject.name == "Arrow" then
-	-- 	debug.log(position, self.gameObject.name)
-	-- end
-
 	self:resetCanvas()
 
 	love.graphics.setColor(self.color)
@@ -51,12 +47,8 @@ function RectangleRenderer:draw()
 
 		love.graphics.rectangle(
 			self.mode,
-			-- shape.origin.x+position.x,
-			-- (shape.origin.y + position.y) * ySign,
 			rect.origin.x,
 			rect.origin.y * ySign,
-			-- shape.width * globalTransform.size.x,
-			-- shape.height * globalTransform.size.y
 			rect.width,
 			rect.height
 		)
