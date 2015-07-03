@@ -2,6 +2,30 @@
 -- an object/component framework for love2d, inspired by unity
 -- decky coss (cosstropolis.com)
 
+--[[
+standard library overrides
+]]
+
+local _print = print
+local _tonumber = tonumber
+
+print = function(...)
+
+	_print(...)
+	io.flush()
+end
+
+tonumber = function(x, b)
+
+	local mt = getmetatable(x)
+
+	if mt and mt.__tonumber then
+		return mt.__tonumber(x, b)
+	else
+		return _tonumber(x, b)
+	end
+end
+
 table.pack = function(...)
 	return { n = select("#", ...), ... }
 end
@@ -28,11 +52,9 @@ debug.log = function(...)
 	io.flush()
 end
 
-local oldPrint = print
-print = function(...)
-	oldPrint(...)
-	io.flush()
-end
+--[[
+imports
+]]
 
 local class = require("lass.class")
 local collections = require("lass.collections")
@@ -72,14 +94,16 @@ EventResponseTable
 
 local EventResponseTable = class.define()
 
--- function EventResponseTable:__call(...)
--- 	for i, e in ipairs(table.pack(...)) do
--- 		self[e] = {}
--- 	end
--- end
-
 function EventResponseTable:__index(key)
 
+	--the normal behaviour of the __index function as defined by lass.class
+	local v = rawget(self.class, key)
+	if v then
+		return v
+	end
+
+	--this allows us to index myEventTable.myUndefinedKey.
+	--required for `MyComponent.events.myEvent.play` syntax
 	self[key] = {}
 	return self[key]
 end
@@ -238,8 +262,8 @@ function GameEntity:resize(x, y, z, allowNegativeSize)
 	self.transform.size = self.transform.size + geometry.Vector3(x, y, z)
 
 	if not allowNegativeSize then
-		for axis, value in pairs(self.transform.size) do
-			if value < 0 then self.transform.size[axis] = 0 end
+		for i, axis in ipairs({"x","y","z"}) do
+			if self.transform.size[axis] < 0 then self.transform.size[axis] = 0 end
 		end
 	end
 end
