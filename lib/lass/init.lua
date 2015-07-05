@@ -410,6 +410,12 @@ local function buildObjectTree(scene, object, parent)
 				end
 			end
 		end
+
+		if pf.events then
+			for i, event in ipairs(pf.events) do
+				scene:addEventListener(event, gameObject)
+			end
+		end
 	end
 
 	--create and add components
@@ -552,7 +558,6 @@ function GameObject:move(x, y, z, stopOnCollide)
 	self.transform.position = newPosition
 
 	if not stopOnCollide then
-		debug.log("not bothering")
 		return true
 	end
 
@@ -573,7 +578,6 @@ function GameObject:move(x, y, z, stopOnCollide)
 		maintainTransform(self)
 
 		for i, layer in ipairs(collider.layersToCheck) do
-			-- print(#self.gameScene.globals.colliders[layer])
 			others[layer] = collections.copy(self.gameScene.globals.colliders[layer])
 		end
 
@@ -581,9 +585,6 @@ function GameObject:move(x, y, z, stopOnCollide)
 			for i, other in ipairs(layer) do
 
 				if other ~= collider and other.solid then
-					if other.gameObject.globalTransform.position.z ~= self.globalTransform.position.z then
-						debug.log("uhoh", i, other.gameObject.name, other.gameObject.globalTransform.position)
-					end
 					local r, d = collider:isCollidingWith(other)
 
 					if r then
