@@ -553,8 +553,6 @@ function GameObject:move(x, y, z, stopOnCollide)
 		stopOnCollide = stopOnCollide or false
 	end
 
-	-- debug.log("moving", self.name, newPosition)
-
 	self.transform.position = newPosition
 
 	if not stopOnCollide then
@@ -595,6 +593,7 @@ function GameObject:move(x, y, z, stopOnCollide)
 							return false
 						-- only add colliders that we weren't already colliding with, and have non-zero overlap
 						elseif not collider.collidingWith[other] and d ~= 0 then
+							-- debug.log(other.gameObject.name, d, newPosition - oldPosition)
 							collisions[#collisions + 1] = other
 						end
 					end
@@ -643,10 +642,15 @@ function GameObject:move(x, y, z, stopOnCollide)
 
 			lastBackward = backward
 			for i,c in ipairs(collisions) do
-				if collider:isCollidingWith(c) then
+				local r, d = collider:isCollidingWith(c)
+				if r then
 					-- print("colliding")
-					backward = true
-					break
+					if d == 0 then
+						done = true
+					else
+						backward = true
+						break
+					end
 				end
 				backward = false
 			end
@@ -684,7 +688,7 @@ function GameObject:move(x, y, z, stopOnCollide)
 
 		end
 
-		self.done = true
+		-- self.done = true
 		return true, collisions
 
 	end

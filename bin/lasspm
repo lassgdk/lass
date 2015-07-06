@@ -208,12 +208,11 @@ def playgame(game, scene="", **kwargs):
 
 	game = buildgame(game, sendToTemp=True, **kwargs)
 
-	argString = ""
-	if scene:
-		argString += "--scene=" + scene
+	# argString = ""
+	args = ["--scene=" + scene] if scene else []
 
 	# os.system(getLoveEngineCommand().format(game, argString))
-	proc = subprocess.Popen(["love", game], stdout=subprocess.PIPE)
+	proc = subprocess.Popen(["love", game] + args, stdout=subprocess.PIPE)
 	while proc.poll() == None:
 		out = proc.stdout.readline()
 		sys.stdout.write(out)
