@@ -620,7 +620,7 @@ local function intersectingCircles(cir1, cir2, transform1, transform2)
 	return intersecting, distance
 end
 
-local function intersectingFixedRectangles(rect1, rect2, transform1, transform2)
+local function intersectingFixedRectangles(rect1, rect2, transform1, transform2, direction)
 	--checks intersection of two rectangles, where rotation is assumed to be 0
 
 	local rect1 = rect1:globalRectangle(transform1)

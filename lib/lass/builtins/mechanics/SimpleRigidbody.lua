@@ -61,9 +61,10 @@ local function move(self, moveBy)
 						-- if we were already colliding with other, check if overlap distance has increased
 						if
 							collider.collidingWith[other] and
-							collider.collidingWith[other] < d and
-							d > 0.000001
+							collider.collidingWith[other] < d
+							-- and d > 0.0001
 						then
+							debug.log(d, moveBy)
 							self.transform.position = oldPosition
 							self:maintainTransform()
 
@@ -105,9 +106,11 @@ local function move(self, moveBy)
 			return false
 		end
 
-		self.transform.position.x = math.floor(self.transform.position.x)
-		self.transform.position.y = math.floor(self.transform.position.y)
-
+		if moveBy.x ~= 0 then
+			self.transform.position.x = math.floor(self.transform.position.x)
+		elseif moveBy.y ~= 0 then
+			self.transform.position.y = math.floor(self.transform.position.y)
+		end
 
 		while not done do
 			if backward then
@@ -122,21 +125,19 @@ local function move(self, moveBy)
 			for i,c in ipairs(collisions) do
 				local r, d = collider:isCollidingWith(c)
 
-				-- debug.log(i,r, d)
-
 				--we are done if at least one collision has an overlap of 0,
 				--and the others are colliding at 0 or not at all
 
 				--if colliding...
 				if r then
 					--...and if overlap is 0, stop here
-					if d == 0 then
-						done = true
-					--else, move backward next time
-					else
+					-- if d == 0 then
+					-- 	done = done
+					-- --else, move backward next time
+					-- else
 						backward = true
 						break
-					end
+					-- end
 				end
 
 				--if not colliding, move forward next time
@@ -188,11 +189,7 @@ function SimpleRigidbody:update(dt)
 
 	self.velocity = self.velocity - self.globals.gravity
 
-	-- debug.log(self.velocity, self.gameObject.name)
-
-	-- move(self, self.velocity.x * dt, self.velocity.y * dt)
 ----[[
-	debug.log(self.gameObject.transform.position, self.velocity)
 
 	local breakAfterY = true
 	for i, axis in ipairs({"x", "y", "x"}) do
@@ -204,7 +201,9 @@ function SimpleRigidbody:update(dt)
 		local r, col = move(self.gameObject, moveBy)
 		-- results[axis] = r
 
-		debug.log(i, axis, r, col)
+		-- if col then
+		-- 	debug.log(i, axis, r, col[1], col[2])
+		-- end
 
 		if r == false or col then
 			-- if collision happened during horizontal movement, try again after vertical movement
