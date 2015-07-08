@@ -17,7 +17,9 @@ local TextRenderer = class.define(Renderer, function(self, arguments)
 end)
 
 function TextRenderer:awake()
+
 	self.font = love.graphics.newFont(self.fontSize)
+	self.base.awake(self)
 end
 
 function TextRenderer:draw()
