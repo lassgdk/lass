@@ -68,6 +68,10 @@ function Vector2.__mul(a, b)
 	return Vector2(vector.x * scalar, vector.y * scalar)
 end
 
+function Vector2:__unm()
+	return Vector2(-self.x, -self.y)
+end
+
 function Vector2:__tostring()
 	return string.format("{x=%.2f, y=%.2f}", self.x, self.y)
 end
@@ -208,6 +212,10 @@ function Vector3.__sub(a, b)
 	assertOperandsHaveXandY(a, b)
 	a, b = sanitizeOperandZAxis(a, b)
 	return Vector3(a.x-b.x, a.y-b.y, a.z-b.z)
+end
+
+function Vector3:__unm()
+	return Vector3(-self.x, -self.y, -self.z)
 end
 
 function Vector3:__tostring()
@@ -376,7 +384,7 @@ local function intersectingPolygonAndOther(poly1, other, transform1, transform2)
 			--the vector might be (0,0) if the 2nd collider is a circle,
 			--and the 1st collider is touching its center
 			if normal.x == 0 and normal.y == 0 then
-				return true, other.radius
+				return true, {shortestOverlap=other.radius}
 			end
 
 			local normalAngle = normal:angle()
@@ -459,7 +467,7 @@ local function intersectingPolygonAndOther(poly1, other, transform1, transform2)
 	end
 
 	--if no gaps have been found, there must be a collision
-	return true, minDistance
+	return true, {shortestOverlap=minDistance}
 end
 
 
@@ -617,7 +625,7 @@ local function intersectingCircles(cir1, cir2, transform1, transform2)
 		distance = nil
 	end
 
-	return intersecting, distance
+	return intersecting, {shortestOverlap = distance}
 end
 
 local function intersectingFixedRectangles(rect1, rect2, transform1, transform2, direction)
@@ -658,24 +666,46 @@ local function intersectingFixedRectangles(rect1, rect2, transform1, transform2,
 		end
 	end
 
-	return true, minDistance
-end
+	local data = {shortestOverlap=minDistance}
 
-local function intersectingFixedRectangleAndCircle(rect, cir, transform1, transform2)
+	--TODO: deal with diagonal directions
 
-	rect = rect:globalRectangle(transform1)
-	cir = cir:globalCircle(transform2)
-
-	--is one of the rectangle's vertices inside the circle?
-	for i, vertex in ipairs(rect:vertices()) do
-		if cir:contains(vertex) then
-			return true
+	if direction then
+		--1 approaching from the left
+		if direction.x > 0 then
+			data.directionOverlap = overlaps[2]
+		--1 approaching from the right
+		elseif direction.x < 0 then
+			data.directionOverlap = overlaps[1]
+		--1 approaching from the top
+		elseif direction.y < 0 then
+			data.directionOverlap = overlaps[4]
+		--1 approaching from the bottom
+		elseif direction.y > 0 then
+			data.directionOverlap = overlaps[3]
 		end
+
+		data.directionOverlap = math.abs(data.directionOverlap)
 	end
 
-	--or is the circle's center inside the rectangle?
-	return rect:contains(cir.center)
+	return true, data
 end
+
+-- local function intersectingFixedRectangleAndCircle(rect, cir, transform1, transform2)
+
+-- 	rect = rect:globalRectangle(transform1)
+-- 	cir = cir:globalCircle(transform2)
+
+-- 	--is one of the rectangle's vertices inside the circle?
+-- 	for i, vertex in ipairs(rect:vertices()) do
+-- 		if cir:contains(vertex) then
+-- 			return true
+-- 		end
+-- 	end
+
+-- 	--or is the circle's center inside the rectangle?
+-- 	return rect:contains(cir.center)
+-- end
 
 
 local function guaranteeOrder(firstValue, ...)
@@ -696,7 +726,7 @@ end
 
 --[[public]]
 
-local function intersecting(fig1, fig2, transform1, transform2, ignoreRotation1, ignoreRotation2)
+local function intersecting(fig1, fig2, transform1, transform2, ignoreRotation1, ignoreRotation2, direction)
 
 	assert(
 		class.instanceof(fig1, Shape, Vector2) and class.instanceof(fig2, Shape, Vector2),
@@ -715,7 +745,7 @@ local function intersecting(fig1, fig2, transform1, transform2, ignoreRotation1,
 		return fig1.x == fig2.x and fig1.y == fig2.y and fig1.z == fig2.z
 	end
 
-	--if not ignoreRotation and rotation is nonzero, cast any rectangles to polygons
+	--if not ignoreRotation and rotation not divisible by 90, cast any rectangles to polygons
 	if ignoreRotation1 then
 		transform1.rotation = 0 
 	elseif fig1Type == Rectangle and transform1.rotation % 90 ~= 0 then
@@ -729,7 +759,7 @@ local function intersecting(fig1, fig2, transform1, transform2, ignoreRotation1,
 
 	--collision between two fixed rectangles
 	if fig1Type == Rectangle and fig2Type == Rectangle then
-		return intersectingFixedRectangles(fig1, fig2, transform1, transform2)
+		return intersectingFixedRectangles(fig1, fig2, transform1, transform2, direction)
 
 	--collision between a fixed rectangle and something else
 	elseif fig1Type == Rectangle or fig2Type == Rectangle then
@@ -743,10 +773,10 @@ local function intersecting(fig1, fig2, transform1, transform2, ignoreRotation1,
 		if otherType == Vector2 then
 			return rec:globalRectangle(transformRec):contains(other + transformOther.position)
 		--collision between a fixed rectangle and a circle
-		elseif otherType == Circle then
-			return intersectingFixedRectangleAndCircle(rec, other, transformRec, transformOther)
+		-- elseif otherType == Circle then
+			-- return intersectingFixedRectangleAndCircle(rec, other, transformRec, transformOther)
 		--collision between a fixed rectangle and a polygon
-		elseif otherType == Polygon then
+		elseif otherType == Polygon or otherType == Circle then
 			return intersectingPolygonAndOther(rec:toPolygon(), other, transformRec, transformOther)
 		end
 

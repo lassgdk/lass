@@ -52,6 +52,17 @@ debug.log = function(...)
 	io.flush()
 end
 
+math.sign = function(n)
+
+	if n < 0 then
+		return -1
+	elseif n > 0 then
+		return 1
+	else
+		return 0
+	end
+end
+
 --[[
 imports
 ]]

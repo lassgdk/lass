@@ -31,22 +31,22 @@ end
 function testIntersectingRectanglesAndVectors()
 	local r1, r2 = geometry.Rectangle(1,2), geometry.Rectangle(1,3)
 	local t1, t2 = geometry.Transform(geometry.Vector3(0,0)), geometry.Transform(geometry.Vector3(0,0))
-	local colliding, distance
+	local colliding, data
 
 	assert(geometry.intersecting(r1, r2), "rectangles at same origin aren't intersecting")
 	assert(geometry.intersecting(r1, r2, t1, t2, true, true), "rectangles at same origin aren't intersecting")
 
 	t2.position.y = 3
-	colliding, distance = geometry.intersecting(r1, r2, t1, t2, true, true)
-	assert(colliding and distance == 0, "rectangles should be touching with overlap of 0")
+	colliding, data = geometry.intersecting(r1, r2, t1, t2, true, true)
+	assert(colliding and data.shortestOverlap == 0, "rectangles should be touching with overlap of 0")
 
 	t2.position.y = 3.00001
-	colliding, distance = geometry.intersecting(r1, r2, t1, t2, true, true)
+	colliding, data = geometry.intersecting(r1, r2, t1, t2, true, true)
 	assert(not colliding, "rectangles should not be touching")
 
 	t2.position.y = 2
-	colliding, distance = geometry.intersecting(r1, r2, t1, t2, true, true)
-	assert(colliding and distance == 1, "rectangles should be touching with overlap of 1")
+	colliding, data = geometry.intersecting(r1, r2, t1, t2, true, true)
+	assert(colliding and data.shortestOverlap == 1, "rectangles should be touching with overlap of 1")
 
 	assert(geometry.intersecting(r1, geometry.Vector2(0.5, -1)), "rectangle should contain vector")
 	assert(not geometry.intersecting(r1, geometry.Vector2(0.5, 1)), "rectangle should not contain vector")
@@ -136,11 +136,11 @@ function testIntersectingPolygonAndCircle()
 
 	t2.position.y = 25
 	r, d = geometry.intersecting(pol, cir, t1, t2)
-	assert(r and d == 0, "figures should be intersecting with overlap of 0")
+	assert(r and d.shortestOverlap == 0, "figures should be intersecting with overlap of 0")
 
 	t2.position.y = 0
 	r, d = geometry.intersecting(pol, cir, t1, t2)
-	assert(r and d == cir.radius, "figures should be intersecting with overlap of " .. cir.radius)
+	assert(r and d.shortestOverlap == cir.radius, "figures should be intersecting with overlap of " .. cir.radius)
 end
 
 function testPolygonWithNoArguments()

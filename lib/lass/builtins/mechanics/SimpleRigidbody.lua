@@ -40,6 +40,8 @@ local function move(self, moveBy)
 	end
 
 	local collider = self:getComponent(Collider)
+	local directionOverlaps = {}
+
 	if collider and collider.solid then
 		local others = {}
 		local collisions = {}
@@ -55,24 +57,27 @@ local function move(self, moveBy)
 			for i, other in ipairs(layer) do
 
 				if other ~= collider and other.solid then
-					local r, d = collider:isCollidingWith(other)
+					local r, data = collider:isCollidingWith(other, moveBy)
 
 					if r then
 						-- if we were already colliding with other, check if overlap distance has increased
 						if
 							collider.collidingWith[other] and
-							collider.collidingWith[other] < d
+							collider.collidingWith[other].shortestOverlap < data.shortestOverlap
 							-- and d > 0.0001
 						then
-							debug.log(d, moveBy)
+							-- debug.log(d, moveBy)
 							self.transform.position = oldPosition
 							self:maintainTransform()
 
 							return false
 						-- only add colliders that we weren't already colliding with, and have non-zero overlap
-						elseif not collider.collidingWith[other] and d ~= 0 then
+						elseif not collider.collidingWith[other] and data.shortestOverlap ~= 0 then
 							-- debug.log(other.gameObject.name, d)
 							collisions[#collisions + 1] = other
+							if data.directionOverlap then
+								directionOverlaps[#directionOverlaps + 1] = data.directionOverlap
+							end
 						end
 					end
 				end
@@ -81,6 +86,19 @@ local function move(self, moveBy)
 
 		if #collisions < 1 then
 			return true
+		elseif #directionOverlaps == #collisions then
+			--we want to pull back by the greatest overlap distance
+			table.sort(directionOverlaps, function(a,b) return a > b end)
+			local dist = directionOverlaps[1]
+
+			if moveBy.x ~= 0 then
+				self:moveGlobal(-(math.sign(moveBy.x) * dist), 0)
+			elseif moveBy.y ~= 0 then
+				self:moveGlobal(0, -(math.sign(moveBy.y) * dist))
+			end
+
+			self:maintainTransform()
+			return true, collisions
 		end
 
 		local backward = true
@@ -114,9 +132,9 @@ local function move(self, moveBy)
 
 		while not done do
 			if backward then
-				self.transform.position = self.transform.position - skip
+				self:moveGlobal(-skip)
 			else
-				self.transform.position = self.transform.position + skip
+				self:moveGlobal(skip)
 			end
 
 			self:maintainTransform()
