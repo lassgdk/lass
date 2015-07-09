@@ -47,7 +47,7 @@ local function move(self, moveBy)
 		local collisions = {}
 
 		-- we need to update the global transform for the collision detection to work immediately
-		self:maintainTransform()
+		self:maintainTransform(true)
 
 		for i, layer in ipairs(collider.layersToCheck) do
 			others[layer] = collections.copy(self.gameScene.globals.colliders[layer])
@@ -61,15 +61,12 @@ local function move(self, moveBy)
 
 					if r then
 						-- if we were already colliding with other, check if overlap distance has increased
-						if
+						if (
 							collider.collidingWith[other] and
 							collider.collidingWith[other].shortestOverlap < data.shortestOverlap
-							-- and d > 0.0001
-						then
-							-- debug.log(d, moveBy)
+						) then
 							self.transform.position = oldPosition
-							self:maintainTransform()
-
+							self:maintainTransform(true)
 							return false
 						-- only add colliders that we weren't already colliding with, and have non-zero overlap
 						elseif not collider.collidingWith[other] and data.shortestOverlap ~= 0 then

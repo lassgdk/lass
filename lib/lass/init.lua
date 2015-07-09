@@ -87,7 +87,7 @@ GameEntity
 
 --[[internal]]
 
-local function maintainTransform(self)
+local function maintainTransform(self, updateDescendants)
 	--maintain global position and rotation
 
 	-- debug.log(self.name)
@@ -122,6 +122,12 @@ local function maintainTransform(self)
 		y = t.position.y * p.size.y,
 		z = t.position.z * p.size.z
 	}):rotate(p.rotation)
+
+	if updateDescendants == true then
+		for i, child in ipairs(self.children) do
+			maintainTransform(child, true)
+		end
+	end
 end
 
 --[[public]]
@@ -670,8 +676,8 @@ function GameObject:moveGlobal(x, y, z)
 	return self:move(moveBy:rotate(-r))
 end
 
-function GameObject:maintainTransform()
-	maintainTransform(self)
+function GameObject:maintainTransform(updateDescendants)
+	maintainTransform(self, updateDescendants)
 end
 
 --callback functions

@@ -843,7 +843,7 @@ return {
 	Circle = Circle,
 	Rectangle = Rectangle,
 	intersecting = intersecting,
-	degreesToRadians = function(d) return (d/180) * math.pi end,
+	-- degreesToRadians = function(d) return (d/180) * math.pi end,
 	flattenedVector2Array = flattenedVector2Array,
 	functions = functions
 }
