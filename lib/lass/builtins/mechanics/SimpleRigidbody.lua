@@ -13,191 +13,277 @@ local SimpleRigidbody = class.define(lass.Component, function(self, arguments)
 	self.base.init(self, arguments)
 end)
 
+local function checkCollisions(gameObject, oldPositions, moveBy)
+
+	local collider = gameObject:getComponent(Collider)
+	if not (collider and collider.solid) then
+		return {}
+	end
+
+	local directionOverlaps = {}
+	local collisions = {}
+	local others = {}
+
+	-- we need to update the global transform for the collision detection to work immediately
+	gameObject:maintainTransform()
+
+	for i, layer in ipairs(collider.layersToCheck) do
+		others[layer] = collections.copy(gameObject.gameScene.globals.colliders[layer])
+	end
+
+	for layerName, layer in pairs(others) do
+		for i, other in ipairs(layer) do
+
+			if other ~= collider and other.solid then
+				local r, data = collider:isCollidingWith(other, moveBy)
+
+				if r then
+					-- if we were already colliding with other, check if overlap distance has increased
+					if (
+						collider.collidingWith[other] and
+						collider.collidingWith[other].shortestOverlap < data.shortestOverlap
+					) then
+						-- debug.log(oldPosition)
+						gameObject.transform.position = oldPositions[gameObject]
+						gameObject:maintainTransform()
+						return false
+					-- only add colliders that we weren't already colliding with, and have non-zero overlap
+					elseif not collider.collidingWith[other] and data.shortestOverlap ~= 0 then
+						-- debug.log(other.gameObject.name, d)
+						collisions[#collisions + 1] = {other, collider}
+						if data.directionOverlap then
+							directionOverlaps[#directionOverlaps + 1] = data.directionOverlap
+						end
+					end
+				end
+			end
+		end
+	end
+
+	for i, child in ipairs(gameObject.children) do
+		local cols, overlaps = checkCollisions(child, oldPositions, moveBy)
+		if cols then
+			for j, col in ipairs(cols) do
+				collisions[#collisions + j] = col
+			end
+			for j, over in ipairs(overlaps) do
+				directionOverlaps[#directionOverlaps + j] = over
+			end
+		else
+			gameObject.transform.position = oldPositions[gameObject]
+			--reset transform of every descendant except the child and its descendants
+			--(because they've already been reset)
+			gameObject:maintainTransform(true, child)
+			return false
+		end
+	end
+
+	return collisions, directionOverlaps
+end
+
+local function gatherPositions(gameObject)
+
+	local positions = {}
+	positions[gameObject] = geometry.Vector3(gameObject.transform.position)
+
+	for i, child in ipairs(gameObject.children) do
+		for k,v in pairs(gatherPositions(child)) do
+			positions[k] = v
+		end
+	end
+
+	return positions
+end
+
 local function move(self, moveBy)
 
-	local oldPosition = geometry.Vector3(self.transform.position)
+	local gameObject = self.gameObject
+	local oldPositions = gatherPositions(gameObject)
 	-- local newPosition
 
 	-- if type(y) == "boolean" or y == nil then
-	-- 	newPosition = geometry.Vector3(x) + self.transform.position
+	-- 	newPosition = geometry.Vector3(x) + gameObject.transform.position
 	-- 	stopOnCollide = y
 	-- else
-	-- 	newPosition = geometry.Vector3(x, y, z) + self.transform.position
+	-- 	newPosition = geometry.Vector3(x, y, z) + gameObject.transform.position
 	-- 	stopOnCollide = stopOnCollide or false
 	-- end
 
-	-- self.transform.position = newPosition
+	-- gameObject.transform.position = newPosition
 
-	self:moveGlobal(moveBy)
-	local newPosition = self.transform.position
+	gameObject:moveGlobal(moveBy)
+	local newPosition = gameObject.transform.position
 
 	if
-		oldPosition.x == newPosition.x and
-		oldPosition.y == newPosition.y and
-		oldPosition.z == newPosition.z
+		oldPositions[gameObject].x == newPosition.x and
+		oldPositions[gameObject].y == newPosition.y and
+		oldPositions[gameObject].z == newPosition.z
 	then
 		return false
 	end
 
-	local collider = self:getComponent(Collider)
-	local directionOverlaps = {}
+	local collisions, directionOverlaps = checkCollisions(gameObject, oldPositions, moveBy)
 
-	if collider and collider.solid then
-		local others = {}
-		local collisions = {}
+	-- local collider = gameObject:getComponent(Collider)
+	-- local directionOverlaps = {}
 
-		-- we need to update the global transform for the collision detection to work immediately
-		self:maintainTransform(true)
+	-- if collider and collider.solid then
+	-- 	local others = {}
+	-- 	local collisions = {}
 
-		for i, layer in ipairs(collider.layersToCheck) do
-			others[layer] = collections.copy(self.gameScene.globals.colliders[layer])
-		end
+	-- 	-- we need to update the global transform for the collision detection to work immediately
+	-- 	gameObject:maintainTransform(true)
 
-		for layerName, layer in pairs(others) do
-			for i, other in ipairs(layer) do
+	-- 	for i, layer in ipairs(collider.layersToCheck) do
+	-- 		others[layer] = collections.copy(gameObject.gameScene.globals.colliders[layer])
+	-- 	end
 
-				if other ~= collider and other.solid then
-					local r, data = collider:isCollidingWith(other, moveBy)
+	-- 	for layerName, layer in pairs(others) do
+	-- 		for i, other in ipairs(layer) do
 
-					if r then
-						-- if we were already colliding with other, check if overlap distance has increased
-						if (
-							collider.collidingWith[other] and
-							collider.collidingWith[other].shortestOverlap < data.shortestOverlap
-						) then
-							self.transform.position = oldPosition
-							self:maintainTransform(true)
-							return false
-						-- only add colliders that we weren't already colliding with, and have non-zero overlap
-						elseif not collider.collidingWith[other] and data.shortestOverlap ~= 0 then
-							-- debug.log(other.gameObject.name, d)
-							collisions[#collisions + 1] = other
-							if data.directionOverlap then
-								directionOverlaps[#directionOverlaps + 1] = data.directionOverlap
-							end
-						end
-					end
-				end
-			end
-		end
+	-- 			if other ~= collider and other.solid then
+	-- 				local r, data = collider:isCollidingWith(other, moveBy)
 
-		if #collisions < 1 then
-			return true
-		elseif #directionOverlaps == #collisions then
-			--we want to pull back by the greatest overlap distance
-			table.sort(directionOverlaps, function(a,b) return a > b end)
-			local dist = directionOverlaps[1]
+	-- 				if r then
+	-- 					-- if we were already colliding with other, check if overlap distance has increased
+	-- 					if (
+	-- 						collider.collidingWith[other] and
+	-- 						collider.collidingWith[other].shortestOverlap < data.shortestOverlap
+	-- 					) then
+	-- 						gameObject.transform.position = oldPosition
+	-- 						gameObject:maintainTransform(true)
+	-- 						return false
+	-- 					-- only add colliders that we weren't already colliding with, and have non-zero overlap
+	-- 					elseif not collider.collidingWith[other] and data.shortestOverlap ~= 0 then
+	-- 						-- debug.log(other.gameObject.name, d)
+	-- 						collisions[#collisions + 1] = other
+	-- 						if data.directionOverlap then
+	-- 							directionOverlaps[#directionOverlaps + 1] = data.directionOverlap
+	-- 						end
+	-- 					end
+	-- 				end
+	-- 			end
+	-- 		end
+	-- 	end
 
-			if moveBy.x ~= 0 then
-				self:moveGlobal(-(math.sign(moveBy.x) * dist), 0)
-			elseif moveBy.y ~= 0 then
-				self:moveGlobal(0, -(math.sign(moveBy.y) * dist))
-			end
-
-			self:maintainTransform()
-			return true, collisions
-		end
-
-		local backward = true
-		local lastBackward = backward
-		local skip = newPosition - oldPosition
-		local oldSkip
-
-		skip = geometry.Vector2(skip.x/2, skip.y/2)
-		for i, a in ipairs({"x", "y"}) do
-			if skip[a] < 0 then
-				skip[a] = math.ceil(skip[a])
-			else
-				skip[a] = math.floor(skip[a])
-			end
-		end
-		local done = false
-		local maintainSkip = false
-		local counter = 0
-
-		if skip.x == 0 and skip.y == 0 then
-			self.transform.position = oldPosition
-			self:maintainTransform()
-			return false
-		end
+	if not collisions then
+		return false
+	elseif #collisions < 1 then
+		return true
+	elseif #directionOverlaps == #collisions then
+		--we want to pull back by the greatest overlap distance
+		table.sort(directionOverlaps, function(a,b) return a > b end)
+		local dist = directionOverlaps[1]
 
 		if moveBy.x ~= 0 then
-			self.transform.position.x = math.floor(self.transform.position.x)
+			gameObject:moveGlobal(-(math.sign(moveBy.x) * dist), 0)
 		elseif moveBy.y ~= 0 then
-			self.transform.position.y = math.floor(self.transform.position.y)
+			gameObject:moveGlobal(0, -(math.sign(moveBy.y) * dist))
 		end
 
-		while not done do
-			if backward then
-				self:moveGlobal(-skip)
-			else
-				self:moveGlobal(skip)
-			end
-
-			self:maintainTransform()
-
-			lastBackward = backward
-			for i,c in ipairs(collisions) do
-				local r, d = collider:isCollidingWith(c)
-
-				--we are done if at least one collision has an overlap of 0,
-				--and the others are colliding at 0 or not at all
-
-				--if colliding...
-				if r then
-					--...and if overlap is 0, stop here
-					-- if d == 0 then
-					-- 	done = done
-					-- --else, move backward next time
-					-- else
-						backward = true
-						break
-					-- end
-				end
-
-				--if not colliding, move forward next time
-				backward = false
-			end
-
-			local axesLessThanOne = 0
-			if not maintainSkip then
-				oldSkip = skip
-				skip = geometry.Vector2(skip.x/2, skip.y/2)
-				for i, a in ipairs({"x", "y"}) do
-					if skip[a] < 0 then
-						skip[a] = math.ceil(skip[a])
-						if skip[a] > -1 then
-							-- skip[a] = -1
-							axesLessThanOne = axesLessThanOne + 1
-						end
-					elseif skip[a] > 0 then
-						skip[a] = math.floor(skip[a])
-						if skip[a] < 1 then
-							-- skip[a] = 1
-							axesLessThanOne = axesLessThanOne + 1
-						end
-					else
-						axesLessThanOne = axesLessThanOne + 1
-					end
-				end
-			end
-
-			if axesLessThanOne == 2 then
-				skip = oldSkip
-				maintainSkip = true
-			end
-
-			-- even if collision overlaps aren't exactly 0, we can stop here if
-			-- we're just moving the collider back and forth
-			if maintainSkip and not backward and lastBackward then
-				done = true
-			end
-
-			counter = counter + 1
-		end
-
+		gameObject:maintainTransform()
 		return true, collisions
 	end
+
+	local backward = true
+	local lastBackward = backward
+	local skip = newPosition - oldPosition
+	local oldSkip
+
+	skip = geometry.Vector2(skip.x/2, skip.y/2)
+	for i, a in ipairs({"x", "y"}) do
+		if skip[a] < 0 then
+			skip[a] = math.ceil(skip[a])
+		else
+			skip[a] = math.floor(skip[a])
+		end
+	end
+	local done = false
+	local maintainSkip = false
+	local counter = 0
+
+	if skip.x == 0 and skip.y == 0 then
+		gameObject.transform.position = oldPosition
+		gameObject:maintainTransform()
+		return false
+	end
+
+	if moveBy.x ~= 0 then
+		gameObject.transform.position.x = math.floor(gameObject.transform.position.x)
+	elseif moveBy.y ~= 0 then
+		gameObject.transform.position.y = math.floor(gameObject.transform.position.y)
+	end
+
+	while not done do
+		if backward then
+			gameObject:moveGlobal(-skip)
+		else
+			gameObject:moveGlobal(skip)
+		end
+
+		gameObject:maintainTransform()
+
+		lastBackward = backward
+		for i, c in ipairs(collisions) do
+			local r, d = c[1]:isCollidingWith(c[2])
+
+			--we are done if at least one collision has an overlap of 0,
+			--and the others are colliding at 0 or not at all
+
+			--if colliding...
+			if r then
+				--...and if overlap is 0, stop here
+				-- if d == 0 then
+				-- 	done = done
+				-- --else, move backward next time
+				-- else
+					backward = true
+					break
+				-- end
+			end
+
+			--if not colliding, move forward next time
+			backward = false
+		end
+
+		local axesLessThanOne = 0
+		if not maintainSkip then
+			oldSkip = skip
+			skip = geometry.Vector2(skip.x/2, skip.y/2)
+			for i, a in ipairs({"x", "y"}) do
+				if skip[a] < 0 then
+					skip[a] = math.ceil(skip[a])
+					if skip[a] > -1 then
+						-- skip[a] = -1
+						axesLessThanOne = axesLessThanOne + 1
+					end
+				elseif skip[a] > 0 then
+					skip[a] = math.floor(skip[a])
+					if skip[a] < 1 then
+						-- skip[a] = 1
+						axesLessThanOne = axesLessThanOne + 1
+					end
+				else
+					axesLessThanOne = axesLessThanOne + 1
+				end
+			end
+		end
+
+		if axesLessThanOne == 2 then
+			skip = oldSkip
+			maintainSkip = true
+		end
+
+		-- even if collision overlaps aren't exactly 0, we can stop here if
+		-- we're just moving the collider back and forth
+		if maintainSkip and not backward and lastBackward then
+			done = true
+		end
+
+		counter = counter + 1
+	end
+
+	return true, collisions
 end
 
 function SimpleRigidbody:update(dt)
@@ -213,7 +299,7 @@ function SimpleRigidbody:update(dt)
 		moveBy[axis] = self.velocity[axis] * dt
 
 		-- local r, col = self.gameObject:moveGlobal(moveBy, true)
-		local r, col = move(self.gameObject, moveBy)
+		local r, col = move(self, moveBy)
 		-- results[axis] = r
 
 		-- if col then

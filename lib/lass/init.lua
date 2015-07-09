@@ -87,10 +87,12 @@ GameEntity
 
 --[[internal]]
 
-local function maintainTransform(self, updateDescendants)
+local function maintainTransform(self, updateDescendants, descendantToExclude)
 	--maintain global position and rotation
 
-	-- debug.log(self.name)
+	if self == descendantToExclude then
+		return
+	end
 
 	--clamp rotation between 0 and 360 degrees (e.g., -290 => 70)
 	self.transform.rotation = self.transform.rotation % 360
@@ -676,8 +678,8 @@ function GameObject:moveGlobal(x, y, z)
 	return self:move(moveBy:rotate(-r))
 end
 
-function GameObject:maintainTransform(updateDescendants)
-	maintainTransform(self, updateDescendants)
+function GameObject:maintainTransform(updateDescendants, descendantToExclude)
+	maintainTransform(self, updateDescendants, descendantToExclude)
 end
 
 --callback functions
