@@ -187,7 +187,7 @@ local function move(self, moveBy)
 
 	local backward = true
 	local lastBackward = backward
-	local skip = newPosition - oldPosition
+	local skip = newPosition - oldPositions[gameObject]
 	local oldSkip
 
 	skip = geometry.Vector2(skip.x/2, skip.y/2)
@@ -203,7 +203,7 @@ local function move(self, moveBy)
 	local counter = 0
 
 	if skip.x == 0 and skip.y == 0 then
-		gameObject.transform.position = oldPosition
+		gameObject.transform.position = oldPositions[gameObject]
 		gameObject:maintainTransform()
 		return false
 	end
