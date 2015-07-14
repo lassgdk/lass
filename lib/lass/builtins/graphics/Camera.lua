@@ -13,13 +13,6 @@ function Camera:awake()
 	self.globals.cameras[self.canvas] = self
 end
 
--- function Camera:update()
-
--- 	local transform = self.globalTransform
-
--- 	if transform.y <
--- end
-
 function Camera:draw()
 
 	local transform = self.gameObject.globalTransform

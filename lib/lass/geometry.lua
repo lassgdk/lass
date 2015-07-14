@@ -834,6 +834,10 @@ function functions.pulse(x, pulseWidth)
 	end
 end
 
+functions["y=x"] = function(x)
+	return x
+end
+
 return {
 	Transform = Transform,
 	Vector2 = Vector2,

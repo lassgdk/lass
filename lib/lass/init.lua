@@ -6,6 +6,7 @@ require("lass.stdext")
 local class = require("lass.class")
 local collections = require("lass.collections")
 local geometry = require("lass.geometry")
+local Collider = nil
 
 --[[
 Event
@@ -234,6 +235,7 @@ for i, f in ipairs({
 	"keypressed",
 	"keyreleased",
 	"mousefocus",
+	"mousemoved",
 	"mousepressed",
 	"mousereleased",
 	"quit",
@@ -689,8 +691,9 @@ for i, f in ipairs({
 	"keypressed",
 	"keyreleased",
 	"mousefocus",
-	"mousepressed",
-	"mousereleased",
+	"mousemoved",
+	-- "mousepressed",
+	-- "mousereleased",
 	"quit",
 	"windowresize",
 	"textinput",
@@ -715,6 +718,25 @@ for i, f in ipairs({
 		if super then
 			self.base[f](self, ...)
 		end
+	end
+end
+
+for i, f in ipairs({"mousepressed", "mousereleased"}) do
+	GameObject[f] = function(self, x, y, button)
+		if not Collider then
+			Collider = require("lass.builtins.collision.Collider")
+		end
+
+		local c = self:getComponent(Collider)
+		local ySign = self.gameScene.globals.ySign
+		local r = c ~= nil and c.clickable and c:isCollidingWith(geometry.Vector2(x, y * ySign))
+
+		for i, component in ipairs(self.components) do
+			if component[f] then
+				component[f](component, x, y, button, r)
+			end
+		end
+		self.base[f](self, x, y, button)
 	end
 end
 
@@ -947,6 +969,11 @@ function GameScene:applySettings()
 
 	--graphics
 	love.graphics.setBackgroundColor(self.settings.graphics.backgroundColor)
+	if self.settings.graphics.invertYAxis then
+		self.globals.ySign = -1
+	else
+		self.globals.ySign = 1
+	end
 
 	--physics
 	self.globals.gravity = geometry.Vector2(self.settings.physics.gravity)
