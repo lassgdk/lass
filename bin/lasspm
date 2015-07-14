@@ -194,7 +194,7 @@ def newgame(game, projects=False):
 		except OSError:
 			print("Could not create %s folder")
 
-	for t in ["main.lua", "settings.lua", "mainscene.lua"]:
+	for t in ["main.lua", "settings.lua", "scene_main.lua"]:
 		shutil.copy(os.path.join(DIR_TEMPLATES_LUA, t), "src")
 
 def playgame(game, scene="", **kwargs):
@@ -219,6 +219,12 @@ def playgame(game, scene="", **kwargs):
 		sys.stdout.flush()
 
 	os.remove(game)
+
+def newprefab(fileName):
+	shutil.copy(
+		os.path.join(DIR_TEMPLATES_LUA, "prefab.lua"),
+		os.path.join("src", fileName)
+	)
 
 #helper functions
 
@@ -276,12 +282,6 @@ def buildexe(loveFileNameFull, exeFolderName=None, exeFileName=None, dest="."):
 
 def main():
 
-	helpMsg = (
-		"usage: lasspm <command> [<args>]\n"
-		"for help regarding a specific command, use lasspm <command> --help\n"
-		"commands: build, new, play"
-	)
-
 	if sys.platform == "win32":
 		pl = "w"
 	elif sys.platform == "darwin":
@@ -335,6 +335,14 @@ def main():
 				"help":"create game in default projects folder (currently %s)" % DIR_PROJECTS
 			}),
 		]),
+		"new-prefab": (newprefab, [
+			(("fileName",), {
+				"type":str,
+				# "default":"prefab",
+				# "nargs":1,
+				"help":"file name of new prefab"
+			}),
+		]),
 		"play": (playgame, [
 			(("game",), {
 				"type":str,
@@ -359,6 +367,13 @@ def main():
 			})
 		]),
 	}
+
+	helpMsg = (
+		"usage: lasspm <command> [<args>]\n"
+		"for help regarding a specific command, use lasspm <command> --help\n"
+		"commands: "
+	) + ", ".join(sorted(commands.keys()))
+
 	try:
 		command = commands[sys.argv[1]]
 	except (IndexError, KeyError):

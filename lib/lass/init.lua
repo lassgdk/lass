@@ -887,6 +887,7 @@ local GameScene = class.define(GameEntity, function(self, transform)
 	self.globals.drawables = {}
 	self.globals.colliders = {}
 	self.globals.canvases = {}
+	self.globals.cameras = {}
 	self.globals.events = {}
 	GameEntity.init(self, transform)
 end)
@@ -1024,12 +1025,12 @@ function GameScene:draw()
 	table.sort(indices, function(a,b) return a > b end)
 
 	--draw
-	if self.globals.camera then
-		-- directly call draw on the Camera component instead of the game object.
-		-- does not account for camera object being in drawables, although Renderer
-		-- class tries to prevent this from happening.
-		self.globals.camera:draw()
-	end
+	-- if self.globals.camera then
+	-- 	-- directly call draw on the Camera component instead of the game object.
+	-- 	-- does not account for camera object being in drawables, although Renderer
+	-- 	-- class tries to prevent this from happening.
+	-- 	self.globals.camera:draw()
+	-- end
 	for i, index in ipairs(indices) do
 		for j, drawable in pairs(drawables[index]) do
 			drawable:draw()
@@ -1039,6 +1040,11 @@ function GameScene:draw()
 	for k, canvas in pairs(self.globals.canvases) do
 		love.graphics.setCanvas()
 		love.graphics.setColor(255,255,255)
+
+		if self.globals.cameras[k] then
+			self.globals.cameras[k]:draw()
+		end
+
 		love.graphics.draw(canvas)
 
 		-- let drawables take care of setting and clearing the canvas

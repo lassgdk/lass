@@ -25,7 +25,7 @@ end
 function TextRenderer:draw()
 
 	local gt = self.gameObject.globalTransform
-	local r = geometry.degreesToRadians(gt.rotation)
+	local r = math.rad(gt.rotation)
 	local ySign = 1
 
 	if self.gameScene.settings.graphics.invertYAxis then
