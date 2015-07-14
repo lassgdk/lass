@@ -216,30 +216,22 @@ local function move(self, moveBy)
 
 	while not done do
 		if backward then
-			gameObject:moveGlobal(-skip)
+			-- gameObject:moveGlobal(-skip)
+			gameObject:move(-skip)
 		else
-			gameObject:moveGlobal(skip)
+			-- gameObject:moveGlobal(skip)
+			gameObject:move(skip)
 		end
 
-		gameObject:maintainTransform()
+		gameObject:maintainTransform(true)
 
 		lastBackward = backward
 		for i, c in ipairs(collisions) do
 			local r, d = c[1]:isCollidingWith(c[2])
-
-			--we are done if at least one collision has an overlap of 0,
-			--and the others are colliding at 0 or not at all
-
 			--if colliding...
 			if r then
-				--...and if overlap is 0, stop here
-				-- if d == 0 then
-				-- 	done = done
-				-- --else, move backward next time
-				-- else
-					backward = true
-					break
-				-- end
+				backward = true
+				break
 			end
 
 			--if not colliding, move forward next time
