@@ -83,7 +83,7 @@ local function deepcopy(t, found)
 	end
 end
 
-local function get(object, ...)
+local function _get(object, calculateValue, ...)
 
 	local lastObject = nil
 	local tmp = nil
@@ -100,20 +100,36 @@ local function get(object, ...)
 			tmp = object
 			object = object(lastObject, subkey)
 			lastObject = tmp
+		else
+			error("object must be table or function")
 		end
 
 		--if we're on the second-to-last subkey, we've found the target object and its key
 		if i >= #key - 1 then
 			-- for k,v in pairs(object) do print(k,v) end
-			local value
-			if type(object) == "table" then
-				value = object[key[i+1]]
-			elseif type(object) == "function" then
-				value = object(object, key[i+1])
+			if calculateValue then
+				local value
+				if type(object) == "table" then
+					value = object[key[i+1]]
+				elseif type(object) == "function" then
+					value = object(object, key[i+1])
+				end
+				return value, object, key[i+1]
+			else
+				return object, key[i+1]
 			end
-			return value, object, key[i+1]
 		end
 	end
+end
+
+local function get(object, ...)
+
+	return _get(object, true, ...)
+end
+
+local function getkey(object, ...)
+
+	return _get(object, false, ...)
 end
 
 local function set(l)
@@ -132,5 +148,6 @@ return {
 	index = index,
 	indices = indices,
 	set = set,
-	get = get
+	get = get,
+	getkey = getkey
 }

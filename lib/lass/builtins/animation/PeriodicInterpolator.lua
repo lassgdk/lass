@@ -62,6 +62,26 @@ function PeriodicInterpolator:awake()
 
 end
 
+function PeriodicInterpolator:play()
+
+	if self.playing then
+		self:seek(0)
+	else
+		self.playing = true
+	end
+end
+
+function PeriodicInterpolator:stop()
+
+	self.playing = false
+	self:seek(0)
+end
+
+function PeriodicInterpolator:pause()
+
+	self.playing = false
+end
+
 function PeriodicInterpolator:seek(x)
 
 	if self.sampleLength ~= math.huge then
@@ -79,7 +99,7 @@ function PeriodicInterpolator:update(dt)
 
 	local targets = {}
 	for i, t in ipairs(self.targets) do
-		local _, object, key = collections.get(self, unpack(t))
+		local object, key = collections.getkey(self, unpack(t))
 		targets[i] = {object, key}
 	end
 
