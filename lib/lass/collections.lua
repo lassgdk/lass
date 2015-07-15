@@ -83,6 +83,39 @@ local function deepcopy(t, found)
 	end
 end
 
+local function get(object, ...)
+
+	local lastObject = nil
+	local tmp = nil
+	local key = table.pack(...)
+
+	for i, subkey in ipairs(key) do
+
+		--go down the chain
+		if type(object) == "table" then
+			lastObject = object
+			object = object[subkey]
+		--function must be unary other than the "self" argument
+		elseif type(object) == "function" then
+			tmp = object
+			object = object(lastObject, subkey)
+			lastObject = tmp
+		end
+
+		--if we're on the second-to-last subkey, we've found the target object and its key
+		if i >= #key - 1 then
+			-- for k,v in pairs(object) do print(k,v) end
+			local value
+			if type(object) == "table" then
+				value = object[key[i+1]]
+			elseif type(object) == "function" then
+				value = object(object, key[i+1])
+			end
+			return value, object, key[i+1]
+		end
+	end
+end
+
 local function set(l)
 
 	s = {}
@@ -98,5 +131,6 @@ return {
 	deepcopy = deepcopy,
 	index = index,
 	indices = indices,
-	set = set
+	set = set,
+	get = get
 }

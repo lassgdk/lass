@@ -27,11 +27,7 @@ local PlayerInput = class.define(lass.Component, function(self, arguments)
 	self.rotationDirection = 0
 end)
 
-function PlayerInput:update(dt, firstUpdate)
-
-	-- if firstUpdate then
-	-- 	print(self.gameObject.name, self.gameObject.transform.position, self.gameObject.globalTransform.position)
-	-- end
+function PlayerInput:update(dt)
 
 	if self.speedMode == "perFrame" then dt = 1 end
 
@@ -41,6 +37,8 @@ function PlayerInput:update(dt, firstUpdate)
 	elseif self.rotationDirection < 0 then
 		self.gameObject:rotate(dt * -self.rotationSpeed)
 	end
+
+	-- debug.log(self.gameObject.globalTransform.position, self.gameObject.name)
 
 end
 

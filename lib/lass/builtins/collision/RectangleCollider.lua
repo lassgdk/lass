@@ -19,13 +19,13 @@ local RectangleCollider = class.define(Collider, function(self, arguments)
 	self.base.init(self, arguments)
 end)
 
-function RectangleCollider:awake()
+-- function RectangleCollider:awake()
 
-	if self.shapeSource then
-		self.shapeSource = self.gameObject:getComponent(self.shapeSource)
-		self.shape = self.shapeSource.shape
-	end
-	self.base.awake(self)
-end
+-- 	if self.shapeSource then
+-- 		self.shapeSource = self.gameObject:getComponent(self.shapeSource)
+-- 		self.shape = self.shapeSource.shape
+-- 	end
+-- 	self.base.awake(self)
+-- end
 
 return RectangleCollider

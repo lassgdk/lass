@@ -21,6 +21,11 @@ end)
 
 function Collider:awake()
 
+	if self.shapeSource then
+		self.shapeSource = self.gameObject:getComponent(self.shapeSource)
+		self.shape = self.shapeSource.shape
+	end
+
 	self.collidingWith = {}
 	for i, layerName in ipairs(self.layers) do
 		local layer = self.globals.colliders[layerName]

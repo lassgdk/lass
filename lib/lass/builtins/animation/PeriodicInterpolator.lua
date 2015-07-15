@@ -47,38 +47,6 @@ local PeriodicInterpolator = class.define(lass.Component, function(self, argumen
 	self.base.init(self, arguments)
 end)
 
---"gameObject","transform","position","x"
---"gameObject","getComponent","lass.builtins.graphics.SpriteRenderer","color","x"
-
-local function getTarget(self, key)
-
-	-- print(self, key)
-
-	local lastObject = nil
-	local tmp = nil
-	local object = self
-
-	for i, subkey in ipairs(key) do
-
-		--go down the chain
-		if type(object) == "table" then
-			lastObject = object
-			object = object[subkey]
-		--function must be unary other than the "self" argument
-		elseif type(object) == "function" then
-			tmp = object
-			object = object(lastObject, subkey)
-			lastObject = tmp
-		end
-
-		--if we're on the second-to-last subkey, we've found the target object and its key
-		if i >= #key - 1 then
-			-- for k,v in pairs(object) do print(k,v) end
-			return {object, key[i+1]}
-		end
-	end
-end
-
 function PeriodicInterpolator:awake()
 
 	-- self.targets = getTarget(self, self.targets)
@@ -105,13 +73,14 @@ end
 
 function PeriodicInterpolator:update(dt)
 
-	local targets = {}
-	for i, t in ipairs(self.targets) do
-		targets[i] = getTarget(self, t)
-	end
-
 	if not self.playing or self.period <= 0 then
 		return
+	end
+
+	local targets = {}
+	for i, t in ipairs(self.targets) do
+		local _, object, key = collections.get(self, unpack(t))
+		targets[i] = {object, key}
 	end
 
 	if self.sampleLength ~= math.huge then

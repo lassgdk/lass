@@ -9,7 +9,6 @@ CircleCollider
 
 local CircleCollider = class.define(Collider, function(self, arguments)
 
-	arguments.shapeSource = arguments.shapeSource or ""
 	if not arguments.shapeSource then
 		arguments.shape = geometry.Circle(arguments.radius, arguments.center)
 	else
@@ -22,14 +21,14 @@ local CircleCollider = class.define(Collider, function(self, arguments)
 	self.base.init(self, arguments)
 end)
 
-function CircleCollider:awake()
+-- function CircleCollider:awake()
 
-	if self.shapeSource then
-		self.shapeSource = self.gameObject:getComponent(self.shapeSource)
-		self.shape = self.shapeSource.shape
-	end
+-- 	if self.shapeSource then
+-- 		self.shapeSource = self.gameObject:getComponent(self.shapeSource)
+-- 		self.shape = self.shapeSource.shape
+-- 	end
 
-	self.base.awake(self)
-end
+-- 	self.base.awake(self)
+-- end
 
 return CircleCollider

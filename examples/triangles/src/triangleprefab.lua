@@ -19,7 +19,7 @@ return {
     {
       script = "lass.builtins.collision.PolygonCollider",
       arguments = {
-        verticesSource = "lass.builtins.graphics.PolygonRenderer"
+        shapeSource = "lass.builtins.graphics.PolygonRenderer"
       }
     },
     {

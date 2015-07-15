@@ -243,7 +243,7 @@ function Vector3:rotate(angle, useRadians)
 	--this is functionally identical to Vector2:rotate except it leaves in the original z value
 	--(Vector2:rotate simply discards it)
 
-	local vec = Vector2.rotate(self, angle, useRadians)
+	local vec = Vector3(Vector2.rotate(self, angle, useRadians))
 	vec.z = self.z
 	return vec
 end
@@ -265,7 +265,7 @@ local Transform = class.define(function(self, position, rotation, size)
 	if size then
 		size.x = size.x or 1
 		size.y = size.y or 1
-		size.y = size.y or 1
+		size.z = size.z or 1
 		self.size = Vector3(size)
 	else
 		self.size = Vector3(1,1,1)

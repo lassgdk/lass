@@ -9,8 +9,7 @@ PolygonCollider
 
 local PolygonCollider = class.define(Collider, function(self, arguments)
 
-	arguments.verticesSource = arguments.verticesSource or ""
-	if not arguments.verticesSource then
+	if not arguments.shapeSource then
 		arguments.shape = geometry.Polygon(arguments.vertices)
 	else
 		--placeholder until _verticesSource exists
@@ -22,14 +21,14 @@ local PolygonCollider = class.define(Collider, function(self, arguments)
 	self.base.init(self, arguments)
 end)
 
-function PolygonCollider:awake()
+-- function PolygonCollider:awake()
 
-	if self.verticesSource then
-		self.verticesSource = self.gameObject:getComponent(self.verticesSource)
-		self.shape = self.verticesSource.shape
-	end
-	self.base.awake(self)
-end
+-- 	if self.shapeSource then
+-- 		self.shapeSource = self.gameObject:getComponent(self.verticesSource)
+-- 		self.shape = self.shapeSource.shape
+-- 	end
+-- 	self.base.awake(self)
+-- end
 
 -- function PolygonCollider:update(dt, firstUpdate)
 
