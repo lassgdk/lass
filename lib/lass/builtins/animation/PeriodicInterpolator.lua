@@ -49,12 +49,10 @@ end)
 
 function PeriodicInterpolator:awake()
 
-	-- self.targets = getTarget(self, self.targets)
-	-- for i, t in ipairs(self.targets) do
-	-- 	self.targets[i] = getTarget(self, t)
-	-- end
 	self.lastY = 0
 	self:seek(0)
+	self.plays = 0
+	self.maxPlays = math.huge
 
 	if self.autoplay then
 		self.playing = true
@@ -62,18 +60,39 @@ function PeriodicInterpolator:awake()
 
 end
 
-function PeriodicInterpolator:play()
+function PeriodicInterpolator:play(timesToRepeat)
+
+	if self.playing then
+		self:seek(0)
+
+		--only reset maxPlays when unpausing if timesToRepeat is specified
+		if timesToRepeat then
+			self.maxPlays = timesToRepeat + 1
+		end
+	else
+		self.playing = true
+		timesToRepeat = timesToRepeat or 0
+		self.maxPlays = timesToRepeat + 1
+	end
+
+end
+
+function PeriodicInterpolator:playForever()
 
 	if self.playing then
 		self:seek(0)
 	else
 		self.playing = true
 	end
+
+	self.maxPlays = math.huge
 end
 
 function PeriodicInterpolator:stop()
 
 	self.playing = false
+	self.plays = 0
+	self.maxPlays = 1
 	self:seek(0)
 end
 
@@ -95,6 +114,9 @@ function PeriodicInterpolator:update(dt)
 
 	if not self.playing or self.period <= 0 then
 		return
+	elseif self.plays >= self.maxPlays then
+		self:stop()
+		return
 	end
 
 	local targets = {}
@@ -103,6 +125,8 @@ function PeriodicInterpolator:update(dt)
 		targets[i] = {object, key}
 	end
 
+	local tmp = self.x
+
 	if self.sampleLength ~= math.huge then
 		self.x = (self.x + dt * (1 / self.period) * self.sampleLength)
 		--wrap around to offset
@@ -110,6 +134,12 @@ function PeriodicInterpolator:update(dt)
 	--if sample length is infinite, x should increase forever
 	else
 		self.x = self.x + dt * (1 / self.period)
+	end
+
+	-- if x is lower than tmp, we have completed a cycle and wrapped around
+	if self.x < tmp then
+		self.plays = self.plays + 1
+		self.x = self.offset.x
 	end
 
 	self.y = (self.ifunction(self.x) * self.amplitude) + self.offset.y
