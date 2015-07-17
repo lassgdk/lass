@@ -36,20 +36,21 @@ function testIntersectingRectanglesAndVectors()
 	assert(geometry.intersecting(r1, r2), "rectangles at same origin aren't intersecting")
 	assert(geometry.intersecting(r1, r2, t1, t2, true, true), "rectangles at same origin aren't intersecting")
 
-	t2.position.y = 3
+
+	t2.position.y = 2.5
 	colliding, data = geometry.intersecting(r1, r2, t1, t2, true, true)
 	assert(colliding and data.shortestOverlap == 0, "rectangles should be touching with overlap of 0")
 
-	t2.position.y = 3.00001
+	t2.position.y = 2.50001
 	colliding, data = geometry.intersecting(r1, r2, t1, t2, true, true)
 	assert(not colliding, "rectangles should not be touching")
 
-	t2.position.y = 2
+	t2.position.y = 1.5
 	colliding, data = geometry.intersecting(r1, r2, t1, t2, true, true)
 	assert(colliding and data.shortestOverlap == 1, "rectangles should be touching with overlap of 1")
 
 	assert(geometry.intersecting(r1, geometry.Vector2(0.5, -1)), "rectangle should contain vector")
-	assert(not geometry.intersecting(r1, geometry.Vector2(0.5, 1)), "rectangle should not contain vector")
+	assert(not geometry.intersecting(r1, geometry.Vector2(0.5, 1.01)), "rectangle should not contain vector")
 end
 
 function testIntersectingRectangleAndCircle()
@@ -58,7 +59,7 @@ function testIntersectingRectangleAndCircle()
 
 	assert(geometry.intersecting(rec, cir), "figures at same origin aren't intersecting")
 
-	t2.position.x = 4
+	t2.position.x = 3.5
 	assert(geometry.intersecting(rec, cir, t1, t2), "figures should be touching")
 	t2.position.x = 4.001
 	assert(not geometry.intersecting(rec, cir, t1, t2), "figures should not be touching")
@@ -106,10 +107,10 @@ function testIntersectingPolygonAndCircle()
 	assert(geometry.intersecting(pol, cir, t1, t2), "figures should be intersecting")
 
 	t1.position.x = 0
-	t2.position.x = 12
+	t2.position.x = 7
 	assert(geometry.intersecting(pol, cir, t1, t2), "figures should be intersecting")
 	assert(geometry.intersecting(cir, pol, t2, t1), "figures should be intersecting")
-	t2.position.x = 12.001
+	t2.position.x = 7.001
 	assert(not geometry.intersecting(pol, cir, t1, t2), "figures should not be intersecting")
 	assert(not geometry.intersecting(cir, pol, t2, t1), "figures should not be intersecting")
 
