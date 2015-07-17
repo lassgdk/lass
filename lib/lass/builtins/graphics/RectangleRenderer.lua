@@ -33,11 +33,6 @@ function RectangleRenderer:draw()
 	local globalTransform = self.gameObject.globalTransform
 	local position = globalTransform.position
 
-	local ySign = 1
-	if self.gameObject.gameScene.settings.graphics.invertYAxis then
-		ySign = -1
-	end
-
 	self:resetCanvas()
 
 	love.graphics.setColor(self.color)
@@ -47,17 +42,17 @@ function RectangleRenderer:draw()
 
 		love.graphics.rectangle(
 			self.mode,
-			rect.origin.x,
-			rect.origin.y * ySign,
+			rect.origin.x - (rect.width / 2),
+			(rect.origin.y + (rect.height / 2)) * self.globals.ySign,
 			rect.width,
 			rect.height
 		)
 	else
 		local verts = geometry.flattenedVector2Array(self.shape:globalVertices(globalTransform))
 
-		if ySign == -1 then
+		if self.globals.ySign == -1 then
 			for i=2, #verts, 2 do
-				verts[i] = verts[i] * ySign
+				verts[i] = verts[i] * self.globals.ySign
 			end
 		end
 

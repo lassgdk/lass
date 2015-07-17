@@ -524,7 +524,7 @@ Rectangle
 ]]
 
 local Rectangle = class.define(Shape, function(self, width, height, origin)
-	-- origin is assumed to be top left
+	-- origin is assumed to be center
 
 	assert(type(width) == "number", "width must be number")
 	assert(type(height) == "number", "height must be number")
@@ -536,11 +536,18 @@ local Rectangle = class.define(Shape, function(self, width, height, origin)
 end)
 
 function Rectangle:vertices()
+-- 	return {
+-- 		self.origin,
+-- 		self.origin + Vector2(self.width, 0),
+-- 		self.origin + Vector2(self.width, -self.height),
+-- 		self.origin + Vector2(0, -self.height)
+-- 	}
+	-- from top left clockwise
 	return {
-		self.origin,
-		self.origin + Vector2(self.width, 0),
-		self.origin + Vector2(self.width, -self.height),
-		self.origin + Vector2(0, -self.height)
+		self.origin + Vector2(-self.width/2, self.height/2),
+		self.origin + Vector2(self.width/2, self.height/2),
+		self.origin + Vector2(self.width/2, -self.height/2),
+		self.origin + Vector2(-self.width/2, -self.height/2)
 	}
 end
 
@@ -564,37 +571,42 @@ function Rectangle:globalRectangle(transform)
 	local height = self.height * transform.size.y	--15 * 1
 	local origin = Vector2(self.origin)				--0,0
 
-	if r % 90 == 0 and r % 360 ~= 0 then
-		local tmp
+	-- if r % 90 == 0 and r % 360 ~= 0 then
+	-- 	local tmp
 
-		-- rotate 180; bottom right becomes origin
-		if r % 180 == 0 then
-			origin = (origin + Vector2(self.width, -self.height)):rotate(r)	--0,0 +
+	-- 	-- rotate 180; bottom right becomes origin
+	-- 	if r % 180 == 0 then
+	-- 		origin = (origin + Vector2(self.width, -self.height)):rotate(r)	--0,0 +
 
-		-- rotate 90 cw; bottom left becomes origin
-		elseif r == 90 or r == -270 then
-			origin = (origin + Vector2(0, -self.height)):rotate(r)
-			tmp = width
-			width = height
-			height = tmp
+	-- 	-- rotate 90 cw; bottom left becomes origin
+	-- 	elseif r == 90 or r == -270 then
+	-- 		origin = (origin + Vector2(0, -self.height)):rotate(r)
+	-- 		tmp = width
+	-- 		width = height
+	-- 		height = tmp
 
-		-- rotate 90 ccw; top right becomes origin
-		else
-			origin = (origin + Vector2(self.width, 0)):rotate(r)
-			tmp = width
-			width = height
-			height = tmp
-		end
+	-- 	-- rotate 90 ccw; top right becomes origin
+	-- 	else
+	-- 		origin = (origin + Vector2(self.width, 0)):rotate(r)
+	-- 		tmp = width
+	-- 		width = height
+	-- 		height = tmp
+	-- 	end
+	-- end
+
+	-- origin.x = origin.x * transform.size.x + transform.position.x
+	-- origin.y = origin.y * transform.size.y + transform.position.y
+
+	--width and height are switched if rectangle is on its side
+	if r % 90 == 0 and r % 180 ~= 0 then
+		local tmp = width
+		width = height
+		height = tmp
 	end
 
-	origin.x = origin.x * transform.size.x + transform.position.x
-	origin.y = origin.y * transform.size.y + transform.position.y
+	origin.x = origin.x + transform.position.x
+	origin.y = origin.y + transform.position.y
 
-	-- if r ~= 0 then
-	-- 	debug.log("=====")
-	-- 	debug.log(self.width,self.height,self.origin)
-	-- 	debug.log(width,height,origin)
-	-- end
 	return Rectangle(width, height, origin)
 end
 
@@ -604,10 +616,10 @@ end
 
 function Rectangle:contains(vector)
 	return
-		vector.x >= self.origin.x and
-		vector.x <= self.origin.x + self.width and
-		vector.y <= self.origin.y and
-		vector.y >= self.origin.y - self.height
+		vector.x >= self.origin.x - (self.width/2) and
+		vector.x <= self.origin.x + (self.width/2) and
+		vector.y <= self.origin.y + (self.height/2) and
+		vector.y >= self.origin.y - (self.height/2)
 end
 
 --[[
@@ -646,13 +658,13 @@ local function intersectingFixedRectangles(rect1, rect2, transform1, transform2,
 
 	local overlaps = {
 		--is 1's left edge on, or to the left of, 2's right edge?
-		rect1.origin.x - (rect2.origin.x + rect2.width),
+		(rect1.origin.x - rect1.width/2) - (rect2.origin.x + rect2.width/2),
 		--is 1's right edge on, or to the right of, 2's left edge?
-		rect2.origin.x - (rect1.origin.x + rect1.width),
+		(rect2.origin.x - rect2.width/2) - (rect1.origin.x + rect1.width/2),
 		--is 1's top edge on or above 2's bottom edge?
-		(rect2.origin.y - rect2.height) - rect1.origin.y,
+		(rect2.origin.y - rect2.height/2) - (rect1.origin.y + rect1.height/2),
 		--is 1's bottom edge on or below 2's top edge?
-		(rect1.origin.y - rect1.height) - rect2.origin.y
+		(rect1.origin.y - rect1.height/2) - (rect2.origin.y + rect2.height/2)
 	}
 	local minDistance = nil
 
@@ -834,8 +846,12 @@ function functions.pulse(x, pulseWidth)
 	end
 end
 
-functions["y=x"] = function(x)
+function functions.positiveX(x)
 	return x
+end
+
+function functions.negativeX(x)
+	return -x
 end
 
 return {
