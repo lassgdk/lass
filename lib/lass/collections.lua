@@ -57,27 +57,28 @@ local function deepcopy(t, found)
 			found[#found + 1] = t
 
 			local _copy = {}
-			for k, v in pairs(t) do
-				_copy[k] = deepcopy(v, found)
+
+			-- preserve the metatable if it exists
+			local mt = getmetatable(t)
+			if mt then
+				setmetatable(_copy, mt)
 			end
+
+			for k, v in pairs(t) do
+				-- if v is a reference to t's metatable, only copy the reference
+				if v == mt then
+					_copy[k] = v
+				-- else, deep copy it
+				else
+					_copy[k] = deepcopy(v, found)
+				end
+			end
+
 
 			return _copy
 		else
-			-- print (index(found, t), t)
 			return nil
 		end
-
-		-- local _copy = {}
-
-		-- for k,v in pairs(t) do
-		-- 	if not index(found, v) then
-		-- 		found = copy(found)
-		-- 		found[#found + 1] = v
-		-- 		_copy[k] = deepcopy(v, found)
-		-- 	end
-		-- end
-
-		-- return _copy
 	else
 		return t
 	end

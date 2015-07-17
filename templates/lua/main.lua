@@ -9,6 +9,7 @@ local opts = utilities.getopt(arg, "scene")
 
 function love.load()
 
+	math.randomseed(os.time())
 	scene = lass.GameScene()
 	scene:loadSettings("settings.lua")
 

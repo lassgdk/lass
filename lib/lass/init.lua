@@ -6,6 +6,7 @@ require("lass.stdext")
 local class = require("lass.class")
 local collections = require("lass.collections")
 local geometry = require("lass.geometry")
+local DelayObject = require("lass.delay")
 local Collider = nil
 
 --[[
@@ -314,6 +315,17 @@ local function mergeComponentLists(prefabComponents, overrides)
 	return components
 end
 
+local function evaluateDelayObjects(collection)
+
+	for k, v in pairs(collection) do
+		if class.instanceof(v, DelayObject) then
+			collection[k] = v()
+		elseif type(v) == "table" then
+			evaluateDelayObjects(v)
+		end
+	end
+end
+
 --[[public]]
 
 local GameObject = class.define(GameEntity, function(self, gameScene, name, transform, parent)
@@ -354,6 +366,14 @@ local function buildObjectTree(scene, object, parent)
 		for i, comp in ipairs(mergeComponentLists(pf.components, object.prefabComponents)) do
 			local componentClass = require(comp.script)
 			assert(class.subclassof(componentClass, Component), comp.script.." does not return a Component")
+
+			--evaluate delayed arguments
+			-- for i, arg in ipairs(comp.arguments) do
+			-- 	if class.instanceof(arg, DelayObject) then
+			-- 		comp.arguments[i] = arg()
+			-- 	end
+			-- end
+			evaluateDelayObjects(comp.arguments)
 			gameObject:addComponent(componentClass(comp.arguments))
 		end
 
@@ -386,6 +406,15 @@ local function buildObjectTree(scene, object, parent)
 
 			-- print("checking inheritance for " .. object.name)
 			assert(class.subclassof(componentClass, Component), comp.script.." does not return a Component")
+
+			--evaluate delayed arguments
+			-- debug.log(i, comp, comp.arguments)
+			-- for arg, value in pairs(comp.arguments) do
+			-- 	if class.instanceof(value, DelayObject) then
+			-- 		comp.arguments[i] = arg()
+			-- 	end
+			-- end
+			evaluateDelayObjects(comp.arguments)
 			gameObject:addComponent(componentClass(comp.arguments))
 		end
 	end
