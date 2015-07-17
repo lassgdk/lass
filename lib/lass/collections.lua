@@ -143,6 +143,24 @@ local function set(l)
 	return s
 end
 
+local function keys(t)
+
+	local _keys = {}
+
+	for k, v in pairs(t) do
+		_keys[#keys + 1] = k
+	end
+
+	return _keys
+end
+
+local function random(l)
+
+	if #l then
+		return l[math.random(1, #l)]
+	end
+end
+
 return {
 	copy = copy,
 	deepcopy = deepcopy,
@@ -150,5 +168,7 @@ return {
 	indices = indices,
 	set = set,
 	get = get,
-	getkey = getkey
+	getkey = getkey,
+	keys = keys,
+	random = random
 }
