@@ -9,7 +9,7 @@ RectangleCollider
 local RectangleCollider = class.define(Collider, function(self, arguments)
 
 	if not arguments.shapeSource then
-		arguments.shape = geometry.Rectangle(arguments.width, arguments.height, arguments.offset)
+		arguments.shape = geometry.Rectangle(arguments.width, arguments.height, geometry.Vector2(arguments.offset))
 	else
 		--placeholder until shapeSource exists
 		arguments.shape = geometry.Rectangle(0,0)

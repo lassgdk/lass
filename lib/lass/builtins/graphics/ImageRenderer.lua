@@ -25,10 +25,8 @@ end)
 function ImageRenderer:draw()
 
 	local globalTransform = self.gameObject.globalTransform
-	local ySign = 1
-	if self.gameObject.gameScene.settings.graphics.invertYAxis then
-		ySign = -1
-	end
+	local ySign = self.globals.ySign
+	local width, height = self.image:getDimensions()
 
 	-- love.graphics.setCanvas(self.globals.canvases[self.canvas])
 	self:resetCanvas()
@@ -37,12 +35,14 @@ function ImageRenderer:draw()
 	love.graphics.draw(
 		self.image,
 		globalTransform.position.x,
-		globalTransform.position.y * ySign,
+		-- globalTransform.position.x - width/2,
+		(globalTransform.position.y) * ySign,
+		-- (globalTransform.position.y + height/2) * ySign,
 		(globalTransform.rotation/180) * math.pi,
 		globalTransform.size.x,
 		globalTransform.size.y,
-		-self.offset.x,
-		-self.offset.y * ySign
+		-self.offset.x + width/2,
+		(-self.offset.y - height/2) * ySign
 	)
 end
 
