@@ -1,13 +1,13 @@
+local delay = require("lass.delay")
+
 return {
-  {
-    name = "Empty Object",
-    transform = {
-      position = {
-        x = 0,
-        y = 0,
-      }
-    },
-    components = {},
-    children = {}
+  name = "Empty Object",
+  transform = {
+    position = {
+      x = 0,
+      y = 0,
+    }
   },
+  components = {},
+  children = {}
 }
