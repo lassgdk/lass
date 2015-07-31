@@ -212,7 +212,7 @@ def playgame(game, scene="", **kwargs):
 	args = ["--scene=" + scene] if scene else []
 
 	# os.system(getLoveEngineCommand().format(game, argString))
-	proc = subprocess.Popen(["love", game] + args, stdout=subprocess.PIPE)
+	proc = subprocess.Popen(getLoveEngineCommand(game, args), stdout=subprocess.PIPE)
 	while proc.poll() == None:
 		out = proc.stdout.readline()
 		sys.stdout.write(out)
@@ -241,13 +241,14 @@ def findgame(game, *folders):
 		if game in os.listdir(f):
 			return os.path.join(os.path.abspath(f), game)
 
-def getLoveEngineCommand():
+# careful with the default args value--only copy or concatenate it
+def getLoveEngineCommand(game, args=[]):
 	if sys.platform.startswith("win32"):
-		return os.path.join(DIR_ENGINE_WINDOWS, "love.exe") + " {0} {1}"
+		return [os.path.join(DIR_ENGINE_WINDOWS, "love.exe"), game] + args
 	elif sys.platform.startswith("darwin"):
-		return "open {0} -a " + os.path.join(DIR_ENGINE_OSX, "love.app") + " --args {1}"
+		return ["open", game, "-a", os.path.join(DIR_ENGINE_OSX, "love.app"), "--args"] + args
 	else:
-		return "love {0} {1}"
+		return ["love", game] + args
 
 def buildapp(loveFileName, appFolderName=None, dest="."):
 	pass
