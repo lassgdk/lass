@@ -30,14 +30,22 @@ local function indices(list, value, keyfunc)
 	return indices
 end
 
-local function copy(t)
+local function copy(t, firstIndex, lastIndex)
 	--shallow copy
 
 	if type(t) == "table" then
 		local _copy = {}
 
-		for k,v in pairs(t) do
-			_copy[k] = v
+		if firstIndex then
+			local i2 = 1
+			for i = firstIndex, (lastIndex or #t) do
+				_copy[i2] = t[i]
+				i2 = i2 + 1
+			end
+		else
+			for k,v in pairs(t) do
+				_copy[k] = v
+			end
 		end
 
 		return _copy

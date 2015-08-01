@@ -4,17 +4,16 @@ return {
   name = "Square",
   components = {
     {
-      script = "lass.builtins.graphics.RectangleRenderer",
+      script = "lass.builtins.graphics.ShapeRenderer",
       arguments = {
         color = {20, delay(math.random, 90, 200), delay(math.random, 100, 255)},
-        width = 50,
-        height = 50,
+        shape = {"Rectangle", 50, 50}
       }
     },
     {
       script = "lass.builtins.collision.RectangleCollider",
       arguments = {
-        shapeSource = "lass.builtins.graphics.RectangleRenderer",
+        shapeSource = "lass.builtins.graphics.Renderer",
         clickable = true,
         solid = false,
         layersToCheck = {}

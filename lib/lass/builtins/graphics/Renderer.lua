@@ -10,6 +10,7 @@ do not use this as a component directly! (unless you can think of a good reason 
 
 local Renderer = class.define(lass.Component, function(self, arguments)
 
+	arguments.color = arguments.color or {0,0,0}
 	arguments.canvas = arguments.canvas or "main"
 	self.base.init(self, arguments)
 end)

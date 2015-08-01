@@ -44,7 +44,7 @@ return {settings = {
         },
         prefabComponents = {
           {
-            script = "lass.builtins.graphics.PolygonRenderer",
+            script = "lass.builtins.graphics.ShapeRenderer",
             arguments = {
               color = {192, 0, 116}
             }
@@ -64,7 +64,7 @@ return {settings = {
             },
             prefabComponents = {
               {
-                script = "lass.builtins.graphics.PolygonRenderer",
+                script = "lass.builtins.graphics.ShapeRenderer",
                 arguments = {
                   color = {157, 228, 0}
                 }
@@ -84,7 +84,7 @@ return {settings = {
                 },
                 prefabComponents = {
                   {
-                    script = "lass.builtins.graphics.PolygonRenderer",
+                    script = "lass.builtins.graphics.ShapeRenderer",
                     arguments = {
                       color = {244, 148, 0}
                     }

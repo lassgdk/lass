@@ -288,6 +288,7 @@ local Circle = class.define(Shape, function(self, radius, center)
 
 	self.radius = radius
 	self.center = center or Vector2(0, 0)
+	self.origin = self.center
 end)
 
 function Circle:area()
