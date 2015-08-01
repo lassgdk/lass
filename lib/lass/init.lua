@@ -576,7 +576,7 @@ end
 for i, f in ipairs({"mousepressed", "mousereleased"}) do
 	GameObject[f] = function(self, x, y, button)
 		if not Collider then
-			Collider = require("lass.builtins.collision.Collider")
+			Collider = require("lass.builtins.physics.Collider")
 		end
 
 		local c = self:getComponent(Collider)

@@ -11,7 +11,7 @@ return {
       }
     },
     {
-      script = "lass.builtins.collision.Collider",
+      script = "lass.builtins.physics.Collider",
       arguments = {
         -- shape = {"Rectangle", 50, 50},
         shapeSource = {"gameObject", "getComponent", "lass.builtins.graphics.Renderer"},

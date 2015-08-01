@@ -1,7 +1,7 @@
 local lass = require("lass")
 local class = require("lass.class")
 local geometry = require("lass.geometry")
-local Collider = require("lass.builtins.collision.Collider")
+local Collider = require("lass.builtins.physics.Collider")
 
 local PlayerInput = class.define(lass.Component, function(self, arguments)
 

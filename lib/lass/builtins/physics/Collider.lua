@@ -4,8 +4,19 @@ local geometry = require("lass.geometry")
 local collections = require("lass.collections")
 
 --[[
-Collider - base class for all collider components
-do not use this as a component directly! (unless you can think of a good reason to)
+Collider
+
+arguments (optional):
+	shape (list, default=nil) - first element must be the name of a lass.geometry shape.
+		remaining elements are the arguments for the shape constructor.
+		example: {"Rectangle", 10, 20}
+	shapeSource (list, default=nil) - key chain pointing to shape object. must be specified
+		if shape is not specified.
+		see lass.collections.get for key chain documentation.
+	ignoreZ (boolean, default=false)
+	layers (list, default={"main"}) - names of layers to add the collider to.
+	layersToCheck (list, default=layers) - names of layers to check against for collisions.
+	solid (boolean, default=false) - if true, rigidbodies cannot pass through this object.
 ]]
 
 local Collider = class.define(lass.Component, function(self, arguments)
