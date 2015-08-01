@@ -101,7 +101,7 @@ return {settings = {
     name = "Scene Manager",
     transform = {
       position = {
-        x = 10,
+        x = 480,
         y = -525,
         z = 0
       },

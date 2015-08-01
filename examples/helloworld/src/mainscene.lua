@@ -7,7 +7,7 @@ return {settings = {
     name = "Text Object",
     transform = {
       position = {
-        x = 0,
+        x = 160,
         y = -10,
       }
     },
