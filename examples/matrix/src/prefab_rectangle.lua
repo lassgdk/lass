@@ -11,9 +11,10 @@ return {
       }
     },
     {
-      script = "lass.builtins.collision.RectangleCollider",
+      script = "lass.builtins.collision.Collider",
       arguments = {
-        shapeSource = "lass.builtins.graphics.Renderer",
+        -- shape = {"Rectangle", 50, 50},
+        shapeSource = {"gameObject", "getComponent", "lass.builtins.graphics.Renderer"},
         clickable = true,
         solid = false,
         layersToCheck = {}

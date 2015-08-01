@@ -9,7 +9,12 @@ do not use this as a component directly! (unless you can think of a good reason 
 ]]
 
 local Collider = class.define(lass.Component, function(self, arguments)
-	assert(class.instanceof(arguments.shape, geometry.Shape), "shape must be geometry.Shape")
+
+	--example: {"Rectangle", 30, 40} becomes geometry["Rectangle"](30, 40)
+	if not arguments.shapeSource then
+		arguments.shape = geometry[arguments.shape[1]](unpack(collections.copy(arguments.shape, 2)))
+		assert(class.instanceof(arguments.shape, geometry.Shape), "shape must be geometry.Shape")
+	end
 
 	arguments.ignoreZ = arguments.ignoreZ or false
 	arguments.layers = arguments.layers or {"main"}
@@ -22,7 +27,8 @@ end)
 function Collider:awake()
 
 	if self.shapeSource then
-		self.shapeSource = self.gameObject:getComponent(self.shapeSource)
+		-- self.shapeSource = self.gameObject:getComponent(self.shapeSource)
+		self.shapeSource = collections.get(self, unpack(self.shapeSource))
 		self.shape = self.shapeSource.shape
 	end
 

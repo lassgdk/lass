@@ -121,7 +121,7 @@ local function _get(object, calculateValue, ...)
 				if type(object) == "table" then
 					value = object[key[i+1]]
 				elseif type(object) == "function" then
-					value = object(object, key[i+1])
+					value = object(lastObject, key[i+1])
 				end
 				return value, object, key[i+1]
 			else

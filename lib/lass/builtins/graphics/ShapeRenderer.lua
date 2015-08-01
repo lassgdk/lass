@@ -4,6 +4,18 @@ local geometry = require("lass.geometry")
 local collections = require("lass.collections")
 local Renderer = require("lass.builtins.graphics.Renderer")
 
+--[[
+ShapeRenderer
+
+arguments:
+	shape (list) - first element must be the name of a lass.geometry shape.
+		remaining elements are the arguments for the shape constructor.
+		example: {"Rectangle", 10, 20}
+arguments (optional):
+	mode (string) - draw mode, can be "fill" or "line"
+]]
+
+
 local ShapeRenderer = class.define(Renderer, function(self, arguments)
 
 	--example: {"Rectangle", 30, 40} becomes geometry["Rectangle"](30, 40)

@@ -18,9 +18,9 @@ return {
       }
     },
     {
-      script = "lass.builtins.collision.PolygonCollider",
+      script = "lass.builtins.collision.Collider",
       arguments = {
-        shapeSource = "lass.builtins.graphics.Renderer"
+        shapeSource = {"gameObject", "getComponent", "lass.builtins.graphics.Renderer"}
       }
     },
     {

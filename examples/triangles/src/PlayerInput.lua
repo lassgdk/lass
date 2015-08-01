@@ -1,8 +1,7 @@
 local lass = require("lass")
 local class = require("lass.class")
 local geometry = require("lass.geometry")
-local PolygonCollider = require("lass.builtins.collision.PolygonCollider")
-local PolygonRenderer = require("lass.builtins.graphics.PolygonRenderer")
+local Collider = require("lass.builtins.collision.Collider")
 
 local PlayerInput = class.define(lass.Component, function(self, arguments)
 
@@ -53,7 +52,7 @@ function PlayerInput:mousepressed(x, y, button)
 		return
 	end
 
-	local collider = self.gameObject:getComponent(PolygonCollider)
+	local collider = self.gameObject:getComponent(Collider)
 	if collider:isCollidingWith(geometry.Vector2(x,-y)) then
 
 		if button == "l" then
