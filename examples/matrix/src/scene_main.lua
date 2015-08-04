@@ -30,15 +30,7 @@ return {settings = {
             "prefab_rectangle.lua"
           }
         }
-      },
-      -- {
-      --   script = "lass.builtins.audio.AudioSource",
-      --   arguments = {
-      --     filename = "lass.mp3",
-      --     sourceType = "stream",
-      --     autoplay = true,
-      --   }
-      -- }
+      }
     }
   },
 }}
