@@ -27,8 +27,29 @@ local function checkCollisions(gameObject, oldPositions, moveBy)
 	-- we need to update the global transform for the collision detection to work immediately
 	gameObject:maintainTransform()
 
-	for i, layer in ipairs(collider.layersToCheck) do
-		others[layer] = collections.copy(gameObject.gameScene.globals.colliders[layer])
+	-- for i, layer in ipairs(collider.layersToCheck) do
+	-- 	others[layer] = collections.copy(gameObject.gameScene.globals.colliders[layer])
+	-- end
+
+	for layerName, layer in pairs(collider.globals.colliders) do
+		-- add everything from layersToCheck to possible collisions
+		if collections.index(collider.layersToCheck, layerName) then
+			others[layerName] = collections.copy(layer)
+		-- add everything whose layersToCheck include this collider's layers
+		else
+			for i, o in ipairs(layer) do
+				for j, layerName2 in ipairs(collider.layers) do
+					if collections.index(o.layersToCheck, layerName2) then
+						if others[layerName2] then
+							others[layerName2][#others[layerName2]] = o
+						else
+							others[layerName2] = {o}
+						end
+						break
+					end
+				end
+			end
+		end
 	end
 
 	for layerName, layer in pairs(others) do
@@ -41,9 +62,13 @@ local function checkCollisions(gameObject, oldPositions, moveBy)
 					-- if we were already colliding with other, check if overlap distance has increased
 					if (
 						collider.collidingWith[other] and
-						collider.collidingWith[other].shortestOverlap < data.shortestOverlap
+						((
+							collider.collidingWith[other].directionOverlap and
+							data.directionOverlap and
+							collider.collidingWith[other].directionOverlap < data.directionOverlap
+						) or
+						collider.collidingWith[other].shortestOverlap < data.shortestOverlap)
 					) then
-						-- debug.log(oldPosition)
 						gameObject.transform.position = oldPositions[gameObject]
 						gameObject:maintainTransform()
 						return false

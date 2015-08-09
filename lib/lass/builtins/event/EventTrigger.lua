@@ -35,8 +35,8 @@ for i, callback in ipairs({
 	{"textinput", {"text"}},
 	{"threaderror", {"thread", "message"}},
 	{"visible", {"visibility"}},
-	{"collisionenter", {"other"}},
-	{"collisionexit", {"other", "noCollisionsLeft"}},
+	{"collisionenter", {"collider"}},
+	{"collisionexit", {"collider", "noCollisionsLeft"}},
 }) do
 	EventTrigger[callback[1]] = function(self, ...)
 
@@ -67,6 +67,8 @@ for i, callback in ipairs({
 		elseif cond == true then
 			postEvents(self)
 		end
+
+
 	end
 end
 
