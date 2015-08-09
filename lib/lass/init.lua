@@ -29,9 +29,15 @@ end
 function Event:post(action, source, data)
 
 	for listener in pairs(self.listeners) do
-		for j, component in ipairs(listener.components) do
-			if component.events[self.name] and component.events[self.name][action] then
-				component.events[self.name][action](component, source, data)
+		if listener.active then
+			for j, component in ipairs(listener.components) do
+				if
+					component.active and
+					component.events[self.name] and
+					component.events[self.name][action]
+				then
+					component.events[self.name][action](component, source, data)
+				end
 			end
 		end
 	end
@@ -45,15 +51,10 @@ local EventResponseTable = class.define()
 
 function EventResponseTable:__index(key)
 
-	--the normal behaviour of the __index function as defined by lass.class
-	local v = rawget(self.class, key)
-	if v then
-		return v
-	end
-
 	--this allows us to index myEventTable.myUndefinedKey.
 	--required for `MyComponent.events.myEvent.play` syntax
 	self[key] = {}
+	rawset(self, key, {})
 	return self[key]
 end
 
@@ -71,7 +72,18 @@ local Component = class.define(function(self, arguments)
 	self.globals = {}
 end)
 
-function Component:awake()
+function Component:activate()
+
+	self.active = true
+	self:awake(false)
+end
+
+function Component:deactivate()
+
+	self.active = false
+end
+
+function Component:awake(firstAwake)
 	--callback function that is invoked whenever Component is attached to a GameObject
 end
 
@@ -179,9 +191,13 @@ function GameEntity:addChild(child, trackParent)
 	maintainTransform(child)
 end
 
-function GameEntity:removeChild(child)
+function GameEntity:removeChild(child, removeDescendants)
 
 	local index
+	if removeDescendants == nil then
+		removeDescendants = true
+	end
+
 	if type(child) == "number" then
 		index = child
 		child = self.children[index]
@@ -191,6 +207,16 @@ function GameEntity:removeChild(child)
 
 	if index then
 		table.remove(self.children, index)
+	else
+		return
+	end
+
+	child.parent = nil
+
+	if not removeDescendants then
+		for i, grandchild in ipairs(child.children) do
+			self:addChild(grandchild)
+		end
 	end
 end
 
@@ -270,7 +296,7 @@ local function getComponents(self, componentType, num)
 		if component:instanceof(componentType) then
 			found[#found + 1] = component
 		end
-		if #found >= num then
+		if num and #found >= num then
 			return found
 		end
 	end
@@ -350,7 +376,7 @@ local GameObject = class.define(GameEntity, function(self, gameScene, name, tran
 	gameScene:addGameObject(self)
 end)
 
-local function buildObjectTree(scene, object, parent)
+function GameObject.fromPrefab(scene, object, parent)
 	--build a game object and its children
 
 	--create gameObject and add it to scene
@@ -381,9 +407,9 @@ local function buildObjectTree(scene, object, parent)
 			for i, pfChild in ipairs(pf.children) do
 				if object.prefabChildren and object.prefabChildren[i] then
 					object.prefabChildren[i].prefab = pfChild
-					gameObject:addChild(buildObjectTree(scene, object.prefabChildren[i].prefab))
+					gameObject:addChild(GameObject.fromPrefab(scene, object.prefabChildren[i].prefab))
 				else
-					gameObject:addChild(buildObjectTree(scene, pfChild))
+					gameObject:addChild(GameObject.fromPrefab(scene, pfChild))
 				end
 			end
 		end
@@ -422,7 +448,7 @@ local function buildObjectTree(scene, object, parent)
 	--build children
 	if object.children then
 		for i, child in ipairs(object.children) do
-			gameObject:addChild(buildObjectTree(scene, child))
+			gameObject:addChild(GameObject.fromPrefab(scene, child))
 		end
 	end
 
@@ -436,18 +462,95 @@ local function buildObjectTree(scene, object, parent)
 	return gameObject
 end
 
---dot, not colon
-function GameObject.fromPrefab(scene, prefab, parent)
+-- function GameObject:destroy(destroyDescendants)
 
-	return buildObjectTree(scene, prefab, parent)
+-- 	if destroyDescendants == nil then
+-- 		destroyDescendants = true
+-- 	end
+
+-- 	-- if we attempt to destroy the components while looping through self.components,
+-- 	-- the table will shrink. so we create a copy
+-- 	local toDestroy = collections.copy(self.components)
+-- 	for i, component in ipairs(toDestroy) do
+-- 		component:destroy()
+-- 	end
+
+-- 	-- remove this object from its parent. if not destroyDescendants, attach children
+-- 	-- to parent
+
+-- 	self.parent:removeChild(self, destroyDescendants)
+-- 	if destroyDescendants then
+-- 		for i, child in ipairs(self.children) do
+-- 			child:destroy(true)
+-- 		end
+-- 	end 
+-- end
+
+function GameObject:destroy(destroyDescendants)
+
+	self.gameScene:removeGameObject(self, destroyDescendants)
+end
+
+function GameObject:activate(activateDescendants)
+
+	if self.active then
+		return
+	end
+
+	if activateDescendants == nil then
+		activateDescendants = true
+	end
+
+	self.active = true
+	for i, component in ipairs(self.components) do
+		if not component.active then
+			component:activate()
+		end
+	end
+
+	if activateDescendants then
+		for i, child in ipairs(self.children) do
+			child:activate(true)
+		end
+	end
+end
+
+function GameObject:deactivate(deactivateDescendants)
+
+	if not self.active then
+		return
+	end
+
+	if deactivateDescendants == nil then
+		deactivateDescendants = true
+	end
+
+	self.active = false
+	for i, component in ipairs(self.components) do
+		if component.active then
+			component:deactivate()
+		end
+	end
+
+	if deactivateDescendants then
+		for i, child in ipairs(self.children) do
+			child:deactivate()
+		end
+	end
 end
 
 function GameObject:update(dt, firstUpdate)
 
+	if not self.active then
+		return
+	end
+
 	maintainTransform(self)
 
 	for i, component in ipairs(self.components) do
-		component:update(dt, firstUpdate)
+		if component.active then
+			component:update(dt, firstUpdate)
+		end
 	end
 
 	self.base.update(self, dt, firstUpdate)
@@ -455,20 +558,14 @@ end
 
 function GameObject:draw()
 
+	if not self.active then
+		return
+	end
+
 	for i, component in ipairs(self.components) do
 		if component.draw then component:draw() end
 	end
 end
-
--- function GameObject:isDrawable()
--- 	--returns true if this GameObject contains a component with a draw() function
-
--- 	for i, component in ipairs(self.components) do
--- 		if component.draw then return true end
--- 	end
-
--- 	return false
--- end
 
 function GameObject:addChild(child)
 
@@ -499,7 +596,40 @@ function GameObject:addComponent(component)
 		component.events[eventName] = {}
 	end
 
-	component:awake()
+	if component.active == nil then
+		component.active = true
+	else
+		component:activate()
+	end
+
+	component:awake(true)
+end
+
+function GameObject:removeComponent(component)
+
+	local index
+	if type(component) == "number" then
+		index = component
+		component = self.components[index]
+	else
+		for i, c in ipairs(self.components) do
+			if c == component then
+				index = i
+				break
+			end
+		end
+	end
+
+	if not index then
+		return
+	end
+
+	component:deactivate()
+
+	table.remove(self.components, index)
+	component.gameObject = nil
+	component.gameScene = nil
+	component.globals = {}
 end
 
 function GameObject:getComponent(componentType)
@@ -740,12 +870,21 @@ local function maintainCollisions(self, colliderToCheck)
 		end
 
 		collider.collidingWith = collections.copy(others.colliding)
-		if next(enter) then
-			collider.gameObject:collisionenter(collections.copy(enter))
+		-- if next(enter) then
+		-- 	collider.gameObject:collisionenter(collections.copy(enter))
+		-- end
+		-- if next(exit) then
+		-- 	local noCollisionsLeft = not next(enter)
+		-- 	collider.gameObject:collisionexit(collections.copy(exit), noCollisionsLeft)
+		-- end
+
+		for i, v in ipairs(enter) do
+			collider.gameObject:collisionenter(v)
 		end
-		if next(exit) then
-			local noCollisionsLeft = not next(enter)
-			collider.gameObject:collisionexit(collections.copy(exit), noCollisionsLeft)
+
+		local noCollisionsLeft = not next(enter)
+		for i, v in ipairs(exit) do
+			collider.gameObject:collisionexit(v, noCollisionsLeft)
 		end
 	end
 end
@@ -801,7 +940,7 @@ function GameScene:load(src)
 
 	--build game objects
 	for i, object in ipairs(src.gameObjects) do
-		buildObjectTree(self, object)
+		GameObject.fromPrefab(self, object)
 	end
 
 end
@@ -837,32 +976,46 @@ function GameScene:addGameObject(gameObject)
 
 	gameObject.gameScene = self
 	table.insert(self.gameObjects, gameObject)
+	if gameObject.active == nil then
+		gameObject.active = true
+	else
+		gameObject:activate()
+	end
 
 	--print("added " .. gameObject.name .. " to scene at " .. gameObject.transform.position.x)
 
 end
 
-function GameScene:removeGameObject(gameObject, removeDescendants, destroy)
+function GameScene:removeGameObject(gameObject, removeDescendants)
+
+	gameObject:deactivate(false)
+
+	if removeDescendants == nil then
+		removeDescendants = true
+	end
+
+	for i, event in ipairs(collections.copy(gameObject.events)) do
+		self:removeEventListener(event, gameObject)
+	end
 
 	local index = collections.index(self.gameObjects, gameObject)
 	if index then
 		table.remove(self.gameObjects, index)
+	else
+		return
 	end
+
+	gameObject.gameScene = nil
+	self.base.removeChild(self, gameObject, removeDescendants)
 
 	if removeDescendants == true then
 		for i, child in ipairs(gameObject.children) do
-			self:removeGameObject(child, true, destroy)
+			self:removeGameObject(child, true)
 		end
 	-- if this object has no parent, its children must become children of the scene
 	elseif not class.instanceof(gameObject.parent, GameObject) then
 		for i, child in ipairs(gameObject.children) do
 			self:addChild(child, false)
-		end
-	end
-
-	if destroy then
-		for k,v in pairs(gameObject) do
-			gameObject[k] = nil
 		end
 	end
 end
@@ -943,6 +1096,21 @@ function GameScene:addEventListener(eventName, listener)
 	local e = self.globals.events[eventName] or self:addEvent(eventName)
 	e.listeners[listener] = true
 	listener.events[#listener.events + 1] = eventName
+end
+
+function GameScene:removeEventListener(eventName, listener)
+
+	self.globals.events[eventName][listener] = nil
+
+	local index
+	for i, event in ipairs(listener.events) do
+		if event == eventName then
+			index = i
+			break
+		end
+	end
+
+	table.remove(listener.events, index)
 end
 
 return {

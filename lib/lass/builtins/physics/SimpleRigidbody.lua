@@ -2,7 +2,7 @@ local lass = require("lass")
 local class = require("lass.class")
 local geometry = require("lass.geometry")
 local collections = require("lass.collections")
-local Collider = require("lass.builtins.collision.Collider")
+local Collider = require("lass.builtins.physics.Collider")
 
 local SimpleRigidbody = class.define(lass.Component, function(self, arguments)
 

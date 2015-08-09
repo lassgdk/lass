@@ -125,7 +125,7 @@ function TileMap:clear()
 
 	for i, child in ipairs(self.gameObject.children) do
 		-- remove and destroy all children of the tile map
-		self.gameScene:removeGameObject(child, false, true)
+		self.gameScene:removeGameObject(child)
 	end
 end
 

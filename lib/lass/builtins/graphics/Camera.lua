@@ -13,6 +13,12 @@ function Camera:awake()
 	self.globals.cameras[self.canvas] = self
 end
 
+function Camera:deactivate()
+
+	self.globals.cameras[self.canvas] = nil
+	self.base.deactivate(self)
+end
+
 function Camera:draw()
 
 	local transform = self.gameObject.globalTransform

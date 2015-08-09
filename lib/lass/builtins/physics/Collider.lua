@@ -35,9 +35,9 @@ local Collider = class.define(lass.Component, function(self, arguments)
 	self.base.init(self, arguments)
 end)
 
-function Collider:awake()
+function Collider:awake(firstAwake)
 
-	if self.shapeSource then
+	if self.shapeSource and firstAwake then
 		-- self.shapeSource = self.gameObject:getComponent(self.shapeSource)
 		self.shapeSource = collections.get(self, unpack(self.shapeSource))
 		self.shape = self.shapeSource.shape
@@ -55,7 +55,27 @@ function Collider:awake()
 			-- self.globals.colliders[layerName][self] = true
 		end
 	end
+end
 
+function Collider:deactivate()
+
+	for i, layerName in ipairs(self.layers) do
+		local layer = self.globals.colliders[layerName]
+		local index
+
+		for i, c in ipairs(layer) do
+			if c == self then
+				index = i
+				break
+			end
+		end
+
+		assert(index, "Collider missing from globals.colliders." .. layerName)
+
+		table.remove(layer, index)
+	end
+
+	self.base.deactivate(self)
 end
 
 function Collider:isCollidingWith(other, direction)

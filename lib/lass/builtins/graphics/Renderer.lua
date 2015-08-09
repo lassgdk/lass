@@ -23,6 +23,20 @@ function Renderer:awake()
 	end
 end
 
+function Renderer:deactivate()
+
+	local renderers = self.gameObject:getComponents(Renderer)
+
+	self:resetCanvas()
+
+	--if this is the only renderer on the object, remove the object from drawables
+	if #renderers == 1 then
+		self.globals.drawables[self.gameObject] = nil
+	end
+
+	self.base.deactivate(self)
+end
+
 function Renderer:resetCanvas()
 
 	local cnv = self.globals.canvases[self.canvas]

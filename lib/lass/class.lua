@@ -5,6 +5,10 @@
 
 local class = {}
 
+local function callable(v)
+    return type(v) == "function" or (type(v) == "table" and v.__call)
+end
+
 function class.define(base, init)
     local c = {}     -- a new class instance
     if not init and type(base) == 'function' then
@@ -24,8 +28,8 @@ function class.define(base, init)
                 if m then
                     setmetatable(c[k], m)
                 end
-            else
-                c[k] = v
+            -- else
+                -- c[k] = v
             end
         end
         c.base = base
@@ -58,6 +62,34 @@ function class.define(base, init)
         init(self,...)
 
         return self
+    end
+
+    -- the class looks for any undefined keys in its superclass
+    mt.__index = c.base
+
+    -- automatically wrap all class functions to prevent infinite self.base loops
+    mt.__newindex = function(self, key, value)
+
+        if type(value) == "function" then
+            rawset(self, key, function(first, ...)
+                if type(first) == "table" and first.base == self then
+
+                    local b = first.base
+
+                    -- temporarily change base to prevent loop
+                    first.base = self.base
+                    local r = table.pack(value(first, ...))
+
+                    -- revert base and return everything
+                    first.base = b
+                    return unpack(r)
+                else
+                    return value(first, ...)
+                end
+            end)
+        else
+            rawset(self, key, value)
+        end
     end
 
     c.init = function(obj, ...)
