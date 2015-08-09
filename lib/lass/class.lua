@@ -3,6 +3,7 @@
 -- http://lua-users.org/wiki/SimpleLuaClasses
 -- with modifications by decky coss (http://cosstropolis.com)
 
+require("lass.stdext")
 local class = {}
 
 local function callable(v)

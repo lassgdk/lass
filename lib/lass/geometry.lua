@@ -158,6 +158,7 @@ end
 function Vector2:project(direction)
 	--project this vector onto a direction vector
 
+	-- debug.log(getmetatable(direction).__mul, Vector2.__mul)
 	assertOperandsHaveXandY(self, direction)
 	return (self:dot(direction) / Vector2.dot(direction, direction)) * direction
 end
@@ -212,6 +213,17 @@ function Vector3.__sub(a, b)
 	assertOperandsHaveXandY(a, b)
 	a, b = sanitizeOperandZAxis(a, b)
 	return Vector3(a.x-b.x, a.y-b.y, a.z-b.z)
+end
+
+function Vector3.__mul(a,b)
+
+	if a.class == Vector3 then
+		self = a
+	else
+		self = b
+	end
+
+	return self.base.__mul(a,b)
 end
 
 function Vector3:__unm()
@@ -372,7 +384,7 @@ local function intersectingPolygonAndOther(poly1, other, transform1, transform2)
 					closest = vertex
 				end
 			end
-			normal = other:globalCenter(transform2) - closest
+			normal = Vector2(other:globalCenter(transform2) - closest)
 		end
 
 		--if this is a polygon, we will check each side
@@ -439,7 +451,6 @@ local function intersectingPolygonAndOther(poly1, other, transform1, transform2)
 					end
 				end
 			end
-			-- print(minPoint1, maxPoint1, minPoint2, maxPoint2)
 
 			local points = {{minPoint1,1}, {minPoint2,2}, {maxPoint1,1}, {maxPoint2,2}}
 			table.sort(points, function(a,b) return a[1].x < b[1].x end)
@@ -503,6 +514,7 @@ function Polygon:globalVertices(transform)
 		globalVertices[i] = Vector2(vertex.x * transform.size.x, vertex.y * transform.size.y)
 		globalVertices[i] = globalVertices[i]:rotate(transform.rotation) + transform.position
 	end
+
 
 	return globalVertices
 end

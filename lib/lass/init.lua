@@ -325,7 +325,6 @@ local function mergeComponentLists(prefabComponents, overrides)
 			found[comp.script] = collections.indices(components, comp.script, function(x)
 				return x.script
 			end)
-		--if we found an override for a component that doesn't exist in the original
 		elseif next(found[comp.script]) == nil then
 			error("component not found in original prefab")
 		end
@@ -338,6 +337,7 @@ local function mergeComponentLists(prefabComponents, overrides)
 			orig.arguments[argkey] = argvalue
 		end
 	end
+
 	return components
 end
 
@@ -806,6 +806,10 @@ local function maintainCollisions(self, colliderToCheck)
 					-- if j > #layer, the loop will be skipped
 					for j = i+1, #layer do
 
+						if collider == layer[j] then
+							goto continue
+						end
+
 						if not collisionData[layer[j]] then
 							collisionData[layer[j]] = {colliding={}, notColliding={}}
 						end
@@ -822,6 +826,8 @@ local function maintainCollisions(self, colliderToCheck)
 								collisionData[layer[j]].notColliding[collider] = true
 							end
 						end
+
+						::continue::
 					end
 				else
 					for i, other in ipairs(self.globals.colliders[layerNameToCheck]) do
@@ -882,7 +888,7 @@ local function maintainCollisions(self, colliderToCheck)
 			collider.gameObject:collisionenter(v)
 		end
 
-		local noCollisionsLeft = not next(enter)
+		local noCollisionsLeft = not next(collider.collidingWith)
 		for i, v in ipairs(exit) do
 			collider.gameObject:collisionexit(v, noCollisionsLeft)
 		end
