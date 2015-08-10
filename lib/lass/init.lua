@@ -346,7 +346,7 @@ local function evaluateDelayObjects(collection)
 	for k, v in pairs(collection) do
 		if class.instanceof(v, DelayObject) then
 			collection[k] = v()
-		elseif type(v) == "table" then
+		elseif type(v) == "table" and k ~= "__index" then
 			evaluateDelayObjects(v)
 		end
 	end
@@ -802,6 +802,10 @@ local function maintainCollisions(self, colliderToCheck)
 			end
 
 			for i, layerNameToCheck in ipairs(collider.layersToCheck) do
+
+				-- if layerNameToCheck == "death" then
+				-- 		debug.log(layerNameToCheck, layerName, collider.gameObject.name)
+				-- 	end
 				if layerNameToCheck == layerName then
 					-- if j > #layer, the loop will be skipped
 					for j = i+1, #layer do

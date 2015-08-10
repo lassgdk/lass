@@ -15,10 +15,6 @@ end)
 
 local function checkCollisions(gameObject, oldPositions, moveBy)
 
-	local collider = gameObject:getComponent(Collider)
-	if not (collider and collider.solid) then
-		return {}
-	end
 
 	local directionOverlaps = {}
 	local collisions = {}
@@ -27,9 +23,28 @@ local function checkCollisions(gameObject, oldPositions, moveBy)
 	-- we need to update the global transform for the collision detection to work immediately
 	gameObject:maintainTransform()
 
-	-- for i, layer in ipairs(collider.layersToCheck) do
-	-- 	others[layer] = collections.copy(gameObject.gameScene.globals.colliders[layer])
-	-- end
+	for i, child in ipairs(gameObject.children) do
+		local cols, overlaps = checkCollisions(child, oldPositions, moveBy)
+		if cols then
+			for j, col in ipairs(cols) do
+				collisions[#collisions + j] = col
+			end
+			for j, over in ipairs(overlaps) do
+				directionOverlaps[#directionOverlaps + j] = over
+			end
+		else
+			gameObject.transform.position = oldPositions[gameObject]
+			--reset transform of every descendant except the child and its descendants
+			--(because they've already been reset)
+			gameObject:maintainTransform(true, child)
+			return false
+		end
+	end
+
+	local collider = gameObject:getComponent(Collider)
+	if not (collider and collider.solid) then
+		return {}, {}
+	end
 
 	for layerName, layer in pairs(collider.globals.colliders) do
 		-- add everything from layersToCheck to possible collisions
@@ -82,24 +97,6 @@ local function checkCollisions(gameObject, oldPositions, moveBy)
 					end
 				end
 			end
-		end
-	end
-
-	for i, child in ipairs(gameObject.children) do
-		local cols, overlaps = checkCollisions(child, oldPositions, moveBy)
-		if cols then
-			for j, col in ipairs(cols) do
-				collisions[#collisions + j] = col
-			end
-			for j, over in ipairs(overlaps) do
-				directionOverlaps[#directionOverlaps + j] = over
-			end
-		else
-			gameObject.transform.position = oldPositions[gameObject]
-			--reset transform of every descendant except the child and its descendants
-			--(because they've already been reset)
-			gameObject:maintainTransform(true, child)
-			return false
 		end
 	end
 
