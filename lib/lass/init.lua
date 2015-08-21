@@ -776,16 +776,7 @@ local function maintainCollisions(self, colliderToCheck)
 		layers = self.globals.colliders
 	end
 
-	-- local D = {}
-
 	for layerName, layer in pairs(layers) do
-
-		-- local colliders = {}
-
-		-- -- turn unordered set into an ordered list
-		-- for collider in pairs(layer) do
-		-- 	colliders[#colliders] = collider
-		-- end
 
 		if colliderToCheck then
 			layer = collections.copy(self.globals.colliders[layerName])
@@ -795,7 +786,6 @@ local function maintainCollisions(self, colliderToCheck)
 
 		-- use "staircase" method to check each collider against all subsequent colliders
 		for i, collider in ipairs(layer) do
-			-- print(i, collider.gameObject.name)
 
 			if not collisionData[collider] then
 				collisionData[collider] = {colliding={}, notColliding={}}
@@ -904,6 +894,7 @@ end
 local GameScene = class.define(GameEntity, function(self, transform)
 
 	self.timeScale = 1
+	self.frame = 1
 	self.gameObjects = {}
 	self.globals = {}
 	self.globals.drawables = {}
@@ -1036,10 +1027,9 @@ function GameScene:update(dt)
 	if not self.paused then
 		maintainTransform(self)
 		maintainCollisions(self)
-		self.base.update(self, dt * self.timeScale, not self.finishedFirstUpdate)
-		if not self.finishedFirstUpdate then
-			self.finishedFirstUpdate = true
-		end
+		self.base.update(self, dt * self.timeScale, self.frame)
+
+		self.frame = self.frame + 1
 	end
 end
 

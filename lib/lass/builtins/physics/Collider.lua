@@ -44,6 +44,8 @@ function Collider:awake(firstAwake)
 	end
 
 	self.collidingWith = {}
+	self.notCollidingWith = {}
+
 	for i, layerName in ipairs(self.layers) do
 		local layer = self.globals.colliders[layerName]
 		if layer then
@@ -83,22 +85,36 @@ function Collider:isCollidingWith(other, direction)
 	local otherType = class.instanceof(other, Collider, geometry.Shape, geometry.Vector2)
 	assert(otherType, "other must be a Collider, Shape, or Vector2")
 
+	local r, d = false, nil
+
 	if otherType == Collider then
 		if not (
 			self.gameObject.globalTransform.position.z == other.gameObject.globalTransform.position.z or
 			self.ignoreZ or
 			other.ignoreZ
 		) then
-			return false
+			r = false
 		else
-			return geometry.intersecting(
+			r, d = geometry.intersecting(
 				self.shape, other.shape, self.gameObject.globalTransform, other.gameObject.globalTransform,
 				false, false, direction
 			)
 		end
 	else
-		return geometry.intersecting(self.shape, other, self.gameObject.globalTransform, false, false, direction)
+		r, d = geometry.intersecting(self.shape, other, self.gameObject.globalTransform, false, false, direction)
 	end
+
+	if otherType == Collider then
+		if r then
+			local _d = collections.deepcopy(d)
+			_d.frame = self.gameScene.frame
+			self.collidingWith[other] = _d
+		else
+			self.notCollidingWith[other] = {frame = self.gameScene.frame}
+		end
+	end
+
+	return r, d
 end
 
 function Collider:detach()

@@ -529,7 +529,25 @@ function Polygon:contains(vector)
 end
 
 function Polygon:isConvex()
+	return love.math.isConvex(flattenedVector2Array(self.vertices))
+end
 
+function Polygon:triangulate()
+
+	local triangles = love.math.triangulate(flattenedVector2Array(self.vertices))
+	local polys = {}
+
+	for i, triangle in ipairs(triangles) do
+		local verts = {}
+
+		for j = 1, #triangle, 2 do
+			verts[#verts + 1] = Vector2(triangle[j], triangle[j+1])
+		end
+
+		polys[i] = Polygon(verts)
+	end
+
+	return polys
 end
 
 --[[
