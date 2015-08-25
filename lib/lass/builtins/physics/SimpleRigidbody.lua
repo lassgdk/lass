@@ -77,21 +77,27 @@ local function checkCollisions(gameObject, oldPositions, moveBy)
 				local oldDataNeg = collider.notCollidingWith[other]
 
 				-- if oldData and oldData.frame == gameObject.gameScene.frame then
-				-- 	debug.log(oldData.frame, gameObject.gameScene.frame)
 				-- 	r, data = true, collections.copy(oldData)
 				-- elseif oldDataNeg and oldDataNeg.frame == gameObject.gameScene.frame then
-				-- 	debug.log(oldDataNeg.frame, gameObject.gameScene.frame)
-				-- 	debug.log("huh")
 				-- 	r, data = false, nil
 				-- else
-					r, data = collider:isCollidingWith(other, moveBy)
+					r, data = collider:isCollidingWith(other, moveBy, false)
 				-- end
 
 				if r then
+					debug.log("collision")
 					-- if we were already colliding with other, check if overlap distance has increased
+					if oldData then
+						debug.log(oldData.frame ~= gameObject.gameScene.frame,
+							oldData.directionOverlap,
+							data.directionOverlap,
+							oldData.directionOverlap < data.directionOverlap
+						)
+					end
 					if (
 						oldData and
 						((
+							oldData.frame ~= gameObject.gameScene.frame and
 							oldData.directionOverlap and
 							data.directionOverlap and
 							oldData.directionOverlap < data.directionOverlap
@@ -100,6 +106,15 @@ local function checkCollisions(gameObject, oldPositions, moveBy)
 					) then
 						gameObject.transform.position = oldPositions[gameObject]
 						gameObject:maintainTransform()
+
+						debug.log("resetting")
+
+						--reset collision data
+						collider.collidingWith[other] = collections.deepcopy(oldData)
+						collider.collidingWith[other].frame = gameObject.gameScene.frame
+						other.collidingWith[collider] = collections.deepcopy(oldData)
+						other.collidingWith[collider].frame = gameObject.gameScene.frame
+
 						return false
 					-- only add colliders that we weren't already colliding with, and have non-zero overlap
 					elseif not oldData and data.shortestOverlap ~= 0 then
@@ -108,6 +123,8 @@ local function checkCollisions(gameObject, oldPositions, moveBy)
 						if data.directionOverlap then
 							directionOverlaps[#directionOverlaps + 1] = data.directionOverlap
 						end
+					else
+						debug.log("overlap:", oldData.frame, data.frame)
 					end
 				end
 			end
@@ -157,6 +174,7 @@ local function move(self, moveBy)
 		return false
 	-- if no collisions occurred, movement is successful
 	elseif #collisions < 1 then
+		debug.log("no collisions")
 		return true
 	-- if we have directionOverlap information for all of the collisions,
 	-- we can simply move in the opposite direction of the highest directionOverlap
@@ -169,6 +187,22 @@ local function move(self, moveBy)
 			gameObject:moveGlobal(-(math.sign(moveBy.x) * dist), 0)
 		elseif moveBy.y ~= 0 then
 			gameObject:moveGlobal(0, -(math.sign(moveBy.y) * dist))
+		end
+
+		-- now that we've moved the objects after the isCollidingWith call,
+		-- the collision data needs to be updated
+		for i, c in ipairs(collisions) do
+			if c[1].collidingWith[c[2]].directionOverlap == directionOverlaps[1] then
+				c[1].collidingWith[c[2]].directionOverlap = 0
+				c[1].collidingWith[c[2]].shortestOverlap = 0
+				c[2].collidingWith[c[1]].directionOverlap = 0
+				c[2].collidingWith[c[1]].shortestOverlap = 0
+			elseif c[1].collidingWith[c[2]].directionOverlap < directionOverlaps[1] then
+				c[1].collidingWith[c[2]] = nil
+				c[1].collidingWith[c[2]] = nil
+				c[2].notCollidingWith[c[1]] = {frame = gameObject.gameScene.frame}
+				c[2].notCollidingWith[c[1]] = {frame = gameObject.gameScene.frame}
+			end
 		end
 
 		gameObject:maintainTransform()
@@ -221,7 +255,7 @@ local function move(self, moveBy)
 
 		lastBackward = backward
 		for i, c in ipairs(collisions) do
-			local r, d = c[1]:isCollidingWith(c[2])
+			local r, d = c[1]:isCollidingWith(c[2], nil, false)
 			--if colliding...
 			if r then
 				backward = true
@@ -278,6 +312,8 @@ function SimpleRigidbody:update(dt)
 
 	self.velocity = self.velocity - self.globals.gravity
 
+	debug.log("============================")
+	debug.log("y velocity is",self.velocity.y)
 ----[[
 
 	local breakAfterY = true
@@ -286,13 +322,9 @@ function SimpleRigidbody:update(dt)
 		local moveBy = geometry.Vector2()
 		moveBy[axis] = self.velocity[axis] * dt
 
-		-- local r, col = self.gameObject:moveGlobal(moveBy, true)
 		local r, col = move(self, moveBy)
-		-- results[axis] = r
 
-		-- if col then
-		-- 	debug.log(i, axis, r, col[1], col[2])
-		-- end
+		if axis == "y" then debug.log(r) end
 
 		if r == false or col then
 			-- if collision happened during horizontal movement, try again after vertical movement

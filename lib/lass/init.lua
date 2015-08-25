@@ -793,9 +793,6 @@ local function maintainCollisions(self, colliderToCheck)
 
 			for i, layerNameToCheck in ipairs(collider.layersToCheck) do
 
-				-- if layerNameToCheck == "death" then
-				-- 		debug.log(layerNameToCheck, layerName, collider.gameObject.name)
-				-- 	end
 				if layerNameToCheck == layerName then
 					-- if j > #layer, the loop will be skipped
 					for j = i+1, #layer do
@@ -811,7 +808,7 @@ local function maintainCollisions(self, colliderToCheck)
 							not collisionData[collider].colliding[layer[j]] and
 							not collisionData[collider].notColliding[layer[j]]
 						) then
-							local r, d = collider:isCollidingWith(layer[j])
+							local r, d = collider:isCollidingWith(layer[j], nil, true)
 							if r then
 								collisionData[collider].colliding[layer[j]] = d
 								collisionData[layer[j]].colliding[collider] = d
@@ -833,7 +830,7 @@ local function maintainCollisions(self, colliderToCheck)
 							not collisionData[collider].colliding[other] and
 							not collisionData[collider].notColliding[other]
 						) then
-							local r, d = collider:isCollidingWith(other)
+							local r, d = collider:isCollidingWith(other, nil, true)
 							if r then
 								collisionData[collider].colliding[other] = d
 								collisionData[other].colliding[collider] = d
@@ -853,10 +850,12 @@ local function maintainCollisions(self, colliderToCheck)
 		local enter = {}
 		local exit = {}
 
-		-- check collisions
+		-- check for collisions that just started
 		for other in pairs(others.colliding) do
 			-- collision just started
-			if not collider.collidingWith[other] then
+			-- debug.log(other.frame)
+			-- if not collider.collidingWith[other] then
+			if collider.collidingWith[other].frame == self.frame then
 				enter[#enter + 1] = other
 			end
 		end
@@ -864,12 +863,13 @@ local function maintainCollisions(self, colliderToCheck)
 		-- check non-collisions
 		for other in pairs(others.notColliding) do
 			-- collision just ended
-			if collider.collidingWith[other] then
+			if collider.notCollidingWith[other].frame == self.frame then
 				exit[#exit + 1] = other
 			end
 		end
 
-		collider.collidingWith = collections.copy(others.colliding)
+		-- collider.collidingWith = collections.copy(others.colliding)
+
 		-- if next(enter) then
 		-- 	collider.gameObject:collisionenter(collections.copy(enter))
 		-- end
@@ -1026,8 +1026,8 @@ function GameScene:update(dt)
 
 	if not self.paused then
 		maintainTransform(self)
-		maintainCollisions(self)
 		self.base.update(self, dt * self.timeScale, self.frame)
+		maintainCollisions(self)
 
 		self.frame = self.frame + 1
 	end

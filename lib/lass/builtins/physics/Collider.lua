@@ -59,6 +59,23 @@ function Collider:awake(firstAwake)
 	end
 end
 
+function Collider:update()
+
+	if self.gameObject.name == "Rectangle 5 3" then
+		debug.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
+		for k,v in pairs(self.collidingWith) do
+			debug.log(k.gameObject.name, v.frame, k.collidingWith[self].frame)
+		end
+		debug.log("vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv")
+	elseif self.gameObject.name:find("Player") then
+		debug.log("000^^^^^^^^^^^^^^^^^^^^^^^^000")
+		for k,v in pairs(self.collidingWith) do
+			debug.log(k.gameObject.name, v.frame, k.collidingWith[self].frame)
+		end
+		debug.log("000vvvvvvvvvvvvvvvvvvvvvvvvv000")
+	end
+end
+
 function Collider:deactivate()
 
 	for i, layerName in ipairs(self.layers) do
@@ -80,14 +97,22 @@ function Collider:deactivate()
 	self.base.deactivate(self)
 end
 
-function Collider:isCollidingWith(other, direction)
+function Collider:isCollidingWith(other, direction, noFrameRepeat)
 
 	local otherType = class.instanceof(other, Collider, geometry.Shape, geometry.Vector2)
 	assert(otherType, "other must be a Collider, Shape, or Vector2")
 
 	local r, d = false, nil
-
 	if otherType == Collider then
+
+		if noFrameRepeat then
+			if self.collidingWith[other] and self.collidingWith[other].frame == self.gameScene.frame then
+				return true, self.collidingWith[other]
+			elseif self.notCollidingWith[other] and self.notCollidingWith[other].frame == self.gameScene.frame then
+				return false
+			end
+		end
+
 		if not (
 			self.gameObject.globalTransform.position.z == other.gameObject.globalTransform.position.z or
 			self.ignoreZ or
@@ -100,19 +125,24 @@ function Collider:isCollidingWith(other, direction)
 				false, false, direction
 			)
 		end
+
+		if r then
+			d.frame = self.gameScene.frame
+			self.collidingWith[other] = collections.deepcopy(d)
+			other.collidingWith[self] = collections.deepcopy(d)
+		else
+			self.notCollidingWith[other] = {frame = self.gameScene.frame}
+			other.notCollidingWith[self] = {frame = self.gameScene.frame}
+		end
 	else
 		r, d = geometry.intersecting(self.shape, other, self.gameObject.globalTransform, false, false, direction)
 	end
 
-	if otherType == Collider then
-		if r then
-			local _d = collections.deepcopy(d)
-			_d.frame = self.gameScene.frame
-			self.collidingWith[other] = _d
-		else
-			self.notCollidingWith[other] = {frame = self.gameScene.frame}
-		end
-	end
+	-- if self.gameObject.name:find("Player") and other.gameObject.name == "Rectangle 5 3" then
+	-- 	debug.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
+	-- 	debug.log(r,d, math.random())
+	-- 	debug.log("vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv")
+	-- end
 
 	return r, d
 end
