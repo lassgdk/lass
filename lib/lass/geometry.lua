@@ -602,32 +602,6 @@ function Rectangle:globalRectangle(transform)
 	local height = self.height * transform.size.y	--15 * 1
 	local origin = Vector2(self.origin)				--0,0
 
-	-- if r % 90 == 0 and r % 360 ~= 0 then
-	-- 	local tmp
-
-	-- 	-- rotate 180; bottom right becomes origin
-	-- 	if r % 180 == 0 then
-	-- 		origin = (origin + Vector2(self.width, -self.height)):rotate(r)	--0,0 +
-
-	-- 	-- rotate 90 cw; bottom left becomes origin
-	-- 	elseif r == 90 or r == -270 then
-	-- 		origin = (origin + Vector2(0, -self.height)):rotate(r)
-	-- 		tmp = width
-	-- 		width = height
-	-- 		height = tmp
-
-	-- 	-- rotate 90 ccw; top right becomes origin
-	-- 	else
-	-- 		origin = (origin + Vector2(self.width, 0)):rotate(r)
-	-- 		tmp = width
-	-- 		width = height
-	-- 		height = tmp
-	-- 	end
-	-- end
-
-	-- origin.x = origin.x * transform.size.x + transform.position.x
-	-- origin.y = origin.y * transform.size.y + transform.position.y
-
 	--width and height are switched if rectangle is on its side
 	if r % 90 == 0 and r % 180 ~= 0 then
 		local tmp = width
@@ -635,8 +609,7 @@ function Rectangle:globalRectangle(transform)
 		height = tmp
 	end
 
-	origin.x = origin.x + transform.position.x
-	origin.y = origin.y + transform.position.y
+	origin = origin:rotate(r) + transform.position
 
 	return Rectangle(width, height, origin)
 end
