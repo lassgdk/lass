@@ -62,17 +62,17 @@ end
 function Collider:update()
 
 	if self.gameObject.name == "Rectangle 5 3" then
-		debug.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
+		-- debug.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
 		for k,v in pairs(self.collidingWith) do
-			debug.log(k.gameObject.name, v.frame, k.collidingWith[self].frame)
+			-- debug.log(k.gameObject.name, v.frame, k.collidingWith[self].frame)
 		end
-		debug.log("vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv")
+		-- debug.log("vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv")
 	elseif self.gameObject.name:find("Player") then
-		debug.log("000^^^^^^^^^^^^^^^^^^^^^^^^000")
+		-- debug.log("000^^^^^^^^^^^^^^^^^^^^^^^^000")
 		for k,v in pairs(self.collidingWith) do
-			debug.log(k.gameObject.name, v.frame, k.collidingWith[self].frame)
+			-- debug.log(k.gameObject.name, v.frame, k.collidingWith[self].frame)
 		end
-		debug.log("000vvvvvvvvvvvvvvvvvvvvvvvvv000")
+		-- debug.log("000vvvvvvvvvvvvvvvvvvvvvvvvv000")
 	end
 end
 
@@ -102,17 +102,31 @@ function Collider:isCollidingWith(other, direction, noFrameRepeat)
 	local otherType = class.instanceof(other, Collider, geometry.Shape, geometry.Vector2)
 	assert(otherType, "other must be a Collider, Shape, or Vector2")
 
+	noFrameRepeat = false
+
 	local r, d = false, nil
 	if otherType == Collider then
 
+		if self.collidingWith[other] then
+			debug.log(self.gameObject.name,
+				other.gameObject.name,
+				"")
+			debug.log("start",
+				self.collidingWith[other].frame,
+				self.gameScene.frame,
+				"")
+		end
+
 		if noFrameRepeat then
 			if self.collidingWith[other] and self.collidingWith[other].frame == self.gameScene.frame then
+				debug.log("collide")
 				return true, self.collidingWith[other]
 			elseif self.notCollidingWith[other] and self.notCollidingWith[other].frame == self.gameScene.frame then
 				return false
 			end
 		end
 
+		-- what to make of all this?
 		if not (
 			self.gameObject.globalTransform.position.z == other.gameObject.globalTransform.position.z or
 			self.ignoreZ or
@@ -125,6 +139,11 @@ function Collider:isCollidingWith(other, direction, noFrameRepeat)
 				false, false, direction
 			)
 		end
+		if d then
+			for k, v in pairs(d) do
+				debug.log(k, v)
+			end
+		end
 
 		if r then
 			d.frame = self.gameScene.frame
@@ -133,6 +152,12 @@ function Collider:isCollidingWith(other, direction, noFrameRepeat)
 		else
 			self.notCollidingWith[other] = {frame = self.gameScene.frame}
 			other.notCollidingWith[self] = {frame = self.gameScene.frame}
+		end
+		if self.collidingWith[other] then
+			debug.log("end",
+				self.collidingWith[other].frame,
+				self.gameScene.frame,
+				r)
 		end
 	else
 		r, d = geometry.intersecting(self.shape, other, self.gameObject.globalTransform, false, false, direction)

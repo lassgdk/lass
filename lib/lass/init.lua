@@ -1025,11 +1025,15 @@ function GameScene:update(dt)
 	--update all children (top-level game objects) of the scene
 
 	if not self.paused then
+		debug.log("============================")
 		maintainTransform(self)
+		debug.log("updating SimpleRigidbody")
 		self.base.update(self, dt * self.timeScale, self.frame)
+		debug.log("maintaining Collisions")
 		maintainCollisions(self)
 
 		self.frame = self.frame + 1
+		
 	end
 end
 

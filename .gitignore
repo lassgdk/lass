@@ -7,3 +7,4 @@ venv
 ignore
 update.sh
 *.sublime-*
+setup.bat

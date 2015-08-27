@@ -85,14 +85,15 @@ local function checkCollisions(gameObject, oldPositions, moveBy)
 				-- end
 
 				if r then
-					debug.log("collision")
+					-- debug.log("collision")
 					-- if we were already colliding with other, check if overlap distance has increased
 					if oldData then
-						debug.log(oldData.frame ~= gameObject.gameScene.frame,
-							oldData.directionOverlap,
-							data.directionOverlap,
-							oldData.directionOverlap < data.directionOverlap
-						)
+						-- debug.log(oldData.directionOverlap, data.directionOverlap)
+						-- debug.log(oldData.frame ~= gameObject.gameScene.frame,
+						-- 	oldData.directionOverlap,
+						-- 	data.directionOverlap,
+						-- 	oldData.directionOverlap < data.directionOverlap
+						-- )
 					end
 					if (
 						oldData and
@@ -107,7 +108,7 @@ local function checkCollisions(gameObject, oldPositions, moveBy)
 						gameObject.transform.position = oldPositions[gameObject]
 						gameObject:maintainTransform()
 
-						debug.log("resetting")
+						-- debug.log("resetting")
 
 						--reset collision data
 						collider.collidingWith[other] = collections.deepcopy(oldData)
@@ -124,7 +125,7 @@ local function checkCollisions(gameObject, oldPositions, moveBy)
 							directionOverlaps[#directionOverlaps + 1] = data.directionOverlap
 						end
 					else
-						debug.log("overlap:", oldData.frame, data.frame)
+						--debug.log("overlap:", oldData.frame, data.frame)
 					end
 				end
 			end
@@ -174,7 +175,7 @@ local function move(self, moveBy)
 		return false
 	-- if no collisions occurred, movement is successful
 	elseif #collisions < 1 then
-		debug.log("no collisions")
+		-- debug.log("no collisions")
 		return true
 	-- if we have directionOverlap information for all of the collisions,
 	-- we can simply move in the opposite direction of the highest directionOverlap
@@ -212,6 +213,7 @@ local function move(self, moveBy)
 	-- if we're still here, it means our movement resulted in a collision for which
 	-- we have no directionOverlap data. we need to do a binary search to determine
 	-- how far back to move
+	-- if there is no directionOverlap data, the colliders are not rectangles
 
 	local backward = true
 	local lastBackward = backward
@@ -312,8 +314,8 @@ function SimpleRigidbody:update(dt)
 
 	self.velocity = self.velocity - self.globals.gravity
 
-	debug.log("============================")
-	debug.log("y velocity is",self.velocity.y)
+	-- debug.log("============================")
+	-- debug.log("y velocity is",self.velocity.y)
 ----[[
 
 	local breakAfterY = true
@@ -324,7 +326,7 @@ function SimpleRigidbody:update(dt)
 
 		local r, col = move(self, moveBy)
 
-		if axis == "y" then debug.log(r) end
+		-- if axis == "y" then debug.log(r) end
 
 		if r == false or col then
 			-- if collision happened during horizontal movement, try again after vertical movement
