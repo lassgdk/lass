@@ -1,45 +1,16 @@
 class = require "lass.class"
 
-function testClassDefine()
-	--ensure that defining a base class will work, with or w/o a constructor
+local classtest = {}
 
-	local Animal = class.define()
+--specify order in which to run the tests
+classtest.tests = {
+	"testClassDefine",
+	"testClassInheritance",
+	"testNilInit",
+	"testInstanceOf"
+}
 
-	print("elements in class Animal (no constructor):")
-	for k,v in pairs(Animal) do
-		print(k,v)
-	end
-
-	Animal = class.define(function(self, legs) self.legs = legs or 4 end)
-	print("elements in class Animal (with constructor)")
-	for k, v in pairs(Animal) do
-		print(k,v)
-	end
-end
-
-function testClassInheritance()
-	--ensure that class inheritance (and self.base) works
-
-	local Being = class.define()
-	local Animal = class.define(Being, function(self, legs)
-		-- print(self.legs)
-		-- print(self.base, self.base.init, self, self.init)
-		-- assert(self.legs ~= 4)
-
-		self.legs = legs or 4
-		self.base.init(self)
-	end)
-	local Dog = class.define(Animal, function(self, legs, breed)
-		self.breed = breed or "unknown"
-		self.base.init(self, legs)
-	end)
-
-	local pom = Dog(3, "pomeranian")
-	assert(pom.legs == 3, "pom.legs should be 3 but is instead " .. tostring(pom.legs))
-	assert(pom.breed == "pomeranian", "pom.breed should be 'pomeranian' but is instead " .. pom.breed)
-end
-
-function testMemberAssignment(object, varName, varValue)
+local function testMemberAssignment(object, varName, varValue)
 	--ensure that assignment to an instance member works
 	--(this will modify the instance)
 
@@ -63,7 +34,46 @@ function testMemberAssignment(object, varName, varValue)
 	)
 end
 
-function testNilInit()
+function classtest.testClassDefine(scene)
+	--ensure that defining a base class will work, with or w/o a constructor
+
+	local Animal = class.define()
+
+	print("elements in class Animal (no constructor):")
+	for k,v in pairs(Animal) do
+		print(k,v)
+	end
+
+	Animal = class.define(function(self, legs) self.legs = legs or 4 end)
+	print("elements in class Animal (with constructor)")
+	for k, v in pairs(Animal) do
+		print(k,v)
+	end
+end
+
+function classtest.testClassInheritance(scene)
+	--ensure that class inheritance (and self.base) works
+
+	local Being = class.define()
+	local Animal = class.define(Being, function(self, legs)
+		-- print(self.legs)
+		-- print(self.base, self.base.init, self, self.init)
+		-- assert(self.legs ~= 4)
+
+		self.legs = legs or 4
+		self.base.init(self)
+	end)
+	local Dog = class.define(Animal, function(self, legs, breed)
+		self.breed = breed or "unknown"
+		self.base.init(self, legs)
+	end)
+
+	local pom = Dog(3, "pomeranian")
+	assert(pom.legs == 3, "pom.legs should be 3 but is instead " .. tostring(pom.legs))
+	assert(pom.breed == "pomeranian", "pom.breed should be 'pomeranian' but is instead " .. pom.breed)
+end
+
+function classtest.testNilInit(scene)
 
 	local Animal = class.define()
 	local a = Animal()
@@ -79,7 +89,7 @@ function testNilInit()
 		"class instance 'a' lost member 'x' after Class.init(instance)")
 end
 
-function testInstanceOf()
+function classtest.testInstanceOf(scene)
 
 	local Animal = class.define()
 	local Dog = class.define(Animal)
@@ -99,14 +109,16 @@ function testInstanceOf()
 	assert(class.instanceof(dog, Plant, Dog), "class.instanceof fails with multiple classes specified")
 end
 
-function main()
+return classtest
 
-	-- testClassDefine()
-	testClassInheritance()
-	testNilInit()
-	testInstanceOf()
+-- function main()
 
-	print("testing complete with no assertion failures")
-end
+-- 	testClassDefine()
+-- 	testClassInheritance()
+-- 	testNilInit()
+-- 	testInstanceOf()
 
-main()
+-- 	print("testing complete with no assertion failures")
+-- end
+
+-- main()

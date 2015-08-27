@@ -1,6 +1,18 @@
 geometry = require "lass.geometry"
 
-function testIntersectingCirclesAndVectors()
+local geometrytest = {}
+
+geometrytest.tests={
+	"testIntersectingCirclesAndVectors",
+	"testCircleWithRadiusZero",
+	"testIntersectingRectanglesAndVectors",
+	"testIntersectingRectangleAndCircle",
+	"testIntersectingPolygonsAndVectors",
+	"testIntersectingPolygonAndCircle",
+	"testIntersectingPolygons",
+}
+
+function geometrytest.testIntersectingCirclesAndVectors()
 	local c1, c2 = geometry.Circle(3), geometry.Circle(1)
 	local t1, t2 = geometry.Transform(geometry.Vector3(0,0)), geometry.Transform(geometry.Vector3(4,0))
 
@@ -15,7 +27,7 @@ function testIntersectingCirclesAndVectors()
 	assert(geometry.intersecting(c1, v), "circle should contain vector")
 end
 
-function testCircleWithRadiusZero()
+function geometrytest.testCircleWithRadiusZero()
 	local c1, c2 = geometry.Circle(0), geometry.Circle(1)
 	local t1, t2 = geometry.Transform(geometry.Vector3(0,0)), geometry.Transform(geometry.Vector3(4,0))
 
@@ -28,7 +40,7 @@ function testCircleWithRadiusZero()
 	assert(not geometry.intersecting(c1, v), "circle should not contain vector")
 end
 
-function testIntersectingRectanglesAndVectors()
+function geometrytest.testIntersectingRectanglesAndVectors()
 	local r1, r2 = geometry.Rectangle(1,2), geometry.Rectangle(1,3)
 	local t1, t2 = geometry.Transform(geometry.Vector3(0,0)), geometry.Transform(geometry.Vector3(0,0))
 	local colliding, data
@@ -53,7 +65,7 @@ function testIntersectingRectanglesAndVectors()
 	assert(not geometry.intersecting(r1, geometry.Vector2(0.5, 1.01)), "rectangle should not contain vector")
 end
 
-function testIntersectingRectangleAndCircle()
+function geometrytest.testIntersectingRectangleAndCircle()
 	local rec, cir = geometry.Rectangle(1,2), geometry.Circle(3)
 	local t1, t2 = geometry.Transform(geometry.Vector3(0,0)), geometry.Transform(geometry.Vector3(0,0))
 
@@ -65,7 +77,7 @@ function testIntersectingRectangleAndCircle()
 	assert(not geometry.intersecting(rec, cir, t1, t2), "figures should not be touching")
 end
 
-function testIntersectingPolygonsAndVectors()
+function geometrytest.testIntersectingPolygonsAndVectors()
 	local p1 = geometry.Polygon({-100, -50, 100, -50, 0, 50})
 	local p2 = geometry.Polygon({-10, -5, 10, -5, 0, 5})
 	local t1 = geometry.Transform(geometry.Vector3(0,0))
@@ -93,7 +105,7 @@ function testIntersectingPolygonsAndVectors()
 	assert(not p1:globalPolygon(t1):contains(geometry.Vector2(100,-50.0001)), "polygon should not contain vector")
 end
 
-function testIntersectingPolygonAndCircle()
+function geometrytest.testIntersectingPolygonAndCircle()
 
 	local pol = geometry.Rectangle(10,3):toPolygon()
 	local cir = geometry.Circle(2)
@@ -144,11 +156,11 @@ function testIntersectingPolygonAndCircle()
 	assert(r and d.shortestOverlap == cir.radius, "figures should be intersecting with overlap of " .. cir.radius)
 end
 
-function testPolygonWithNoArguments()
+function geometrytest.testPolygonWithNoArguments()
 
 end
 
-function testIntersectingPolygons()
+function geometrytest.testIntersectingPolygons()
 	local p1 = geometry.Polygon({-100, -50, 100, -50, 0, 50})
 	local p2 = geometry.Polygon({-100, -50, 100, -50, 0, 50})
 	local t1 = geometry.Transform(geometry.Vector3(0,0))
@@ -158,17 +170,4 @@ function testIntersectingPolygons()
 
 end
 
-function main()
-
-	testIntersectingCirclesAndVectors()
-	testCircleWithRadiusZero()
-	testIntersectingRectanglesAndVectors()
-	testIntersectingRectangleAndCircle()
-	testIntersectingPolygonsAndVectors()
-	testIntersectingPolygonAndCircle()
-	testIntersectingPolygons()
-
-	print("testing complete with no assertion failures")
-end
-
-main()
+return geometrytest

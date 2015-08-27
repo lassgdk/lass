@@ -84,8 +84,11 @@ os.chdir("lib")
 DATA_FILES += listAll("lass", True, headPrefix=DIR_LUA, filePrefix="lib")
 os.chdir(os.path.join("..", "conf"))
 DATA_FILES += listAll(".", headPrefix=DIR_LASS_CONF, filePrefix="conf")
-# DATA_FILES += [(os.path.join(DIR_LASS_DATA, "projects"), "")]
-os.chdir("..")
+os.chdir(os.path.join("..", "tests", "libtests"))
+DATA_FILES += listAll(
+	".", True, headPrefix=os.path.join(DIR_LASS_DATA, "tests"), filePrefix=os.path.join("tests", "libtests")
+)
+os.chdir(os.path.join("..", ".."))
 
 #find the owner of a data file; assume for now that all data files share this owner
 UID = os.stat(DATA_FILES[0][1][0]).st_uid
