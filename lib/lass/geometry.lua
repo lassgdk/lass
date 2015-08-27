@@ -78,7 +78,7 @@ end
 
 function Vector2:sqrMagnitude(origin)
 	--return the square magnitude of a vector relative to origin (0,0 by default)
-	--this can also be used as a class/static function (i.e., Vector3.sqrMagnitude(a, b))
+	--this can also be used as a class/static function (i.e., Vector2.sqrMagnitude(a, b))
 
 	assertOperandsHaveXandY(self, origin, "nil")
 	local vec = self - Vector2(origin)
@@ -293,14 +293,14 @@ local Shape = class.define()
 
 --[[Circle]]
 
-local Circle = class.define(Shape, function(self, radius, center)
+local Circle = class.define(Shape, function(self, radius, position)
 
 	assert(type(radius) == "number", "radius must be number")
-	assert(class.instanceof(center, Vector2) or center == nil, "center must be Vector2 or nil")
+	assert(class.instanceof(position, Vector2) or position == nil, "position must be Vector2 or nil")
 
 	self.radius = radius
-	self.center = center or Vector2(0, 0)
-	self.origin = self.center
+	self.position = position or Vector2(0, 0)
+	self.origin = self.position
 end)
 
 function Circle:area()
@@ -311,17 +311,17 @@ function Circle:circumference()
 	return math.pi * self.radius * 2
 end
 
-function Circle:globalCenter(transform)
-	return transform.position + self.center
+function Circle:globalPosition(transform)
+	return transform.position + self.position
 end
 
 function Circle:globalCircle(transform)
 	--transform size.x is assumed to be the radius (eventually, we'll make an ellipse object)
-	return Circle(self.radius * transform.size.x, self.center + transform.position)
+	return Circle(self.radius * transform.size.x, self.position + transform.position)
 end
 
 function Circle:contains(vector)
-	return (vector-self.center):magnitude() <= self.radius
+	return (vector - self.position):magnitude() <= self.radius
 end
 
 --[[
@@ -344,11 +344,11 @@ local function intersectingPolygonAndOther(poly1, other, transform1, transform2)
 		otherVerts = {other}
 	elseif otherType == Circle then
 		gc = other:globalCircle(transform2)
-		--we will rotate the "vertices" (center and two outmost points) on each new axis
+		--we will rotate the "vertices" (position and two outmost points) on each new axis
 		otherVerts = {
-			-- gc.center - Vector2(gc.radius, 0),
-			gc.center,
-			-- gc.center + Vector2(gc.radius, 0)
+			-- gc.position - Vector2(gc.radius, 0),
+			gc.position,
+			-- gc.position + Vector2(gc.radius, 0)
 		}
 	else
 		otherVerts = other:globalVertices(transform2)
@@ -378,13 +378,13 @@ local function intersectingPolygonAndOther(poly1, other, transform1, transform2)
 			-- naively find the point on the polygon that is closest to the circle
 			-- TODO: find the point by using voronoi regions instead
 			for i, vertex in ipairs(poly1Verts) do
-				local sm = (vertex - other:globalCenter(transform2)):sqrMagnitude()
+				local sm = (vertex - other:globalPosition(transform2)):sqrMagnitude()
 				if not minSm or sm <= minSm then
 					minSm = sm
 					closest = vertex
 				end
 			end
-			normal = Vector2(other:globalCenter(transform2) - closest)
+			normal = Vector2(other:globalPosition(transform2) - closest)
 		end
 
 		--if this is a polygon, we will check each side
@@ -554,31 +554,31 @@ end
 Rectangle
 ]]
 
-local Rectangle = class.define(Shape, function(self, width, height, origin)
-	-- origin is assumed to be center
+local Rectangle = class.define(Shape, function(self, width, height, position)
+	-- position is assumed to be center
 
 	assert(type(width) == "number", "width must be number")
 	assert(type(height) == "number", "height must be number")
-	assert(class.instanceof(origin, Vector2) or origin == nil, "origin must be Vector2 or nil")
+	assert(class.instanceof(position, Vector2) or position == nil, "position must be Vector2 or nil")
 
 	self.width = width
 	self.height = height
-	self.origin = origin or Vector2(0, 0)
+	self.position = position or Vector2(0, 0)
 end)
 
 function Rectangle:vertices()
 -- 	return {
--- 		self.origin,
--- 		self.origin + Vector2(self.width, 0),
--- 		self.origin + Vector2(self.width, -self.height),
--- 		self.origin + Vector2(0, -self.height)
+-- 		self.position,
+-- 		self.position + Vector2(self.width, 0),
+-- 		self.position + Vector2(self.width, -self.height),
+-- 		self.position + Vector2(0, -self.height)
 -- 	}
 	-- from top left clockwise
 	return {
-		self.origin + Vector2(-self.width/2, self.height/2),
-		self.origin + Vector2(self.width/2, self.height/2),
-		self.origin + Vector2(self.width/2, -self.height/2),
-		self.origin + Vector2(-self.width/2, -self.height/2)
+		self.position + Vector2(-self.width/2, self.height/2),
+		self.position + Vector2(self.width/2, self.height/2),
+		self.position + Vector2(self.width/2, -self.height/2),
+		self.position + Vector2(-self.width/2, -self.height/2)
 	}
 end
 
@@ -600,7 +600,7 @@ function Rectangle:globalRectangle(transform)
 	local r = transform.rotation					--180
 	local width = self.width * transform.size.x		--40 * 1
 	local height = self.height * transform.size.y	--15 * 1
-	local origin = Vector2(self.origin)				--0,0
+	local position = Vector2(self.position)			--0,0
 
 	--width and height are switched if rectangle is on its side
 	if r % 90 == 0 and r % 180 ~= 0 then
@@ -609,9 +609,9 @@ function Rectangle:globalRectangle(transform)
 		height = tmp
 	end
 
-	origin = origin:rotate(r) + transform.position
+	position = position:rotate(r) + transform.position
 
-	return Rectangle(width, height, origin)
+	return Rectangle(width, height, position)
 end
 
 function Rectangle:toPolygon()
@@ -620,10 +620,10 @@ end
 
 function Rectangle:contains(vector)
 	return
-		vector.x >= self.origin.x - (self.width/2) and
-		vector.x <= self.origin.x + (self.width/2) and
-		vector.y <= self.origin.y + (self.height/2) and
-		vector.y >= self.origin.y - (self.height/2)
+		vector.x >= self.position.x - (self.width/2) and
+		vector.x <= self.position.x + (self.width/2) and
+		vector.y <= self.position.y + (self.height/2) and
+		vector.y >= self.position.y - (self.height/2)
 end
 
 --[[
@@ -634,7 +634,7 @@ intersection functions
 
 local function intersectingCircles(cir1, cir2, transform1, transform2)
 
-	local distance = Vector2(cir1:globalCenter(transform1) - cir2:globalCenter(transform2)):magnitude()
+	local distance = Vector2(cir1:globalPosition(transform1) - cir2:globalPosition(transform2)):magnitude()
 	local intersecting = distance <= cir1.radius + cir2.radius
 
 	if not intersecting then
@@ -652,23 +652,23 @@ local function intersectingFixedRectangles(rect1, rect2, transform1, transform2,
 
 	-- return
 	-- 	--is 1's left edge on, or to the left of, 2's right edge?
-	-- 	rect1.origin.x <= rect2.origin.x + rect2.width and
+	-- 	rect1.position.x <= rect2.position.x + rect2.width and
 	-- 	--is 1's right edge on, or to the right of, 2's left edge?
-	-- 	rect1.origin.x + rect1.width >= rect2.origin.x and
+	-- 	rect1.position.x + rect1.width >= rect2.position.x and
 	-- 	--is 1's top edge on or above 2's bottom edge?
-	-- 	rect1.origin.y >= rect2.origin.y - rect2.height and
+	-- 	rect1.position.y >= rect2.position.y - rect2.height and
 	-- 	--is 1's bottom edge on or below 2's top edge?
-	-- 	rect1.origin.y - rect1.height <= rect2.origin.y
+	-- 	rect1.position.y - rect1.height <= rect2.position.y
 
 	local overlaps = {
 		--is 1's left edge on, or to the left of, 2's right edge?
-		(rect1.origin.x - rect1.width/2) - (rect2.origin.x + rect2.width/2),
+		(rect1.position.x - rect1.width/2) - (rect2.position.x + rect2.width/2),
 		--is 1's right edge on, or to the right of, 2's left edge?
-		(rect2.origin.x - rect2.width/2) - (rect1.origin.x + rect1.width/2),
+		(rect2.position.x - rect2.width/2) - (rect1.position.x + rect1.width/2),
 		--is 1's top edge on or above 2's bottom edge?
-		(rect2.origin.y - rect2.height/2) - (rect1.origin.y + rect1.height/2),
+		(rect2.position.y - rect2.height/2) - (rect1.position.y + rect1.height/2),
 		--is 1's bottom edge on or below 2's top edge?
-		(rect1.origin.y - rect1.height/2) - (rect2.origin.y + rect2.height/2)
+		(rect1.position.y - rect1.height/2) - (rect2.position.y + rect2.height/2)
 	}
 	local minDistance = nil
 
@@ -720,7 +720,7 @@ end
 -- 	end
 
 -- 	--or is the circle's center inside the rectangle?
--- 	return rect:contains(cir.center)
+-- 	return rect:contains(cir.position)
 -- end
 
 
@@ -814,7 +814,7 @@ local function intersecting(fig1, fig2, transform1, transform2, ignoreRotation1,
 			return cir:globalCircle(transformCir):contains(other)
 		--collision between a circle and a polygon
 		else
-			cir = Circle(cir.radius, cir.center)
+			cir = Circle(cir.radius, cir.position)
 			return intersectingPolygonAndOther(other, cir, transformOther, transformCir)
 		end
 

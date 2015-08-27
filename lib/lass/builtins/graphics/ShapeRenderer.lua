@@ -32,8 +32,8 @@ local function drawRectangle(self)
 
 	love.graphics.rectangle(
 		self.mode,
-		rect.origin.x - (rect.width / 2),
-		(rect.origin.y + (rect.height / 2)) * self.globals.ySign,
+		rect.position.x - (rect.width / 2),
+		(rect.position.y + (rect.height / 2)) * self.globals.ySign,
 		rect.width,
 		rect.height
 	)
@@ -57,8 +57,8 @@ local function drawCircle(self)
 	local circle = self.shape:globalCircle(self.gameObject.globalTransform)
 	love.graphics.circle(
 		self.mode,
-		circle.center.x, 
-		circle.center.y * self.globals.ySign,
+		circle.position.x,
+		circle.position.y * self.globals.ySign,
 		circle.radius
 	)
 end

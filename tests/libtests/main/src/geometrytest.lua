@@ -16,8 +16,8 @@ function geometrytest.testIntersectingCirclesAndVectors()
 	local c1, c2 = geometry.Circle(3), geometry.Circle(1)
 	local t1, t2 = geometry.Transform(geometry.Vector3(0,0)), geometry.Transform(geometry.Vector3(4,0))
 
-	assert(geometry.intersecting(c1, c2), "circles at same origin aren't intersecting")
-	assert(geometry.intersecting(c2, c1), "circles at same origin aren't intersecting")
+	assert(geometry.intersecting(c1, c2), "circles at same position aren't intersecting")
+	assert(geometry.intersecting(c2, c1), "circles at same position aren't intersecting")
 	assert(geometry.intersecting(c1, c2, t1, t2), "circle edges should be touching")
 	assert(geometry.intersecting(c2, c1, t2, t1), "circle edges should be touching")
 	t2.position.x = 4.0001
@@ -31,7 +31,7 @@ function geometrytest.testCircleWithRadiusZero()
 	local c1, c2 = geometry.Circle(0), geometry.Circle(1)
 	local t1, t2 = geometry.Transform(geometry.Vector3(0,0)), geometry.Transform(geometry.Vector3(4,0))
 
-	assert(geometry.intersecting(c1, c2), "circles at same origin aren't intersecting")
+	assert(geometry.intersecting(c1, c2), "circles at same position aren't intersecting")
 	assert(not geometry.intersecting(c1, c2, t1, t2), "circles should not be intersecting")
 
 	local v = geometry.Vector2(0,0)
@@ -45,8 +45,8 @@ function geometrytest.testIntersectingRectanglesAndVectors()
 	local t1, t2 = geometry.Transform(geometry.Vector3(0,0)), geometry.Transform(geometry.Vector3(0,0))
 	local colliding, data
 
-	assert(geometry.intersecting(r1, r2), "rectangles at same origin aren't intersecting")
-	assert(geometry.intersecting(r1, r2, t1, t2, true, true), "rectangles at same origin aren't intersecting")
+	assert(geometry.intersecting(r1, r2), "rectangles at same position aren't intersecting")
+	assert(geometry.intersecting(r1, r2, t1, t2, true, true), "rectangles at same position aren't intersecting")
 
 
 	t2.position.y = 2.5
