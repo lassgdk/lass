@@ -4,6 +4,8 @@ local geometrytest = {}
 
 geometrytest.tests={
 	"testRectangleCreation",
+	"testVector2Creation",
+	"testVector3Creation",
 	"testIntersectingCirclesAndVectors",
 	"testCircleWithRadiusZero",
 	"testIntersectingRectanglesAndVectors",
@@ -15,35 +17,27 @@ geometrytest.tests={
 
 function geometrytest.testRectangleCreation()
 
-	local crash = pcall(geometry.Rectangle)
-	assert(crash ~= true, "rectangle incorrectly created with no arguments")
-	crash = pcall(geometry.Rectangle, 0)
-	assert(crash ~= true, "rectangle incorrectly created with only one argument")
+	assert(pcall(geometry.Rectangle) ~= true, "rectangle incorrectly created with no arguments")
+	assert(pcall(geometry.Rectangle, 0) ~= true, "rectangle incorrectly created with only one argument")
 
-	crash = pcall(geometry.Rectangle, 0, 1)
-	assert(crash ~= true, "rectangle incorrectly created with 0 width")
-	crash = pcall(geometry.Rectangle, -1, 1)
-	assert(crash ~= true, "rectangle incorrectly created with -1 width")
+	assert(pcall(geometry.Rectangle, 0, 1) ~= true, "rectangle incorrectly created with 0 width")
+	assert(pcall(geometry.Rectangle, -1, 1) ~= true, "rectangle incorrectly created with -1 width")
 
-	crash = pcall(geometry.Rectangle, 1, 0)
-	assert(crash ~= true, "rectangle incorrectly created with 0 height")
-	crash = pcall(geometry.Rectangle, 1, -1)
-	assert(crash ~= true, "rectangle incorrectly created with -1 height")
+	assert(pcall(geometry.Rectangle, 1, 0) ~= true, "rectangle incorrectly created with 0 height")
+	assert(pcall(geometry.Rectangle, 1, -1) ~= true, "rectangle incorrectly created with -1 height")
 
 
 	local r = geometry.Rectangle(1, 1)
-
-	-- debug.log("r is a Rectangle:       ", r:instanceof(Rectangle))
-	-- debug.log("r is a geometry.Rectangle:", r:instanceof(geometry.Rectangle))
 
 	assert(type(r.width) == "number", "rectangle width is not a number")
 	assert(type(r.height) == "number", "rectangle height is not a number")
 	assert(r.width == 1, "rectangle width changed from given value of 1")
 	assert(r.height == 1, "rectangle height changed from given value of 1")
 
-	-- assert(class.instanceof(r.position, Vector2), "rectangle position is not Vector2")
+	assert(r.position:instanceof(geometry.Vector2), "rectangle position is not Vector2")
 	assert(r.position.x == 0, "rectangle default x position is not 0")
 	assert(r.position.y == 0, "rectangle default y position is not 0")
+
 
 	local r = geometry.Rectangle(1, 1, geometry.Vector2(0, 0))
 
@@ -52,7 +46,7 @@ function geometrytest.testRectangleCreation()
 	assert(r.width == 1, "rectangle width changed from given value of 1")
 	assert(r.height == 1, "rectangle height changed from given value of 1")
 
-	-- assert(class.instanceof(r.position, Vector2), "rectangle position is not Vector2")
+	assert(r.position:instanceof(geometry.Vector2), "rectangle position is not Vector2")
 	assert(r.position.x == 0, "rectangle x position changed from given value of 0")
 	assert(r.position.y == 0, "rectangle y position changed from given value of 0")
 
@@ -64,7 +58,66 @@ function geometrytest.testRectangleCreation()
 	assert(r.position.x == -1, "rectangle x position changed from given value of -1")
 	assert(r.position.y == -1, "rectangle y position changed from given value of -1")
 
-	
+
+	local r = geometry.Rectangle(1, 1, geometry.Vector2(geometry.Vector3(1, 1)))
+
+	assert(r.position:instanceof(geometry.Vector2), "rectangle position shouldn't be Vector3")
+	assert(r.position:instanceof(geometry.Vector3) == false, "rectangle position shouldn't be Vector3")
+	assert(r.position.x == 1, "rectangle x position changed from given value of 1")
+	assert(r.position.y == 1, "rectangle y position changed from given value of 1")
+	assert(r.position.z == nil, "rectangle z position shouldn't exist")
+
+	local v = geometry.Vector2(geometry.Vector3(1, 1, 1))
+	local r = geometry.Rectangle(1, 1, v)
+
+	assert(r.position:instanceof(geometry.Vector2), "rectangle position shouldn't be Vector3")
+	assert(r.position:instanceof(geometry.Vector3) == false, "rectangle position shouldn't be Vector3")
+	assert(r.position.x == 1, "rectangle x position changed from given value of 1")
+	assert(r.position.y == 1, "rectangle y position changed from given value of 1")
+	assert(r.position.z == nil, "rectangle z position shouldn't exist")
+
+
+end
+
+function geometrytest.testVector2Creation()
+
+	local v = geometry.Vector2()
+	assert(v.x == 0, "Vector2 x value didn't default to 0")
+	assert(v.y == 0, "Vector2 y value didn't default to 0")
+	assert(v.z == nil, "Vector2 shouldn't have a z value")
+
+	v = geometry.Vector2({})
+	assert(v.x == 0, "Vector2 x value didn't default to 0")
+	assert(v.y == 0, "Vector2 y value didn't default to 0")
+
+	v = geometry.Vector2(geometry.Vector3())
+
+	assert(v.x == 0, "Vector2 x value didn't default to 0")
+	assert(v.y == 0, "Vector2 y value didn't default to 0")
+	assert(v.z == nil, "Vector2 shouldn't have a z value")
+	assert(v:instanceof(geometry.Vector2), "Vector2 should be valid as a Vector2")
+	assert(v:instanceof(geometry.Vector3) == false, "Vector2 shouldn't be valid as a Vector3")
+
+end
+
+function geometrytest.testVector3Creation()
+
+	local v geometry.Vector3()
+	assert(v.x == 0, "Vector2 x value didn't default to 0")
+	assert(v.y == 0, "Vector2 y value didn't default to 0")
+	assert(v.z == 0, "Vector2 z value didn't default to 0")
+
+	v = geometry.Vector3({})
+	assert(v.x == 0, "Vector2 x value didn't default to 0")
+	assert(v.y == 0, "Vector2 y value didn't default to 0")
+	assert(v.z == 0, "Vector2 z value didn't default to 0")
+
+	v = geometry.Vector3(geometry.Vector2())
+	assert(v.x == 0, "Vector3 x value didn't default to 0")
+	assert(v.y == 0, "Vector3 y value didn't default to 0")
+	assert(v.y == 0, "Vector3 z value didn't default to 0")
+	assert(r.position:instanceof(geometry.Vector2), "Vector3 should be valid as a Vector2")
+	assert(r.position:instanceof(geometry.Vector3), "Vector3 should be valid as a Vector3")
 
 end
 

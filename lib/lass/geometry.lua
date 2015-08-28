@@ -554,7 +554,7 @@ Rectangle
 ]]
 
 local Rectangle = class.define(Shape, function(self, width, height, position)
-	-- position is assumed to be center
+	-- position always points to the center of the rectangle
 
 	assert(type(width) == "number", "width must be number")
 	assert(type(height) == "number", "height must be number")
@@ -564,7 +564,8 @@ local Rectangle = class.define(Shape, function(self, width, height, position)
 
 	self.width = width
 	self.height = height
-	self.position = position or Vector2(0, 0)
+	-- make sure position is a Vector2, since it is valid to create a rectangle with a Vector3
+	self.position = Vector2(position) or Vector2(0, 0)
 end)
 
 function Rectangle:vertices()
