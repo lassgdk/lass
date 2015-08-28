@@ -640,7 +640,7 @@ local function intersectingCircles(cir1, cir2, transform1, transform2)
 	local data
 
 	if intersecting then
-		data = {shortestOverlap - distance}
+		data = {shortestOverlap = distance}
 	end
 
 	return intersecting, data

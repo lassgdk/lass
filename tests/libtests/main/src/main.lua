@@ -26,7 +26,7 @@ function love.load()
 		print("---" .. testModules[i] .. "---")
 		local failures = 0
 
-		for j, testName in ipairs(loadedModule) do
+		for j, testName in ipairs(loadedModule.tests) do
 
 			local r, d = pcall(loadedModule[testName], scene)
 
