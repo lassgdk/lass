@@ -310,9 +310,9 @@ function Circle:circumference()
 	return math.pi * self.radius * 2
 end
 
-function Circle:globalPosition(transform)
-	return transform.position + self.position
-end
+-- function Circle:globalPosition(transform)
+-- 	return transform.position + self.position
+-- end
 
 function Circle:globalCircle(transform)
 	--transform size.x is assumed to be the radius (eventually, we'll make an ellipse object)
@@ -377,13 +377,13 @@ local function intersectingPolygonAndOther(poly1, other, transform1, transform2)
 			-- naively find the point on the polygon that is closest to the circle
 			-- TODO: find the point by using voronoi regions instead
 			for i, vertex in ipairs(poly1Verts) do
-				local sm = (vertex - other:globalPosition(transform2)):sqrMagnitude()
+				local sm = (vertex - gc.position):sqrMagnitude()
 				if not minSm or sm <= minSm then
 					minSm = sm
 					closest = vertex
 				end
 			end
-			normal = Vector2(other:globalPosition(transform2) - closest)
+			normal = Vector2(gc.position - closest)
 		end
 
 		--if this is a polygon, we will check each side
@@ -633,14 +633,17 @@ intersection functions
 
 local function intersectingCircles(cir1, cir2, transform1, transform2)
 
-	local distance = Vector2(cir1:globalPosition(transform1) - cir2:globalPosition(transform2)):magnitude()
+	local gcir1, gcir2 = cir1:globalCircle(transform1), cir2:globalCircle(transform2)
+	local distance = Vector2(gcir1.position - gcir2.position):magnitude()
 	local intersecting = distance <= cir1.radius + cir2.radius
 
-	if not intersecting then
-		distance = nil
+	local data
+
+	if intersecting then
+		data = {shortestOverlap - distance}
 	end
 
-	return intersecting, {shortestOverlap = distance}
+	return intersecting, data
 end
 
 local function intersectingFixedRectangles(rect1, rect2, transform1, transform2, direction)
