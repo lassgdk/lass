@@ -3,6 +3,7 @@ geometry = require "lass.geometry"
 local geometrytest = {}
 
 geometrytest.tests={
+	"testRectangleCreation",
 	"testIntersectingCirclesAndVectors",
 	"testCircleWithRadiusZero",
 	"testIntersectingRectanglesAndVectors",
@@ -14,22 +15,57 @@ geometrytest.tests={
 
 function geometrytest.testRectangleCreation()
 
-	local r = geometry.Rectangle()
+	local crash = pcall(geometry.Rectangle)
+	assert(crash ~= true, "rectangle incorrectly created with no arguments")
+	crash = pcall(geometry.Rectangle, 0)
+	assert(crash ~= true, "rectangle incorrectly created with only one argument")
 
-	debug.log(r.width, r.height, r.position)
+	crash = pcall(geometry.Rectangle, 0, 1)
+	assert(crash ~= true, "rectangle incorrectly created with 0 width")
+	crash = pcall(geometry.Rectangle, -1, 1)
+	assert(crash ~= true, "rectangle incorrectly created with -1 width")
 
-	assert(r.width ~= nil, "rectangle width is nil")
-	assert(r.height ~= nil, "rectangle height is nil")
-	assert(r.position ~= nil, "rectangle position is nil")
+	crash = pcall(geometry.Rectangle, 1, 0)
+	assert(crash ~= true, "rectangle incorrectly created with 0 height")
+	crash = pcall(geometry.Rectangle, 1, -1)
+	assert(crash ~= true, "rectangle incorrectly created with -1 height")
 
-	assert(r.width == 0, "default rectangle width isn't 0")
-	assert(r.height == 0, "default rectangle height isn't 0")
-	assert(r.position.x == 0, "default rectangle x position isn't 0")
-	assert(r.position.y == 0, "default rectangle y position isn't 0")
 
-	assert(type(r.width) == "number", "rectangle width isn't a number")
-	assert(type(r.height) == "number", "rectangle height isn't a number")
-	assert(class.instanceof(r.position, Vector2), "rectangle position isn't Vector2")
+	local r = geometry.Rectangle(1, 1)
+
+	-- debug.log("r is a Rectangle:       ", r:instanceof(Rectangle))
+	-- debug.log("r is a geometry.Rectangle:", r:instanceof(geometry.Rectangle))
+
+	assert(type(r.width) == "number", "rectangle width is not a number")
+	assert(type(r.height) == "number", "rectangle height is not a number")
+	assert(r.width == 1, "rectangle width changed from given value of 1")
+	assert(r.height == 1, "rectangle height changed from given value of 1")
+
+	-- assert(class.instanceof(r.position, Vector2), "rectangle position is not Vector2")
+	assert(r.position.x == 0, "rectangle default x position is not 0")
+	assert(r.position.y == 0, "rectangle default y position is not 0")
+
+	local r = geometry.Rectangle(1, 1, geometry.Vector2(0, 0))
+
+	assert(type(r.width) == "number", "rectangle width is not a number")
+	assert(type(r.height) == "number", "rectangle height is not a number")
+	assert(r.width == 1, "rectangle width changed from given value of 1")
+	assert(r.height == 1, "rectangle height changed from given value of 1")
+
+	-- assert(class.instanceof(r.position, Vector2), "rectangle position is not Vector2")
+	assert(r.position.x == 0, "rectangle x position changed from given value of 0")
+	assert(r.position.y == 0, "rectangle y position changed from given value of 0")
+
+
+	local r = geometry.Rectangle(1, 1, geometry.Vector2(1, 1))
+	assert(r.position.x == 1, "rectangle x position changed from given value of 1")
+	assert(r.position.y == 1, "rectangle y position changed from given value of 1")
+	local r = geometry.Rectangle(1, 1, geometry.Vector2(-1, -1))
+	assert(r.position.x == -1, "rectangle x position changed from given value of -1")
+	assert(r.position.y == -1, "rectangle y position changed from given value of -1")
+
+	
+
 end
 
 function geometrytest.testIntersectingCirclesAndVectors()

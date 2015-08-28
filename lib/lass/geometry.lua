@@ -558,6 +558,8 @@ local Rectangle = class.define(Shape, function(self, width, height, position)
 
 	assert(type(width) == "number", "width must be number")
 	assert(type(height) == "number", "height must be number")
+	assert(width > 0, "width must be greater than 0")
+	assert(height > 0, "height must be greater than 0")
 	assert(class.instanceof(position, Vector2) or position == nil, "position must be Vector2 or nil")
 
 	self.width = width
