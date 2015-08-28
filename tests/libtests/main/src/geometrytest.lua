@@ -12,6 +12,26 @@ geometrytest.tests={
 	"testIntersectingPolygons",
 }
 
+function geometrytest.testRectangleCreation()
+
+	local r = geometry.Rectangle()
+
+	debug.log(r.width, r.height, r.position)
+
+	assert(r.width ~= nil, "rectangle width is nil")
+	assert(r.height ~= nil, "rectangle height is nil")
+	assert(r.position ~= nil, "rectangle position is nil")
+
+	assert(r.width == 0, "default rectangle width isn't 0")
+	assert(r.height == 0, "default rectangle height isn't 0")
+	assert(r.position.x == 0, "default rectangle x position isn't 0")
+	assert(r.position.y == 0, "default rectangle y position isn't 0")
+
+	assert(type(r.width) == "number", "rectangle width isn't a number")
+	assert(type(r.height) == "number", "rectangle height isn't a number")
+	assert(class.instanceof(r.position, Vector2), "rectangle position isn't Vector2")
+end
+
 function geometrytest.testIntersectingCirclesAndVectors()
 	local c1, c2 = geometry.Circle(3), geometry.Circle(1)
 	local t1, t2 = geometry.Transform(geometry.Vector3(0,0)), geometry.Transform(geometry.Vector3(4,0))
