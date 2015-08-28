@@ -97,18 +97,17 @@ local function checkCollisions(gameObject, oldPositions, moveBy)
 					end
 					if (
 						oldData and
-						((
-							oldData.frame ~= gameObject.gameScene.frame and
-							oldData.directionOverlap and
-							data.directionOverlap and
-							oldData.directionOverlap < data.directionOverlap
-						) or
-						oldData.shortestOverlap < data.shortestOverlap)
+						oldData.frame == gameObject.gameScene.frame - 1 and (
+							(
+								oldData.directionOverlap and
+								data.directionOverlap and
+								oldData.directionOverlap < data.directionOverlap
+							) or
+							oldData.shortestOverlap < data.shortestOverlap
+						)
 					) then
 						gameObject.transform.position = oldPositions[gameObject]
 						gameObject:maintainTransform()
-
-						-- debug.log("resetting")
 
 						--reset collision data
 						collider.collidingWith[other] = collections.deepcopy(oldData)
@@ -118,14 +117,13 @@ local function checkCollisions(gameObject, oldPositions, moveBy)
 
 						return false
 					-- only add colliders that we weren't already colliding with, and have non-zero overlap
-					elseif not oldData and data.shortestOverlap ~= 0 then
-						-- debug.log(other.gameObject.name, d)
+					elseif (not oldData or oldData.frame < gameObject.gameScene.frame) and data.shortestOverlap ~= 0 then
 						collisions[#collisions + 1] = {other, collider}
 						if data.directionOverlap then
 							directionOverlaps[#directionOverlaps + 1] = data.directionOverlap
 						end
-					else
-						--debug.log("overlap:", oldData.frame, data.frame)
+					-- else
+						-- debug.log("overlap:", oldData.frame, data.frame)
 					end
 				end
 			end
