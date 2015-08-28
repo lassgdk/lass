@@ -102,12 +102,16 @@ function class.define(base, init)
         init(obj, ...)
     end
 
-    c.instanceof = function(self, klass)
-        local m = getmetatable(self)
-        while m do 
-            if m == klass then return true end
-            m = m.base
+    c.instanceof = function(self, ...)
+
+        for i, cl in ipairs({...}) do 
+            local m = getmetatable(self)
+            while m do 
+                if m == cl then return cl end
+                m = m.base
+            end
         end
+
         return false
     end
 
@@ -137,14 +141,16 @@ function class.instanceof(object, ...)
     -- check if object is an instance of class(es), regardless of its type.
     -- returns false or the first match found
 
-    if not (type(object) == "table" and object.instanceof) then
-        return false
-    else
-        for _, cl in ipairs({...}) do
-            if object:instanceof(cl) then return cl end
-        end
-        return false
-    end
+    -- if not (type(object) == "table" and object.instanceof) then
+    --     return false
+    -- else
+    --     for _, cl in ipairs({...}) do
+    --         if object:instanceof(cl) then return cl end
+    --     end
+    --     return false
+    -- end
+
+    return type(object) == "table" and object.instanceof and object:instanceof(...)
 end
 
 function class.subclassof(myclass, ...)
