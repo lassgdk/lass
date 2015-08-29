@@ -26,6 +26,27 @@ table.pack = function(...)
 	return { n = select("#", ...), ... }
 end
 
+debug.logs = function(...)
+
+	local info = debug.getinfo(2)
+	local a = table.pack(...)
+	local sep = "\t"
+	local s = ""
+
+	a[a.n + 1] = "(" .. info.short_src .. ", line " .. info.currentline .. ")"
+	a.n = a.n + 1
+
+	for i = 1, a.n do
+		s = s .. tostring(a[i])
+
+		if i < a.n then
+			s = s .. sep
+		end
+	end
+
+	return s
+end
+
 debug.log = function(...)
 
 	local info = debug.getinfo(2)

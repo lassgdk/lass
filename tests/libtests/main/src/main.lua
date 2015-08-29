@@ -28,10 +28,15 @@ function love.load()
 
 		for j, testName in ipairs(loadedModule.tests) do
 
-			local r, d = pcall(loadedModule[testName], scene)
+			local r, d = xpcall(loadedModule[testName], debug.traceback, scene)
+			-- local r, d = pcall(loadedModule[testName], scene)
 
 			if not r then
-				print(d)
+				print(testName .. " gave the following error:")
+
+				--indent the error message
+				print("    " .. d:gsub("\n", "\n    "))
+
 				failures = failures + 1
 			end
 		end
