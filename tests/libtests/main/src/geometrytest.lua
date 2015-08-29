@@ -3,7 +3,10 @@ geometry = require "lass.geometry"
 local geometrytest = {}
 
 geometrytest.tests={
+	"testCircleCreation",
+	"testCircleCreationVectors",
 	"testRectangleCreation",
+	"testRectangleCreationVectors",
 	"testVector2Creation",
 	"testVector3Creation",
 	"testIntersectingCirclesAndVectors",
@@ -15,19 +18,101 @@ geometrytest.tests={
 	"testIntersectingPolygons",
 }
 
+function geometrytest.testCircleCreation()
+
+	assert(pcall(geometrytest.Circle) ~= true, "circle incorrectly created with no arguments")
+	assert(pcall(geometrytest.Circle, -1) ~= true, "circle incorrectly created with -1 radius")
+
+	local c = geometry.Circle(0)
+	assert(c.radius == 0, "circle radius of 0 should be possible")
+
+
+	c = geometry.Circle(1)
+
+	assert(type(c.radius) == "number", "circle radius is not a number")
+	assert(c.radius == 1, "circle radius changed from given value of 1")
+	assert(c.position:instanceof(geometry.Vector2), "circle position is not Vector2")
+	assert(c.position.x == 0, "circle default x position is not 0")
+	assert(c.position.y == 0, "circle default y position is not 0")
+
+
+	c = geometry.Circle(1, geometry.Vector2(0, 0))
+
+	assert(type(c.radius) == "number", "circle radius is not a number")
+	assert(c.radius == 1, "circle radius changed from given value of 1")
+	assert(c.position:instanceof(geometry.Vector2), "circle position is not Vector2")
+	assert(c.position.x == 0, "circle x position changed from given value of 0")
+	assert(c.position.y == 0, "circle y position changed from given value of 0")
+
+	c = geometry.Circle(1, geometry.Vector2(1, 1))
+	assert(c.position.x == 1, "circle x position changed from given value of 1")
+	assert(c.position.y == 1, "circle y position changed from given value of 1")
+
+	c = geometry.Circle(1, geometry.Vector2(-1, -1))
+	assert(c.position.x == -1, "circle x position changed from given value of -1")
+	assert(c.position.y == -1, "circle y position changed from given value of -1")
+
+
+	c = geometry.Circle(math.huge, geometry.Vector2(math.huge, math.huge))
+	assert(c.radius == math.huge, "circle radius changed from given value of math.huge")
+	assert(c.position.x == math.huge, "circle x position changed from given value of math.huge")
+	assert(c.position.y == math.huge, "circle y position changed from given value of math.huge")
+
+end
+
+function geometrytest.testCircleCreationVectors()
+
+	local v = geometry.Vector3()
+	local c = geometry.Circle(1, v)
+	assert(c.position:instanceof(geometry.Vector2), "circle position should be Vector2")
+	assert(c.position:instanceof(geometry.Vector3) == false, "circle position shouldn't be Vector3")
+	assert(c.position.x == 0, "circle default x position is not 0")
+	assert(c.position.y == 0, "circle default y position is not 0")
+	assert(c.position.z == nil, "circle z position shouldn't exist")
+
+	v = geometry.Vector2(geometry.Vector3(1, 1))
+	c = geometry.Circle(1, v)
+
+	assert(c.position:instanceof(geometry.Vector2), "circle position should be Vector2")
+	assert(c.position:instanceof(geometry.Vector3) == false, "circle position shouldn't be Vector3")
+	assert(c.position.x == 1, "circle x position changed from given value of 1")
+	assert(c.position.y == 1, "circle y position changed from given value of 1")
+	assert(c.position.z == nil, "circle z position shouldn't exist")
+
+	v = geometry.Vector2(geometry.Vector3(1, 1, 1))
+	c = geometry.Circle(1, v)
+
+	assert(c.position:instanceof(geometry.Vector2), "circle position should be Vector2")
+	assert(c.position:instanceof(geometry.Vector3) == false, "circle position shouldn't be Vector3")
+	assert(c.position.x == 1, "circle x position changed from given value of 1")
+	assert(c.position.y == 1, "circle y position changed from given value of 1")
+	assert(c.position.z == nil, "circle z position shouldn't exist")
+
+	v = geometry.Vector3(geometry.Vector2(1, 1))
+	c = geometry.Circle(1, v)
+
+	assert(c.position:instanceof(geometry.Vector2), "circle position should be Vector2")
+	assert(c.position:instanceof(geometry.Vector3) == false, "circle position shouldn't be Vector3")
+	assert(c.position.x == 1, "circle x position changed from given value of 1")
+	assert(c.position.y == 1, "circle y position changed from given value of 1")
+	assert(c.position.z == nil, "circle z position shouldn't exist")
+
+end
+
 function geometrytest.testRectangleCreation()
 
 	assert(pcall(geometry.Rectangle) ~= true, "rectangle incorrectly created with no arguments")
 	assert(pcall(geometry.Rectangle, 0) ~= true, "rectangle incorrectly created with only one argument")
 
-	assert(pcall(geometry.Rectangle, 0, 1) ~= true, "rectangle incorrectly created with 0 width")
 	assert(pcall(geometry.Rectangle, -1, 1) ~= true, "rectangle incorrectly created with -1 width")
-
-	assert(pcall(geometry.Rectangle, 1, 0) ~= true, "rectangle incorrectly created with 0 height")
 	assert(pcall(geometry.Rectangle, 1, -1) ~= true, "rectangle incorrectly created with -1 height")
 
+	local r = geometry.Rectangle(0, 0)
+	assert(r.width == 0, "rectangle width of 0 should be possible")
+	assert(r.height == 0, "rectangle height of 0 should be possible")
 
-	local r = geometry.Rectangle(1, 1)
+
+	r = geometry.Rectangle(1, 1)
 
 	assert(type(r.width) == "number", "rectangle width is not a number")
 	assert(type(r.height) == "number", "rectangle height is not a number")
@@ -50,7 +135,6 @@ function geometrytest.testRectangleCreation()
 	assert(r.position.x == 0, "rectangle x position changed from given value of 0")
 	assert(r.position.y == 0, "rectangle y position changed from given value of 0")
 
-
 	r = geometry.Rectangle(1, 1, geometry.Vector2(1, 1))
 	assert(r.position.x == 1, "rectangle x position changed from given value of 1")
 	assert(r.position.y == 1, "rectangle y position changed from given value of 1")
@@ -66,11 +150,22 @@ function geometrytest.testRectangleCreation()
 	assert(r.position.x == math.huge, "rectangle x position changed from given value of math.huge")
 	assert(r.position.y == math.huge, "rectangle y position changed from given value of math.huge")
 
+end
 
-	local v = geometry.Vector2(geometry.Vector3(1, 1))
+function geometrytest.testRectangleCreationVectors()
+
+	local v = geometry.Vector3()
+	r = geometry.Rectangle(1, 1, v)
+	assert(r.position:instanceof(geometry.Vector2), "rectangle position should be Vector2")
+	assert(r.position:instanceof(geometry.Vector3) == false, "rectangle position shouldn't be Vector3")
+	assert(r.position.x == 0, "rectangle default x position is not 0")
+	assert(r.position.y == 0, "rectangle default y position is not 0")
+	assert(r.position.z == nil, "rectangle z position shouldn't exist")
+
+	v = geometry.Vector2(geometry.Vector3(1, 1))
 	r = geometry.Rectangle(1, 1, v)
 
-	assert(r.position:instanceof(geometry.Vector2), "rectangle position shouldn't be Vector3")
+	assert(r.position:instanceof(geometry.Vector2), "rectangle position should be Vector2")
 	assert(r.position:instanceof(geometry.Vector3) == false, "rectangle position shouldn't be Vector3")
 	assert(r.position.x == 1, "rectangle x position changed from given value of 1")
 	assert(r.position.y == 1, "rectangle y position changed from given value of 1")
@@ -79,7 +174,16 @@ function geometrytest.testRectangleCreation()
 	v = geometry.Vector2(geometry.Vector3(1, 1, 1))
 	r = geometry.Rectangle(1, 1, v)
 
-	assert(r.position:instanceof(geometry.Vector2), "rectangle position shouldn't be Vector3")
+	assert(r.position:instanceof(geometry.Vector2), "rectangle position should be Vector2")
+	assert(r.position:instanceof(geometry.Vector3) == false, "rectangle position shouldn't be Vector3")
+	assert(r.position.x == 1, "rectangle x position changed from given value of 1")
+	assert(r.position.y == 1, "rectangle y position changed from given value of 1")
+	assert(r.position.z == nil, "rectangle z position shouldn't exist")
+
+	v = geometry.Vector3(geometry.Vector2(1, 1))
+	r = geometry.Rectangle(1, 1, v)
+
+	assert(r.position:instanceof(geometry.Vector2), "rectangle position should be Vector2")
 	assert(r.position:instanceof(geometry.Vector3) == false, "rectangle position shouldn't be Vector3")
 	assert(r.position.x == 1, "rectangle x position changed from given value of 1")
 	assert(r.position.y == 1, "rectangle y position changed from given value of 1")

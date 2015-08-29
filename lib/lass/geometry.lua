@@ -295,11 +295,13 @@ local Shape = class.define()
 
 local Circle = class.define(Shape, function(self, radius, position)
 
-	assert(type(radius) == "number", "radius must be number")
+	assert(type(radius) == "number", "radius must be a number")
+	assert(radius >= 0, "radius must be greater than or equal to 0")
 	assert(class.instanceof(position, Vector2) or position == nil, "position must be Vector2 or nil")
 
 	self.radius = radius
-	self.position = position or Vector2(0, 0)
+	-- make sure position is a Vector2, since it is valid to create a rectangle with a Vector3
+	self.position = Vector2(position) or Vector2(0, 0)
 end)
 
 function Circle:area()
@@ -558,8 +560,8 @@ local Rectangle = class.define(Shape, function(self, width, height, position)
 
 	assert(type(width) == "number", "width must be number")
 	assert(type(height) == "number", "height must be number")
-	assert(width > 0, "width must be greater than 0")
-	assert(height > 0, "height must be greater than 0")
+	assert(width >= 0, "width must be 0 or greater")
+	assert(height >= 0, "height must be 0 or greater")
 	assert(class.instanceof(position, Vector2) or position == nil, "position must be Vector2 or nil")
 
 	self.width = width
