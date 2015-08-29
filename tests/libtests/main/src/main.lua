@@ -24,9 +24,12 @@ function love.load()
 	for i, loadedModule in ipairs(loadedModules) do
 
 		print("---" .. testModules[i] .. "---")
+		local testsRun = 0
 		local failures = 0
 
 		for j, testName in ipairs(loadedModule.tests) do
+
+			testsRun = testsRun + 1
 
 			local r, d = xpcall(loadedModule[testName], debug.traceback, scene)
 			-- local r, d = pcall(loadedModule[testName], scene)
@@ -41,7 +44,7 @@ function love.load()
 			end
 		end
 
-		print("Testing complete. Assertion failures: " .. failures)
+		print("Completed " .. testsRun .. " tests. Assertion failures: " .. failures)
 	end
 
 	print("All tests complete")
