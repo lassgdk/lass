@@ -1,0 +1,30 @@
+Original software copyright (c) 2015, David Deckman Coss
+All rights reserved.
+
+DEFINITIONS
+
+"Source code" refers to any collection of human-readable, human-writable computer instructions that results in a software program.
+
+"Binary form" refers to any non-human-readable files that are generated through the act of compiling, compressing, embedding, or encrypting source code.
+
+"This software" refers to the source code to which this license has been applied. It also refers to the binary form of this source code, except in cases where the binary form was partly generated from source code not bound by this license; in such a case, the binary form is considered an example of a "work that contains this software". If these license terms are located within a single source code file, it can be assumed that this software consists only of the contents of that source file (other than the license terms) unless stated otherwise. These license terms can only be applied to source code or to the binary form of source code.
+
+"You" and "your" refer to any entity exercising the rights of this license.
+
+"The modified software" refers to any version of this software that was modified by you. Any reference to "this software" also applies to the modified software.
+
+PERMISSIONS AND WARRANTY DISCLAIMER
+
+This software is provided by its copyright holders and contributors "as-is". Any express or implied warranties for this software are disclaimed and void. In no event shall the copyright owner or contributors be held liable for any damages resulting from the use of this software.
+
+You are permitted to use, distribute, and/or modify this software, by itself or within a work that contains this software, subject to the following restrictions:
+
+1. If you have modified this software's source code, and you distribute a binary form of the modified source code, then you must provide all recipients of such distribution with either of the following:
+    a. a distribution of the modified source code;
+    b. accurate, reasonable instructions for obtaining a distribution of the modified source code.
+
+2. Each distribution of this software's source code must retain these license terms in their entirety, including this list of restrictions and the above copyright notice, definitions, and warranty disclaimer, without any omissions or insertions.
+
+3. Each distribution of this software in binary form must provide a human-readable reproduction of these license terms in their entirety, including this list of restrictions and the above copyright notice, definitions, and warranty disclaimer, without any omissions or insertions. If the binary distribution is a work that contains this software, then the distribution must also include a human-readable notice that properly identifies the portions of the distribution that constitute this software.
+
+4. If you have modified this software, then you are the copyright holder of the modified software. The copyright notice that accompanies each distribution of the modified software must be prefixed with a statement that the software has been modified and/or a statement of copyright over the modified version (for example, "Modified software copyright (c) Example Corp").
