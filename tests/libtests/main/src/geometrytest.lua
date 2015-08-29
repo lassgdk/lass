@@ -228,7 +228,7 @@ function geometrytest.testVector3Creation()
 	v = geometry.Vector3(geometry.Vector2())
 	assert(v.x == 0, "Vector3 x value didn't default to 0")
 	assert(v.y == 0, "Vector3 y value didn't default to 0")
-	assert(v.y == 0, "Vector3 z value didn't default to 0")
+	assert(v.z == 0, "Vector3 z value didn't default to 0")
 	assert(v:instanceof(geometry.Vector2), "Vector3 should be valid as a Vector2")
 	assert(v:instanceof(geometry.Vector3), "Vector3 should be valid as a Vector3")
 
