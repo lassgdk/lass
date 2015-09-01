@@ -102,8 +102,6 @@ function Collider:isCollidingWith(other, direction, noFrameRepeat)
 	local otherType = class.instanceof(other, Collider, geometry.Shape, geometry.Vector2)
 	assert(otherType, "other must be a Collider, Shape, or Vector2")
 
-	noFrameRepeat = false
-
 	local r, d = false, nil
 	if otherType == Collider then
 
