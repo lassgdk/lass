@@ -14,7 +14,6 @@ except:
 if sys.platform == "win32":
 	# XDG_CONFIG_HOME = os.path.dirname(os.path.realpath(__file__))
 	DIR_LASS_CONF = os.path.dirname(os.path.realpath(sys.argv[0]))
-	print(DIR_LASS_CONF)
 #else, look in the $HOME directory
 else:
 	try:
@@ -78,8 +77,6 @@ def buildgame(game, sendToTemp=False, projects=False, examples=False, tests=Fals
 		target: target platform--must be combination of w, l, o
 	"""
 
-	print(tests)
-
 	if not (projects or examples or tests):
 		if os.path.isabs(game):
 			projPath = game
@@ -95,7 +92,6 @@ def buildgame(game, sendToTemp=False, projects=False, examples=False, tests=Fals
 		if examples:
 			dirs.append(DIR_EXAMPLES)
 		if tests:
-			print("hi")
 			dirs.append(DIR_TESTS)
 		projPath = findgame(game, dirs)
 
