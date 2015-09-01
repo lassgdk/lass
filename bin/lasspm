@@ -56,6 +56,7 @@ else:
 DIR_ENGINE_WINDOWS = os.path.join(DIR_LASS_DATA, "engine", "windows")
 DIR_ENGINE_OSX = os.path.join(DIR_LASS_DATA, "engine", "osx")
 DIR_EXAMPLES = os.path.join(DIR_LASS_DATA, "examples")
+DIR_TESTS = os.path.join(DIR_LASS_DATA, "tests")
 DIR_TEMPLATES_LUA = os.path.join(DIR_LASS_DATA, "templates", "lua")
 
 ID_WINDOWS = "w"
@@ -64,7 +65,7 @@ ID_OSX = "o"
 
 #main functions
 
-def buildgame(game, sendToTemp=False, projects=False, examples=False, target="l"):
+def buildgame(game, sendToTemp=False, projects=False, examples=False, tests=False, target="l"):
 	"""
 	build a .love file, plus optional binary distributions
 
@@ -73,10 +74,13 @@ def buildgame(game, sendToTemp=False, projects=False, examples=False, target="l"
 		sendToTemp: store compiled game in temp folder
 		projects: search for project in default projects folder
 		examples: search for project in examples folder, if not found in projects
+		tests: search for project in tests folder, if not found in examples
 		target: target platform--must be combination of w, l, o
 	"""
 
-	if not (projects or examples):
+	print(tests)
+
+	if not (projects or examples or tests):
 		if os.path.isabs(game):
 			projPath = game
 		else:
@@ -90,6 +94,9 @@ def buildgame(game, sendToTemp=False, projects=False, examples=False, target="l"
 			dirs.append(DIR_PROJECTS)
 		if examples:
 			dirs.append(DIR_EXAMPLES)
+		if tests:
+			print("hi")
+			dirs.append(DIR_TESTS)
 		projPath = findgame(game, dirs)
 
 	#in case game is '.', find the 'real' name
@@ -360,6 +367,11 @@ def main():
 				"action":"store_true",
 				"default":False,
 				"help":"search for game in examples folder"
+			}),
+			(("-u", "--tests"), {
+				"action":"store_true",
+				"default":False,
+				"help":"search for game in tests folder"
 			}),
 			(("-s", "--scene"), {
 				"type":str,

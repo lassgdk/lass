@@ -45,6 +45,17 @@ The `lasspm` command-line tool allows you to create, preview, and compile Lass g
 
 If you are on Windows and you have not added Lass to the system Path variable, you will only be able to run lasspm after navigating to the Lass program directory.
 
+Test
+----
+
+Tests for the Lass Lua library and LÖVE are located in the tests/ directory, and can be run with lasspm:
+
+`lasspm play -u <testname>`
+
+For example, the "main" test is executed with `lasspm play -u main`.
+
+Tests for lasspm itself are not yet available.
+
 Uninstall
 ---------
 
