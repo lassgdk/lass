@@ -26,6 +26,15 @@ end
 
 --[[public]]
 
+--[[
+    create a Vector2
+    
+    arguments:
+    x (number, default=0)
+    y (number, default=0)
+    arguments (alternative signature):
+    coords (table, default={x=0, y=0})
+    ]]
 local Vector2 = class.define(function(self, x, y)
 
 	if type(x) == "table" then
@@ -35,6 +44,9 @@ local Vector2 = class.define(function(self, x, y)
 
 	self.x = x or 0
 	self.y = y or 0
+
+	assert(type(self.x) == "number", "valid arguments are a table or two numbers")
+	assert(type(self.y) == "number", "valid arguments are a table or two numbers")
 end)
 
 function Vector2.__add(a, b)
@@ -198,7 +210,10 @@ local Vector3 = class.define(Vector2, function(self, x, y, z)
 	end
 
 	self.z = z or 0
-	Vector2.init(self, x, y)
+	-- Vector2.init(self, x, y)
+	assert(pcall(Vector2.init, self, x, y) == true, "valid arguments are a table or up to three numbers")
+
+	assert(type(self.z) == "number", "valid arguments are a table or up to three numbers")
 end)
 
 function Vector3.__add(a, b)

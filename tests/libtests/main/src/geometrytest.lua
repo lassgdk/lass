@@ -4,11 +4,13 @@ local geometrytest = {}
 
 geometrytest.tests={
 	"testCircleCreation",
-	"testCircleCreationVectors",
 	"testRectangleCreation",
-	"testRectangleCreationVectors",
+	"testCircleCreationWithVectors",
+	"testRectangleCreationWithVectors",
 	"testVector2Creation",
 	"testVector3Creation",
+	"testVector2CreationWithVectors",
+	"testVector3CreationWithVectors",
 	"testIntersectingCirclesAndVectors",
 	"testCircleWithRadiusZero",
 	"testIntersectingRectanglesAndVectors",
@@ -20,13 +22,16 @@ geometrytest.tests={
 
 function geometrytest.testCircleCreation()
 
+	--[[incorrect creation attempts]]
 	assert(pcall(geometrytest.Circle) ~= true, "circle incorrectly created with no arguments")
 	assert(pcall(geometrytest.Circle, -1) ~= true, "circle incorrectly created with -1 radius")
+	assert(pcall(geometrytest.Circle, "1") ~= true, "circle incorrectly created with a string for radius")
 
+	--[[verify boundary conditions for size]]
 	local c = geometry.Circle(0)
 	assert(c.radius == 0, "circle radius of 0 should be possible")
 
-
+	--[[basic creation]]
 	c = geometry.Circle(1)
 
 	assert(type(c.radius) == "number", "circle radius is not a number")
@@ -36,6 +41,7 @@ function geometrytest.testCircleCreation()
 	assert(c.position.y == 0, "circle default y position is not 0")
 
 
+	--[[creation with Vector2]]
 	c = geometry.Circle(1, geometry.Vector2(0, 0))
 
 	assert(type(c.radius) == "number", "circle radius is not a number")
@@ -53,6 +59,7 @@ function geometrytest.testCircleCreation()
 	assert(c.position.y == -1, "circle y position changed from given value of -1")
 
 
+	--[[creation with infinity]]
 	c = geometry.Circle(math.huge, geometry.Vector2(math.huge, math.huge))
 	assert(c.radius == math.huge, "circle radius changed from given value of math.huge")
 	assert(c.position.x == math.huge, "circle x position changed from given value of math.huge")
@@ -60,58 +67,26 @@ function geometrytest.testCircleCreation()
 
 end
 
-function geometrytest.testCircleCreationVectors()
-
-	local v = geometry.Vector3()
-	local c = geometry.Circle(1, v)
-	assert(c.position:instanceof(geometry.Vector2), "circle position should be Vector2")
-	assert(c.position:instanceof(geometry.Vector3) == false, "circle position shouldn't be Vector3")
-	assert(c.position.x == 0, "circle default x position is not 0")
-	assert(c.position.y == 0, "circle default y position is not 0")
-	assert(c.position.z == nil, "circle z position shouldn't exist")
-
-	v = geometry.Vector2(geometry.Vector3(1, 1))
-	c = geometry.Circle(1, v)
-
-	assert(c.position:instanceof(geometry.Vector2), "circle position should be Vector2")
-	assert(c.position:instanceof(geometry.Vector3) == false, "circle position shouldn't be Vector3")
-	assert(c.position.x == 1, "circle x position changed from given value of 1")
-	assert(c.position.y == 1, "circle y position changed from given value of 1")
-	assert(c.position.z == nil, "circle z position shouldn't exist")
-
-	v = geometry.Vector2(geometry.Vector3(1, 1, 1))
-	c = geometry.Circle(1, v)
-
-	assert(c.position:instanceof(geometry.Vector2), "circle position should be Vector2")
-	assert(c.position:instanceof(geometry.Vector3) == false, "circle position shouldn't be Vector3")
-	assert(c.position.x == 1, "circle x position changed from given value of 1")
-	assert(c.position.y == 1, "circle y position changed from given value of 1")
-	assert(c.position.z == nil, "circle z position shouldn't exist")
-
-	v = geometry.Vector3(geometry.Vector2(1, 1))
-	c = geometry.Circle(1, v)
-
-	assert(c.position:instanceof(geometry.Vector2), "circle position should be Vector2")
-	assert(c.position:instanceof(geometry.Vector3) == false, "circle position shouldn't be Vector3")
-	assert(c.position.x == 1, "circle x position changed from given value of 1")
-	assert(c.position.y == 1, "circle y position changed from given value of 1")
-	assert(c.position.z == nil, "circle z position shouldn't exist")
-
-end
 
 function geometrytest.testRectangleCreation()
 
+	--[[incorrect creation attempts]]
 	assert(pcall(geometry.Rectangle) ~= true, "rectangle incorrectly created with no arguments")
 	assert(pcall(geometry.Rectangle, 0) ~= true, "rectangle incorrectly created with only one argument")
 
 	assert(pcall(geometry.Rectangle, -1, 1) ~= true, "rectangle incorrectly created with -1 width")
 	assert(pcall(geometry.Rectangle, 1, -1) ~= true, "rectangle incorrectly created with -1 height")
 
+	assert(pcall(geometry.Rectangle, "1", 1) ~= true, "rectangle incorrectly created with a stright for width")
+	assert(pcall(geometry.Rectangle, 1, "1") ~= true, "rectangle incorrectly created with a stright for height")
+
+
+	--[[verify boundary conditions for size]]
 	local r = geometry.Rectangle(0, 0)
 	assert(r.width == 0, "rectangle width of 0 should be possible")
 	assert(r.height == 0, "rectangle height of 0 should be possible")
 
-
+	--[[basic creation]]
 	r = geometry.Rectangle(1, 1)
 
 	assert(type(r.width) == "number", "rectangle width is not a number")
@@ -124,6 +99,7 @@ function geometrytest.testRectangleCreation()
 	assert(r.position.y == 0, "rectangle default y position is not 0")
 
 
+	--[[creation with Vector2]]
 	r = geometry.Rectangle(1, 1, geometry.Vector2(0, 0))
 
 	assert(type(r.width) == "number", "rectangle width is not a number")
@@ -144,6 +120,7 @@ function geometrytest.testRectangleCreation()
 	assert(r.position.y == -1, "rectangle y position changed from given value of -1")
 
 
+	--[[creation with infinity]]
 	r = geometry.Rectangle(math.huge, math.huge, geometry.Vector2(math.huge, math.huge))
 	assert(r.width == math.huge, "rectangle width changed from given value of math.huge")
 	assert(r.height == math.huge, "rectangle height changed from given value of math.huge")
@@ -152,10 +129,53 @@ function geometrytest.testRectangleCreation()
 
 end
 
-function geometrytest.testRectangleCreationVectors()
+function geometrytest.testCircleCreationWithVectors()
+	-- extended testing with Vectors in weird ways
+
+	local v = geometry.Vector3()
+	local c = geometry.Circle(1, v)
+
+	assert(c.position:instanceof(geometry.Vector2), "circle position should be Vector2")
+	assert(c.position:instanceof(geometry.Vector3) == false, "circle position shouldn't be Vector3")
+	assert(c.position.x == 0, "circle default x position is not 0")
+	assert(c.position.y == 0, "circle default y position is not 0")
+	assert(c.position.z == nil, "circle z position shouldn't exist")
+
+	v = geometry.Vector2(geometry.Vector3(1, 1))
+	c = geometry.Circle(1, v)
+
+	assert(c.position:instanceof(geometry.Vector2), "circle position should be Vector2")
+	assert(c.position:instanceof(geometry.Vector3) == false, "circle position shouldn't be Vector3")
+	assert(c.position.x == 1, "circle x position changed from given value of 1")
+	assert(c.position.y == 1, "circle y position changed from given value of 1")
+	assert(c.position.z == nil, "circle z position shouldn't exist")
+
+	v = geometry.Vector2(geometry.Vector3(1, 1, 1))
+	c = geometry.Circle(1, v)
+
+	assert(c.position:instanceof(geometry.Vector2), "circle position should be Vector2")
+	assert(c.position:instanceof(geometry.Vector3) == false, "circle position shouldn't be Vector3")
+	assert(c.position.x == 1, "circle x position changed from given value of 1")
+	assert(c.position.y == 1, "circle y position changed from given value of 1")
+	assert(c.position.z == nil, "circle z position shouldn't exist")
+
+	v = geometry.Vector3(geometry.Vector2(1, 1))
+	c = geometry.Circle(1, v)
+
+	assert(c.position:instanceof(geometry.Vector2), "circle position should be Vector2")
+	assert(c.position:instanceof(geometry.Vector3) == false, "circle position shouldn't be Vector3")
+	assert(c.position.x == 1, "circle x position changed from given value of 1")
+	assert(c.position.y == 1, "circle y position changed from given value of 1")
+	assert(c.position.z == nil, "circle z position shouldn't exist")
+
+end
+
+function geometrytest.testRectangleCreationWithVectors()
+	-- extended testing with Vectors in weird ways
 
 	local v = geometry.Vector3()
 	r = geometry.Rectangle(1, 1, v)
+
 	assert(r.position:instanceof(geometry.Vector2), "rectangle position should be Vector2")
 	assert(r.position:instanceof(geometry.Vector3) == false, "rectangle position shouldn't be Vector3")
 	assert(r.position.x == 0, "rectangle default x position is not 0")
@@ -189,48 +209,243 @@ function geometrytest.testRectangleCreationVectors()
 	assert(r.position.y == 1, "rectangle y position changed from given value of 1")
 	assert(r.position.z == nil, "rectangle z position shouldn't exist")
 
-
 end
 
 function geometrytest.testVector2Creation()
 
+	--[[incorrect creation attempts]]
+	assert(pcall(geometry.Vector2, "0") ~= true, "incorrectly created Vector2 with a string for x")
+	assert(pcall(geometry.Vector2, 0, "0") ~= true, "incorrectly created Vector2 with a string for y")
+
+
+	--[[purely default creation]]
 	local v = geometry.Vector2()
 	assert(v.x == 0, "Vector2 x value didn't default to 0")
 	assert(v.y == 0, "Vector2 y value didn't default to 0")
 	assert(v.z == nil, "Vector2 shouldn't have a z value")
+	assert(v:instanceof(geometry.Vector2), "Vector2 should be valid as a Vector2")
 
+
+	--[[creation with just numbers]]
+	v = geometry.Vector2(1)
+	assert(v.x == 1, "Vector2 x value changed from 1")
+	assert(v.y == 0, "Vector2 y value didn't default to 0")
+
+	v = geometry.Vector2(1, 1)
+	assert(v.x == 1, "Vector2 x value changed from 1")
+	assert(v.y == 1, "Vector2 y value changed from 1")
+
+	v = geometry.Vector2(1, 1, 1)
+	assert(v.x == 1, "Vector2 x value changed from 1")
+	assert(v.y == 1, "Vector2 y value changed from 1")
+	assert(v.z == nil, "Vector2 shouldn't have a z value")
+
+	v = geometry.Vector2(math.huge, math.huge)
+	assert(v.x == math.huge, "Vector2 x value changed from math.huge")
+	assert(v.y == math.huge, "Vector2 y value changed from math.huge")
+
+
+	--[[creation with just tables]]
 	v = geometry.Vector2({})
 	assert(v.x == 0, "Vector2 x value didn't default to 0")
 	assert(v.y == 0, "Vector2 y value didn't default to 0")
 
-	v = geometry.Vector2(geometry.Vector3())
+	-- values given here should be ignored
+	v = geometry.Vector2({1, 1})
+	assert(v.x == 0, "Vector2 x value didn't default to 0")
+	assert(v.y == 0, "Vector2 y value didn't default to 0")
 
+	v = geometry.Vector2({["x"] = 1, ["y"] = 1})
+	assert(v.x == 1, "Vector2 x value changed from 1")
+	assert(v.y == 1, "Vector2 y value changed from 1")
+	
+	-- second table should be ignored
+	v = geometry.Vector2({}, {["x"] = 1, ["y"] = 1})
+	assert(v.x == 0, "Vector2 x value didn't default to 0")
+	assert(v.y == 0, "Vector2 y value didn't default to 0")
+
+
+	--[[creation with tables and numbers]]
+	-- second value should be ignored
+	v = geometry.Vector2({}, 1)
+	assert(v.x == 0, "Vector2 x value didn't default to 0")
+	assert(v.y == 0, "Vector2 y value didn't default to 0")
+
+	assert(pcall(geometry.Vector2, 1, {}) ~= true, "incorrectly created Vector2 with a table for y")
+
+end
+
+function geometrytest.testVector3Creation()
+
+	--[[incorrect creation attempts]]
+	assert(pcall(geometry.Vector3, "0") ~= true, "incorrectly created Vector3 with a string for x")
+	assert(pcall(geometry.Vector3, 0, "0") ~= true, "incorrectly created Vector3 with a string for y")
+	assert(pcall(geometry.Vector3, 0, 0, "0") ~= true, "incorrectly created Vector3 with a string for z")
+
+
+	--[[purely default creation]]
+	local v = geometry.Vector3()
+	assert(v.x == 0, "Vector3 x value didn't default to 0")
+	assert(v.y == 0, "Vector3 y value didn't default to 0")
+	assert(v.z == 0, "Vector3 z value didn't default to 0")
+	assert(v:instanceof(geometry.Vector3), "Vector3 should be valid as a Vector3")
+
+	--[[creation with just numbers]]
+	v = geometry.Vector3(1)
+	assert(v.x == 1, "Vector3 x value changed from 1")
+	assert(v.y == 0, "Vector3 y value didn't default to 0")
+	assert(v.z == 0, "Vector3 z value didn't default to 0")
+
+	v = geometry.Vector3(1, 1)
+	assert(v.x == 1, "Vector3 x value changed from 1")
+	assert(v.y == 1, "Vector3 y value changed from 1")
+	assert(v.z == 0, "Vector3 z value didn't default to 0")
+
+	v = geometry.Vector3(1, 1, 1)
+	assert(v.x == 1, "Vector3 x value changed from 1")
+	assert(v.y == 1, "Vector3 y value changed from 1")
+	assert(v.z == 1, "Vector3 z value changed from 1")
+
+	v = geometry.Vector3(math.huge, math.huge, math.huge)
+	assert(v.x == math.huge, "Vector3 x value changed from math.huge")
+	assert(v.y == math.huge, "Vector3 y value changed from math.huge")
+	assert(v.z == math.huge, "Vector3 z value changed from math.huge")
+
+
+	--[[creation with just tables]]
+	v = geometry.Vector3({})
+	assert(v.x == 0, "Vector3 x value didn't default to 0")
+	assert(v.y == 0, "Vector3 y value didn't default to 0")
+	assert(v.z == 0, "Vector3 z value didn't default to 0")
+
+	-- values here should be ignored
+	v = geometry.Vector3({1, 1, 1})
+	assert(v.x == 0, "Vector3 x value didn't default to 0")
+	assert(v.y == 0, "Vector3 y value didn't default to 0")
+	assert(v.z == 0, "Vector3 z value didn't default to 0")
+
+	v = geometry.Vector3({["x"] = 1, ["y"] = 1, ["z"] = 1})
+	assert(v.x == 1, "Vector3 x value changed from 1")
+	assert(v.y == 1, "Vector3 y value changed from 1")
+	assert(v.z == 1, "Vector3 z value changed from 1")
+
+	-- second table should be ignored
+	v = geometry.Vector3({}, {["x"] = 1, ["y"] = 1, ["z"] = 1})
+	assert(v.x == 0, "Vector3 x value didn't default to 0")
+	assert(v.y == 0, "Vector3 y value didn't default to 0")
+	assert(v.z == 0, "Vector3 z value didn't default to 0")
+
+
+	--[[creation with tables and numbers]]
+	-- second and third values should be ignored
+	v = geometry.Vector3({}, 1, 1)
+	assert(v.x == 0, "Vector3 x value didn't default to 0")
+	assert(v.y == 0, "Vector3 y value didn't default to 0")
+	assert(v.z == 0, "Vector3 z value didn't default to 0")
+
+	assert(pcall(geometry.Vector3, 1, {}) ~= true, "incorrectly created Vector3 with a table for y")
+	assert(pcall(geometry.Vector3, 1, 1, {}) ~= true, "incorrectly created Vector3 with a table for z")
+
+end
+
+function geometrytest.testVector2CreationWithVectors()
+
+	--[[creation with Vector2]]
+	local v = geometry.Vector2(geometry.Vector2())
+	assert(v.x == 0, "Vector2 x value didn't default to 0")
+	assert(v.y == 0, "Vector2 y value didn't default to 0")
+	assert(v:instanceof(geometry.Vector2), "Vector2 should be valid as a Vector2")
+
+	v = geometry.Vector2(geometry.Vector2(1, 1))
+	assert(v.x == 1, "Vector2 x value changed from 1")
+	assert(v.y == 1, "Vector2 y value changed from 1")
+
+	local v2 = geometry.Vector2(1, 1)
+	v = geometry.Vector2(v2.x, v2.y)
+	assert(v.x == 1, "Vector2 x value changed from 1")
+	assert(v.y == 1, "Vector2 y value changed from 1")
+
+	v = geometry.Vector2(geometry.Vector2(), geometry.Vector2(1, 1))
+	assert(v.x == 0, "Vector2 x value didn't default to 0")
+	assert(v.y == 0, "Vector2 y value didn't default to 0")
+
+
+	--[[creation with Vector3]]
+	v = geometry.Vector2(geometry.Vector3())
 	assert(v.x == 0, "Vector2 x value didn't default to 0")
 	assert(v.y == 0, "Vector2 y value didn't default to 0")
 	assert(v.z == nil, "Vector2 shouldn't have a z value")
 	assert(v:instanceof(geometry.Vector2), "Vector2 should be valid as a Vector2")
 	assert(v:instanceof(geometry.Vector3) == false, "Vector2 shouldn't be valid as a Vector3")
 
+	v = geometry.Vector2(geometry.Vector3(1, 1, 1))
+	assert(v.x == 1, "Vector2 x value changed from 1")
+	assert(v.y == 1, "Vector2 y value changed from 1")
+	assert(v.z == nil, "Vector2 shouldn't have a z value")
+
+	local v3 = geometry.Vector3(1, 1, 1)
+	v = geometry.Vector2(v3.x, v3.y, v3.z)
+	assert(v.x == 1, "Vector2 x value changed from 1")
+	assert(v.y == 1, "Vector2 y value changed from 1")
+	assert(v.z == nil, "Vector2 shouldn't have a z value")
+
+	v = geometry.Vector2(geometry.Vector3(), geometry.Vector3(1, 1, 1))
+	assert(v.x == 0, "Vector2 x value didn't default to 0")
+	assert(v.y == 0, "Vector2 y value didn't default to 0")
+	assert(v.z == nil, "Vector2 shouldn't have a z value")
+
 end
 
-function geometrytest.testVector3Creation()
+function geometrytest.testVector3CreationWithVectors()
 
-	local v = geometry.Vector3()
-	assert(v.x == 0, "Vector2 x value didn't default to 0")
-	assert(v.y == 0, "Vector2 y value didn't default to 0")
-	assert(v.z == 0, "Vector2 z value didn't default to 0")
-
-	v = geometry.Vector3({})
-	assert(v.x == 0, "Vector2 x value didn't default to 0")
-	assert(v.y == 0, "Vector2 y value didn't default to 0")
-	assert(v.z == 0, "Vector2 z value didn't default to 0")
-
-	v = geometry.Vector3(geometry.Vector2())
+	--[[creation with Vector2]]
+	local v = geometry.Vector3(geometry.Vector2())
 	assert(v.x == 0, "Vector3 x value didn't default to 0")
 	assert(v.y == 0, "Vector3 y value didn't default to 0")
 	assert(v.z == 0, "Vector3 z value didn't default to 0")
 	assert(v:instanceof(geometry.Vector2), "Vector3 should be valid as a Vector2")
 	assert(v:instanceof(geometry.Vector3), "Vector3 should be valid as a Vector3")
+
+	v = geometry.Vector3(geometry.Vector2(1, 1))
+	assert(v.x == 1, "Vector3 x value changed from 1")
+	assert(v.y == 1, "Vector3 y value changed from 1")
+	assert(v.z == 0, "Vector3 z value didn't default to 0")
+
+	local v2 = geometry.Vector2(1, 1)
+	v = geometry.Vector3(v2.x, v2.y)
+	assert(v.x == 1, "Vector3 x value changed from 1")
+	assert(v.y == 1, "Vector3 y value changed from 1")
+	assert(v.z == 0, "Vector3 z value didn't default to 0")
+
+	v = geometry.Vector3(geometry.Vector2(), geometry.Vector2(1, 1))
+	assert(v.x == 0, "Vector3 x value didn't default to 0")
+	assert(v.y == 0, "Vector3 y value didn't default to 0")
+	assert(v.z == 0, "Vector3 z value didn't default to 0")
+
+
+	--[[creation with Vector3]]
+	v = geometry.Vector3(geometry.Vector3())
+	assert(v.x == 0, "Vector3 x value didn't default to 0")
+	assert(v.y == 0, "Vector3 y value didn't default to 0")
+	assert(v.z == 0, "Vector3 z value didn't default to 0")
+	assert(v:instanceof(geometry.Vector2), "Vector3 should be valid as a Vector2")
+	assert(v:instanceof(geometry.Vector3), "Vector3 shouldn't be valid as a Vector3")
+
+	v = geometry.Vector3(geometry.Vector3(1, 1, 1))
+	assert(v.x == 1, "Vector3 x value changed from 1")
+	assert(v.y == 1, "Vector3 y value changed from 1")
+	assert(v.z == 1, "Vector3 z value changed from 1")
+
+	local v3 = geometry.Vector3(1, 1, 1)
+	v = geometry.Vector3(v3.x, v3.y, v3.z)
+	assert(v.x == 1, "Vector3 x value changed from 1")
+	assert(v.y == 1, "Vector3 y value changed from 1")
+	assert(v.z == 1, "Vector3 z value changed from 1")
+
+	v = geometry.Vector3(geometry.Vector3(), geometry.Vector3(1, 1, 1))
+	assert(v.x == 0, "Vector3 x value didn't default to 0")
+	assert(v.y == 0, "Vector3 y value didn't default to 0")
+	assert(v.z == 0, "Vector3 z value didn't default to 0")
 
 end
 
