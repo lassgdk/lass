@@ -51,9 +51,10 @@ Uninstall
 There is no uninstall command in setup.py just yet, so if you wish to uninstall Lass you will need to remove all associated files manually.
 
 **Linux and OS X**  
-1. Remove the Lass data files. These are stored in either `$XDG_DATA_HOME/Lass` (`~/.local/share/Lass`) or `~/.Lass`.  
-2. If you have Lua 5.1 installed, then the Lass Lua library is probably still on your system. You can find and delete it in `/usr/local/share/lua/5.1`.  
-3. If you wish, you can also remove the Lass config files from `$XDG_CONFIG_HOME/Lass` (`~/.config/Lass`)
+1. Remove lasspm. By default, it can be found in `/usr/local/bin`; use the `which lasspm` command to confirm this.  
+2. Remove the Lass data files. These are stored in either `$XDG_DATA_HOME/Lass` (`~/.local/share/Lass`) or `~/.Lass`.  
+3. If you have Lua 5.1 installed, then the Lass Lua library is probably still on your system. You can find and delete it in `/usr/local/share/lua/5.1`.  
+4. If you wish, you can also remove the Lass config files from `$XDG_CONFIG_HOME/Lass` (`~/.config/Lass`)
 
 **Windows**  
 Lass for Windows is entirely portable: the setup.py script doesn't create any files other than those generated in the "dist" folder. Simply deleting the Lass program folder is enough to remove it from your system.

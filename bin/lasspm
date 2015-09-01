@@ -251,8 +251,23 @@ def getLoveEngineCommand(game, args=[]):
 	else:
 		return ["love", game] + args
 
-def buildapp(loveFileName, appFolderName=None, dest="."):
-	pass
+def buildapp(loveFileNameFull, appFolderName=None, dest="."):
+
+	gameName = ".".join(os.path.basename(loveFileNameFull).split(".")[:-1])
+
+	if not appFolderName:
+		appFolderName = gameName + ".app"
+
+	if appFolderName in os.listdir(dest):
+		shutil.rmtree(os.path.join(dest, appFolderName))
+
+	# copy and rename love.app
+	shutil.copytree(os.path.join(DIR_ENGINE_OSX, "love.app"), os.path.join(dest, appFolderName))
+
+	#add love file to app folder
+	shutil.copy(loveFileNameFull, os.path.join(dest, appFolderName, "Contents", "Resources"))
+
+	#TODO: update Info.plist file with custom metadata
 
 def buildexe(loveFileNameFull, exeFolderName=None, exeFileName=None, dest="."):
 
@@ -276,7 +291,6 @@ def buildexe(loveFileNameFull, exeFolderName=None, exeFileName=None, dest="."):
 
 	#append love file to renamed love.exe
 	with open(exeFileNameFull, "ab") as exeFile, open(loveFileNameFull, "rb") as loveFile:
-	# print(os.path.abspath(loveFileNameFull))
 		bytes = loveFile.read()
 		exeFile.write(bytes)
 
@@ -313,11 +327,6 @@ def main():
 				"default":False,
 				"help":"create lovefile only (equivalent to -t l)"
 			}),
-			(("-p", "--projects"), {
-				"action":"store_true",
-				"default":False,
-				"help":projects_help % DIR_PROJECTS
-			}),
 			(("-e", "--examples"), {
 				"action":"store_true",
 				"default":False,
@@ -330,11 +339,6 @@ def main():
 				"default":".",
 				"nargs":"?",
 				"help":"name of new game project directory"
-			}),
-			(("-p", "--projects"), {
-				"action":"store_true",
-				"default":False,
-				"help":"create game in default projects folder (currently %s)" % DIR_PROJECTS
 			}),
 		]),
 		"new-prefab": (newprefab, [
@@ -351,11 +355,6 @@ def main():
 				"default":".",
 				"nargs":"?",
 				"help":"name of game project directory"
-			}),
-			(("-p", "--projects"), {
-				"action":"store_true",
-				"default":False,
-				"help":projects_help % DIR_PROJECTS
 			}),
 			(("-e", "--examples"), {
 				"action":"store_true",
