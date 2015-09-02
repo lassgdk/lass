@@ -13,7 +13,7 @@ local SimpleRigidbody = class.define(lass.Component, function(self, arguments)
 	self.base.init(self, arguments)
 end)
 
-local function checkCollisions(gameObject, oldPositions, moveBy)
+local function checkCollisions(gameObject, oldPositions, moveBy, alwaysFailOnCollision)
 
 
 	local directionOverlaps = {}
@@ -76,25 +76,11 @@ local function checkCollisions(gameObject, oldPositions, moveBy)
 				local oldData = collider.collidingWith[other]
 				local oldDataNeg = collider.notCollidingWith[other]
 
-				-- if oldData and oldData.frame == gameObject.gameScene.frame then
-				-- 	r, data = true, collections.copy(oldData)
-				-- elseif oldDataNeg and oldDataNeg.frame == gameObject.gameScene.frame then
-				-- 	r, data = false, nil
-				-- else
-					r, data = collider:isCollidingWith(other, moveBy, false)
-				-- end
+				r, data = collider:isCollidingWith(other, moveBy, false, not alwaysFailOnCollision)
 
 				if r then
-					-- debug.log("collision")
-					-- if we were already colliding with other, check if overlap distance has increased
-					if oldData then
-						-- debug.log(oldData.directionOverlap, data.directionOverlap)
-						-- debug.log(oldData.frame ~= gameObject.gameScene.frame,
-						-- 	oldData.directionOverlap,
-						-- 	data.directionOverlap,
-						-- 	oldData.directionOverlap < data.directionOverlap
-						-- )
-					end
+					-- return false if we were already colliding with this collider,
+					-- and the overlap increased
 					if (
 						oldData and
 						oldData.frame == gameObject.gameScene.frame - 1 and (
@@ -110,20 +96,29 @@ local function checkCollisions(gameObject, oldPositions, moveBy)
 						gameObject:maintainTransform()
 
 						--reset collision data
-						collider.collidingWith[other] = collections.deepcopy(oldData)
-						collider.collidingWith[other].frame = gameObject.gameScene.frame
-						other.collidingWith[collider] = collections.deepcopy(oldData)
-						other.collidingWith[collider].frame = gameObject.gameScene.frame
+						if not alwaysFailOnCollision then
+							collider.collidingWith[other] = collections.deepcopy(oldData)
+							collider.collidingWith[other].frame = gameObject.gameScene.frame
+							other.collidingWith[collider] = collections.deepcopy(oldData)
+							other.collidingWith[collider].frame = gameObject.gameScene.frame
+						end
 
 						return false
 					-- only add colliders that we weren't already colliding with, and have non-zero overlap
-					elseif (not oldData or oldData.frame < gameObject.gameScene.frame) and data.shortestOverlap ~= 0 then
-						collisions[#collisions + 1] = {other, collider}
-						if data.directionOverlap then
-							directionOverlaps[#directionOverlaps + 1] = data.directionOverlap
+					elseif
+						(not oldData or oldData.frame < gameObject.gameScene.frame - 1) and
+						data.shortestOverlap ~= 0
+					then
+						if alwaysFailOnCollision then
+							gameObject.transform.position = oldPositions[gameObject]
+							gameObject:maintainTransform()
+							return false
+						else
+							collisions[#collisions + 1] = {other, collider}
+							if data.directionOverlap then
+								directionOverlaps[#directionOverlaps + 1] = data.directionOverlap
+							end
 						end
-					-- else
-						-- debug.log("overlap:", oldData.frame, data.frame)
 					end
 				end
 			end
@@ -147,7 +142,7 @@ local function gatherPositions(gameObject)
 	return positions
 end
 
-local function move(self, moveBy)
+local function move(self, moveBy, alwaysFailOnCollision)
 
 	local gameObject = self.gameObject
 	local oldPositions = gatherPositions(gameObject)
@@ -165,7 +160,7 @@ local function move(self, moveBy)
 
 	-- check collisions and respond
 
-	local collisions, directionOverlaps = checkCollisions(gameObject, oldPositions, moveBy)
+	local collisions, directionOverlaps = checkCollisions(gameObject, oldPositions, moveBy, alwaysFailOnCollision)
 
 	-- collisions would only be false if the object failed to move
 	-- (for example, if it was already stuck inside an object)
@@ -175,6 +170,8 @@ local function move(self, moveBy)
 	elseif #collisions < 1 then
 		-- debug.log("no collisions")
 		return true
+	elseif alwaysFailOnCollision then
+		return false
 	-- if we have directionOverlap information for all of the collisions,
 	-- we can simply move in the opposite direction of the highest directionOverlap
 	elseif #directionOverlaps == #collisions then
@@ -312,21 +309,22 @@ function SimpleRigidbody:update(dt)
 
 	self.velocity = self.velocity - self.globals.gravity
 
-	-- debug.log("============================")
-	-- debug.log("y velocity is",self.velocity.y)
-----[[
-
+	-- move one axis at a time.
+	-- if x movement fails, try again after y movement
 	local breakAfterY = true
+
+	--this flag must be true the first time we check the x axis,
+	--so that it returns to its original position upon collision
+	local alwaysFailOnCollision = true
 	for i, axis in ipairs({"x", "y", "x"}) do
 
 		local moveBy = geometry.Vector2()
 		moveBy[axis] = self.velocity[axis] * dt
 
-		local r, col = move(self, moveBy)
-
-		-- if axis == "y" then debug.log(r) end
+		local r, col = move(self, moveBy, alwaysFailOnCollision)
 
 		if r == false or col then
+
 			-- if collision happened during horizontal movement, try again after vertical movement
 			if i == 1 then
 				breakAfterY = false
@@ -346,6 +344,8 @@ function SimpleRigidbody:update(dt)
 				break
 			end
 		end
+
+		alwaysFailOnCollision = false
 	end
 --]]
 end

@@ -97,10 +97,14 @@ function Collider:deactivate()
 	self.base.deactivate(self)
 end
 
-function Collider:isCollidingWith(other, direction, noFrameRepeat)
+function Collider:isCollidingWith(other, direction, noFrameRepeat, storeCollisionData)
 
 	local otherType = class.instanceof(other, Collider, geometry.Shape, geometry.Vector2)
 	assert(otherType, "other must be a Collider, Shape, or Vector2")
+
+	if storeCollisionData == nil then
+		storeCollisionData = true
+	end
 
 	local r, d = false, nil
 	if otherType == Collider then
@@ -137,20 +141,23 @@ function Collider:isCollidingWith(other, direction, noFrameRepeat)
 				false, false, direction
 			)
 		end
-		if d then
-			for k, v in pairs(d) do
-				debug.log(k, v)
+		-- if d then
+		-- 	for k, v in pairs(d) do
+		-- 		debug.log(k, v)
+		-- 	end
+		-- end
+
+		if storeCollisionData then
+			if r then
+				d.frame = self.gameScene.frame
+				self.collidingWith[other] = collections.deepcopy(d)
+				other.collidingWith[self] = collections.deepcopy(d)
+			else
+				self.notCollidingWith[other] = {frame = self.gameScene.frame}
+				other.notCollidingWith[self] = {frame = self.gameScene.frame}
 			end
 		end
 
-		if r then
-			d.frame = self.gameScene.frame
-			self.collidingWith[other] = collections.deepcopy(d)
-			other.collidingWith[self] = collections.deepcopy(d)
-		else
-			self.notCollidingWith[other] = {frame = self.gameScene.frame}
-			other.notCollidingWith[self] = {frame = self.gameScene.frame}
-		end
 		if self.collidingWith[other] then
 			debug.log("end",
 				self.collidingWith[other].frame,
