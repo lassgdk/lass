@@ -3,6 +3,8 @@ geometry = require "lass.geometry"
 local geometrytest = {}
 
 geometrytest.tests={
+	"testTransformCreation",
+	"testGlobalRectangle",
 	"testCircleCreation",
 	"testRectangleCreation",
 	"testCircleCreationWithVectors",
@@ -19,6 +21,96 @@ geometrytest.tests={
 	"testIntersectingPolygonAndCircle",
 	"testIntersectingPolygons",
 }
+
+function geometrytest.testTransformCreation()
+
+	--[[incorrect creation attempts]]
+	-- test giving false for each value
+	assert(pcall(geometry.Transform, 5) ~= true, "improperly created a Transform with a number for position")
+	assert(pcall(geometry.Transform, nil, nil, 5) ~= true, "improperly created a Transform with a number for size")
+	assert(pcall(geometry.Transform, "") ~= true, "improperly created a Transform with a string for position")
+	assert(pcall(geometry.Transform, nil, "") ~= true, "improperly created a Transform with a string for rotation")
+	assert(pcall(geometry.Transform, nil, nil, "") ~= true, "improperly created a Transform with a string for size")
+
+	--[[strings incorrectly nested in tables]]
+	-- geometry.Transform({x = ""})
+	-- geometry.Transform({y = ""})
+	-- geometry.Transform({z = ""})
+	-- geometry.Transform(nil, nil, {x = ""})
+	-- geometry.Transform(nil, nil, {y = ""})
+	-- geometry.Transform(nil, nil, {z = ""})
+
+
+	--[[basic creation]]
+	local t = geometry.Transform()
+
+	assert(t.position.x == 0, "transform x position changed from default of 0")
+	assert(t.position.y == 0, "transform y position changed from default of 0")
+	assert(t.position.z == 0, "transform z position changed from default of 0")
+
+	assert(t.rotation == 0, "transform rotation changed from default of 0")
+
+	assert(t.size.x == 1, "transform x size changed from default of 1")
+	assert(t.size.y == 1, "transform y size changed from default of 1")
+	assert(t.size.z == 1, "transform z size changed from default of 1")
+
+
+	--[[testing position]]
+	t = geometry.Transform({})
+	assert(t.position.x == 0, "transform x position changed from default of 0")
+	assert(t.position.y == 0, "transform y position changed from default of 0")
+	assert(t.position.z == 0, "transform z position changed from default of 0")
+
+	-- values in table should be ignored
+	t = geometry.Transform({1, 1, 1})
+	assert(t.position.x == 0, "transform x position changed from default of 0")
+	assert(t.position.y == 0, "transform y position changed from default of 0")
+	assert(t.position.z == 0, "transform z position changed from default of 0")
+
+	t = geometry.Transform({x = 1, y = 1, z = 1})
+	assert(t.position.x == 1, "transform x position changed from given value of 1")
+	assert(t.position.y == 1, "transform y position changed from given value of 1")
+	assert(t.position.z == 1, "transform z position changed from given value of 1")
+
+
+	--[[testing rotation]]
+	t = geometry.Transform(nil, 0)
+	assert(t.rotation == 0, "transform rotation changed from given value of 0")
+	t = geometry.Transform(nil, 1)
+	assert(t.rotation == 1, "transform rotation changed from given value of 1")
+	t = geometry.Transform(nil, 359)
+	assert(t.rotation == 359, "transform rotation changed from given value of 359")
+	t = geometry.Transform(nil, 360)
+	assert(t.rotation == 0, "transform rotation should have changed from 360 to 0")
+	t = geometry.Transform(nil, 361)
+	assert(t.rotation == 1, "transform rotation should have changed from 361 to 1")
+	t = geometry.Transform(nil, -1)
+	assert(t.rotation == 359, "transform rotation should have changed from -1 to 359")
+
+
+	--[[testing size]]
+	t = geometry.Transform(nil, nil, {})
+	assert(t.size.x == 1, "transform x size changed from default of 1")
+	assert(t.size.y == 1, "transform y size changed from default of 1")
+	assert(t.size.z == 1, "transform z size changed from default of 1")
+
+	-- values in table should be ignored
+	t = geometry.Transform(nil, nil, {1, 1, 1})
+	assert(t.size.x == 1, "transform x size changed from default of 1")
+	assert(t.size.y == 1, "transform y size changed from default of 1")
+	assert(t.size.z == 1, "transform z size changed from default of 1")
+
+	t = geometry.Transform(nil, nil, {x = 2, y = 2, z = 2})
+	assert(t.size.x == 2, "transform x size changed from given value of 2")
+	assert(t.size.y == 2, "transform y size changed from given value of 2")
+	assert(t.size.z == 2, "transform z size changed from given value of 2")
+
+end
+
+function geometrytest.testGlobalRectangle()
+
+
+end
 
 function geometrytest.testCircleCreation()
 
@@ -255,12 +347,12 @@ function geometrytest.testVector2Creation()
 	assert(v.x == 0, "Vector2 x value didn't default to 0")
 	assert(v.y == 0, "Vector2 y value didn't default to 0")
 
-	v = geometry.Vector2({["x"] = 1, ["y"] = 1})
+	v = geometry.Vector2({x = 1, y = 1})
 	assert(v.x == 1, "Vector2 x value changed from 1")
 	assert(v.y == 1, "Vector2 y value changed from 1")
 	
 	-- second table should be ignored
-	v = geometry.Vector2({}, {["x"] = 1, ["y"] = 1})
+	v = geometry.Vector2({}, {x = 1, y = 1})
 	assert(v.x == 0, "Vector2 x value didn't default to 0")
 	assert(v.y == 0, "Vector2 y value didn't default to 0")
 
@@ -324,13 +416,13 @@ function geometrytest.testVector3Creation()
 	assert(v.y == 0, "Vector3 y value didn't default to 0")
 	assert(v.z == 0, "Vector3 z value didn't default to 0")
 
-	v = geometry.Vector3({["x"] = 1, ["y"] = 1, ["z"] = 1})
+	v = geometry.Vector3({x = 1, y = 1, z = 1})
 	assert(v.x == 1, "Vector3 x value changed from 1")
 	assert(v.y == 1, "Vector3 y value changed from 1")
 	assert(v.z == 1, "Vector3 z value changed from 1")
 
 	-- second table should be ignored
-	v = geometry.Vector3({}, {["x"] = 1, ["y"] = 1, ["z"] = 1})
+	v = geometry.Vector3({}, {x = 1, y = 1, z = 1})
 	assert(v.x == 0, "Vector3 x value didn't default to 0")
 	assert(v.y == 0, "Vector3 y value didn't default to 0")
 	assert(v.z == 0, "Vector3 z value didn't default to 0")

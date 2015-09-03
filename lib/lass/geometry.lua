@@ -45,8 +45,8 @@ local Vector2 = class.define(function(self, x, y)
 	self.x = x or 0
 	self.y = y or 0
 
-	assert(type(self.x) == "number", "valid arguments are a table or two numbers")
-	assert(type(self.y) == "number", "valid arguments are a table or two numbers")
+	assert(type(self.x) == "number", "valid arguments to Vector2 are a table or two numbers")
+	assert(type(self.y) == "number", "valid arguments to Vector2 are a table or two numbers")
 end)
 
 function Vector2.__add(a, b)
@@ -211,9 +211,9 @@ local Vector3 = class.define(Vector2, function(self, x, y, z)
 
 	self.z = z or 0
 	-- Vector2.init(self, x, y)
-	assert(pcall(Vector2.init, self, x, y) == true, "valid arguments are a table or up to three numbers")
+	assert(pcall(Vector2.init, self, x, y) == true, "valid arguments to a Vector3 are a table or up to three numbers")
 
-	assert(type(self.z) == "number", "valid arguments are a table or up to three numbers")
+	assert(type(self.z) == "number", "valid arguments to a Vector3 are a table or up to three numbers")
 end)
 
 function Vector3.__add(a, b)
@@ -281,12 +281,23 @@ Transform
 
 local Transform = class.define(function(self, position, rotation, size)
 
-	if position and (position.position or position.rotation or position.size) then
+	if type(position) == "table" and (position.position or position.rotation or position.size) then
 		size = position.size
 		rotation = position.rotation
 		position = position.position
 	end
+		
+	if position ~= nil then
+		assert(type(position) == "table", "position must be nil, table, Vector3, or Transform")
+	end
+	if rotation ~= nil then
+		assert(type(rotation) == "number", "rotation must be nil or number")
+	end
+	if size ~= nil then
+		assert(type(size) == "table", "size must be nil, table, or Vector3")
+	end
 
+	-- if Vector3 calls crash, they should be wrapped in a unique error message from Transform
 	self.position = Vector3(position)
 	self.rotation = (rotation or 0) % 360
 	if size then
