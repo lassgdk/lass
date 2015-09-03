@@ -109,19 +109,19 @@ function Collider:isCollidingWith(other, direction, noFrameRepeat, storeCollisio
 	local r, d = false, nil
 	if otherType == Collider then
 
-		if self.collidingWith[other] then
-			debug.log(self.gameObject.name,
-				other.gameObject.name,
-				"")
-			debug.log("start",
-				self.collidingWith[other].frame,
-				self.gameScene.frame,
-				"")
-		end
+		-- if self.collidingWith[other] then
+		-- 	debug.log(self.gameObject.name,
+		-- 		other.gameObject.name,
+		-- 		"")
+		-- 	debug.log("start",
+		-- 		self.collidingWith[other].frame,
+		-- 		self.gameScene.frame,
+		-- 		"")
+		-- end
 
 		if noFrameRepeat then
 			if self.collidingWith[other] and self.collidingWith[other].frame == self.gameScene.frame then
-				debug.log("collide")
+				-- debug.log(other.gameObject.name, "collide")
 				return true, self.collidingWith[other]
 			elseif self.notCollidingWith[other] and self.notCollidingWith[other].frame == self.gameScene.frame then
 				return false
@@ -147,23 +147,35 @@ function Collider:isCollidingWith(other, direction, noFrameRepeat, storeCollisio
 		-- 	end
 		-- end
 
+		if r then
+			d.direction = direction
+		end
+
 		if storeCollisionData then
 			if r then
 				d.frame = self.gameScene.frame
-				self.collidingWith[other] = collections.deepcopy(d)
-				other.collidingWith[self] = collections.deepcopy(d)
+
+				local selfData, otherData = collections.deepcopy(d), collections.deepcopy(d)
+
+				if direction then
+					otherData.direction.x = -otherData.direction.x
+					otherData.direction.y = -otherData.direction.y
+				end
+
+				self.collidingWith[other] = selfData
+				other.collidingWith[self] = otherData
 			else
 				self.notCollidingWith[other] = {frame = self.gameScene.frame}
 				other.notCollidingWith[self] = {frame = self.gameScene.frame}
 			end
 		end
 
-		if self.collidingWith[other] then
-			debug.log("end",
-				self.collidingWith[other].frame,
-				self.gameScene.frame,
-				r)
-		end
+		-- if self.collidingWith[other] then
+		-- 	debug.log("end",
+		-- 		self.collidingWith[other].frame,
+		-- 		self.gameScene.frame,
+		-- 		r)
+		-- end
 	else
 		r, d = geometry.intersecting(self.shape, other, self.gameObject.globalTransform, false, false, direction)
 	end

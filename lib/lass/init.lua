@@ -853,9 +853,13 @@ local function maintainCollisions(self, colliderToCheck)
 		-- check for collisions that just started
 		for other in pairs(others.colliding) do
 			-- collision just started
-			-- debug.log(other.frame)
-			-- if not collider.collidingWith[other] then
-			if collider.collidingWith[other].frame == self.frame then
+			if
+				collider.collidingWith[other].frame == self.frame and
+				(
+					not collider.notCollidingWith[other] or
+					collider.notCollidingWith[other].frame == self.frame - 1
+				)
+			then
 				enter[#enter + 1] = other
 			end
 		end
@@ -863,7 +867,13 @@ local function maintainCollisions(self, colliderToCheck)
 		-- check non-collisions
 		for other in pairs(others.notColliding) do
 			-- collision just ended
-			if collider.notCollidingWith[other].frame == self.frame then
+			if
+				collider.notCollidingWith[other].frame == self.frame and
+				(
+					collider.collidingWith[other] and
+					collider.collidingWith[other].frame == self.frame - 1
+				)
+			then
 				exit[#exit + 1] = other
 			end
 		end
@@ -1005,6 +1015,7 @@ function GameScene:removeGameObject(gameObject, removeDescendants)
 	else
 		return
 	end
+	-- crash()
 
 	gameObject.gameScene = nil
 	self.base.removeChild(self, gameObject, removeDescendants)

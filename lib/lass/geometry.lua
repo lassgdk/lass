@@ -27,14 +27,14 @@ end
 --[[public]]
 
 --[[
-    create a Vector2
-    
-    arguments:
-    x (number, default=0)
-    y (number, default=0)
-    arguments (alternative signature):
-    coords (table, default={x=0, y=0})
-    ]]
+	create a Vector2
+
+	arguments:
+		x (number, default=0)
+		y (number, default=0)
+	arguments (alternative signature):
+		coords (table, default={x=0, y=0})
+]]
 local Vector2 = class.define(function(self, x, y)
 
 	if type(x) == "table" then

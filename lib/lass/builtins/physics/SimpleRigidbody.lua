@@ -79,19 +79,24 @@ local function checkCollisions(gameObject, oldPositions, moveBy, alwaysFailOnCol
 				r, data = collider:isCollidingWith(other, moveBy, false, not alwaysFailOnCollision)
 
 				if r then
+					debug.log(other.gameObject.name, data.shortestOverlap, data.directionOverlap)
 					-- return false if we were already colliding with this collider,
 					-- and the overlap increased
+
 					if (
 						oldData and
 						oldData.frame == gameObject.gameScene.frame - 1 and (
 							(
 								oldData.directionOverlap and
 								data.directionOverlap and
-								oldData.directionOverlap < data.directionOverlap
+								oldData.directionOverlap < data.directionOverlap and
+								oldData.direction:angle() == data.direction:angle()
 							) or
 							oldData.shortestOverlap < data.shortestOverlap
 						)
 					) then
+						debug.log(other.gameObject.name, oldData.shortestOverlap, oldData.directionOverlap, "overlap increased")
+
 						gameObject.transform.position = oldPositions[gameObject]
 						gameObject:maintainTransform()
 
@@ -109,6 +114,8 @@ local function checkCollisions(gameObject, oldPositions, moveBy, alwaysFailOnCol
 						(not oldData or oldData.frame < gameObject.gameScene.frame - 1) and
 						data.shortestOverlap ~= 0
 					then
+						debug.log(other.gameObject.name, "nonzero overlap")
+
 						if alwaysFailOnCollision then
 							gameObject.transform.position = oldPositions[gameObject]
 							gameObject:maintainTransform()
@@ -119,6 +126,8 @@ local function checkCollisions(gameObject, oldPositions, moveBy, alwaysFailOnCol
 								directionOverlaps[#directionOverlaps + 1] = data.directionOverlap
 							end
 						end
+					elseif (not oldData or oldData.frame < gameObject.gameScene.frame - 1) then
+						debug.log(other.gameObject.name, "zero overlap")
 					end
 				end
 			end
@@ -309,25 +318,68 @@ function SimpleRigidbody:update(dt)
 
 	self.velocity = self.velocity - self.globals.gravity
 
-	-- move one axis at a time.
-	-- if x movement fails, try again after y movement
-	local breakAfterY = true
+	-- move one axis at a time. if x movement fails, try again after y movement.
 
-	--this flag must be true the first time we check the x axis,
-	--so that it returns to its original position upon collision
-	local alwaysFailOnCollision = true
-	for i, axis in ipairs({"x", "y", "x"}) do
+	--[[
+	local axesToCheck
+	if self.velocity.x == 0 and self.velocity.y == 0 then
+		return
+	elseif self.velocity.x == 0 then
+		axesToCheck = {"y"}
+	elseif self.velocity.y == 0 then
+		axesToCheck = {"x"}
+	else
+		-- this will become {"x","y","x"} if the first x movement fails
+		axesToCheck = {"x", "y"}
+	end
+
+	-- if y is nonzero, then this flag must be true the first time we check the x axis,
+	-- so that it returns to its original position upon collision
+	local alwaysFailOnCollision = self.velocity.y ~= 0
+
+	for i, axis in ipairs(axesToCheck) do
 
 		local moveBy = geometry.Vector2()
 		moveBy[axis] = self.velocity[axis] * dt
 
 		local r, col = move(self, moveBy, alwaysFailOnCollision)
 
-		if r == false or col then
+		if not r then
+
+			-- if this is the first time we checked x, and we plan to check y,
+			-- check x again after checking y
+			if #axesToCheck == 2 and i == 1 then
+				axesToCheck[3] = "x"
+			else
+				--TODO: set velocity to other rigidbody's velocity instead of 0
+				self.velocity[axis] = 0
+			end
+		end
+
+		alwaysFailOnCollision = false
+	end
+
+	--]]
+
+	----[[
+	local breakAfterY = true
+	local alwaysFailOnCollision = self.velocity.y ~= 0
+	for i, axis in ipairs({"x", "y", "x"}) do
+		debug.log(i, alwaysFailOnCollision)
+
+		local moveBy = geometry.Vector2()
+		moveBy[axis] = self.velocity[axis] * dt
+
+		local r, col = move(self, moveBy, alwaysFailOnCollision)
+
+		if r == false then
 
 			-- if collision happened during horizontal movement, try again after vertical movement
 			if i == 1 then
 				breakAfterY = false
+				if moveBy.x ~= 0 then
+					debug.log("colliding horizontally")
+				end
 			else
 				self.velocity[axis] = 0
 			end
@@ -347,7 +399,7 @@ function SimpleRigidbody:update(dt)
 
 		alwaysFailOnCollision = false
 	end
---]]
+	--]]
 end
 
 return SimpleRigidbody
