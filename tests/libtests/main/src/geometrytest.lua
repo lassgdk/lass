@@ -4,6 +4,7 @@ local geometrytest = {}
 
 geometrytest.tests={
 	"testTransformCreation",
+	"testTransformCreationWithTransform",
 	"testGlobalRectangle",
 	"testCircleCreation",
 	"testRectangleCreation",
@@ -25,47 +26,57 @@ geometrytest.tests={
 function geometrytest.testTransformCreation()
 
 	--[[incorrect creation attempts]]
-	-- test giving false for each value
-	assert(pcall(geometry.Transform, 5) ~= true, "improperly created a Transform with a number for position")
-	assert(pcall(geometry.Transform, nil, nil, 5) ~= true, "improperly created a Transform with a number for size")
-	assert(pcall(geometry.Transform, "") ~= true, "improperly created a Transform with a string for position")
-	assert(pcall(geometry.Transform, nil, "") ~= true, "improperly created a Transform with a string for rotation")
-	assert(pcall(geometry.Transform, nil, nil, "") ~= true, "improperly created a Transform with a string for size")
+	assert(pcall(geometry.Transform, 5) ~= true, "improperly created a transform with a number for position")
+	assert(pcall(geometry.Transform, nil, nil, 5) ~= true, "improperly created a transform with a number for size")
+
+	assert(pcall(geometry.Transform, "") ~= true, "improperly created a transform with a string for position")
+	assert(pcall(geometry.Transform, nil, "") ~= true, "improperly created a transform with a string for rotation")
+	assert(pcall(geometry.Transform, nil, nil, "") ~= true, "improperly created a transform with a string for size")
+
+	assert(pcall(geometry.Transform, false) ~= true, "improperly created a transform with false for position")
+	assert(pcall(geometry.Transform, nil, false) ~= true, "improperly created a transform with false for rotation")
+	assert(pcall(geometry.Transform, nil, nil, false) ~= true, "improperly created a transform with false for size")
+
+	assert(pcall(geometry.Transform, nil, math.huge) ~= true, "improperly allowed infinity for rotation")
+	assert(pcall(geometry.Transform, nil, -math.huge) ~= true, "improperly allowed negative infinity for rotation")
+	assert(pcall(geometry.Transform, nil, math.huge / math.huge) ~= true, "improperly allowed NaN for rotation")
+
 
 	--[[strings incorrectly nested in tables]]
-	-- geometry.Transform({x = ""})
-	-- geometry.Transform({y = ""})
-	-- geometry.Transform({z = ""})
-	-- geometry.Transform(nil, nil, {x = ""})
-	-- geometry.Transform(nil, nil, {y = ""})
-	-- geometry.Transform(nil, nil, {z = ""})
+	assert(pcall(geometry.Transform, {x = ""}) ~= true, "improperly created a transform with a string for position.x")
+	assert(pcall(geometry.Transform, {y = ""}) ~= true, "improperly created a transform with a string for position.y")
+	assert(pcall(geometry.Transform, {z = ""}) ~= true, "improperly created a transform with a string for position.z")
+
+	assert(pcall(geometry.Transform, nil, nil, {x = ""}) ~= true, "improperly created a transform with a string for size.x")
+	assert(pcall(geometry.Transform, nil, nil, {y = ""}) ~= true, "improperly created a transform with a string for size.y")
+	assert(pcall(geometry.Transform, nil, nil, {z = ""}) ~= true, "improperly created a transform with a string for size.z")
 
 
 	--[[basic creation]]
 	local t = geometry.Transform()
 
-	assert(t.position.x == 0, "transform x position changed from default of 0")
-	assert(t.position.y == 0, "transform y position changed from default of 0")
-	assert(t.position.z == 0, "transform z position changed from default of 0")
+	assert(t.position.x == 0, "transform x position didn't default to 0")
+	assert(t.position.y == 0, "transform y position didn't default to 0")
+	assert(t.position.z == 0, "transform z position didn't default to 0")
 
-	assert(t.rotation == 0, "transform rotation changed from default of 0")
+	assert(t.rotation == 0, "transform rotation didn't default to 0")
 
-	assert(t.size.x == 1, "transform x size changed from default of 1")
-	assert(t.size.y == 1, "transform y size changed from default of 1")
-	assert(t.size.z == 1, "transform z size changed from default of 1")
+	assert(t.size.x == 1, "transform x size didn't default to 1")
+	assert(t.size.y == 1, "transform y size didn't default to 1")
+	assert(t.size.z == 1, "transform z size didn't default to 1")
 
 
 	--[[testing position]]
 	t = geometry.Transform({})
-	assert(t.position.x == 0, "transform x position changed from default of 0")
-	assert(t.position.y == 0, "transform y position changed from default of 0")
-	assert(t.position.z == 0, "transform z position changed from default of 0")
+	assert(t.position.x == 0, "transform x position didn't default to 0")
+	assert(t.position.y == 0, "transform y position didn't default to 0")
+	assert(t.position.z == 0, "transform z position didn't default to 0")
 
 	-- values in table should be ignored
 	t = geometry.Transform({1, 1, 1})
-	assert(t.position.x == 0, "transform x position changed from default of 0")
-	assert(t.position.y == 0, "transform y position changed from default of 0")
-	assert(t.position.z == 0, "transform z position changed from default of 0")
+	assert(t.position.x == 0, "transform x position didn't default to 0")
+	assert(t.position.y == 0, "transform y position didn't default to 0")
+	assert(t.position.z == 0, "transform z position didn't default to 0")
 
 	t = geometry.Transform({x = 1, y = 1, z = 1})
 	assert(t.position.x == 1, "transform x position changed from given value of 1")
@@ -90,20 +101,112 @@ function geometrytest.testTransformCreation()
 
 	--[[testing size]]
 	t = geometry.Transform(nil, nil, {})
-	assert(t.size.x == 1, "transform x size changed from default of 1")
-	assert(t.size.y == 1, "transform y size changed from default of 1")
-	assert(t.size.z == 1, "transform z size changed from default of 1")
+	assert(t.size.x == 1, "transform x size didn't default to 1")
+	assert(t.size.y == 1, "transform y size didn't default to 1")
+	assert(t.size.z == 1, "transform z size didn't default to 1")
 
 	-- values in table should be ignored
 	t = geometry.Transform(nil, nil, {1, 1, 1})
-	assert(t.size.x == 1, "transform x size changed from default of 1")
-	assert(t.size.y == 1, "transform y size changed from default of 1")
-	assert(t.size.z == 1, "transform z size changed from default of 1")
+	assert(t.size.x == 1, "transform x size didn't default to 1")
+	assert(t.size.y == 1, "transform y size didn't default to 1")
+	assert(t.size.z == 1, "transform z size didn't default to 1")
 
 	t = geometry.Transform(nil, nil, {x = 2, y = 2, z = 2})
 	assert(t.size.x == 2, "transform x size changed from given value of 2")
 	assert(t.size.y == 2, "transform y size changed from given value of 2")
 	assert(t.size.z == 2, "transform z size changed from given value of 2")
+
+	t = geometry.Transform(nil, nil, {x = 2})
+	assert(t.size.x == 2, "transform x size changed from given value of 2")
+	assert(t.size.y == 1, "transform y size didn't default to 1")
+	assert(t.size.z == 1, "transform z size didn't default to 1")
+
+	t = geometry.Transform(nil, nil, {y = 2})
+	assert(t.size.x == 1, "transform x size didn't default to 1")
+	assert(t.size.y == 2, "transform y size changed from given value of 2")
+	assert(t.size.z == 1, "transform z size didn't default to 1")
+
+	t = geometry.Transform(nil, nil, {z = 2})
+	assert(t.size.x == 1, "transform x size didn't default to 1")
+	assert(t.size.y == 1, "transform y size didn't default to 1")
+	assert(t.size.z == 2, "transform z size changed from given value of 2")
+
+end
+
+function geometrytest.testTransformCreationWithTransform()
+
+	--[[incorrect creation attempts]]
+
+	local t1 = geometry.Transform()
+	t1.position.x = ""
+	assert(pcall(geometry.Transform, t1) ~= true, "improperly made transform with transform with incorrect values")
+	t1 = geometry.Transform()
+	t1.position.y = ""
+	assert(pcall(geometry.Transform, t1) ~= true, "improperly made transform with transform with incorrect values")
+	t1 = geometry.Transform()
+	t1.position.z = ""
+	assert(pcall(geometry.Transform, t1) ~= true, "improperly made transform with transform with incorrect values")
+
+	t1 = geometry.Transform()
+	t1.rotation = ""
+	assert(pcall(geometry.Transform, t1) ~= true, "improperly made transform with transform with incorrect values")
+
+	t1 = geometry.Transform()
+	t1.size.x = ""
+	assert(pcall(geometry.Transform, t1) ~= true, "improperly made transform with transform with incorrect values")
+	t1 = geometry.Transform()
+	t1.size.y = ""
+	assert(pcall(geometry.Transform, t1) ~= true, "improperly made transform with transform with incorrect values")
+	t1 = geometry.Transform()
+	t1.size.z = ""
+	assert(pcall(geometry.Transform, t1) ~= true, "improperly made transform with transform with incorrect values")
+
+
+	--[[basic creation]]
+	t1 = geometry.Transform()
+	local t2 = geometry.Transform(t1)
+
+	assert(t2.position.x == 0, "transform x position didn't default to 0")
+	assert(t2.position.y == 0, "transform y position didn't default to 0")
+	assert(t2.position.z == 0, "transform z position didn't default to 0")
+
+	assert(t2.rotation == 0, "transform rotation didn't default to 0")
+
+	assert(t2.size.x == 1, "transform x size didn't default to 1")
+	assert(t2.size.y == 1, "transform y size didn't default to 1")
+	assert(t2.size.z == 1, "transform z size didn't default to 1")
+
+
+	--[[basic unpacking]]
+	t1 = geometry.Transform(geometry.Vector3(1, 1, 1), 1, geometry.Vector3(2, 2, 2))
+	t2 = geometry.Transform(t1)
+
+	assert(t2.position.x == 1, "transform x position changed from given value of 1")
+	assert(t2.position.y == 1, "transform y position changed from given value of 1")
+	assert(t2.position.y == 1, "transform y position changed from given value of 1")
+
+	assert(t2.rotation == 1, "transform rotation changed from given value of 1")
+
+	assert(t2.size.x == 2, "transform x size changed from given value of 2")
+	assert(t2.size.y == 2, "transform y size changed from given value of 2")
+	assert(t2.size.y == 2, "transform y size changed from given value of 2")
+
+
+	--[[alt signature reliance]]
+
+	t1 = geometry.Transform(nil, 1, geometry.Vector3(2, 2, 2))
+	-- rotation and size should be overwritten by t1.rotation and .size
+	t2 = geometry.Transform(t1, 5, geometry.Vector3(5, 5, 5))
+	assert(t2.rotation == 1, "rotation wasn't overwritten by given transform")
+	assert(t2.size.x == 2, "x size wasn't overwritten by given transform")
+	assert(t2.size.y == 2, "y size wasn't overwritten by given transform")
+	assert(t2.size.z == 2, "z size wasn't overwritten by given transform")
+
+	t1 = geometry.Transform(nil, 1, geometry.Vector3(2, 2, 2))
+	-- this call shouldn't fail even though the given rotation is improper
+	geometry.Transform(t1, "")
+	-- ditto for size
+	geometry.Transform(t1, nil, "")
 
 end
 
@@ -118,6 +221,7 @@ function geometrytest.testCircleCreation()
 	assert(pcall(geometrytest.Circle) ~= true, "circle incorrectly created with no arguments")
 	assert(pcall(geometrytest.Circle, -1) ~= true, "circle incorrectly created with -1 radius")
 	assert(pcall(geometrytest.Circle, "1") ~= true, "circle incorrectly created with a string for radius")
+	assert(pcall(geometrytest.Circle, false) ~= true, "circle incorrectly created with false for radius")
 
 	--[[verify boundary conditions for size]]
 	local c = geometry.Circle(0)
@@ -172,11 +276,15 @@ function geometrytest.testRectangleCreation()
 	assert(pcall(geometry.Rectangle, "1", 1) ~= true, "rectangle incorrectly created with a stright for width")
 	assert(pcall(geometry.Rectangle, 1, "1") ~= true, "rectangle incorrectly created with a stright for height")
 
+	assert(pcall(geometry.Rectangle, false, 1) ~= true, "rectangle incorrectly created with false for width")
+	assert(pcall(geometry.Rectangle, 1, false) ~= true, "rectangle incorrectly created with false for height")
+
 
 	--[[verify boundary conditions for size]]
 	local r = geometry.Rectangle(0, 0)
 	assert(r.width == 0, "rectangle width of 0 should be possible")
 	assert(r.height == 0, "rectangle height of 0 should be possible")
+
 
 	--[[basic creation]]
 	r = geometry.Rectangle(1, 1)
@@ -306,8 +414,11 @@ end
 function geometrytest.testVector2Creation()
 
 	--[[incorrect creation attempts]]
-	assert(pcall(geometry.Vector2, "0") ~= true, "incorrectly created Vector2 with a string for x")
-	assert(pcall(geometry.Vector2, 0, "0") ~= true, "incorrectly created Vector2 with a string for y")
+	assert(pcall(geometry.Vector2, "") ~= true, "incorrectly created Vector2 with a string for x")
+	assert(pcall(geometry.Vector2, 0, "") ~= true, "incorrectly created Vector2 with a string for y")
+
+	assert(pcall(geometry.Vector2, false) ~= true, "incorrectly created Vector2 with false for x")
+	assert(pcall(geometry.Vector2, 0, false) ~= true, "incorrectly created Vector2 with false for y")
 
 
 	--[[purely default creation]]
@@ -332,6 +443,8 @@ function geometrytest.testVector2Creation()
 	assert(v.y == 1, "Vector2 y value changed from 1")
 	assert(v.z == nil, "Vector2 shouldn't have a z value")
 
+
+	--[[creation with infinity]]
 	v = geometry.Vector2(math.huge, math.huge)
 	assert(v.x == math.huge, "Vector2 x value changed from math.huge")
 	assert(v.y == math.huge, "Vector2 y value changed from math.huge")
@@ -370,9 +483,13 @@ end
 function geometrytest.testVector3Creation()
 
 	--[[incorrect creation attempts]]
-	assert(pcall(geometry.Vector3, "0") ~= true, "incorrectly created Vector3 with a string for x")
-	assert(pcall(geometry.Vector3, 0, "0") ~= true, "incorrectly created Vector3 with a string for y")
-	assert(pcall(geometry.Vector3, 0, 0, "0") ~= true, "incorrectly created Vector3 with a string for z")
+	assert(pcall(geometry.Vector3, "") ~= true, "incorrectly created Vector3 with a string for x")
+	assert(pcall(geometry.Vector3, 0, "") ~= true, "incorrectly created Vector3 with a string for y")
+	assert(pcall(geometry.Vector3, 0, 0, "") ~= true, "incorrectly created Vector3 with a string for z")
+
+	assert(pcall(geometry.Vector3, false) ~= true, "incorrectly created Vector3 with false for x")
+	assert(pcall(geometry.Vector3, 0, false) ~= true, "incorrectly created Vector3 with false for y")
+	assert(pcall(geometry.Vector3, 0, 0, false) ~= true, "incorrectly created Vector3 with false for z")
 
 
 	--[[purely default creation]]
@@ -381,6 +498,7 @@ function geometrytest.testVector3Creation()
 	assert(v.y == 0, "Vector3 y value didn't default to 0")
 	assert(v.z == 0, "Vector3 z value didn't default to 0")
 	assert(v:instanceof(geometry.Vector3), "Vector3 should be valid as a Vector3")
+
 
 	--[[creation with just numbers]]
 	v = geometry.Vector3(1)
@@ -397,7 +515,9 @@ function geometrytest.testVector3Creation()
 	assert(v.x == 1, "Vector3 x value changed from 1")
 	assert(v.y == 1, "Vector3 y value changed from 1")
 	assert(v.z == 1, "Vector3 z value changed from 1")
+	
 
+	--[[creation with infinity]]
 	v = geometry.Vector3(math.huge, math.huge, math.huge)
 	assert(v.x == math.huge, "Vector3 x value changed from math.huge")
 	assert(v.y == math.huge, "Vector3 y value changed from math.huge")

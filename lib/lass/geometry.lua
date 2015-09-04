@@ -42,11 +42,15 @@ local Vector2 = class.define(function(self, x, y)
 		x = x.x
 	end
 
+	if x ~= nil then
+		assert(type(x) == "number", "valid arguments to Vector2 are a table or two numbers")
+	end
+	if y ~= nil then
+		assert(type(y) == "number", "valid arguments to Vector2 are a table or two numbers")
+	end
+
 	self.x = x or 0
 	self.y = y or 0
-
-	assert(type(self.x) == "number", "valid arguments to Vector2 are a table or two numbers")
-	assert(type(self.y) == "number", "valid arguments to Vector2 are a table or two numbers")
 end)
 
 function Vector2.__add(a, b)
@@ -209,11 +213,14 @@ local Vector3 = class.define(Vector2, function(self, x, y, z)
 		z = x.z
 	end
 
+	if z ~= nil then
+		assert(type(z) == "number", "valid arguments to a Vector3 are a table or up to three numbers")
+	end
+
 	self.z = z or 0
 	-- Vector2.init(self, x, y)
 	assert(pcall(Vector2.init, self, x, y) == true, "valid arguments to a Vector3 are a table or up to three numbers")
 
-	assert(type(self.z) == "number", "valid arguments to a Vector3 are a table or up to three numbers")
 end)
 
 function Vector3.__add(a, b)
@@ -275,9 +282,7 @@ function Vector3:rotate(angle, useRadians)
 	return vec
 end
 
---[[
-Transform
-]]
+--[[Transform]]
 
 local Transform = class.define(function(self, position, rotation, size)
 
@@ -292,19 +297,32 @@ local Transform = class.define(function(self, position, rotation, size)
 	end
 	if rotation ~= nil then
 		assert(type(rotation) == "number", "rotation must be nil or number")
+		assert(rotation ~= math.huge, "rotation cannot be infinity")
+		assert(rotation ~= -math.huge, "rotation cannot be negative infinity")
+		assert(rotation == rotation, "rotation cannot be NaN")
 	end
 	if size ~= nil then
 		assert(type(size) == "table", "size must be nil, table, or Vector3")
 	end
 
 	-- if Vector3 calls crash, they should be wrapped in a unique error message from Transform
-	self.position = Vector3(position)
+	-- self.position = Vector3(position)
+	safe, self.position = pcall(Vector3, position)
+	if not safe then
+		error("the x, y, and z values of position must be numbers")
+	end
+
 	self.rotation = (rotation or 0) % 360
+
 	if size then
 		size.x = size.x or 1
 		size.y = size.y or 1
 		size.z = size.z or 1
-		self.size = Vector3(size)
+		-- self.size = Vector3(size)
+		safe, self.size = pcall(Vector3, size)
+		if not safe then
+			error("the x, y, and z values of size must be numbers")
+		end
 	else
 		self.size = Vector3(1,1,1)
 	end
