@@ -11,12 +11,17 @@ local function callable(v)
 end
 
 function class.define(base, init)
+
     local c = {}     -- a new class instance
+    c.__protected = {}
+    c.__get = {}
+    c.__set = {}
+
     if not init and type(base) == 'function' then
         init = base
         base = nil
     elseif type(base) == 'table' then
-     -- our new class is a shallow copy of the base class!
+        -- copy protected variables from the superclass
         for k,v in pairs(base) do
             -- protected base class variables are copied instead of referenced
             if base.__protected[k] then
@@ -29,15 +34,38 @@ function class.define(base, init)
                 if m then
                     setmetatable(c[k], m)
                 end
-            -- else
-                -- c[k] = v
+            elseif k == "__protected" or k == "__get" or k == "__set" then
+                for k2,v2 in pairs(v) do
+                    c[k][k2] = v2
+                end
             end
         end
         c.base = base
     end
+
+    -- when overriding __index or __newindex, make sure that the new function calls
+    -- the original __index or __newindex function.
+    -- otherwise, objects won't be able to find class methods, and getters/setters
+    -- won't work
+
     -- the class will be the metatable for all its objects,
     -- and they will look up their methods in it.
-    c.__index = c
+    -- this also enables getters
+    c.__index = function(self, key)
+        if c.__get[key] then
+            return c.__get[key](self)
+        end
+        return c[key]
+    end
+
+    -- enable setters
+    c.__newindex = function(self, key, value)
+        if c.__set[key] then
+            c.__set[key](self, value)
+        else
+            rawset(self, key, value)
+        end
+    end
 
     --if there's still no init, make one
     if not init then
@@ -117,14 +145,14 @@ function class.define(base, init)
 
     setmetatable(c, mt)
 
-    if c.__protected then
-        local protected = {}
-        for k,v in pairs(c.__protected) do
-            c.__protected[k] = v
-        end
-    else
-        c.__protected = {}
-    end
+    -- if c.__protected then
+    --     local protected = {}
+    --     for k,v in pairs(c.base.__protected) do
+    --         c.__protected[k] = v
+    --     end
+    -- else
+    --     c.__protected = {}
+    -- end
 
     return c
 end

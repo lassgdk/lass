@@ -50,9 +50,12 @@ EventResponseTable
 local EventResponseTable = class.define()
 
 function EventResponseTable:__index(key)
-
 	--this allows us to index myEventTable.myUndefinedKey.
 	--required for `MyComponent.events.myEvent.play` syntax
+
+	--NOTE: this changes the internal mechanisms of class instantiation.
+	--normally, Class.__index == Class
+
 	self[key] = {}
 	rawset(self, key, {})
 	return self[key]
@@ -203,6 +206,7 @@ function GameEntity:removeChild(child, removeDescendants)
 		child = self.children[index]
 	else
 		index = collections.index(self.children, child)
+		debug.log(index)
 	end
 
 	if index then
@@ -912,6 +916,8 @@ local GameScene = class.define(GameEntity, function(self, transform)
 	self.globals.canvases = {}
 	self.globals.cameras = {}
 	self.globals.events = {}
+	self.globals.physicsWorld = love.physics.newWorld(0, 0, true)
+
 	GameEntity.init(self, transform)
 end)
 
@@ -978,6 +984,13 @@ function GameScene:applySettings()
 
 	--physics
 	self.globals.gravity = geometry.Vector2(self.settings.physics.gravity)
+	self.globals.pixelsPerMeter = self.settings.physics.pixelsPerMeter
+	love.physics.setMeter(self.settings.physics.pixelsPerMeter)
+
+	local grav = geometry.Vector2(self.globals.gravity)
+	grav.x = grav.x / self.settings.physics.pixelsPerMeter
+	grav.y = grav.y / self.settings.physics.pixelsPerMeter
+	self.globals.physicsWorld:setGravity(grav.x, grav.y)
 end
 
 function GameScene:addGameObject(gameObject)
@@ -1015,10 +1028,9 @@ function GameScene:removeGameObject(gameObject, removeDescendants)
 	else
 		return
 	end
-	-- crash()
 
 	gameObject.gameScene = nil
-	self.base.removeChild(self, gameObject, removeDescendants)
+	self.base.removeChild(self, child, removeDescendants)
 
 	if removeDescendants == true then
 		for i, child in ipairs(gameObject.children) do
@@ -1036,11 +1048,12 @@ function GameScene:update(dt)
 	--update all children (top-level game objects) of the scene
 
 	if not self.paused then
-		debug.log("============================")
+		-- debug.log("============================")
 		maintainTransform(self)
-		debug.log("updating SimpleRigidbody")
+		-- debug.log("updating SimpleRigidbody")
 		self.base.update(self, dt * self.timeScale, self.frame)
-		debug.log("maintaining Collisions")
+		self.globals.physicsWorld:update(dt)
+		-- debug.log("maintaining Collisions")
 		maintainCollisions(self)
 
 		self.frame = self.frame + 1

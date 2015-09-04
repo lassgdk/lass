@@ -12,6 +12,7 @@ return {
     gravity = {
       x = 0,
       y = 9.80665 * 2
-    }
+    },
+    pixelsPerMeter = 50
   }
 }
