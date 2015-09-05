@@ -5,7 +5,7 @@ local Collider = require("lass.builtins.physics.Collider")
 
 local Rigidbody = class.define(lass.Component, function(self, arguments)
 
-	arguments._velocity = geometry.Vector2(arguments.velocity)
+	arguments.velocity = geometry.Vector2(arguments.velocity)
 	arguments.body = love.physics.newBody(self.globals.physicsWorld, 0, 0, "dynamic")
 
 	self.base.init(self, arguments)
@@ -78,12 +78,13 @@ end
 
 function Rigidbody.__get.velocity(self)
 
-	return self.body:getLinearVelocity()
+	local x, y = self.body:getLinearVelocity()
+	return geometry.Vector2(x, y) * self.globals.pixelsPerMeter
 end
 
-function Rigidbody.__set.velocity(self, value)
+function Rigidbody.__set.velocity(self, ...)
 
-	self.body:setLinearVelocity(value)
+	self.body:setLinearVelocity(geometry.Vector2(...) / self.globals.pixels)
 end
 
 function Rigidbody:awake()
@@ -100,7 +101,6 @@ function Rigidbody:awake()
 		love.physics.newFixture(self.body, shapeToPhysicsShape(self, collider.shape), 1)
 	end
 
-	self.body:setVelocity(self.velocity.x, self.velocity.y)
 end
 
 function Rigidbody:update()

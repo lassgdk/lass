@@ -84,6 +84,25 @@ function Vector2.__mul(a, b)
 	return Vector2(vector.x * scalar, vector.y * scalar)
 end
 
+function Vector2.__div(a, b)
+
+	local scalar = nil
+	local vector = nil
+
+	if type(a) == "table" then
+		vector = a
+		scalar = b
+	else
+		scalar = a
+		vector = b
+	end
+
+	assertOperandsHaveXandY(vector, nil, "nil")
+	assert(type(scalar) == "number", "cannot divide vector and " .. type(scalar))
+
+	return Vector2(vector.x / scalar, vector.y / scalar)
+end
+
 function Vector2:__unm()
 	return Vector2(-self.x, -self.y)
 end
@@ -239,13 +258,40 @@ end
 
 function Vector3.__mul(a,b)
 
-	if a.class == Vector3 then
-		self = a
+	local scalar = nil
+	local vector = nil
+
+	if type(a) == "table" then
+		vector = a
+		scalar = b
 	else
-		self = b
+		scalar = a
+		vector = b
 	end
 
-	return self.base.__mul(a,b)
+	assertOperandsHaveXandY(vector, nil, "nil")
+	assert(type(scalar) == "number", "cannot multiply vector and " .. type(scalar))
+
+	return Vector2(vector.x * scalar, vector.y * scalar, vector.z * scalar)
+end
+
+function Vector3.__div(a,b)
+
+	local scalar = nil
+	local vector = nil
+
+	if type(a) == "table" then
+		vector = a
+		scalar = b
+	else
+		scalar = a
+		vector = b
+	end
+
+	assertOperandsHaveXandY(vector, nil, "nil")
+	assert(type(scalar) == "number", "cannot multiply vector and " .. type(scalar))
+
+	return Vector2(vector.x / scalar, vector.y / scalar, vector.z / scalar)
 end
 
 function Vector3:__unm()
