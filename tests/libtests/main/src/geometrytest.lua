@@ -5,8 +5,10 @@ local geometrytest = {}
 geometrytest.tests={
 	"testVector2Add",
 	"testVector3Add",
+	"testVector2And3Add",
 	"testVector2Subtract",
 	"testVector3Subtract",
+	"testVector2And3Subtract",
 	"testTransformCreation",
 	"testTransformCreationWithTransform",
 	"testGlobalRectangle", -- placeholder
@@ -88,7 +90,6 @@ function geometrytest.testVector2Add()
 	v3 = v1 + v2
 	assert(v3.x ~= v3.x, "math.huge + -math.huge didn't become NaN")
 	assert(v3.y ~= v3.y, "math.huge + -math.huge didn't become NaN")
-
 end
 
 function geometrytest.testVector3Add()
@@ -160,6 +161,44 @@ function geometrytest.testVector3Add()
 	assert(v3.x ~= v3.x, "math.huge + -math.huge didn't become NaN")
 	assert(v3.y ~= v3.y, "math.huge + -math.huge didn't become NaN")
 	assert(v3.z ~= v3.z, "math.huge + -math.huge didn't become NaN")
+end
+
+function geometrytest.testVector2And3Add()
+	-- test vector addition that crosses vector 2 and 3
+
+	--[[basic usage]]
+	v2 = geometry.Vector2()
+	v3 = geometry.Vector3()
+
+	r = v2 + v3
+	assert(r:instanceof(geometry.Vector2), "Vector2 addition didn't return Vector2")
+	assert(r:instanceof(geometry.Vector3) == false, "Vector2 addition shouldn't return Vector3")
+	assert(r.x == 0, "0 + 0 didn't equal 0")
+	assert(r.y == 0, "0 + 0 didn't equal 0")
+	assert(r.z == nil, "Vector2 shouldn't have a z value")
+
+	r = v3 + v2
+	assert(r:instanceof(geometry.Vector2), "Vector3 should be valid as Vector2")
+	assert(r:instanceof(geometry.Vector3), "Vector2 addition didn't return Vector3")
+	assert(r.x == 0, "0 + 0 didn't equal 0")
+	assert(r.y == 0, "0 + 0 didn't equal 0")
+	assert(r.z == 0, "0 + 0 didn't equal 0")
+
+
+	--[[genuine usage]]
+	-- uses a spread of values to guaruntee unique results
+	v2 = geometry.Vector2(1, 5)
+	v3 = geometry.Vector3(10, 20, 30)
+
+	r = v2 + v3
+	assert(r.x == 11, "1 + 10 didn't equal 11")
+	assert(r.y == 25, "5 + 20 didn't equal 25")
+	assert(r.z == nil, "Vector2 shouldn't have a z value")
+
+	r = v3 + v2
+	assert(r.x == 11, "10 + 1 didn't equal 11")
+	assert(r.y == 25, "20 + 5 didn't equal 25")
+	assert(r.z == 30, "30 + 0 didn't equal 30")
 
 end
 
@@ -229,8 +268,6 @@ function geometrytest.testVector2Subtract()
 	v3 = v2 - v1
 	assert(v3.x == -math.huge, "-math.huge - math.huge didn't equal -math.huge")
 	assert(v3.y == -math.huge, "-math.huge - math.huge didn't equal -math.huge")
-
-
 end
 
 function geometrytest.testVector3Subtract()
@@ -307,7 +344,44 @@ function geometrytest.testVector3Subtract()
 	assert(v3.x == -math.huge, "-math.huge - math.huge didn't equal math.huge")
 	assert(v3.y == -math.huge, "-math.huge - math.huge didn't equal math.huge")
 	assert(v3.z == -math.huge, "-math.huge - math.huge didn't equal math.huge")
+end
 
+function geometrytest.testVector2And3Subtract()
+	-- test vector subtraction that crosses vector 2 and 3
+
+	--[[basic usage]]
+	v2 = geometry.Vector2()
+	v3 = geometry.Vector3()
+
+	r = v2 - v3
+	assert(r:instanceof(geometry.Vector2), "Vector2 addition didn't return Vector2")
+	assert(r:instanceof(geometry.Vector3) == false, "Vector2 addition shouldn't return Vector3")
+	assert(r.x == 0, "0 - 0 didn't equal 0")
+	assert(r.y == 0, "0 - 0 didn't equal 0")
+	assert(r.z == nil, "Vector2 shouldn't have a z value")
+
+	r = v3 - v2
+	assert(r:instanceof(geometry.Vector2), "Vector3 should be valid as Vector2")
+	assert(r:instanceof(geometry.Vector3), "Vector2 addition didn't return Vector3")
+	assert(r.x == 0, "0 - 0 didn't equal 0")
+	assert(r.y == 0, "0 - 0 didn't equal 0")
+	assert(r.z == 0, "0 - 0 didn't equal 0")
+
+
+	--[[genuine usage]]
+	-- uses a spread of values to guaruntee unique results
+	v2 = geometry.Vector2(1, 5)
+	v3 = geometry.Vector3(10, 20, 30)
+
+	r = v2 - v3
+	assert(r.x == -9, "1 - 10 didn't equal -9")
+	assert(r.y == -15, "5 - 20 didn't equal -15")
+	assert(r.z == nil, "Vector2 shouldn't have a z value")
+
+	r = v3 - v2
+	assert(r.x == 9, "10 - 1 didn't equal 9")
+	assert(r.y == 15, "20 - 5 didn't equal 15")
+	assert(r.z == 30, "30 - 0 didn't equal 30")
 
 end
 
@@ -418,7 +492,6 @@ function geometrytest.testTransformCreation()
 	assert(t.size.x == 1, "transform x size didn't default to 1")
 	assert(t.size.y == 1, "transform y size didn't default to 1")
 	assert(t.size.z == 2, "transform z size changed from given value of 2")
-
 end
 
 function geometrytest.testTransformCreationWithTransform()
