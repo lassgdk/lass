@@ -4,11 +4,12 @@ local geometrytest = {}
 
 geometrytest.tests={
 	"testVector2Add",
+	"testVector3Add",
 	"testVector2Subtract",
-	-- "testVector3AddAndSubtract",
+	-- "testVector3Subtract",
 	"testTransformCreation",
 	"testTransformCreationWithTransform",
-	"testGlobalRectangle", -- empty for now
+	"testGlobalRectangle", -- placeholder
 	"testCircleCreation",
 	"testRectangleCreation",
 	"testVector2Creation",
@@ -43,25 +44,15 @@ function geometrytest.testVector2Add()
 
 	--[[basic usage]]
 	v1 = geometry.Vector2()
-	local v2 = geometry.Vector2()
-
 	v3 = v1 + v1
 	assert(v3.x == 0, "0 + 0 didn't equal 0")
 	assert(v3.y == 0, "0 + 0 didn't equal 0")
 
-	v3 = v1 + v2
-	assert(v3.x == 0, "0 + 0 didn't equal 0")
-	assert(v3.y == 0, "0 + 0 didn't equal 0")
 
-	v3 = v2 + v1
-	assert(v3.x == 0, "0 + 0 didn't equal 0")
-	assert(v3.y == 0, "0 + 0 didn't equal 0")
-
-
-	--[[genuine usage]]
+	--[[operator order]]
 	-- uses a spread of different numbers to ensure unique results for each test
 	v1 = geometry.Vector2(1, 5)
-	v2 = geometry.Vector2(2, 10)
+	local v2 = geometry.Vector2(2, 10)
 
 	v3 = v1 + v1
 	assert(v3.x == 2, "1 + 1 didn't become 2")
@@ -72,38 +63,22 @@ function geometrytest.testVector2Add()
 	assert(v3.y == 15, "5 + 10 didn't become 15")
 
 	v3 = v2 + v1
-	assert(v3.x == 3, "1 + 2 didn't become 3")
-	assert(v3.y == 15, "5 + 10 didn't become 15")
+	assert(v3.x == 3, "2 + 1 didn't become 3")
+	assert(v3.y == 15, "10 + 5 didn't become 15")
 
 
 	--[[usage with infinite numbers]]
 	v1 = geometry.Vector2(math.huge, math.huge)
 	v2 = geometry.Vector2(math.huge, math.huge)
 
-	v3 = v1 + v1
-	assert(v3.x == math.huge, "math.huge + math.huge didn't equal math.huge")
-	assert(v3.y == math.huge, "math.huge + math.huge didn't equal math.huge")
-
 	v3 = v1 + v2
-	assert(v3.x == math.huge, "math.huge + math.huge didn't equal math.huge")
-	assert(v3.y == math.huge, "math.huge + math.huge didn't equal math.huge")
-
-	v3 = v2 + v1
 	assert(v3.x == math.huge, "math.huge + math.huge didn't equal math.huge")
 	assert(v3.y == math.huge, "math.huge + math.huge didn't equal math.huge")
 
 	v1 = geometry.Vector2(-math.huge, -math.huge)
 	v2 = geometry.Vector2(-math.huge, -math.huge)
 
-	v3 = v1 + v1
-	assert(v3.x == -math.huge, "-math.huge + -math.huge didn't equal -math.huge")
-	assert(v3.y == -math.huge, "-math.huge + -math.huge didn't equal -math.huge")
-
 	v3 = v1 + v2
-	assert(v3.x == -math.huge, "-math.huge + -math.huge didn't equal -math.huge")
-	assert(v3.y == -math.huge, "-math.huge + -math.huge didn't equal -math.huge")
-
-	v3 = v2 + v1
 	assert(v3.x == -math.huge, "-math.huge + -math.huge didn't equal -math.huge")
 	assert(v3.y == -math.huge, "-math.huge + -math.huge didn't equal -math.huge")
 
@@ -114,14 +89,82 @@ function geometrytest.testVector2Add()
 	assert(v3.x ~= v3.x, "math.huge + -math.huge didn't become NaN")
 	assert(v3.y ~= v3.y, "math.huge + -math.huge didn't become NaN")
 
+end
+
+function geometrytest.testVector3Add()
+	-- assumes the only way to call these functions is using at least one Vector3
+
+	--[[incorrect calls]]
+	local v1 = geometry.Vector3()
+
+	pcall(function() return v1 + 1 end, "Vector3 improperly added with number")
+	pcall(function() return 1 + v1 end, "Vector3 improperly added with number")
+
+	pcall(function() return v1 + "" end, "Vector3 improperly added with string")
+	pcall(function() return "" + v1 end, "Vector3 improperly added with string")
+
+	pcall(function() return v1 + false end, "Vector3 improperly added with false")
+	pcall(function() return false + v1 end, "Vector3 improperly added with false")
+
+
+	--[[basic usage]]
+	v1 = geometry.Vector3()
+	v3 = v1 + v1
+	assert(v3.x == 0, "0 + 0 didn't equal 0")
+	assert(v3.y == 0, "0 + 0 didn't equal 0")
+	assert(v3.z == 0, "0 + 0 didn't equal 0")
+
+
+	--[[operator order]]
+	-- uses a spread of different numbers to ensure unique results for each test
+	v1 = geometry.Vector3(1, 5, 10)
+	local v2 = geometry.Vector3(2, 10, 20)
+
+	v3 = v1 + v1
+	assert(v3.x == 2, "1 + 1 didn't become 2")
+	assert(v3.y == 10, "5 + 5 didn't become 10")
+	assert(v3.z == 20, "10 + 10 didn't become 20")
+
+	v3 = v1 + v2
+	assert(v3.x == 3, "1 + 2 didn't become 3")
+	assert(v3.y == 15, "5 + 10 didn't become 15")
+	assert(v3.z == 30, "10 + 20 didn't become 30")
+
 	v3 = v2 + v1
-	assert(v3.x ~= v3.x, "-math.huge + math.huge didn't become NaN")
-	assert(v3.y ~= v3.y, "-math.huge + math.huge didn't become NaN")
+	assert(v3.x == 3, "2 + 1 didn't become 3")
+	assert(v3.y == 15, "10 + 5 didn't become 15")
+	assert(v3.z == 30, "20 + 10 didn't become 30")
+
+
+	--[[usage with infinite numbers]]
+	v1 = geometry.Vector3(math.huge, math.huge, math.huge)
+	v2 = geometry.Vector3(math.huge, math.huge, math.huge)
+
+	v3 = v1 + v2
+	assert(v3.x == math.huge, "math.huge + math.huge didn't equal math.huge")
+	assert(v3.y == math.huge, "math.huge + math.huge didn't equal math.huge")
+	assert(v3.z == math.huge, "math.huge + math.huge didn't equal math.huge")
+
+	v1 = geometry.Vector3(-math.huge, -math.huge, -math.huge)
+	v2 = geometry.Vector3(-math.huge, -math.huge, -math.huge)
+
+	v3 = v1 + v2
+	assert(v3.x == -math.huge, "-math.huge + -math.huge didn't equal -math.huge")
+	assert(v3.y == -math.huge, "-math.huge + -math.huge didn't equal -math.huge")
+	assert(v3.z == -math.huge, "-math.huge + -math.huge didn't equal -math.huge")
+
+	v1 = geometry.Vector3(math.huge, math.huge, math.huge)
+	v2 = geometry.Vector3(-math.huge, -math.huge, -math.huge)
+
+	v3 = v1 + v2
+	assert(v3.x ~= v3.x, "math.huge + -math.huge didn't become NaN")
+	assert(v3.y ~= v3.y, "math.huge + -math.huge didn't become NaN")
+	assert(v3.z ~= v3.z, "math.huge + -math.huge didn't become NaN")
 
 end
 
 function geometrytest.testVector2Subtract()
-
+	-- assumes the only way to call these functions is using at least one Vector2
 
 	--[[incorrect calls]]
 	local v1 = geometry.Vector2()
@@ -138,25 +181,15 @@ function geometrytest.testVector2Subtract()
 
 	--[[basic usage]]
 	v1 = geometry.Vector2()
-	local v2 = geometry.Vector2()
-
-	v3 = v1 - v2
-	assert(v3.x == 0, "0 - 0 didn't equal 0")
-	assert(v3.y == 0, "0 - 0 didn't equal 0")
-
-	v3 = v2 - v1
-	assert(v3.x == 0, "0 - 0 didn't equal 0")
-	assert(v3.y == 0, "0 - 0 didn't equal 0")
-
 	v3 = v1 - v1
 	assert(v3.x == 0, "0 - 0 didn't equal 0")
 	assert(v3.y == 0, "0 - 0 didn't equal 0")
 
 
-	--[[genuine usage]]
+	--[[operator order]]
 	-- uses a spread of different numbers to ensure unique results for each test
 	v1 = geometry.Vector2(1, 5)
-	v2 = geometry.Vector2(2, 10)
+	local v2 = geometry.Vector2(2, 10)
 
 	v3 = v1 - v1
 	assert(v3.x == 0, "1 - 1 didn't become 0")
@@ -175,30 +208,14 @@ function geometrytest.testVector2Subtract()
 	v1 = geometry.Vector2(math.huge, math.huge)
 	v2 = geometry.Vector2(math.huge, math.huge)
 
-	v3 = v1 - v1
-	assert(v3.x ~= v3.x, "math.huge - math.huge didn't become NaN")
-	assert(v3.y ~= v3.y, "math.huge - math.huge didn't become NaN")
-
 	v3 = v1 - v2
-	assert(v3.x ~= v3.x, "math.huge - math.huge didn't become NaN")
-	assert(v3.y ~= v3.y, "math.huge - math.huge didn't become NaN")
-
-	v3 = v2 - v1
 	assert(v3.x ~= v3.x, "math.huge - math.huge didn't become NaN")
 	assert(v3.y ~= v3.y, "math.huge - math.huge didn't become NaN")
 
 	v1 = geometry.Vector2(-math.huge, -math.huge)
 	v2 = geometry.Vector2(-math.huge, -math.huge)
 
-	v3 = v1 - v1
-	assert(v3.x ~= v3.x, "-math.huge - -math.huge didn't become NaN")
-	assert(v3.y ~= v3.y, "-math.huge - -math.huge didn't become NaN")
-
 	v3 = v1 - v2
-	assert(v3.x ~= v3.x, "-math.huge - -math.huge didn't become NaN")
-	assert(v3.y ~= v3.y, "-math.huge - -math.huge didn't become NaN")
-
-	v3 = v2 - v1
 	assert(v3.x ~= v3.x, "-math.huge - -math.huge didn't become NaN")
 	assert(v3.y ~= v3.y, "-math.huge - -math.huge didn't become NaN")
 
@@ -209,9 +226,78 @@ function geometrytest.testVector2Subtract()
 	assert(v3.x == math.huge, "math.huge - -math.huge didn't equal math.huge")
 	assert(v3.y == math.huge, "math.huge - -math.huge didn't equal math.huge")
 
+
+end
+
+function geometrytest.testVector3Subtract()
+	-- assumes the only way to call these functions is using at least one Vector3
+
+	--[[incorrect calls]]
+	local v1 = geometry.Vector3()
+
+	pcall(function() return v1 - 1 end, "number improperly subtracted from Vector3")
+	pcall(function() return 1 - v1 end, "Vector3 improperly subtracted from number")
+
+	pcall(function() return v1 - "" end, "string improperly subtracted from Vector3")
+	pcall(function() return "" - v1 end, "Vector3 improperly subtracted from string")
+
+	pcall(function() return v1 - false end, "false improperly subtracted from Vector3")
+	pcall(function() return false - v1 end, "Vector3 improperly subtracted from false")
+
+
+	--[[basic usage]]
+	v1 = geometry.Vector3()
+	v3 = v1 - v1
+	assert(v3.x == 0, "0 - 0 didn't equal 0")
+	assert(v3.y == 0, "0 - 0 didn't equal 0")
+	assert(v3.z == 0, "0 - 0 didn't equal 0")
+
+
+	--[[operator order]]
+	-- uses a spread of different numbers to ensure unique results for each test
+	v1 = geometry.Vector3(1, 5, 10)
+	local v2 = geometry.Vector3(2, 10, 20)
+
+	v3 = v1 - v1
+	assert(v3.x == 0, "1 - 1 didn't become 0")
+	assert(v3.y == 0, "5 - 5 didn't become 0")
+	assert(v3.z == 0, "10 - 10 didn't become 0")
+
+	v3 = v1 - v2
+	assert(v3.x == -1, "1 - 2 didn't become -1")
+	assert(v3.y == -5, "5 - 10 didn't become -5")
+	assert(v3.z == -10, "10 - 20 didn't become -10")
+
 	v3 = v2 - v1
-	assert(v3.x == -math.huge, "-math.huge - math.huge didn't equal -math.huge")
-	assert(v3.y == -math.huge, "-math.huge - math.huge didn't equal -math.huge")
+	assert(v3.x == 1, "2 - 1 didn't become 1")
+	assert(v3.y == 5, "10 - 5 didn't become 5")
+	assert(v3.z == 10, "20 - 10 didn't become 10")
+
+
+	--[[usage with infinite numbers]]
+	v1 = geometry.Vector3(math.huge, math.huge, math.huge)
+	v2 = geometry.Vector3(math.huge, math.huge, math.huge)
+
+	v3 = v1 - v2
+	assert(v3.x ~= v3.x, "math.huge - math.huge didn't become NaN")
+	assert(v3.y ~= v3.y, "math.huge - math.huge didn't become NaN")
+	assert(v3.z ~= v3.z, "math.huge - math.huge didn't become NaN")
+
+	v1 = geometry.Vector3(-math.huge, -math.huge, -math.huge)
+	v2 = geometry.Vector3(-math.huge, -math.huge, -math.huge)
+
+	v3 = v1 - v2
+	assert(v3.x ~= v3.x, "-math.huge - -math.huge didn't become NaN")
+	assert(v3.y ~= v3.y, "-math.huge - -math.huge didn't become NaN")
+	assert(v3.z ~= v3.z, "-math.huge - -math.huge didn't become NaN")
+
+	v1 = geometry.Vector3(math.huge, math.huge, math.huge)
+	v2 = geometry.Vector3(-math.huge, -math.huge, math.huge)
+
+	v3 = v1 - v2
+	assert(v3.x == math.huge, "math.huge - -math.huge didn't equal math.huge")
+	assert(v3.y == math.huge, "math.huge - -math.huge didn't equal math.huge")
+	assert(v3.z == math.huge, "math.huge - -math.huge didn't equal math.huge")
 
 
 end
