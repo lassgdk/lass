@@ -92,10 +92,6 @@ end
 
 function Component:update(dt, firstUpdate) end
 
-function Component:globals()
-	return self.gameObject.gameScene.globals
-end
-
 class.addkey(Component, "events", EventResponseTable(), false)
 
 --[[
@@ -237,7 +233,44 @@ function GameEntity:move(x, y, z)
 end
 
 function GameEntity:moveTo(x, y, z)
+
+	if type(x) == "table" then
+		z = x.z or self.transform.position.z
+	else
+		z = z or self.transform.position.z
+	end
+
 	self.transform.position = geometry.Vector3(x, y, z)
+end
+
+function GameEntity:moveGlobal(x, y, z)
+
+	if not self:hasParent() then
+		return self:move(x, y, z)
+	end
+
+	local moveBy = geometry.Vector2(x,y,z)
+
+	local r = self.parent.globalTransform.rotation
+	-- local rotated = geometry.Vector2(moveBy.x, moveBy.y):rotate(-r)
+	-- rotated.z = moveBy.z
+
+	return self:move(moveBy:rotate(-r))
+end
+
+function GameEntity:moveToGlobal(x, y, z)
+
+	if not self:hasParent() then
+		return self:moveTo(x, y, z)
+	end
+
+	if type(x) == "table" then
+		z = x.z or self.transform.position.z
+	else
+		z = z or self.transform.position.z
+	end
+
+	self:moveTo(geometry.Vector3(x,y,z) - self.globalTransform.position)
 end
 
 function GameEntity:rotate(angle)
@@ -651,20 +684,20 @@ function GameObject:getComponents(componentType)
 end
 
 
-function GameObject:moveGlobal(x, y, z)
+-- function GameObject:moveGlobal(x, y, z)
 
-	if not self:hasParent() then
-		return self:move(x, y, z)
-	end
+-- 	if not self:hasParent() then
+-- 		return self:move(x, y, z)
+-- 	end
 
-	local moveBy = geometry.Vector2(x,y,z)
+-- 	local moveBy = geometry.Vector2(x,y,z)
 
-	local r = self.parent.globalTransform.rotation
-	-- local rotated = geometry.Vector2(moveBy.x, moveBy.y):rotate(-r)
-	-- rotated.z = moveBy.z
+-- 	local r = self.parent.globalTransform.rotation
+-- 	-- local rotated = geometry.Vector2(moveBy.x, moveBy.y):rotate(-r)
+-- 	-- rotated.z = moveBy.z
 
-	return self:move(moveBy:rotate(-r))
-end
+-- 	return self:move(moveBy:rotate(-r))
+-- end
 
 function GameObject:maintainTransform(updateDescendants, descendantToExclude)
 	maintainTransform(self, updateDescendants, descendantToExclude)
@@ -918,6 +951,9 @@ local GameScene = class.define(GameEntity, function(self, transform)
 	self.globals.events = {}
 	self.globals.physicsWorld = love.physics.newWorld(0, 0, true)
 
+	self:addEvent("physicsPreUpdate")
+	self:addEvent("physicsPostUpdate")
+
 	GameEntity.init(self, transform)
 end)
 
@@ -988,8 +1024,8 @@ function GameScene:applySettings()
 	love.physics.setMeter(self.settings.physics.pixelsPerMeter)
 
 	local grav = geometry.Vector2(self.globals.gravity)
-	grav.x = grav.x / self.settings.physics.pixelsPerMeter
-	grav.y = grav.y / self.settings.physics.pixelsPerMeter
+	-- grav.x = grav.x / self.settings.physics.pixelsPerMeter
+	-- grav.y = grav.y / self.settings.physics.pixelsPerMeter
 	self.globals.physicsWorld:setGravity(grav.x, grav.y)
 end
 
@@ -1052,7 +1088,10 @@ function GameScene:update(dt)
 		maintainTransform(self)
 		-- debug.log("updating SimpleRigidbody")
 		self.base.update(self, dt * self.timeScale, self.frame)
+
+		self.globals.events.physicsPreUpdate:play(self)
 		self.globals.physicsWorld:update(dt)
+		self.globals.events.physicsPostUpdate:play(self)
 		-- debug.log("maintaining Collisions")
 		maintainCollisions(self)
 
@@ -1119,11 +1158,15 @@ function GameScene:addEvent(eventName)
 	return e
 end
 
-function GameScene:addEventListener(eventName, listener)
+function GameScene:addEventListener(eventName, listener, addToObjectEventsList)
 
 	local e = self.globals.events[eventName] or self:addEvent(eventName)
 	e.listeners[listener] = true
 	listener.events[#listener.events + 1] = eventName
+
+	if addToObjectEventsList == true then
+		listener.events[#listener.events + 1] = eventName
+	end
 end
 
 function GameScene:removeEventListener(eventName, listener)
