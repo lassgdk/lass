@@ -104,7 +104,13 @@ function Vector2.__div(a, b)
 end
 
 function Vector2:__unm()
+
 	return Vector2(-self.x, -self.y)
+end
+
+function Vector2:__eq(other)
+
+	return self.x == other.x and self.y == other.y
 end
 
 function Vector2:__tostring()
@@ -295,7 +301,13 @@ function Vector3.__div(a,b)
 end
 
 function Vector3:__unm()
+
 	return Vector3(-self.x, -self.y, -self.z)
+end
+
+function Vector3:__eq(other)
+
+	return self.x == other.x and self.y == other.y and self.z == other.z
 end
 
 function Vector3:__tostring()

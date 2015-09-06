@@ -89,23 +89,50 @@ end
 
 function Rigidbody:awake()
 
-	local transform = self.gameObject.globalTransform
-	self.body:setPosition(
-		transform.position.x/self.globals.pixelsPerMeter,
-		transform.position.y/self.globals.pixelsPerMeter
-	)
+	self._oldTransform = self.gameObject.globalTransform
+	self.body:setPosition(self._oldTransform.position / self.globals.pixelsPerMeter)
 
 	local colliders = self.gameObject:getComponents(Collider)
+	self.fixtures = {}
 
 	for i, collider in ipairs(colliders) do
-		love.physics.newFixture(self.body, shapeToPhysicsShape(self, collider.shape), 1)
+		local fix = love.physics.newFixture(self.body, shapeToPhysicsShape(self, collider.shape), 1)
+		self.fixtures[fix] = collider
 	end
 
 end
 
 function Rigidbody:update()
 
+	local transform = self.gameObject.globalTransform
 
+	if
+		self._oldTransform.position.x ~= transform.x or
+		self._oldTransform.position.y ~= transform.y
+	then
+		self.body:setPosition(transform.position / self.globals.pixelsPerMeter)
+	end
+
+	for i, fixture in ipairs(self.body:getFixtureList()) do
+		local collider = self.fixtures[fixture]
+
+		if not collider then
+			fixture:destroy()
+		else
+			local shape = shapeToPhysicsShape(self, collider.shpe, fixture:getShape(), self._oldTransform)
+
+			-- if shape, then we weren't able to modify the existing fixture.
+			-- we need to replace it
+			if shape then
+				self.fixtures[fixture] = nil
+				fixture:destroy()
+				fixture = love.physics.newFixture(self.body, shape, 1)
+				self.fixtures[fixture] = collider
+			end
+		end
+	end
+
+	self._oldTransform = self.gameObject.globalTransform
 end
 
 return Rigidbody

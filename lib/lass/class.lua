@@ -143,6 +143,21 @@ function class.define(base, init)
         return false
     end
 
+    c.is = function(self, other)
+
+        if self ~= other then
+            return false
+        end
+
+        local __eq = c.__eq
+        c.__eq = nil
+
+        local r = self == other
+
+        c.__eq = __eq
+        return r
+    end
+
     setmetatable(c, mt)
 
     -- if c.__protected then
