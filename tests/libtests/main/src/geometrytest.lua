@@ -6,7 +6,7 @@ geometrytest.tests={
 	"testVector2Add",
 	"testVector3Add",
 	"testVector2Subtract",
-	-- "testVector3Subtract",
+	"testVector3Subtract",
 	"testTransformCreation",
 	"testTransformCreationWithTransform",
 	"testGlobalRectangle", -- placeholder
@@ -226,6 +226,10 @@ function geometrytest.testVector2Subtract()
 	assert(v3.x == math.huge, "math.huge - -math.huge didn't equal math.huge")
 	assert(v3.y == math.huge, "math.huge - -math.huge didn't equal math.huge")
 
+	v3 = v2 - v1
+	assert(v3.x == -math.huge, "-math.huge - math.huge didn't equal -math.huge")
+	assert(v3.y == -math.huge, "-math.huge - math.huge didn't equal -math.huge")
+
 
 end
 
@@ -292,12 +296,17 @@ function geometrytest.testVector3Subtract()
 	assert(v3.z ~= v3.z, "-math.huge - -math.huge didn't become NaN")
 
 	v1 = geometry.Vector3(math.huge, math.huge, math.huge)
-	v2 = geometry.Vector3(-math.huge, -math.huge, math.huge)
+	v2 = geometry.Vector3(-math.huge, -math.huge, -math.huge)
 
 	v3 = v1 - v2
 	assert(v3.x == math.huge, "math.huge - -math.huge didn't equal math.huge")
 	assert(v3.y == math.huge, "math.huge - -math.huge didn't equal math.huge")
 	assert(v3.z == math.huge, "math.huge - -math.huge didn't equal math.huge")
+
+	v3 = v2 - v1
+	assert(v3.x == -math.huge, "-math.huge - math.huge didn't equal math.huge")
+	assert(v3.y == -math.huge, "-math.huge - math.huge didn't equal math.huge")
+	assert(v3.z == -math.huge, "-math.huge - math.huge didn't equal math.huge")
 
 
 end
