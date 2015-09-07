@@ -1,4 +1,4 @@
-class = require "lass.class"
+local class = require "lass.class"
 
 local classtest = {}
 

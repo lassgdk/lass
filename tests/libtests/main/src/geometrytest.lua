@@ -1,4 +1,4 @@
-geometry = require "lass.geometry"
+local geometry = require "lass.geometry"
 
 local geometrytest = {}
 

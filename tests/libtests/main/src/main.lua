@@ -6,6 +6,7 @@ local system = require("lass.system")
 local scene = {}
 local opts = system.getopt(arg, "scene")
 local testModules = {
+	"coretest",
 	"geometrytest",
 	"classtest"
 }

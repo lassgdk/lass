@@ -177,7 +177,9 @@ function Collider:isCollidingWith(other, direction, noFrameRepeat, storeCollisio
 		-- 		r)
 		-- end
 	else
-		r, d = geometry.intersecting(self.shape, other, self.gameObject.globalTransform, false, false, direction)
+		r, d = geometry.intersecting(
+			self.shape, other, self.gameObject.globalTransform, nil, false, false, direction
+		)
 	end
 
 	-- if self.gameObject.name:find("Player") and other.gameObject.name == "Rectangle 5 3" then
