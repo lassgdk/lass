@@ -168,7 +168,7 @@ end
 function Rigidbody.events.physicsPostUpdate.play(self, source, data)
 
 	local x,y = self.body:getPosition()
-	self.gameObject:moveTo(x, y * self.globals.ySign)
+	self.gameObject:moveToGlboal(x, y * self.globals.ySign)
 	debug.log(x, y, self.gameObject.transform.position, self.gameObject.globalTransform.position)
 
 	self._oldTransform = geometry.Transform(self.gameObject.globalTransform)

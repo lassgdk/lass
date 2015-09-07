@@ -241,7 +241,6 @@ function GameEntity:removeChild(child, removeDescendants)
 		child = self.children[index]
 	else
 		index = collections.index(self.children, child)
-		debug.log(index)
 	end
 
 	if index then

@@ -4,7 +4,7 @@ local classtest = {}
 
 --specify order in which to run the tests
 classtest.tests = {
-	"testClassDefine",
+	-- "testClassDefine",
 	"testClassInheritance",
 	"testNilInit",
 	"testInstanceOf"
