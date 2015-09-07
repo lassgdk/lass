@@ -464,6 +464,14 @@ function geometrytest.testTransformCreation()
 	assert(pcall(geometry.Transform, nil, nil, {z = ""}) ~= true, "improperly created transform with string for size.z")
 
 
+	--[[breaking setters]]
+	local t = geometry.Transform()
+	assert(pcall(function() t.rotation = "" end) ~= true, "transform rotation shouldn't accept string")
+	assert(pcall(function() t.rotation = math.huge end) ~= true, "transform rotation shouldn't accept math.huge")
+	assert(pcall(function() t.rotation = -math.huge end) ~= true, "transform rotation shouldn't accept -math.huge")
+	assert(pcall(function() t.rotation = math.huge / math.huge end) ~= true, "transform rotation shouldn't accept NaN")
+
+
 	--[[basic creation]]
 	local t = geometry.Transform()
 
@@ -557,10 +565,6 @@ function geometrytest.testTransformCreationWithTransform()
 	t1 = geometry.Transform()
 	t1.position.z = ""
 	assert(pcall(geometry.Transform, t1) ~= true, "improperly made transform with transform with string for position z")
-
-	t1 = geometry.Transform()
-	t1.rotation = ""
-	assert(pcall(geometry.Transform, t1) ~= true, "improperly made transform with transform with string for rotation")
 
 	t1 = geometry.Transform()
 	t1.size.x = ""

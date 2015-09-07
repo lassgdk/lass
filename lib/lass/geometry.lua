@@ -355,9 +355,8 @@ local Transform = class.define(function(self, position, rotation, size)
 	end
 	if rotation ~= nil then
 		assert(type(rotation) == "number", "rotation must be nil or number")
-		assert(rotation ~= math.huge, "rotation cannot be infinity")
-		assert(rotation ~= -math.huge, "rotation cannot be negative infinity")
-		assert(rotation == rotation, "rotation cannot be NaN")
+	else
+		rotation = 0
 	end
 	if size ~= nil then
 		assert(type(size) == "table", "size must be nil, table, or Vector3")
@@ -370,7 +369,7 @@ local Transform = class.define(function(self, position, rotation, size)
 		error("the x, y, and z values of position must be numbers")
 	end
 
-	self.rotation = rotation or 0
+	self.rotation = rotation
 
 	if size then
 		size.x = size.x or 1
@@ -393,6 +392,11 @@ end
 
 function Transform.__set.rotation(self, value)
 	--clamp rotation between 0 and 360 degrees (e.g., -290 => 70)
+
+	assert(type(value) == "number", "rotation must be number")
+	assert(value ~= math.huge, "rotation cannot be infinity")
+	assert(value ~= -math.huge, "rotation cannot be negative infinity")
+	assert(value == value, "rotation cannot be NaN")
 
 	self._rotation = value % 360
 end
