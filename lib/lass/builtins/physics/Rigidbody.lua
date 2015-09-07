@@ -89,6 +89,7 @@ end
 
 function Rigidbody:awake()
 
+	debug.log(self.gameObject.globalTransform)
 	self._oldTransform = geometry.Transform(self.gameObject.globalTransform)
 	self.body = love.physics.newBody(self.globals.physicsWorld, 0, 0, "dynamic")
 

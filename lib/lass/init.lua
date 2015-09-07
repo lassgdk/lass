@@ -100,50 +100,50 @@ GameEntity
 
 --[[internal]]
 
-local function maintainTransform(self, updateDescendants, descendantToExclude)
-	--maintain global position and rotation
+-- local function maintainTransform(self, updateDescendants, descendantToExclude)
+-- 	--maintain global position and rotation
 
-	if self == descendantToExclude then
-		return
-	end
+-- 	if self == descendantToExclude then
+-- 		return
+-- 	end
 
-	--clamp rotation between 0 and 360 degrees (e.g., -290 => 70)
-	self.transform.rotation = self.transform.rotation % 360
+-- 	--clamp rotation between 0 and 360 degrees (e.g., -290 => 70)
+-- 	self.transform.rotation = self.transform.rotation % 360
 
-	local t = self.transform
-	local p = nil
+-- 	local t = self.transform
+-- 	local p = nil
 
-	if self.parent and next(self.parent) ~= nil then
-		p = self.parent.globalTransform
-	elseif self.gameScene and next(self.gameScene) ~= nil then
-		p = self.gameScene.transform
-	else
-		self.globalTransform = self.transform
-		return
-	end
+-- 	if self.parent and next(self.parent) ~= nil then
+-- 		p = self.parent.globalTransform
+-- 	elseif self.gameScene and next(self.gameScene) ~= nil then
+-- 		p = self.gameScene.transform
+-- 	else
+-- 		self.globalTransform = self.transform
+-- 		return
+-- 	end
 
-	self.globalTransform = geometry.Transform({
-		position = p.position, 
-		size = geometry.Vector3({
-			x = t.size.x * p.size.x,
-			y = t.size.y * p.size.y,
-			z = t.size.z * p.size.z,
-		}),
-		rotation = t.rotation + p.rotation
-	})
+-- 	self.globalTransform = geometry.Transform({
+-- 		position = p.position, 
+-- 		size = geometry.Vector3({
+-- 			x = t.size.x * p.size.x,
+-- 			y = t.size.y * p.size.y,
+-- 			z = t.size.z * p.size.z,
+-- 		}),
+-- 		rotation = t.rotation + p.rotation
+-- 	})
 
-	self.globalTransform.position = self.globalTransform.position + geometry.Vector3({
-		x = t.position.x * p.size.x,
-		y = t.position.y * p.size.y,
-		z = t.position.z * p.size.z
-	}):rotate(p.rotation)
+-- 	self.globalTransform.position = self.globalTransform.position + geometry.Vector3({
+-- 		x = t.position.x * p.size.x,
+-- 		y = t.position.y * p.size.y,
+-- 		z = t.position.z * p.size.z
+-- 	}):rotate(p.rotation)
 
-	if updateDescendants == true then
-		for i, child in ipairs(self.children) do
-			maintainTransform(child, true)
-		end
-	end
-end
+-- 	if updateDescendants == true then
+-- 		for i, child in ipairs(self.children) do
+-- 			maintainTransform(child, true)
+-- 		end
+-- 	end
+-- end
 
 --[[public]]
 
@@ -163,6 +163,45 @@ local GameEntity = class.define(function(self, transform, parent)
 
 	-- maintainTransform(self)
 end)
+
+function GameEntity.__get.globalTransform(self)
+
+	-- self.transform.rotation = self.transform.rotation % 360
+
+	local t = self.transform
+	local p = nil
+
+	if self.parent and next(self.parent) ~= nil then
+		p = self.parent.globalTransform
+	elseif self.gameScene and next(self.gameScene) ~= nil then
+		p = self.gameScene.transform
+	else
+		return geometry.Transform(self.transform)
+	end
+
+	local gt = geometry.Transform({
+		position = p.position, 
+		size = geometry.Vector3({
+			x = t.size.x * p.size.x,
+			y = t.size.y * p.size.y,
+			z = t.size.z * p.size.z,
+		}),
+		rotation = t.rotation + p.rotation
+	})
+
+	gt.position = gt.position + geometry.Vector3({
+		x = t.position.x * p.size.x,
+		y = t.position.y * p.size.y,
+		z = t.position.z * p.size.z
+	}):rotate(p.rotation)
+
+	return gt
+end
+
+function GameEntity.__set.globalTransform(self)
+
+	error("attempt to set read-only field \"globalTransform\"")
+end
 
 -- trackParent should normally be false if GameEntity is scene and child is GameObject
 function GameEntity:addChild(child, trackParent)
@@ -187,7 +226,7 @@ function GameEntity:addChild(child, trackParent)
 		child.parent = self
 	end
 
-	maintainTransform(child)
+	-- maintainTransform(child)
 end
 
 function GameEntity:removeChild(child, removeDescendants)
@@ -582,7 +621,7 @@ function GameObject:update(dt, firstUpdate)
 		return
 	end
 
-	maintainTransform(self)
+	-- maintainTransform(self)
 
 	for i, component in ipairs(self.components) do
 		if component.active then
@@ -699,9 +738,9 @@ end
 -- 	return self:move(moveBy:rotate(-r))
 -- end
 
-function GameObject:maintainTransform(updateDescendants, descendantToExclude)
-	maintainTransform(self, updateDescendants, descendantToExclude)
-end
+-- function GameObject:maintainTransform(updateDescendants, descendantToExclude)
+-- 	maintainTransform(self, updateDescendants, descendantToExclude)
+-- end
 
 --callback functions
 for i, f in ipairs({
@@ -1085,7 +1124,7 @@ function GameScene:update(dt)
 
 	if not self.paused then
 		-- debug.log("============================")
-		maintainTransform(self)
+		-- maintainTransform(self)
 		-- debug.log("updating SimpleRigidbody")
 		self.base.update(self, dt * self.timeScale, self.frame)
 

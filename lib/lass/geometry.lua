@@ -370,7 +370,7 @@ local Transform = class.define(function(self, position, rotation, size)
 		error("the x, y, and z values of position must be numbers")
 	end
 
-	self.rotation = (rotation or 0) % 360
+	self.rotation = rotation or 0
 
 	if size then
 		size.x = size.x or 1
@@ -385,6 +385,17 @@ local Transform = class.define(function(self, position, rotation, size)
 		self.size = Vector3(1,1,1)
 	end
 end)
+
+function Transform.__get.rotation(self)
+
+	return self._rotation
+end
+
+function Transform.__set.rotation(self, value)
+	--clamp rotation between 0 and 360 degrees (e.g., -290 => 70)
+
+	self._rotation = value % 360
+end
 
 --[[
 Shape
