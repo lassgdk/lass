@@ -148,13 +148,7 @@ function coretest.testGameObjectChildMovement(scene)
 	testLocalPosition(child, geometry.Vector3(7,-5,0))
 	testGlobalPosition(child, geometry.Vector3(7,-5,0))
 
-	debug.log(object.globalTransform.position, child.globalTransform.position)
-	debug.log(object.transform.position, child.transform.position)
-
 	child:moveToGlobal(0,0)
-	debug.log(object.globalTransform.position, child.globalTransform.position)
-	debug.log(object.transform.position, child.transform.position)
-
 	testLocalPosition(child, geometry.Vector3(0,0,0))
 	testGlobalPosition(child, geometry.Vector3(0,0,0))
 end

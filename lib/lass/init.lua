@@ -307,8 +307,10 @@ function GameEntity:moveToGlobal(x, y, z)
 	else
 		z = z or self.transform.position.z
 	end
-
-	self:moveTo(geometry.Vector3(x,y,z) - self.globalTransform.position)
+	
+	-- we need to change the local position so that the offset from the parent
+	-- positions us at the wanted global position
+	self:moveTo(geometry.Vector3(x,y,z) - self.parent.globalTransform.position)
 end
 
 function GameEntity:rotate(angle)
