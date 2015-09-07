@@ -191,8 +191,8 @@ function geometrytest.testVector2And3Add()
 	assert(r.z == 0, "0 + 0 didn't equal 0")
 
 
-	--[[genuine usage]]
-	-- uses a spread of values to guaruntee unique results
+	--[[operator order]]
+	-- uses a spread of different numbers to ensure unique results for each test
 	v2 = geometry.Vector2(1, 5)
 	v3 = geometry.Vector3(10, 20, 30)
 
@@ -374,8 +374,8 @@ function geometrytest.testVector2And3Subtract()
 	assert(r.z == 0, "0 - 0 didn't equal 0")
 
 
-	--[[genuine usage]]
-	-- uses a spread of values to guaruntee unique results
+	--[[operator order]]
+	-- uses a spread of different numbers to ensure unique results for each test
 	v2 = geometry.Vector2(1, 5)
 	v3 = geometry.Vector3(10, 20, 30)
 
