@@ -72,33 +72,36 @@ local function shapeToPhysicsShape(self, shape, physicsShape, oldTransform)
 	end
 end
 
-function Rigidbody.__get.velocity(self)
+function Rigidbody:getVelocity()
 
 	local x, y = self.body:getLinearVelocity()
 	return geometry.Vector2(x, y)
 end
 
-function Rigidbody.__set.velocity(self, ...)
+function Rigidbody:setVelocity(...)
 
-	if not body then
+	if not self.body then
 		self._velocity = geometry.Vector2(...)
 	else
-		self.body:setLinearVelocity(geometry.Vector2(...))
+		local v = geometry.Vector2(...)
+		self.body:setLinearVelocity(v.x,v.y)
 	end
 end
 
 function Rigidbody:awake()
 
-	debug.log(self.gameObject.globalTransform)
-	-- self._oldTransform = self.gameObject.globalTransform
 	self.body = love.physics.newBody(self.globals.physicsWorld, 0, 0, "dynamic")
 
 	local p = self.gameObject.globalTransform.position
 	self.body:setPosition(p.x, p.y * self.globals.ySign)
 
-	if self._velocity then
-		self.velocity = self._velocity
+	if self.velocity then
+		self:setVelocity(self.velocity)
 		self.velocity = nil
+		self._velocity = nil
+	elseif self._velocity then
+		self:setVelocity(self._velocity)
+		self._velocity = nil
 	end
 
 	local colliders = self.gameObject:getComponents(Collider)
@@ -143,9 +146,6 @@ function Rigidbody:update()
 		end
 	end
 
-	-- self.gameObject.transform.position = 
-	-- 	self.gameObject.transform.position - geometry.Vector2(self.body:getPosition())
-
 end
 
 function Rigidbody.events.physicsPreUpdate.play(self, source, data)
@@ -153,13 +153,14 @@ function Rigidbody.events.physicsPreUpdate.play(self, source, data)
 	local transform = self.gameObject.globalTransform
 	-- debug.log("pre", transform.position, self._oldTransform.position)
 
+	-- if the transform has changed independently of physics transformations,
+	-- we need to reset the body position
 	if
 		self._oldTransform and (
 			self._oldTransform.position.x ~= transform.position.x or
 			self._oldTransform.position.y ~= transform.position.y
 		)
 	then
-		-- debug.log("ohno")
 		self.body:setPosition(transform.position.x, transform.position.y * self.globals.ySign)
 	end
 
@@ -168,8 +169,8 @@ end
 function Rigidbody.events.physicsPostUpdate.play(self, source, data)
 
 	local x,y = self.body:getPosition()
-	self.gameObject:moveToGlboal(x, y * self.globals.ySign)
-	debug.log(x, y, self.gameObject.transform.position, self.gameObject.globalTransform.position)
+	self.gameObject:moveToGlobal(x, y * self.globals.ySign)
+	-- debug.log(x, y, self.gameObject.transform.position, self.gameObject.globalTransform.position)
 
 	self._oldTransform = geometry.Transform(self.gameObject.globalTransform)
 	-- debug.log("post2", self._oldTransform.position)
