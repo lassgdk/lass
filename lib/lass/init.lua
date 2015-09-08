@@ -437,11 +437,10 @@ local GameObject = class.define(GameEntity, function(self, gameScene, name, tran
 	self.name = string.format(name)
 
 	GameEntity.init(self, transform)
+	gameScene:addGameObject(self)
 
 	--if parent is specified, it must be a GameObject
 	if parent then
-		assert(class.instanceof(parent, GameObject), "parent must be GameObject")
-
 		parent:addChild(self)
 	else
 		gameScene:addChild(self, false)
@@ -450,7 +449,6 @@ local GameObject = class.define(GameEntity, function(self, gameScene, name, tran
 	self.components = {}
 	self.events = {}
 
-	gameScene:addGameObject(self)
 end)
 
 function GameObject.fromPrefab(scene, object, parent)
@@ -484,7 +482,8 @@ function GameObject.fromPrefab(scene, object, parent)
 			for i, pfChild in ipairs(pf.children) do
 				if object.prefabChildren and object.prefabChildren[i] then
 					object.prefabChildren[i].prefab = pfChild
-					gameObject:addChild(GameObject.fromPrefab(scene, object.prefabChildren[i].prefab))
+					-- gameObject:addChild(GameObject.fromPrefab(scene, object.prefabChildren[i].prefab))
+					GameObject.fromPrefab(scene, object.prefabChildren[i].prefab, gameObject)
 				else
 					gameObject:addChild(GameObject.fromPrefab(scene, pfChild))
 				end
@@ -525,7 +524,8 @@ function GameObject.fromPrefab(scene, object, parent)
 	--build children
 	if object.children then
 		for i, child in ipairs(object.children) do
-			gameObject:addChild(GameObject.fromPrefab(scene, child))
+			-- gameObject:addChild(GameObject.fromPrefab(scene, child))
+			GameObject.fromPrefab(scene, child, gameObject)
 		end
 	end
 

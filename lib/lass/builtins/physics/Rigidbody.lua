@@ -151,7 +151,6 @@ end
 function Rigidbody.events.physicsPreUpdate.play(self, source, data)
 
 	local transform = self.gameObject.globalTransform
-	-- debug.log("pre", transform.position, self._oldTransform.position)
 
 	-- if the transform has changed independently of physics transformations,
 	-- we need to reset the body position
@@ -170,10 +169,8 @@ function Rigidbody.events.physicsPostUpdate.play(self, source, data)
 
 	local x,y = self.body:getPosition()
 	self.gameObject:moveToGlobal(x, y * self.globals.ySign)
-	-- debug.log(x, y, self.gameObject.transform.position, self.gameObject.globalTransform.position)
 
 	self._oldTransform = geometry.Transform(self.gameObject.globalTransform)
-	-- debug.log("post2", self._oldTransform.position)
 end
 
 return Rigidbody
