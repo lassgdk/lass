@@ -22,6 +22,14 @@ local ImageRenderer = class.define(Renderer, function(self, arguments)
 	self.base.init(self, arguments)
 end)
 
+function ImageRenderer:awake()
+
+	local width, height = self.image:getDimensions()
+	self.shape = geometry.Rectangle(width, height, self.offset)
+
+	self.base.awake(self)
+end
+
 function ImageRenderer:draw()
 
 	local globalTransform = self.gameObject.globalTransform
@@ -44,6 +52,16 @@ function ImageRenderer:draw()
 		-self.offset.x + width/2,
 		(-self.offset.y - height/2) * ySign
 	)
+end
+
+function ImageRenderer:update()
+
+	local width, height = self.image:getDimensions()
+	self.shape.width = width
+	self.shape.height = height
+	self.shape.position = self.offset
+
+	self.base.update(self)
 end
 
 return ImageRenderer

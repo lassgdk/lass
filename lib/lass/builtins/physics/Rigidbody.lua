@@ -29,8 +29,10 @@ local function shapeToPhysicsShape(self, shape, physicsShape, oldTransform)
 
 	local transform = geometry.Transform(self.gameObject.globalTransform)
 
-	--we want the global size and rotation of the shape, but not the global position
+	-- we want the global size of the shape, but not the global position or rotation
+	-- (we will use the rotation for the body, but not the fixture)
 	transform.position = geometry.Vector3(0,0,0)
+	transform.rotation = 0
 
 	if shape.class == geometry.Rectangle or shape.class == geometry.Polygon then
 
@@ -40,9 +42,9 @@ local function shapeToPhysicsShape(self, shape, physicsShape, oldTransform)
 			-- if we have a reason to change them, create a new PolygonShape.
 			-- else, return nothing
 			if
-				oldTransform.r ~= transform.r or
-				oldTransform.x ~= transform.x or
-				oldTransform.y ~= transform.y or
+				-- oldTransform.r ~= transform.r or
+				oldTransform.size.x ~= transform.size.x or
+				oldTransform.size.y ~= transform.size.y or
 				not physicsShape:typeOf("PolygonShape")
 			then
 				local verts = shape:globalVertices(transform)
@@ -88,12 +90,31 @@ function Rigidbody:setVelocity(...)
 	end
 end
 
+function Rigidbody:getAngularVelocity()
+
+	local r = self.body:getAngularVelocity()
+	return math.deg(r)
+end
+
+function Rigidbody:setAngularVelocity(r)
+
+	-- if not self.body then
+	-- 	self._velocity = geometry.Vector2(...)
+	-- else
+	-- 	local v = geometry.Vector2(...)
+	-- 	self.body:setAngularVelocity(v.x,v.y)
+	-- end
+
+	self.body:setAngularVelocity(math.rad(r))
+end
+
 function Rigidbody:awake()
 
 	self.body = love.physics.newBody(self.globals.physicsWorld, 0, 0, "dynamic")
 
 	local p = self.gameObject.globalTransform.position
 	self.body:setPosition(p.x, p.y * self.globals.ySign)
+	self.body:setAngle(math.rad(self.gameObject.globalTransform.rotation))
 
 	if self.velocity then
 		self:setVelocity(self.velocity)
@@ -114,6 +135,12 @@ function Rigidbody:awake()
 
 	self.gameScene:addEventListener("physicsPreUpdate", self.gameObject, true)
 	self.gameScene:addEventListener("physicsPostUpdate", self.gameObject, true)
+end
+
+function Rigidbody:deactivate()
+
+	self.body:destroy()
+	self.base.deactivate(self)
 end
 
 function Rigidbody:update()
@@ -140,12 +167,13 @@ function Rigidbody:update()
 			if shape then
 				self.fixtures[fixture] = nil
 				fixture:destroy()
-				fixture = love.physics.newFixture(self.body, shape, 1)
+				fixture = love.physics.newFixture(self.body, shape, 6)
 				self.fixtures[fixture] = collider
 			end
 		end
 	end
 
+	-- debug.log(self.gameObject.globalTransform.position)
 end
 
 function Rigidbody.events.physicsPreUpdate.play(self, source, data)
@@ -153,7 +181,8 @@ function Rigidbody.events.physicsPreUpdate.play(self, source, data)
 	local transform = self.gameObject.globalTransform
 
 	-- if the transform has changed independently of physics transformations,
-	-- we need to reset the body position
+	-- we need to reset the body position and rotation
+	-- (the size is accounted for in the fixture update)
 	if
 		self._oldTransform and (
 			self._oldTransform.position.x ~= transform.position.x or
@@ -161,6 +190,7 @@ function Rigidbody.events.physicsPreUpdate.play(self, source, data)
 		)
 	then
 		self.body:setPosition(transform.position.x, transform.position.y * self.globals.ySign)
+		self.body:setAngle(math.rad(transform.rotation))
 	end
 
 end
@@ -169,6 +199,9 @@ function Rigidbody.events.physicsPostUpdate.play(self, source, data)
 
 	local x,y = self.body:getPosition()
 	self.gameObject:moveToGlobal(x, y * self.globals.ySign)
+
+	local angle = math.deg(self.body:getAngle())
+	self.gameObject.transform.rotation = angle - self.gameObject.parent.globalTransform.rotation
 
 	self._oldTransform = geometry.Transform(self.gameObject.globalTransform)
 end

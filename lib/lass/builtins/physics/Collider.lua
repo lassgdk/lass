@@ -2,6 +2,7 @@ local lass = require("lass")
 local class = require("lass.class")
 local geometry = require("lass.geometry")
 local collections = require("lass.collections")
+local Rigidbody = nil
 
 --[[
 Collider
@@ -35,6 +36,115 @@ local Collider = class.define(lass.Component, function(self, arguments)
 	self.base.init(self, arguments)
 end)
 
+local function shapeToPhysicsShape(self, shape, physicsShape, oldTransform)
+	-- create or modify a physics shape using a geometry.Shape
+
+	-- only Circle physics shapes can be modified, which makes this function's signature
+	-- somewhat complicated:
+
+	-- if physicsShape is not specified, return a new physics shape.
+	-- if shape and physicsShape are not the same shape type, return a new physics shape.
+	-- if shape and physicsShape are circles, modify physicsShape and return nil.
+	-- if shape and physicsShape are polygons, and self.globalTransform == oldTransform,
+	-- do nothing and return nil.
+	-- if shape and physicsShape are polygons, and self.globalTransform ~= oldTransform,
+	-- return a new physics shape.
+
+	-- all of this is to say: if you specify physicsShape and this function returns a new
+	-- physics shape, you should destroy the old shape and replace it with the new one.
+
+	local transform = geometry.Transform(self.gameObject.globalTransform)
+
+	--we want the global size and rotation of the shape, but not the global position
+	transform.position = geometry.Vector3(0,0,0)
+
+	if shape.class == geometry.Rectangle or shape.class == geometry.Polygon then
+
+		if physicsShape and oldTransform then
+
+			-- we can't directly edit the vertices of a PolygonShape.
+			-- if we have a reason to change them, create a new PolygonShape.
+			-- else, return nothing
+			if
+				oldTransform.r ~= transform.r or
+				oldTransform.x ~= transform.x or
+				oldTransform.y ~= transform.y or
+				not physicsShape:typeOf("PolygonShape")
+			then
+				local verts = shape:globalVertices(transform)
+				for i, vert in ipairs(verts) do
+					vert.y = vert.y * self.globals.ySign
+				end
+				return love.physics.newPolygonShape(unpack(geometry.flattenedVector2Array(verts)))
+			end
+		else
+			local verts = shape:globalVertices(transform)
+			for i, vert in ipairs(verts) do
+				vert.y = vert.y * self.globals.ySign
+			end
+			return love.physics.newPolygonShape(unpack(geometry.flattenedVector2Array(verts)))
+		end
+
+	elseif shape.class == geometry.Circle then
+		local cir = shape:globalCircle(transform)
+
+		-- thankfully, we can directly edit the radius and center of a CircleShape
+		if physicsShape and physicsShape:typeOf("CircleShape") then
+			physicsShape:setRadius(cir.radius)
+			physicsShape:setPoint(cir.position.x, cir.position.y * self.globals.ySign)
+		else
+			return love.physics.newCircleShape(cir.position.x, cir.position.y * self.globals.ySign, cir.radius)
+		end
+	end
+end
+
+function Collider.__get.solid(self)
+
+	return self._solid
+end
+
+function Collider.__set.solid(self, value)
+
+	self._solid = value
+
+	if not self.attachedToRigidbody and self.gameObject then
+
+		if value == true then
+			if (self.body and self.body:isDestroyed()) or not self.body then
+				local pos = self.gameObject.globalTransform.position
+				pos.y = pos.y * self.globals.ySign
+				self.body = love.physics.newBody(self.globals.physicsWorld, pos.x, pos.y, "static")
+				love.physics.newFixture(self.body, shapeToPhysicsShape(self, self.shape), 1)
+			end
+		elseif value == false and self.body and not self.body:isDestroyed() then
+			self.body:destroy()
+		end
+	elseif self.attachedToRigidbody and self.body then
+		self.body:destroy()
+		self.body = nil
+	end
+end
+
+function Collider.__get.attachedToRigidbody(self)
+
+	if not Rigidbody then
+		Rigidbody = require("lass.builtins.physics.Rigidbody")
+	end
+
+	--TODO: account for rigidbody being on an ancestor GameObject
+	if not self.gameObject then
+		return false
+	elseif self.gameObject:getComponent(Rigidbody) then
+		return true
+	else
+		return false
+	end
+end
+
+function Collider.__set.attachedToRigidbody(self)
+	error("attempted to set \"attachedToRigidBody\" (a read-only property)")
+end
+
 function Collider:awake(firstAwake)
 
 	if self.shapeSource and firstAwake then
@@ -57,23 +167,40 @@ function Collider:awake(firstAwake)
 			-- self.globals.colliders[layerName][self] = true
 		end
 	end
+
+	-- if self.solid is true but self.body was destroyed, setting self.solid to
+	-- true again will trigger construction of a new self.body
+	self.solid = self.solid
 end
 
 function Collider:update()
 
-	if self.gameObject.name == "Rectangle 5 3" then
-		-- debug.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
-		for k,v in pairs(self.collidingWith) do
-			-- debug.log(k.gameObject.name, v.frame, k.collidingWith[self].frame)
+	self.solid = self.solid
+
+	if self.body then
+		-- debug.log(self.gameObject.name, self.gameObject.globalTransform.position, self.body:getPosition())
+
+		local transform = self.gameObject.globalTransform
+
+		-- if the transform has changed independently of physics transformations,
+		-- we need to reset the body position
+		if
+			self._oldTransform and (
+				self._oldTransform.position.x ~= transform.position.x or
+				self._oldTransform.position.y ~= transform.position.y
+			)
+		then
+			self.body:setPosition(transform.position.x, transform.position.y * self.globals.ySign)
 		end
-		-- debug.log("vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv")
-	elseif self.gameObject.name:find("Player") then
-		-- debug.log("000^^^^^^^^^^^^^^^^^^^^^^^^000")
-		for k,v in pairs(self.collidingWith) do
-			-- debug.log(k.gameObject.name, v.frame, k.collidingWith[self].frame)
-		end
-		-- debug.log("000vvvvvvvvvvvvvvvvvvvvvvvvv000")
+
+		--globalTransform is a property, so we don't need to do a deepcopy
+		self._oldTransform = self.gameObject.globalTransform
+
 	end
+	-- debug.log(self.gameObject.name, self.gameObject.globalTransform.position)
+	-- for i,v in ipairs(self.shape:globalVertices(self.gameObject.globalTransform)) do
+	-- 	debug.log(i,v)
+	-- end
 end
 
 function Collider:deactivate()
@@ -94,6 +221,10 @@ function Collider:deactivate()
 		table.remove(layer, index)
 	end
 
+	if self.body then
+		self.body:destroy()
+	end
+
 	self.base.deactivate(self)
 end
 
@@ -109,16 +240,6 @@ function Collider:isCollidingWith(other, direction, noFrameRepeat, storeCollisio
 	local r, d = false, nil
 	if otherType == Collider then
 
-		-- if self.collidingWith[other] then
-		-- 	debug.log(self.gameObject.name,
-		-- 		other.gameObject.name,
-		-- 		"")
-		-- 	debug.log("start",
-		-- 		self.collidingWith[other].frame,
-		-- 		self.gameScene.frame,
-		-- 		"")
-		-- end
-
 		if noFrameRepeat then
 			if self.collidingWith[other] and self.collidingWith[other].frame == self.gameScene.frame then
 				-- debug.log(other.gameObject.name, "collide")
@@ -128,7 +249,7 @@ function Collider:isCollidingWith(other, direction, noFrameRepeat, storeCollisio
 			end
 		end
 
-		-- what to make of all this?
+		-- if z values don't match and neither collider ignores z, collision is false
 		if not (
 			self.gameObject.globalTransform.position.z == other.gameObject.globalTransform.position.z or
 			self.ignoreZ or
@@ -141,11 +262,6 @@ function Collider:isCollidingWith(other, direction, noFrameRepeat, storeCollisio
 				false, false, direction
 			)
 		end
-		-- if d then
-		-- 	for k, v in pairs(d) do
-		-- 		debug.log(k, v)
-		-- 	end
-		-- end
 
 		if r then
 			d.direction = direction
@@ -170,23 +286,11 @@ function Collider:isCollidingWith(other, direction, noFrameRepeat, storeCollisio
 			end
 		end
 
-		-- if self.collidingWith[other] then
-		-- 	debug.log("end",
-		-- 		self.collidingWith[other].frame,
-		-- 		self.gameScene.frame,
-		-- 		r)
-		-- end
 	else
 		r, d = geometry.intersecting(
 			self.shape, other, self.gameObject.globalTransform, nil, false, false, direction
 		)
 	end
-
-	-- if self.gameObject.name:find("Player") and other.gameObject.name == "Rectangle 5 3" then
-	-- 	debug.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
-	-- 	debug.log(r,d, math.random())
-	-- 	debug.log("vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv")
-	-- end
 
 	return r, d
 end
@@ -199,4 +303,30 @@ function Collider:detach()
 		table.remove(l, collections.index(l, self))
 	end
 end
+
+-- function Collider.events.physicsPreUpdate.play(self, source, data)
+
+-- 	local transform = self.gameObject.globalTransform
+
+-- 	-- if the transform has changed independently of physics transformations,
+-- 	-- we need to reset the body position
+-- 	if
+-- 		self._oldTransform and (
+-- 			self._oldTransform.position.x ~= transform.position.x or
+-- 			self._oldTransform.position.y ~= transform.position.y
+-- 		)
+-- 	then
+-- 		self.body:setPosition(transform.position.x, transform.position.y * self.globals.ySign)
+-- 	end
+
+-- end
+
+-- function Collider.events.physicsPostUpdate.play(self, source, data)
+
+-- 	local x,y = self.body:getPosition()
+-- 	self.gameObject:moveToGlobal(x, y * self.globals.ySign)
+
+-- 	self._oldTransform = geometry.Transform(self.gameObject.globalTransform)
+-- end
+
 return Collider
