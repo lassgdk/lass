@@ -145,6 +145,7 @@ function Rigidbody:awake()
 
 	for i, collider in ipairs(colliders) do
 		local fix = love.physics.newFixture(self.body, shapeToPhysicsShape(self, collider.shape), 1)
+		fix:setRestitution(collider.restitution)
 		self.fixtures[fix] = collider
 	end
 
@@ -183,6 +184,7 @@ function Rigidbody:update()
 				self.fixtures[fixture] = nil
 				fixture:destroy()
 				fixture = love.physics.newFixture(self.body, shape, 6)
+				fixture:setRestitution(collider.restitution)
 				self.fixtures[fixture] = collider
 			end
 		end

@@ -32,6 +32,7 @@ local Collider = class.define(lass.Component, function(self, arguments)
 	arguments.layers = arguments.layers or {"main"}
 	arguments.layersToCheck = arguments.layersToCheck or collections.copy(arguments.layers)
 	arguments.solid = arguments.solid or false
+	arguments.restitution = arguments.restitution or 0
 
 	self.base.init(self, arguments)
 end)
