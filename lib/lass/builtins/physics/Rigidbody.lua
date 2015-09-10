@@ -74,29 +74,55 @@ local function shapeToPhysicsShape(self, shape, physicsShape, oldTransform)
 	end
 end
 
-function Rigidbody:getVelocity()
+-- function Rigidbody:getVelocity()
 
-	local x, y = self.body:getLinearVelocity()
-	return geometry.Vector2(x, y)
+-- 	local x, y = self.body:getLinearVelocity()
+-- 	return geometry.Vector2(x, y)
+-- end
+
+-- function Rigidbody:setVelocity(...)
+
+-- 	if not self.body then
+-- 		self._velocity = geometry.Vector2(...)
+-- 	else
+-- 		local v = geometry.Vector2(...)
+-- 		self.body:setLinearVelocity(v.x,v.y)
+-- 	end
+-- end
+
+function Rigidbody.__get.velocity(self)
+
+	local v = geometry.Vector2(self.body:getLinearVelocity())
+
+	v.callback = function(object, key, value)
+		local vel = self.velocity
+
+		if key == "x" then
+			self.velocity = geometry.Vector2(value, vel.y)
+		elseif key == "y" then
+			self.velocity = geometry.Vector2(vel.x, value)
+		end
+	end
+
+	return v
 end
 
-function Rigidbody:setVelocity(...)
+function Rigidbody.__set.velocity(self, value)
 
 	if not self.body then
-		self._velocity = geometry.Vector2(...)
+		self._velocity = value
 	else
-		local v = geometry.Vector2(...)
-		self.body:setLinearVelocity(v.x,v.y)
+		self.body:setLinearVelocity(value.x, value.y)
 	end
 end
 
-function Rigidbody:getAngularVelocity()
+function Rigidbody.__get.angularVelocity(self)
 
 	local r = self.body:getAngularVelocity()
 	return math.deg(r)
 end
 
-function Rigidbody:setAngularVelocity(r)
+function Rigidbody.__set.angularVelocity(self, r)
 
 	-- if not self.body then
 	-- 	self._velocity = geometry.Vector2(...)
@@ -116,12 +142,13 @@ function Rigidbody:awake()
 	self.body:setPosition(p.x, p.y * self.globals.ySign)
 	self.body:setAngle(math.rad(self.gameObject.globalTransform.rotation))
 
-	if self.velocity then
-		self:setVelocity(self.velocity)
-		self.velocity = nil
-		self._velocity = nil
-	elseif self._velocity then
-		self:setVelocity(self._velocity)
+	-- if self.velocity then
+	-- 	self:setVelocity(self.velocity)
+	-- 	self.velocity = nil
+	-- 	self._velocity = nil
+	if self._velocity then
+		-- self:setVelocity(self._velocity)
+		self.velocity = self._velocity
 		self._velocity = nil
 	end
 
@@ -191,8 +218,8 @@ function Rigidbody.events.physicsPreUpdate.play(self, source, data)
 	then
 		self.body:setPosition(transform.position.x, transform.position.y * self.globals.ySign)
 		self.body:setAngle(math.rad(transform.rotation))
+		self.body:setAwake(true)
 	end
-
 end
 
 function Rigidbody.events.physicsPostUpdate.play(self, source, data)

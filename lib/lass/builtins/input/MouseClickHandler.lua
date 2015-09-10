@@ -27,6 +27,14 @@ local function mouseEvent(self, f, x, y, button, clickedOnSelf)
 			else
 				target[1][target[2]](target[1])
 			end
+		else
+			-- if type(self.targetArguments[i]) == "table" then
+			if type(self.targetArguments[i]) == "function" then
+				target[1][target[2]] = self.targetArguments[i](f, x, y, button, clickedOnSelf)
+			else
+				target[1][target[2]] = self.targetArguments[i]
+				-- target[1][target[2]](target[1])
+			end
 		end
 	end
 end

@@ -982,7 +982,11 @@ function functions.negativeX(x)
 	return -x
 end
 
-return {
+--[[
+getters and setters
+]]
+
+local geometry = {
 	Transform = Transform,
 	Vector2 = Vector2,
 	Vector3 = Vector3,
@@ -995,3 +999,54 @@ return {
 	flattenedVector2Array = flattenedVector2Array,
 	functions = functions
 }
+
+for i, gClassTable in ipairs({
+	{"Vector2", x="number", y="number"},
+	{"Vector3", x="number", y="number", z="number"},
+	{"Transform", position={Vector3=Vector3}, size={Vector3=Vector3}},
+	{"Rectangle", width="number", height="number", position={Vector2=Vector2}},
+	{"Circle", radius="number", position={Vector2=Vector2}},
+	{"Polygon", vertices="table", position={Vector2=Vector2}},
+}) do
+	local gClass = gClassTable[1]
+	gClassTable[1] = nil
+
+	for property, propertyType in pairs(gClassTable) do
+		geometry[gClass]["__get"][property] = function(self)
+			return self["_" .. property]
+		end
+
+		if type(propertyType) == "string" then
+			geometry[gClass]["__set"][property] = function(self, value)
+				assert(
+					type(value) == propertyType,
+					gClass .. "." .. property .. " must be " .. propertyType
+				)
+
+				self["_" .. property] = value
+
+				if self.callback then
+					self.callback(self, property, value)
+				end
+			end
+		elseif type(propertyType) == "table" then
+
+			local name, cl = next(propertyType)
+
+			geometry[gClass]["__set"][property] = function(self, value)
+				assert(
+					class.instanceof(value, cl),
+					gClass .. "." .. property .. " must be " .. name
+				)
+
+				self["_" .. property] = value
+
+				if self.callback then
+					self.callback(property, value)
+				end
+			end
+		end
+	end
+end
+
+return geometry

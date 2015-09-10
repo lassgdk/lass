@@ -78,8 +78,6 @@ function ShapeRenderer:draw()
 		drawPolygon(self)
 	elseif self.shape:instanceof(geometry.Circle) then
 		drawCircle(self)
-	else
-		debug.log('idunno')
 	end
 end
 
