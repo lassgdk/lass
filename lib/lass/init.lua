@@ -1070,7 +1070,7 @@ function GameScene:applySettings()
 	local grav = geometry.Vector2(self.globals.gravity)
 	-- grav.x = grav.x / self.settings.physics.pixelsPerMeter
 	-- grav.y = grav.y / self.settings.physics.pixelsPerMeter
-	self.globals.physicsWorld:setGravity(grav.x, grav.y)
+	self.globals.physicsWorld:setGravity(grav.x, self.globals.ySign * grav.y)
 end
 
 function GameScene:addGameObject(gameObject)

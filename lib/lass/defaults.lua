@@ -11,8 +11,8 @@ return {
   physics = {
     gravity = {
       x = 0,
-      y = 9.80665 * 50
+      y = -9.80665 * 20
     },
-    pixelsPerMeter = 50
+    pixelsPerMeter = 20
   }
 }

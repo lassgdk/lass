@@ -124,13 +124,6 @@ end
 
 function Rigidbody.__set.angularVelocity(self, r)
 
-	-- if not self.body then
-	-- 	self._velocity = geometry.Vector2(...)
-	-- else
-	-- 	local v = geometry.Vector2(...)
-	-- 	self.body:setAngularVelocity(v.x,v.y)
-	-- end
-
 	self.body:setAngularVelocity(math.rad(r))
 end
 
@@ -142,12 +135,7 @@ function Rigidbody:awake()
 	self.body:setPosition(p.x, p.y * self.globals.ySign)
 	self.body:setAngle(math.rad(self.gameObject.globalTransform.rotation))
 
-	-- if self.velocity then
-	-- 	self:setVelocity(self.velocity)
-	-- 	self.velocity = nil
-	-- 	self._velocity = nil
 	if self._velocity then
-		-- self:setVelocity(self._velocity)
 		self.velocity = self._velocity
 		self._velocity = nil
 	end
