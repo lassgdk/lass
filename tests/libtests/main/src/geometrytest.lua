@@ -35,20 +35,23 @@ geometrytest.tests={
 }
 
 local function assertIncorrectCreation(class, className, variables, default)
-	-- assumes up to three variables
 
 	for _, badValue in ipairs({-1, "1", false, math.huge, -math.huge, NaN}) do
+
+		local params = {}
 		for i, var in ipairs(variables) do
-			if i == 1 then
-				success = pcall(class, badValue, default, default)
-			elseif i == 2 then
-				success = pcall(class, default, badValue, default)
-			else
-				success = pcall(class, default, default, badValue)
-			end
+			params[i] = default
+		end
+
+		for i, var in ipairs(variables) do
+			params[i] = badValue
+
+			success = pcall(class, unpack(params))
 			if success then
 				error(className .. "." .. var .. " incorrectly created with " .. badValue)
 			end
+
+			params[i] = default
 		end
 	end
 end
