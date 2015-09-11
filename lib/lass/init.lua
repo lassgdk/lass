@@ -995,6 +995,18 @@ local GameScene = class.define(GameEntity, function(self, transform)
 	self.globals.events = {}
 	self.globals.physicsWorld = love.physics.newWorld(0, 0, true)
 
+	self.globals.physicsWorld:setCallbacks(
+		--begin contact
+		function(...)
+			debug.log("begin contact", ...)
+		end,
+
+		--end contact
+		function(...)
+			debug.log("end contact", ...)
+		end
+	)
+
 	self:addEvent("physicsPreUpdate")
 	self:addEvent("physicsPostUpdate")
 
