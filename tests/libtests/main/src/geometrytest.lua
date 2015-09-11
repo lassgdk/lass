@@ -1,6 +1,7 @@
 local geometry = require "lass.geometry"
 
 local geometrytest = {}
+local NaN = math.huge / math.huge
 
 geometrytest.tests={
 	"testVector2Add",
@@ -33,6 +34,25 @@ geometrytest.tests={
 	"testIntersectingPolygons",
 }
 
+local function assertIncorrectCreation(class, className, variables, default)
+	-- assumes up to three variables
+
+	for _, badValue in ipairs({-1, "1", false, math.huge, -math.huge, NaN}) do
+		for i, var in ipairs(variables) do
+			if i == 1 then
+				success = pcall(class, badValue, default, default)
+			elseif i == 2 then
+				success = pcall(class, default, badValue, default)
+			else
+				success = pcall(class, default, default, badValue)
+			end
+			if success then
+				error(className .. "." .. var .. " incorrectly created with " .. badValue)
+			end
+		end
+	end
+end
+
 
 function geometrytest.testVector2Add()
 	-- assumes the only way to call these functions is using at least one Vector2
@@ -48,6 +68,9 @@ function geometrytest.testVector2Add()
 
 	assert(pcall(function() return v1 + false end) ~= true, "Vector2 improperly added with false")
 	assert(pcall(function() return false + v1 end) ~= true, "Vector2 improperly added with false")
+
+	assert(pcall(function() return v1 + math.huge end) ~= true, "Vector2 improperly added with infinity")
+	assert(pcall(function() return math.huge + v1 end) ~= true, "Vector2 improperly added with infinity")
 
 
 	--[[basic usage]]
@@ -73,29 +96,6 @@ function geometrytest.testVector2Add()
 	v3 = v2 + v1
 	assert(v3.x == 3, "2 + 1 didn't become 3")
 	assert(v3.y == 15, "10 + 5 didn't become 15")
-
-
-	--[[usage with infinite numbers]]
-	v1 = geometry.Vector2(math.huge, math.huge)
-	v2 = geometry.Vector2(math.huge, math.huge)
-
-	v3 = v1 + v2
-	assert(v3.x == math.huge, "math.huge + math.huge didn't equal math.huge")
-	assert(v3.y == math.huge, "math.huge + math.huge didn't equal math.huge")
-
-	v1 = geometry.Vector2(-math.huge, -math.huge)
-	v2 = geometry.Vector2(-math.huge, -math.huge)
-
-	v3 = v1 + v2
-	assert(v3.x == -math.huge, "-math.huge + -math.huge didn't equal -math.huge")
-	assert(v3.y == -math.huge, "-math.huge + -math.huge didn't equal -math.huge")
-
-	v1 = geometry.Vector2(math.huge, math.huge)
-	v2 = geometry.Vector2(-math.huge, -math.huge)
-
-	v3 = v1 + v2
-	assert(v3.x ~= v3.x, "math.huge + -math.huge didn't become NaN")
-	assert(v3.y ~= v3.y, "math.huge + -math.huge didn't become NaN")
 end
 
 function geometrytest.testVector3Add()
@@ -141,32 +141,6 @@ function geometrytest.testVector3Add()
 	assert(v3.x == 3, "2 + 1 didn't become 3")
 	assert(v3.y == 15, "10 + 5 didn't become 15")
 	assert(v3.z == 30, "20 + 10 didn't become 30")
-
-
-	--[[usage with infinite numbers]]
-	v1 = geometry.Vector3(math.huge, math.huge, math.huge)
-	v2 = geometry.Vector3(math.huge, math.huge, math.huge)
-
-	v3 = v1 + v2
-	assert(v3.x == math.huge, "math.huge + math.huge didn't equal math.huge")
-	assert(v3.y == math.huge, "math.huge + math.huge didn't equal math.huge")
-	assert(v3.z == math.huge, "math.huge + math.huge didn't equal math.huge")
-
-	v1 = geometry.Vector3(-math.huge, -math.huge, -math.huge)
-	v2 = geometry.Vector3(-math.huge, -math.huge, -math.huge)
-
-	v3 = v1 + v2
-	assert(v3.x == -math.huge, "-math.huge + -math.huge didn't equal -math.huge")
-	assert(v3.y == -math.huge, "-math.huge + -math.huge didn't equal -math.huge")
-	assert(v3.z == -math.huge, "-math.huge + -math.huge didn't equal -math.huge")
-
-	v1 = geometry.Vector3(math.huge, math.huge, math.huge)
-	v2 = geometry.Vector3(-math.huge, -math.huge, -math.huge)
-
-	v3 = v1 + v2
-	assert(v3.x ~= v3.x, "math.huge + -math.huge didn't become NaN")
-	assert(v3.y ~= v3.y, "math.huge + -math.huge didn't become NaN")
-	assert(v3.z ~= v3.z, "math.huge + -math.huge didn't become NaN")
 end
 
 function geometrytest.testVector2And3Add()
@@ -247,33 +221,6 @@ function geometrytest.testVector2Subtract()
 	v3 = v2 - v1
 	assert(v3.x == 1, "2 - 1 didn't become 1")
 	assert(v3.y == 5, "10 - 5 didn't become 5")
-
-
-	--[[usage with infinite numbers]]
-	v1 = geometry.Vector2(math.huge, math.huge)
-	v2 = geometry.Vector2(math.huge, math.huge)
-
-	v3 = v1 - v2
-	assert(v3.x ~= v3.x, "math.huge - math.huge didn't become NaN")
-	assert(v3.y ~= v3.y, "math.huge - math.huge didn't become NaN")
-
-	v1 = geometry.Vector2(-math.huge, -math.huge)
-	v2 = geometry.Vector2(-math.huge, -math.huge)
-
-	v3 = v1 - v2
-	assert(v3.x ~= v3.x, "-math.huge - -math.huge didn't become NaN")
-	assert(v3.y ~= v3.y, "-math.huge - -math.huge didn't become NaN")
-
-	v1 = geometry.Vector2(math.huge, math.huge)
-	v2 = geometry.Vector2(-math.huge, -math.huge)
-
-	v3 = v1 - v2
-	assert(v3.x == math.huge, "math.huge - -math.huge didn't equal math.huge")
-	assert(v3.y == math.huge, "math.huge - -math.huge didn't equal math.huge")
-
-	v3 = v2 - v1
-	assert(v3.x == -math.huge, "-math.huge - math.huge didn't equal -math.huge")
-	assert(v3.y == -math.huge, "-math.huge - math.huge didn't equal -math.huge")
 end
 
 function geometrytest.testVector3Subtract()
@@ -319,37 +266,6 @@ function geometrytest.testVector3Subtract()
 	assert(v3.x == 1, "2 - 1 didn't become 1")
 	assert(v3.y == 5, "10 - 5 didn't become 5")
 	assert(v3.z == 10, "20 - 10 didn't become 10")
-
-
-	--[[usage with infinite numbers]]
-	v1 = geometry.Vector3(math.huge, math.huge, math.huge)
-	v2 = geometry.Vector3(math.huge, math.huge, math.huge)
-
-	v3 = v1 - v2
-	assert(v3.x ~= v3.x, "math.huge - math.huge didn't become NaN")
-	assert(v3.y ~= v3.y, "math.huge - math.huge didn't become NaN")
-	assert(v3.z ~= v3.z, "math.huge - math.huge didn't become NaN")
-
-	v1 = geometry.Vector3(-math.huge, -math.huge, -math.huge)
-	v2 = geometry.Vector3(-math.huge, -math.huge, -math.huge)
-
-	v3 = v1 - v2
-	assert(v3.x ~= v3.x, "-math.huge - -math.huge didn't become NaN")
-	assert(v3.y ~= v3.y, "-math.huge - -math.huge didn't become NaN")
-	assert(v3.z ~= v3.z, "-math.huge - -math.huge didn't become NaN")
-
-	v1 = geometry.Vector3(math.huge, math.huge, math.huge)
-	v2 = geometry.Vector3(-math.huge, -math.huge, -math.huge)
-
-	v3 = v1 - v2
-	assert(v3.x == math.huge, "math.huge - -math.huge didn't equal math.huge")
-	assert(v3.y == math.huge, "math.huge - -math.huge didn't equal math.huge")
-	assert(v3.z == math.huge, "math.huge - -math.huge didn't equal math.huge")
-
-	v3 = v2 - v1
-	assert(v3.x == -math.huge, "-math.huge - math.huge didn't equal math.huge")
-	assert(v3.y == -math.huge, "-math.huge - math.huge didn't equal math.huge")
-	assert(v3.z == -math.huge, "-math.huge - math.huge didn't equal math.huge")
 end
 
 function geometrytest.testVector2And3Subtract()
@@ -421,18 +337,6 @@ function geometrytest.testVector2Multiply()
 	v2 = 5 * v1
 	assert(v2.x == 5, "1 * 5 didn't become 5")
 	assert(v2.y == 10, "2 * 5 didn't become 10")
-
-
-	--[[usage with infinite numbers]]
-	v1 = geometry.Vector2(math.huge, math.huge)
-	v2 = v1 * math.huge
-	assert(v2.x == math.huge, "math.huge * math.huge didn't equal math.huge")
-	assert(v2.y == math.huge, "math.huge * math.huge didn't equal math.huge")
-
-	v1 = geometry.Vector2(-math.huge, -math.huge)
-	v2 = v1 * math.huge
-	assert(v2.x == -math.huge, "-math.huge * math.huge didn't equal -math.huge")
-	assert(v2.y == -math.huge, "-math.huge * math.huge didn't equal -math.huge")
 end
 
 function geometrytest.testTransformCreation()
@@ -451,25 +355,35 @@ function geometrytest.testTransformCreation()
 
 	assert(pcall(geometry.Transform, nil, math.huge) ~= true, "improperly allowed infinity for rotation")
 	assert(pcall(geometry.Transform, nil, -math.huge) ~= true, "improperly allowed negative infinity for rotation")
-	assert(pcall(geometry.Transform, nil, math.huge / math.huge) ~= true, "improperly allowed NaN for rotation")
+	assert(pcall(geometry.Transform, nil, NaN) ~= true, "improperly allowed NaN for rotation")
 
 
 	--[[strings incorrectly nested in tables]]
-	assert(pcall(geometry.Transform, {x = ""}) ~= true, "improperly created transform with string for position.x")
-	assert(pcall(geometry.Transform, {y = ""}) ~= true, "improperly created transform with string for position.y")
-	assert(pcall(geometry.Transform, {z = ""}) ~= true, "improperly created transform with string for position.z")
+	assert(pcall(geometry.Transform, {x = ""}) ~= true,
+		"improperly created transform with string for position.x")
+	assert(pcall(geometry.Transform, {y = ""}) ~= true,
+		"improperly created transform with string for position.y")
+	assert(pcall(geometry.Transform, {z = ""}) ~= true,
+		"improperly created transform with string for position.z")
 
-	assert(pcall(geometry.Transform, nil, nil, {x = ""}) ~= true, "improperly created transform with string for size.x")
-	assert(pcall(geometry.Transform, nil, nil, {y = ""}) ~= true, "improperly created transform with string for size.y")
-	assert(pcall(geometry.Transform, nil, nil, {z = ""}) ~= true, "improperly created transform with string for size.z")
+	assert(pcall(geometry.Transform, nil, nil, {x = ""}) ~= true,
+		"improperly created transform with string for size.x")
+	assert(pcall(geometry.Transform, nil, nil, {y = ""}) ~= true,
+		"improperly created transform with string for size.y")
+	assert(pcall(geometry.Transform, nil, nil, {z = ""}) ~= true,
+		"improperly created transform with string for size.z")
 
 
 	--[[breaking setters]]
 	local t = geometry.Transform()
-	assert(pcall(function() t.rotation = "" end) ~= true, "transform rotation shouldn't accept string")
-	assert(pcall(function() t.rotation = math.huge end) ~= true, "transform rotation shouldn't accept math.huge")
-	assert(pcall(function() t.rotation = -math.huge end) ~= true, "transform rotation shouldn't accept -math.huge")
-	assert(pcall(function() t.rotation = math.huge / math.huge end) ~= true, "transform rotation shouldn't accept NaN")
+	assert(pcall(function() t.rotation = "" end) ~= true,
+		"transform rotation shouldn't accept string")
+	assert(pcall(function() t.rotation = math.huge end) ~= true,
+		"transform rotation shouldn't accept math.huge")
+	assert(pcall(function() t.rotation = -math.huge end) ~= true,
+		"transform rotation shouldn't accept -math.huge")
+	assert(pcall(function() t.rotation = NaN end) ~= true,
+		"transform rotation shouldn't accept NaN")
 
 
 	--[[basic creation]]
@@ -556,29 +470,29 @@ function geometrytest.testTransformCreationWithTransform()
 
 	--[[incorrect creation attempts]]
 
-	local t1 = geometry.Transform()
-	t1.position.x = ""
-	assert(pcall(geometry.Transform, t1) ~= true, "improperly made transform with transform with string for position x")
-	t1 = geometry.Transform()
-	t1.position.y = ""
-	assert(pcall(geometry.Transform, t1) ~= true, "improperly made transform with transform with string for position y")
-	t1 = geometry.Transform()
-	t1.position.z = ""
-	assert(pcall(geometry.Transform, t1) ~= true, "improperly made transform with transform with string for position z")
+	-- local t1 = geometry.Transform()
+	-- t1.position.x = ""
+	-- assert(pcall(geometry.Transform, t1) ~= true, "improperly made transform with transform with string for position x")
+	-- t1 = geometry.Transform()
+	-- t1.position.y = ""
+	-- assert(pcall(geometry.Transform, t1) ~= true, "improperly made transform with transform with string for position y")
+	-- t1 = geometry.Transform()
+	-- t1.position.z = ""
+	-- assert(pcall(geometry.Transform, t1) ~= true, "improperly made transform with transform with string for position z")
 
-	t1 = geometry.Transform()
-	t1.size.x = ""
-	assert(pcall(geometry.Transform, t1) ~= true, "improperly made transform with transform with string for size x")
-	t1 = geometry.Transform()
-	t1.size.y = ""
-	assert(pcall(geometry.Transform, t1) ~= true, "improperly made transform with transform with string for size y")
-	t1 = geometry.Transform()
-	t1.size.z = ""
-	assert(pcall(geometry.Transform, t1) ~= true, "improperly made transform with transform with string for size z")
+	-- t1 = geometry.Transform()
+	-- t1.size.x = ""
+	-- assert(pcall(geometry.Transform, t1) ~= true, "improperly made transform with transform with string for size x")
+	-- t1 = geometry.Transform()
+	-- t1.size.y = ""
+	-- assert(pcall(geometry.Transform, t1) ~= true, "improperly made transform with transform with string for size y")
+	-- t1 = geometry.Transform()
+	-- t1.size.z = ""
+	-- assert(pcall(geometry.Transform, t1) ~= true, "improperly made transform with transform with string for size z")
 
 
 	--[[basic creation]]
-	t1 = geometry.Transform()
+	local t1 = geometry.Transform()
 	local t2 = geometry.Transform(t1)
 
 	assert(t2.position.x == 0, "transform x position didn't default to 0")
@@ -633,20 +547,16 @@ end
 function geometrytest.testCircleCreation()
 
 	--[[incorrect creation attempts]]
-	assert(pcall(geometrytest.Circle) ~= true, "circle incorrectly created with no arguments")
-	assert(pcall(geometrytest.Circle, -1) ~= true, "circle incorrectly created with -1 radius")
-	assert(pcall(geometrytest.Circle, "1") ~= true, "circle incorrectly created with string for radius")
-	assert(pcall(geometrytest.Circle, false) ~= true, "circle incorrectly created with false for radius")
+	assert(pcall(geometry.Circle) ~= true, "circle incorrectly created with no arguments")
 
-	--[[verify boundary conditions for size]]
-	local c = geometry.Circle(0)
-	assert(c.radius == 0, "circle radius of 0 should be possible")
+	assertIncorrectCreation(geometry.Circle, "circle", {"radius"})
+
 
 	--[[basic creation]]
-	c = geometry.Circle(1)
+	c = geometry.Circle(0)
 
 	assert(type(c.radius) == "number", "circle radius is not number")
-	assert(c.radius == 1, "circle radius changed from given value of 1")
+	assert(c.radius == 0, "circle radius changed from given value of 0")
 	assert(c.position:instanceof(geometry.Vector2), "circle position is not Vector2")
 	assert(c.position.x == 0, "circle default x position is not 0")
 	assert(c.position.y == 0, "circle default y position is not 0")
@@ -669,13 +579,6 @@ function geometrytest.testCircleCreation()
 	assert(c.position.x == -1, "circle x position changed from given value of -1")
 	assert(c.position.y == -1, "circle y position changed from given value of -1")
 
-
-	--[[creation with infinity]]
-	c = geometry.Circle(math.huge, geometry.Vector2(math.huge, math.huge))
-	assert(c.radius == math.huge, "circle radius changed from given value of math.huge")
-	assert(c.position.x == math.huge, "circle x position changed from given value of math.huge")
-	assert(c.position.y == math.huge, "circle y position changed from given value of math.huge")
-
 end
 
 
@@ -685,14 +588,7 @@ function geometrytest.testRectangleCreation()
 	assert(pcall(geometry.Rectangle) ~= true, "rectangle incorrectly created with no arguments")
 	assert(pcall(geometry.Rectangle, 0) ~= true, "rectangle incorrectly created with only one argument")
 
-	assert(pcall(geometry.Rectangle, -1, 1) ~= true, "rectangle incorrectly created with -1 width")
-	assert(pcall(geometry.Rectangle, 1, -1) ~= true, "rectangle incorrectly created with -1 height")
-
-	assert(pcall(geometry.Rectangle, "1", 1) ~= true, "rectangle incorrectly created with stright for width")
-	assert(pcall(geometry.Rectangle, 1, "1") ~= true, "rectangle incorrectly created with stright for height")
-
-	assert(pcall(geometry.Rectangle, false, 1) ~= true, "rectangle incorrectly created with false for width")
-	assert(pcall(geometry.Rectangle, 1, false) ~= true, "rectangle incorrectly created with false for height")
+	assertIncorrectCreation(geometry.Rectangle, "rectangle", {"width", "height"}, 1)
 
 
 	--[[verify boundary conditions for size]]
@@ -734,14 +630,6 @@ function geometrytest.testRectangleCreation()
 	assert(r.position.x == -1, "rectangle x position changed from given value of -1")
 	assert(r.position.y == -1, "rectangle y position changed from given value of -1")
 
-
-	--[[creation with infinity]]
-	r = geometry.Rectangle(math.huge, math.huge, geometry.Vector2(math.huge, math.huge))
-	assert(r.width == math.huge, "rectangle width changed from given value of math.huge")
-	assert(r.height == math.huge, "rectangle height changed from given value of math.huge")
-	assert(r.position.x == math.huge, "rectangle x position changed from given value of math.huge")
-	assert(r.position.y == math.huge, "rectangle y position changed from given value of math.huge")
-
 end
 
 function geometrytest.testVector2Creation()
@@ -775,12 +663,6 @@ function geometrytest.testVector2Creation()
 	assert(v.x == 1, "Vector2 x value changed from 1")
 	assert(v.y == 1, "Vector2 y value changed from 1")
 	assert(v.z == nil, "Vector2 shouldn't have an existing value for z")
-
-
-	--[[creation with infinity]]
-	v = geometry.Vector2(math.huge, math.huge)
-	assert(v.x == math.huge, "Vector2 x value changed from math.huge")
-	assert(v.y == math.huge, "Vector2 y value changed from math.huge")
 
 
 	--[[creation with just tables]]
@@ -848,13 +730,6 @@ function geometrytest.testVector3Creation()
 	assert(v.x == 1, "Vector3 x value changed from 1")
 	assert(v.y == 1, "Vector3 y value changed from 1")
 	assert(v.z == 1, "Vector3 z value changed from 1")
-	
-
-	--[[creation with infinity]]
-	v = geometry.Vector3(math.huge, math.huge, math.huge)
-	assert(v.x == math.huge, "Vector3 x value changed from math.huge")
-	assert(v.y == math.huge, "Vector3 y value changed from math.huge")
-	assert(v.z == math.huge, "Vector3 z value changed from math.huge")
 
 
 	--[[creation with just tables]]

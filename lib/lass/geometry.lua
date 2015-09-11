@@ -24,6 +24,19 @@ local function assertOperandsHaveXandY(a, b, otherAllowedType, otherAllowedTypeP
 	end
 end
 
+
+local function assertValueIsValidNumber(class, key, value)
+	if type(value) ~= "number" then
+		error(class .. "." .. key .. " must be number")
+	elseif value == math.huge then
+		error(class .. "." .. key .. " cannot be infinity")
+	elseif value == -math.huge then
+		error(class .. "." .. key .. " cannot be negative infinity")
+	elseif value ~= value then
+		error(class .. "." .. key .. " cannot be NaN")
+	end
+end
+
 --[[public]]
 
 --[[
@@ -363,7 +376,6 @@ local Transform = class.define(function(self, position, rotation, size)
 	end
 
 	-- if Vector3 calls crash, they should be wrapped in a unique error message from Transform
-	-- self.position = Vector3(position)
 	safe, self.position = pcall(Vector3, position)
 	if not safe then
 		error("the x, y, and z values of position must be numbers")
@@ -375,7 +387,6 @@ local Transform = class.define(function(self, position, rotation, size)
 		size.x = size.x or 1
 		size.y = size.y or 1
 		size.z = size.z or 1
-		-- self.size = Vector3(size)
 		safe, self.size = pcall(Vector3, size)
 		if not safe then
 			error("the x, y, and z values of size must be numbers")
@@ -391,13 +402,8 @@ function Transform.__get.rotation(self)
 end
 
 function Transform.__set.rotation(self, value)
-	--clamp rotation between 0 and 360 degrees (e.g., -290 => 70)
-
-	assert(type(value) == "number", "rotation must be number")
-	assert(value ~= math.huge, "rotation cannot be infinity")
-	assert(value ~= -math.huge, "rotation cannot be negative infinity")
-	assert(value == value, "rotation cannot be NaN")
-
+	assertValueIsValidNumber("transform", "rotation", value)
+	-- clamp rotation between 0 and 360 degrees (e.g., -290 => 70)
 	self._rotation = value % 360
 end
 
@@ -1016,7 +1022,17 @@ for i, gClassTable in ipairs({
 			return self["_" .. property]
 		end
 
-		if type(propertyType) == "string" then
+		if propertyType == "number" then
+			geometry[gClass]["__set"][property] = function(self, value)
+				assertValueIsValidNumber(gClass, property, value)
+
+				self["_" .. property] = value
+
+				if self.callback then
+					self.callback(self, property, value)
+				end
+			end
+		elseif type(propertyType) == "string" then
 			geometry[gClass]["__set"][property] = function(self, value)
 				assert(
 					type(value) == propertyType,
