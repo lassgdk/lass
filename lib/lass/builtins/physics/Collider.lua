@@ -56,8 +56,10 @@ local function shapeToPhysicsShape(self, shape, physicsShape, oldTransform)
 
 	local transform = geometry.Transform(self.gameObject.globalTransform)
 
-	--we want the global size and rotation of the shape, but not the global position
+	-- we want the global size of the shape, but not the global position or rotation
+	-- (we will use the rotation for the body, but not the fixture)
 	transform.position = geometry.Vector3(0,0,0)
+	transform.rotation = 0
 
 	if shape.class == geometry.Rectangle or shape.class == geometry.Polygon then
 
@@ -67,9 +69,9 @@ local function shapeToPhysicsShape(self, shape, physicsShape, oldTransform)
 			-- if we have a reason to change them, create a new PolygonShape.
 			-- else, return nothing
 			if
-				oldTransform.r ~= transform.r or
-				oldTransform.x ~= transform.x or
-				oldTransform.y ~= transform.y or
+				-- oldTransform.r ~= transform.r or
+				oldTransform.size.x ~= transform.size.x or
+				oldTransform.size.y ~= transform.size.y or
 				not physicsShape:typeOf("PolygonShape")
 			then
 				local verts = shape:globalVertices(transform)
@@ -108,42 +110,66 @@ function Collider.__set.solid(self, value)
 
 	self._solid = value
 
-	if not self.attachedToRigidbody and self.gameObject then
+	-- if not attached to Rigidbody, create a new static body or destroy the current body
+	if not self.rigidbody and self.gameObject then
 
 		if value == true then
 			if (self.body and self.body:isDestroyed()) or not self.body then
 				local pos = self.gameObject.globalTransform.position
 				pos.y = pos.y * self.globals.ySign
+
 				self.body = love.physics.newBody(self.globals.physicsWorld, pos.x, pos.y, "static")
-				love.physics.newFixture(self.body, shapeToPhysicsShape(self, self.shape), 1)
+				self.fixture = love.physics.newFixture(self.body, shapeToPhysicsShape(self, self.shape), 1)
 			end
 		elseif value == false and self.body and not self.body:isDestroyed() then
 			self.body:destroy()
+			self.fixture:destroy()
 		end
-	elseif self.attachedToRigidbody and self.body then
-		self.body:destroy()
-		self.body = nil
+
+	--else, set self.body to the rigidbody or destroy the current body
+	elseif self.rigidbody and self.body ~= self.rigidbody.body then
+
+		if value == true then
+			self.body = self.rigidbody.body
+			self.fixture = love.physics.newFixture(self.body, shapeToPhysicsShape(self, self.shape), 1)
+		elseif value == false then
+			self.fixture:destroy()
+		end
 	end
 end
 
-function Collider.__get.attachedToRigidbody(self)
+function Collider.__get.fixture(self)
+
+	return self._fixture
+end
+
+function Collider.__set.fixture(self, value)
+
+	if self._fixture then
+		self._fixture:destroy()
+		self.globals.physicsFixtures[self._fixture] = nil
+	end
+
+	self.globals.physicsFixtures[value] = self
+	self._fixture = value
+end
+
+function Collider.__get.rigidbody(self)
 
 	if not Rigidbody then
 		Rigidbody = require("lass.builtins.physics.Rigidbody")
 	end
 
 	--TODO: account for rigidbody being on an ancestor GameObject
-	if not self.gameObject then
-		return false
-	elseif self.gameObject:getComponent(Rigidbody) then
-		return true
+	if not (self.gameObject and self.solid) then
+		return nil
 	else
-		return false
+		return self.gameObject:getComponent(Rigidbody)
 	end
 end
 
-function Collider.__set.attachedToRigidbody(self)
-	error("attempted to set \"attachedToRigidBody\" (a read-only property)")
+function Collider.__set.rigidbody(self)
+	error("attempted to set \"rigidbody\" (a read-only property)")
 end
 
 function Collider:awake(firstAwake)
@@ -194,14 +220,16 @@ function Collider:update()
 			self.body:setPosition(transform.position.x, transform.position.y * self.globals.ySign)
 		end
 
-		--globalTransform is a property, so we don't need to do a deepcopy
-		self._oldTransform = self.gameObject.globalTransform
+		local shape = shapeToPhysicsShape(self, self.shape, self.fixture:getShape(), self._oldTransform)
 
+		-- if shape, then we weren't able to modify the existing fixture.
+		-- we need to replace it
+		if shape then
+			self.fixture = love.physics.newFixture(self.body, shape, 6)
+		end
+
+		self.fixture:setRestitution(self.restitution)
 	end
-	-- debug.log(self.gameObject.name, self.gameObject.globalTransform.position)
-	-- for i,v in ipairs(self.shape:globalVertices(self.gameObject.globalTransform)) do
-	-- 	debug.log(i,v)
-	-- end
 end
 
 function Collider:deactivate()
@@ -222,8 +250,12 @@ function Collider:deactivate()
 		table.remove(layer, index)
 	end
 
-	if self.body then
+	if self.body and not self.rigidbody then
 		self.body:destroy()
+	end
+
+	if self.fixture then
+		self.fixture:destroy()
 	end
 
 	self.base.deactivate(self)
@@ -322,12 +354,10 @@ end
 
 -- end
 
--- function Collider.events.physicsPostUpdate.play(self, source, data)
+function Collider.events.physicsPostUpdate.play(self, source, data)
 
--- 	local x,y = self.body:getPosition()
--- 	self.gameObject:moveToGlobal(x, y * self.globals.ySign)
-
--- 	self._oldTransform = geometry.Transform(self.gameObject.globalTransform)
--- end
+	--globalTransform is a property, so we don't need to do a deepcopy
+	self._oldTransform = self.gameObject.globalTransform
+end
 
 return Collider

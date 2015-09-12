@@ -993,6 +993,7 @@ local GameScene = class.define(GameEntity, function(self, transform)
 	self.globals.canvases = {}
 	self.globals.cameras = {}
 	self.globals.events = {}
+	self.globals.physicsFixtures = {}
 	self.globals.physicsWorld = love.physics.newWorld(0, 0, true)
 
 	self.globals.physicsWorld:setCallbacks(
@@ -1005,6 +1006,16 @@ local GameScene = class.define(GameEntity, function(self, transform)
 		function(...)
 			debug.log("end contact", ...)
 		end
+
+		-- --pre-solve
+		-- function(...)
+		-- 	debug.log("pre-solve", ...)
+		-- end,
+
+		-- --post-solve
+		-- function(...)
+		-- 	debug.log("post-solve", ...)
+		-- end
 	)
 
 	self:addEvent("physicsPreUpdate")
