@@ -58,7 +58,7 @@ function class.define(base, init)
             local v = c[key]
             if v ~= nil then
                 return v
-            else
+            elseif c.__genericget then
                 return c.__genericget(self, key)
             end
         end
@@ -68,17 +68,11 @@ function class.define(base, init)
     c.__newindex = function(self, key, value)
         if c.__set[key] then
             c.__set[key](self, value)
-        else
+        elseif c.__genericset then
             c.__genericset(self, key, value)
+        else
+            rawset(self, key, value)
         end
-    end
-
-    -- a replacement for __index
-    c.__genericget = function() end
-
-    -- a replacement for __newindex
-    c.__genericset = function(self, key, value)
-        rawset(self, key, value)
     end
 
     --if there's still no init, make one
@@ -117,14 +111,13 @@ function class.define(base, init)
             rawset(self, key, function(first, ...)
                 if type(first) == "table" and first.base == self then
 
-                    local b = first.base
-
                     -- temporarily change base to prevent loop
                     first.base = self.base
                     local r = table.pack(value(first, ...))
 
                     -- revert base and return everything
-                    first.base = b
+                    -- (setting to nil allows object to get .base from the __index)
+                    first.base = nil
                     return unpack(r)
                 else
                     return value(first, ...)
@@ -136,12 +129,20 @@ function class.define(base, init)
     end
 
     c.init = function(obj, ...)
-        --prevent infinitely recursive self.base.init() calls,
-        --and give the object a reference to its class's superclass
+        --prevent infinitely recursive self.base.init() calls
         if obj then
             obj.base = c.base
         end
-        init(obj, ...)
+
+        -- init would not normally return a value, but no reason to forbid it...
+        local r = init(obj, ...)
+
+        -- revert base to nil, so it can be retrieved from __index
+        if obj then
+            obj.base = nil
+        end
+
+        return r
     end
 
     c.instanceof = function(self, ...)
