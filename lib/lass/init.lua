@@ -49,14 +49,10 @@ EventResponseTable
 
 local EventResponseTable = class.define()
 
-function EventResponseTable:__index(key)
+function EventResponseTable:__genericget(key)
 	--this allows us to index myEventTable.myUndefinedKey.
 	--required for `MyComponent.events.myEvent.play` syntax
 
-	--NOTE: this changes the internal mechanisms of class instantiation.
-	--normally, Class.__index == Class
-
-	self[key] = {}
 	rawset(self, key, {})
 	return self[key]
 end
@@ -673,9 +669,6 @@ function GameObject:addComponent(component)
 	component.gameObject = self
 	component.gameScene = self.gameScene
 	component.globals = self.gameScene.globals
-	for i, eventName in ipairs(self.events) do
-		component.events[eventName] = {}
-	end
 
 	if component.active == nil then
 		component.active = true
@@ -997,25 +990,31 @@ local GameScene = class.define(GameEntity, function(self, transform)
 	self.globals.physicsWorld = love.physics.newWorld(0, 0, true)
 
 	self.globals.physicsWorld:setCallbacks(
-		--begin contact
-		function(...)
-			debug.log("begin contact", ...)
+		function(fixture1, fixture2, contact)
+			debug.log("begin contact",
+				fixture1:getUserData(),
+				self.globals.physicsFixtures[fixture1].gameObject.name,
+				self.globals.physicsFixtures[fixture2].gameObject.name,
+				self.frame)
 		end,
 
 		--end contact
-		function(...)
-			debug.log("end contact", ...)
+		function(fixture1, fixture2, contact)
+			debug.log("end contact",
+				self.globals.physicsFixtures[fixture1].gameObject.name,
+				self.globals.physicsFixtures[fixture2].gameObject.name,
+				self.frame)
 		end
 
-		-- --pre-solve
-		-- function(...)
-		-- 	debug.log("pre-solve", ...)
-		-- end,
+	-- 	-- --pre-solve
+	-- 	-- function(...)
+	-- 	-- 	debug.log("pre-solve", ...)
+	-- 	-- end,
 
-		-- --post-solve
-		-- function(...)
-		-- 	debug.log("post-solve", ...)
-		-- end
+	-- 	-- --post-solve
+	-- 	-- function(...)
+	-- 	-- 	debug.log("post-solve", ...)
+	-- 	-- end
 	)
 
 	self:addEvent("physicsPreUpdate")
@@ -1229,9 +1228,8 @@ function GameScene:addEventListener(eventName, listener, addToObjectEventsList)
 
 	local e = self.globals.events[eventName] or self:addEvent(eventName)
 	e.listeners[listener] = true
-	listener.events[#listener.events + 1] = eventName
 
-	if addToObjectEventsList == true then
+	if addToObjectEventsList == true and not collections.index(listener.events, eventName) then
 		listener.events[#listener.events + 1] = eventName
 	end
 end

@@ -54,8 +54,14 @@ function class.define(base, init)
     c.__index = function(self, key)
         if c.__get[key] then
             return c.__get[key](self)
+        else
+            local v = c[key]
+            if v ~= nil then
+                return v
+            else
+                return c.__genericget(self, key)
+            end
         end
-        return c[key]
     end
 
     -- enable setters
@@ -63,8 +69,16 @@ function class.define(base, init)
         if c.__set[key] then
             c.__set[key](self, value)
         else
-            rawset(self, key, value)
+            c.__genericset(self, key, value)
         end
+    end
+
+    -- a replacement for __index
+    c.__genericget = function() end
+
+    -- a replacement for __newindex
+    c.__genericset = function(self, key, value)
+        rawset(self, key, value)
     end
 
     --if there's still no init, make one

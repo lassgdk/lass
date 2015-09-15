@@ -47,6 +47,10 @@ function Rigidbody.__set.angularVelocity(self, r)
 	self.body:setAngularVelocity(math.rad(r))
 end
 
+function Rigidbody:__tostring()
+	return "Rigidbody"
+end
+
 function Rigidbody:awake()
 
 	self.body = love.physics.newBody(self.globals.physicsWorld, 0, 0, "dynamic")

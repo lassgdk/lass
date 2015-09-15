@@ -144,7 +144,7 @@ function Collider.__get.fixture(self)
 end
 
 function Collider.__set.fixture(self, value)
-
+	-- debug.log("setting fixture of " .. self.gameObject.name)
 	if self._fixture then
 		self._fixture:destroy()
 		self.globals.physicsFixtures[self._fixture] = nil
@@ -195,12 +195,26 @@ function Collider:awake(firstAwake)
 		end
 	end
 
+	-- if self.gameObject.name == "floor" then
+		self.gameScene:addEventListener("physicsPreUpdate", self.gameObject, true)
+		self.gameScene:addEventListener("physicsPostUpdate", self.gameObject, true)
+	-- end
+
+	-- for i,v in ipairs(self.gameObject.events) do
+		-- debug.log(i,v)
+	-- end
+
 	-- if self.solid is true but self.body was destroyed, setting self.solid to
 	-- true again will trigger construction of a new self.body
 	self.solid = self.solid
 end
 
-function Collider:update()
+function Collider:__tostring()
+	return "Collider"
+end
+
+
+function Collider.events.physicsPreUpdate.play(self, source, data)
 
 	self.solid = self.solid
 
@@ -212,14 +226,17 @@ function Collider:update()
 		-- if the transform has changed independently of physics transformations,
 		-- we need to reset the body position
 		if
-			self._oldTransform and (
+			self._oldTransform and
+			not self.rigidbody and (
 				self._oldTransform.position.x ~= transform.position.x or
 				self._oldTransform.position.y ~= transform.position.y
 			)
 		then
+			-- debug.log(self.gameObject.name)
 			self.body:setPosition(transform.position.x, transform.position.y * self.globals.ySign)
 		end
 
+		-- debug.log(self._oldTransform)
 		local shape = shapeToPhysicsShape(self, self.shape, self.fixture:getShape(), self._oldTransform)
 
 		-- if shape, then we weren't able to modify the existing fixture.
@@ -231,6 +248,12 @@ function Collider:update()
 		self.fixture:setRestitution(self.restitution)
 	end
 end
+
+function Collider.events.physicsPostUpdate.play(self, source, data)
+
+	self._oldTransform = geometry.Transform(self.gameObject.globalTransform)
+end
+
 
 function Collider:deactivate()
 
@@ -335,29 +358,6 @@ function Collider:detach()
 		l = self.globals.colliders[layer]
 		table.remove(l, collections.index(l, self))
 	end
-end
-
--- function Collider.events.physicsPreUpdate.play(self, source, data)
-
--- 	local transform = self.gameObject.globalTransform
-
--- 	-- if the transform has changed independently of physics transformations,
--- 	-- we need to reset the body position
--- 	if
--- 		self._oldTransform and (
--- 			self._oldTransform.position.x ~= transform.position.x or
--- 			self._oldTransform.position.y ~= transform.position.y
--- 		)
--- 	then
--- 		self.body:setPosition(transform.position.x, transform.position.y * self.globals.ySign)
--- 	end
-
--- end
-
-function Collider.events.physicsPostUpdate.play(self, source, data)
-
-	--globalTransform is a property, so we don't need to do a deepcopy
-	self._oldTransform = self.gameObject.globalTransform
 end
 
 return Collider
