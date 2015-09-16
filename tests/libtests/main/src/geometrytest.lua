@@ -4,6 +4,7 @@ local geometrytest = {}
 local NaN = math.huge / math.huge
 
 geometrytest.tests={
+	"assertIncorrectVectorAlgebra",
 	"testVector2Add",
 	"testVector3Add",
 	"testVector2And3Add",
@@ -48,7 +49,7 @@ local function assertIncorrectCreation(class, className, variables, default)
 
 			success = pcall(class, unpack(params))
 			if success then
-				error(className .. "." .. var .. " incorrectly created with " .. badValue)
+				error(className .. "." .. var .. " incorrectly created with " .. tostring(badValue))
 			end
 
 			params[i] = default
@@ -56,31 +57,55 @@ local function assertIncorrectCreation(class, className, variables, default)
 	end
 end
 
+function _assertIncorrectVectorAlgebra(vectorName, vector)
+
+	for i, badValue in ipairs({1, "1", false, math.huge, -math.huge, NaN}) do
+		operands = {vector, badValue}
+
+		-- goes through (vector, badValue) then (badValue, vector)
+		for first, second in pairs({2, 1}) do
+
+			success = pcall(function() return operands[first] + operands[second] end)
+			if success then
+				error(vectorName .. " improperly added with " .. tostring(badValue))
+			end
+
+			success = pcall(function() return operands[first] - operands[second] end)
+			if success then
+				error(vectorName .. " improperly subtracted with " .. tostring(badValue))
+			end
+
+			if i ~= 1 then
+				success = pcall(function() return operands[first] * operands[second] end)
+				if success then
+					error(vectorName .. " improperly multipled by " .. tostring(badValue))
+				end
+
+				success = pcall(function() return operands[first] / operands[second] end)
+				if success then
+					error(vectorName .. " improperly divided by " .. tostring(badValue))
+				end
+			end
+
+		end
+	end
+end
+
+function geometrytest.assertIncorrectVectorAlgebra()
+	-- tests all possible cases of Vector2/3 algebra that should crash
+	_assertIncorrectVectorAlgebra("Vector2", geometry.Vector2)
+	_assertIncorrectVectorAlgebra("Vector3", geometry.Vector3)
+end
+
 
 function geometrytest.testVector2Add()
-	-- assumes the only way to call these functions is using at least one Vector2
-
-	--[[incorrect calls]]
-	local v1 = geometry.Vector2()
-
-	assert(pcall(function() return v1 + 1 end) ~= true, "Vector2 improperly added with number")
-	assert(pcall(function() return 1 + v1 end) ~= true, "Vector2 improperly added with number")
-
-	assert(pcall(function() return v1 + "" end) ~= true, "Vector2 improperly added with string")
-	assert(pcall(function() return "" + v1 end) ~= true, "Vector2 improperly added with string")
-
-	assert(pcall(function() return v1 + false end) ~= true, "Vector2 improperly added with false")
-	assert(pcall(function() return false + v1 end) ~= true, "Vector2 improperly added with false")
-
-	assert(pcall(function() return v1 + math.huge end) ~= true, "Vector2 improperly added with infinity")
-	assert(pcall(function() return math.huge + v1 end) ~= true, "Vector2 improperly added with infinity")
-
+	-- testing accessing Vector2.__add is intentionally not covered, as it is not the proper usage
 
 	--[[basic usage]]
-	v1 = geometry.Vector2()
-	v3 = v1 + v1
-	assert(v3.x == 0, "0 + 0 didn't equal 0")
-	assert(v3.y == 0, "0 + 0 didn't equal 0")
+	local v1 = geometry.Vector2()
+	r = v1 + v1
+	assert(r.x == 0, "0 + 0 didn't equal 0")
+	assert(r.y == 0, "0 + 0 didn't equal 0")
 
 
 	--[[operator order]]
@@ -88,41 +113,28 @@ function geometrytest.testVector2Add()
 	v1 = geometry.Vector2(1, 5)
 	local v2 = geometry.Vector2(2, 10)
 
-	v3 = v1 + v1
-	assert(v3.x == 2, "1 + 1 didn't become 2")
-	assert(v3.y == 10, "5 + 5 didn't become 10")
+	r = v1 + v1
+	assert(r.x == 2, "1 + 1 didn't become 2")
+	assert(r.y == 10, "5 + 5 didn't become 10")
 
-	v3 = v1 + v2
-	assert(v3.x == 3, "1 + 2 didn't become 3")
-	assert(v3.y == 15, "5 + 10 didn't become 15")
+	r = v1 + v2
+	assert(r.x == 3, "1 + 2 didn't become 3")
+	assert(r.y == 15, "5 + 10 didn't become 15")
 
-	v3 = v2 + v1
-	assert(v3.x == 3, "2 + 1 didn't become 3")
-	assert(v3.y == 15, "10 + 5 didn't become 15")
+	r = v2 + v1
+	assert(r.x == 3, "2 + 1 didn't become 3")
+	assert(r.y == 15, "10 + 5 didn't become 15")
 end
 
 function geometrytest.testVector3Add()
-	-- assumes the only way to call these functions is using at least one Vector3
-
-	--[[incorrect calls]]
-	local v1 = geometry.Vector3()
-
-	assert(pcall(function() return v1 + 1 end) ~= true, "Vector3 improperly added with number")
-	assert(pcall(function() return 1 + v1 end) ~= true, "Vector3 improperly added with number")
-
-	assert(pcall(function() return v1 + "" end) ~= true, "Vector3 improperly added with string")
-	assert(pcall(function() return "" + v1 end) ~= true, "Vector3 improperly added with string")
-
-	assert(pcall(function() return v1 + false end) ~= true, "Vector3 improperly added with false")
-	assert(pcall(function() return false + v1 end) ~= true, "Vector3 improperly added with false")
-
+	-- testing accessing Vector3.__add is intentionally not covered, as it is not the proper usage
 
 	--[[basic usage]]
-	v1 = geometry.Vector3()
-	v3 = v1 + v1
-	assert(v3.x == 0, "0 + 0 didn't equal 0")
-	assert(v3.y == 0, "0 + 0 didn't equal 0")
-	assert(v3.z == 0, "0 + 0 didn't equal 0")
+	local v1 = geometry.Vector3()
+	r = v1 + v1
+	assert(r.x == 0, "0 + 0 didn't equal 0")
+	assert(r.y == 0, "0 + 0 didn't equal 0")
+	assert(r.z == 0, "0 + 0 didn't equal 0")
 
 
 	--[[operator order]]
@@ -130,20 +142,20 @@ function geometrytest.testVector3Add()
 	v1 = geometry.Vector3(1, 5, 10)
 	local v2 = geometry.Vector3(2, 10, 20)
 
-	v3 = v1 + v1
-	assert(v3.x == 2, "1 + 1 didn't become 2")
-	assert(v3.y == 10, "5 + 5 didn't become 10")
-	assert(v3.z == 20, "10 + 10 didn't become 20")
+	r = v1 + v1
+	assert(r.x == 2, "1 + 1 didn't become 2")
+	assert(r.y == 10, "5 + 5 didn't become 10")
+	assert(r.z == 20, "10 + 10 didn't become 20")
 
-	v3 = v1 + v2
-	assert(v3.x == 3, "1 + 2 didn't become 3")
-	assert(v3.y == 15, "5 + 10 didn't become 15")
-	assert(v3.z == 30, "10 + 20 didn't become 30")
+	r = v1 + v2
+	assert(r.x == 3, "1 + 2 didn't become 3")
+	assert(r.y == 15, "5 + 10 didn't become 15")
+	assert(r.z == 30, "10 + 20 didn't become 30")
 
-	v3 = v2 + v1
-	assert(v3.x == 3, "2 + 1 didn't become 3")
-	assert(v3.y == 15, "10 + 5 didn't become 15")
-	assert(v3.z == 30, "20 + 10 didn't become 30")
+	r = v2 + v1
+	assert(r.x == 3, "2 + 1 didn't become 3")
+	assert(r.y == 15, "10 + 5 didn't become 15")
+	assert(r.z == 30, "20 + 10 didn't become 30")
 end
 
 function geometrytest.testVector2And3Add()
@@ -186,23 +198,10 @@ function geometrytest.testVector2And3Add()
 end
 
 function geometrytest.testVector2Subtract()
-	-- assumes the only way to call these functions is using at least one Vector2
-
-	--[[incorrect calls]]
-	local v1 = geometry.Vector2()
-
-	assert(pcall(function() return v1 - 1 end) ~= true, "number improperly subtracted from Vector2")
-	assert(pcall(function() return 1 - v1 end) ~= true, "Vector2 improperly subtracted from number")
-
-	assert(pcall(function() return v1 - "" end) ~= true, "string improperly subtracted from Vector2")
-	assert(pcall(function() return "" - v1 end) ~= true, "Vector2 improperly subtracted from string")
-
-	assert(pcall(function() return v1 - false end) ~= true, "false improperly subtracted from Vector2")
-	assert(pcall(function() return false - v1 end) ~= true, "Vector2 improperly subtracted from false")
-
+	-- testing accessing Vector2.__sub is intentionally not covered, as it is not the proper usage
 
 	--[[basic usage]]
-	v1 = geometry.Vector2()
+	local v1 = geometry.Vector2()
 	v3 = v1 - v1
 	assert(v3.x == 0, "0 - 0 didn't equal 0")
 	assert(v3.y == 0, "0 - 0 didn't equal 0")
@@ -227,23 +226,10 @@ function geometrytest.testVector2Subtract()
 end
 
 function geometrytest.testVector3Subtract()
-	-- assumes the only way to call these functions is using at least one Vector3
-
-	--[[incorrect calls]]
-	local v1 = geometry.Vector3()
-
-	assert(pcall(function() return v1 - 1 end) ~= true, "number improperly subtracted from Vector3")
-	assert(pcall(function() return 1 - v1 end) ~= true, "Vector3 improperly subtracted from number")
-
-	assert(pcall(function() return v1 - "" end) ~= true, "string improperly subtracted from Vector3")
-	assert(pcall(function() return "" - v1 end) ~= true, "Vector3 improperly subtracted from string")
-
-	assert(pcall(function() return v1 - false end) ~= true, "false improperly subtracted from Vector3")
-	assert(pcall(function() return false - v1 end) ~= true, "Vector3 improperly subtracted from false")
-
+	-- testing accessing Vector3.__sub is intentionally not covered, as it is not the proper usage
 
 	--[[basic usage]]
-	v1 = geometry.Vector3()
+	local v1 = geometry.Vector3()
 	v3 = v1 - v1
 	assert(v3.x == 0, "0 - 0 didn't equal 0")
 	assert(v3.y == 0, "0 - 0 didn't equal 0")
@@ -311,69 +297,27 @@ function geometrytest.testVector2And3Subtract()
 end
 
 function geometrytest.testVector2Multiply()
-	-- assumes the only way to call these functions is using at least one Vector2
-
-	--[[incorrect calls]]
-	local v1 = geometry.Vector2()
-
-	assert(pcall(function() return v1 * "" end) ~= true, "Vector2 improperly multiplied by string")
-	assert(pcall(function() return "" * v1 end) ~= true, "Vector2 improperly multiplied by string")
-
-	assert(pcall(function() return v1 * false end) ~= true, "Vector2 improperly multiplied by false")
-	assert(pcall(function() return false * v1 end) ~= true, "Vector2 improperly multiplied by false")
-
-	local v2 = geometry.Vector2()
-	assert(pcall(function() return v1 * v2 end) ~= true, "Vector2 improperly multiplied by Vector2")
-	assert(pcall(function() return v2 * v1 end) ~= true, "Vector2 improperly multiplied by Vector2")
-
+	-- testing accessing Vector2.__mul is intentionally not covered, as it is not the proper usage
 
 	--[[basic usage]]
 	v1 = geometry.Vector2()
-	v2 = v1 * 0
-	assert(v2.x == 0, "0 * 0 didn't equal 0")
-	assert(v2.y == 0, "0 * 0 didn't equal 0")
+	r = v1 * 0
+	assert(r.x == 0, "0 * 0 didn't equal 0")
+	assert(r.y == 0, "0 * 0 didn't equal 0")
 
 
 	--[[operator order]]
 	v1 = geometry.Vector2(1, 2)
-	v2 = v1 * 5
-	v2 = 5 * v1
-	assert(v2.x == 5, "1 * 5 didn't become 5")
-	assert(v2.y == 10, "2 * 5 didn't become 10")
+	r = v1 * 5
+	r = 5 * v1
+	assert(r.x == 5, "1 * 5 didn't become 5")
+	assert(r.y == 10, "2 * 5 didn't become 10")
 end
 
 function geometrytest.testTransformCreation()
 
 	--[[incorrect creation]]
 	assertIncorrectCreation(geometry.Circle, "transform", {"position", "rotation", "size"})
-
-
-	--[[strings incorrectly nested in tables]]
-	assert(pcall(geometry.Transform, {x = ""}) ~= true,
-		"improperly created transform with string for position.x")
-	assert(pcall(geometry.Transform, {y = ""}) ~= true,
-		"improperly created transform with string for position.y")
-	assert(pcall(geometry.Transform, {z = ""}) ~= true,
-		"improperly created transform with string for position.z")
-
-	assert(pcall(geometry.Transform, nil, nil, {x = ""}) ~= true,
-		"improperly created transform with string for size.x")
-	assert(pcall(geometry.Transform, nil, nil, {y = ""}) ~= true,
-		"improperly created transform with string for size.y")
-	assert(pcall(geometry.Transform, nil, nil, {z = ""}) ~= true,
-		"improperly created transform with string for size.z")
-
-
-	--[[breaking setters]]
-	local t = geometry.Transform()
-	assert(pcall(function() t.rotation = "" end) ~= true,
-		"transform rotation shouldn't accept string")
-	assert(pcall(function() t.rotation = math.huge end) ~= true,
-		"transform rotation shouldn't accept math.huge")
-	assert(pcall(function() t.rotation = -math.huge end) ~= true,
-		"transform rotation shouldn't accept -math.huge")
-	assert(pcall(function() t.rotation = NaN end) ~= true,
-		"transform rotation shouldn't accept NaN")
 
 
 	--[[basic creation]]
