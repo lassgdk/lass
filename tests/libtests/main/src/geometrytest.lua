@@ -344,21 +344,8 @@ end
 
 function geometrytest.testTransformCreation()
 
-	--[[incorrect creation attempts]]
-	assert(pcall(geometry.Transform, 5) ~= true, "improperly created transform with number for position")
-	assert(pcall(geometry.Transform, nil, nil, 5) ~= true, "improperly created transform with number for size")
-
-	assert(pcall(geometry.Transform, "") ~= true, "improperly created transform with string for position")
-	assert(pcall(geometry.Transform, nil, "") ~= true, "improperly created transform with string for rotation")
-	assert(pcall(geometry.Transform, nil, nil, "") ~= true, "improperly created transform with string for size")
-
-	assert(pcall(geometry.Transform, false) ~= true, "improperly created transform with false for position")
-	assert(pcall(geometry.Transform, nil, false) ~= true, "improperly created transform with false for rotation")
-	assert(pcall(geometry.Transform, nil, nil, false) ~= true, "improperly created transform with false for size")
-
-	assert(pcall(geometry.Transform, nil, math.huge) ~= true, "improperly allowed infinity for rotation")
-	assert(pcall(geometry.Transform, nil, -math.huge) ~= true, "improperly allowed negative infinity for rotation")
-	assert(pcall(geometry.Transform, nil, NaN) ~= true, "improperly allowed NaN for rotation")
+	--[[incorrect creation]]
+	assertIncorrectCreation(geometry.Circle, "transform", {"position", "rotation", "size"})
 
 
 	--[[strings incorrectly nested in tables]]
@@ -470,28 +457,6 @@ function geometrytest.testTransformCreation()
 end
 
 function geometrytest.testTransformCreationWithTransform()
-
-	--[[incorrect creation attempts]]
-
-	-- local t1 = geometry.Transform()
-	-- t1.position.x = ""
-	-- assert(pcall(geometry.Transform, t1) ~= true, "improperly made transform with transform with string for position x")
-	-- t1 = geometry.Transform()
-	-- t1.position.y = ""
-	-- assert(pcall(geometry.Transform, t1) ~= true, "improperly made transform with transform with string for position y")
-	-- t1 = geometry.Transform()
-	-- t1.position.z = ""
-	-- assert(pcall(geometry.Transform, t1) ~= true, "improperly made transform with transform with string for position z")
-
-	-- t1 = geometry.Transform()
-	-- t1.size.x = ""
-	-- assert(pcall(geometry.Transform, t1) ~= true, "improperly made transform with transform with string for size x")
-	-- t1 = geometry.Transform()
-	-- t1.size.y = ""
-	-- assert(pcall(geometry.Transform, t1) ~= true, "improperly made transform with transform with string for size y")
-	-- t1 = geometry.Transform()
-	-- t1.size.z = ""
-	-- assert(pcall(geometry.Transform, t1) ~= true, "improperly made transform with transform with string for size z")
 
 
 	--[[basic creation]]
@@ -637,12 +602,8 @@ end
 
 function geometrytest.testVector2Creation()
 
-	--[[incorrect creation attempts]]
-	assert(pcall(geometry.Vector2, "") ~= true, "incorrectly created Vector2 with string for x")
-	assert(pcall(geometry.Vector2, 0, "") ~= true, "incorrectly created Vector2 with string for y")
-
-	assert(pcall(geometry.Vector2, false) ~= true, "incorrectly created Vector2 with false for x")
-	assert(pcall(geometry.Vector2, 0, false) ~= true, "incorrectly created Vector2 with false for y")
+	--[[incorrect creation]]
+	assertIncorrectCreation(geometry.Circle, "vector2", {"x", "y"})
 
 
 	--[[purely default creation]]
@@ -700,14 +661,8 @@ end
 
 function geometrytest.testVector3Creation()
 
-	--[[incorrect creation attempts]]
-	assert(pcall(geometry.Vector3, "") ~= true, "incorrectly created Vector3 with string for x")
-	assert(pcall(geometry.Vector3, 0, "") ~= true, "incorrectly created Vector3 with string for y")
-	assert(pcall(geometry.Vector3, 0, 0, "") ~= true, "incorrectly created Vector3 with string for z")
-
-	assert(pcall(geometry.Vector3, false) ~= true, "incorrectly created Vector3 with false for x")
-	assert(pcall(geometry.Vector3, 0, false) ~= true, "incorrectly created Vector3 with false for y")
-	assert(pcall(geometry.Vector3, 0, 0, false) ~= true, "incorrectly created Vector3 with false for z")
+	--[[incorrect creation]]
+	assertIncorrectCreation(geometry.Circle, "vector3", {"x", "y", "z"})
 
 
 	--[[purely default creation]]
@@ -873,6 +828,7 @@ function geometrytest.testVector3CreationWithVectors()
 end
 
 function geometrytest.testIntersectingCirclesAndVectors()
+
 	local c1, c2 = geometry.Circle(3), geometry.Circle(1)
 	local t1, t2 = geometry.Transform(geometry.Vector3(0,0)), geometry.Transform(geometry.Vector3(4,0))
 
@@ -888,6 +844,7 @@ function geometrytest.testIntersectingCirclesAndVectors()
 end
 
 function geometrytest.testCircleWithRadiusZero()
+
 	local c1, c2 = geometry.Circle(0), geometry.Circle(1)
 	local t1, t2 = geometry.Transform(geometry.Vector3(0,0)), geometry.Transform(geometry.Vector3(4,0))
 
@@ -901,6 +858,7 @@ function geometrytest.testCircleWithRadiusZero()
 end
 
 function geometrytest.testIntersectingRectanglesAndVectors()
+
 	local r1, r2 = geometry.Rectangle(1,2), geometry.Rectangle(1,3)
 	local t1, t2 = geometry.Transform(geometry.Vector3(0,0)), geometry.Transform(geometry.Vector3(0,0))
 	local colliding, data
@@ -926,6 +884,7 @@ function geometrytest.testIntersectingRectanglesAndVectors()
 end
 
 function geometrytest.testIntersectingRectangleAndCircle()
+
 	local rec, cir = geometry.Rectangle(1,2), geometry.Circle(3)
 	local t1, t2 = geometry.Transform(geometry.Vector3(0,0)), geometry.Transform(geometry.Vector3(0,0))
 
@@ -938,6 +897,7 @@ function geometrytest.testIntersectingRectangleAndCircle()
 end
 
 function geometrytest.testIntersectingPolygonsAndVectors()
+
 	local p1 = geometry.Polygon({-100, -50, 100, -50, 0, 50})
 	local p2 = geometry.Polygon({-10, -5, 10, -5, 0, 5})
 	local t1 = geometry.Transform(geometry.Vector3(0,0))
@@ -1013,14 +973,12 @@ function geometrytest.testIntersectingPolygonAndCircle()
 
 	t2.position.y = 0
 	r, d = geometry.intersecting(pol, cir, t1, t2)
-	assert(r and d.shortestOverlap == cir.radius, "figures should be intersecting with overlap of " .. cir.radius)
-end
-
-function geometrytest.testPolygonWithNoArguments()
-
+	assert(r and d.shortestOverlap == cir.radius,
+		"figures should be intersecting with overlap of " .. cir.radius)
 end
 
 function geometrytest.testIntersectingPolygons()
+
 	local p1 = geometry.Polygon({-100, -50, 100, -50, 0, 50})
 	local p2 = geometry.Polygon({-100, -50, 100, -50, 0, 50})
 	local t1 = geometry.Transform(geometry.Vector3(0,0))
