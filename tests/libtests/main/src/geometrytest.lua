@@ -12,7 +12,7 @@ geometrytest.tests={
 	"testVector3Subtract",
 	"testVector2And3Subtract",
 	"testVector2Multiply",
-	-- "testVector3Multiply",
+	"testVector3Multiply",
 	-- "testVector2And3Multiply",
 	-- "testVector2Divide",
 	-- "testVector3Divide",
@@ -59,23 +59,25 @@ end
 
 function _assertIncorrectVectorAlgebra(vectorName, vector)
 
-	for i, badValue in ipairs({1, "1", false, math.huge, -math.huge, NaN}) do
+	for i, badValue in ipairs({{}, 1, "1", false, math.huge, -math.huge, NaN}) do
 		operands = {vector, badValue}
 
 		-- goes through (vector, badValue) then (badValue, vector)
 		for first, second in pairs({2, 1}) do
 
-			success = pcall(function() return operands[first] + operands[second] end)
-			if success then
-				error(vectorName .. " improperly added with " .. tostring(badValue))
-			end
-
-			success = pcall(function() return operands[first] - operands[second] end)
-			if success then
-				error(vectorName .. " improperly subtracted with " .. tostring(badValue))
-			end
-
 			if i ~= 1 then
+				success = pcall(function() return operands[first] + operands[second] end)
+				if success then
+					error(vectorName .. " improperly added with " .. tostring(badValue))
+				end
+
+				success = pcall(function() return operands[first] - operands[second] end)
+				if success then
+					error(vectorName .. " improperly subtracted with " .. tostring(badValue))
+				end
+			end
+
+			if i ~= 2 then
 				success = pcall(function() return operands[first] * operands[second] end)
 				if success then
 					error(vectorName .. " improperly multipled by " .. tostring(badValue))
@@ -293,25 +295,55 @@ function geometrytest.testVector2And3Subtract()
 	assert(r.x == 9, "10 - 1 didn't equal 9")
 	assert(r.y == 15, "20 - 5 didn't equal 15")
 	assert(r.z == 30, "30 - 0 didn't equal 30")
-
 end
 
 function geometrytest.testVector2Multiply()
 	-- testing accessing Vector2.__mul is intentionally not covered, as it is not the proper usage
 
 	--[[basic usage]]
-	v1 = geometry.Vector2()
-	r = v1 * 0
+	local v = geometry.Vector2()
+	r = v * 0
 	assert(r.x == 0, "0 * 0 didn't equal 0")
 	assert(r.y == 0, "0 * 0 didn't equal 0")
 
 
 	--[[operator order]]
-	v1 = geometry.Vector2(1, 2)
-	r = v1 * 5
-	r = 5 * v1
-	assert(r.x == 5, "1 * 5 didn't become 5")
-	assert(r.y == 10, "2 * 5 didn't become 10")
+	-- uses a spread of different numbers to ensure unique results for each test
+	v = geometry.Vector3(1, 2)
+
+	r = v * 2
+	assert(r.x == 2, "1 * 2 didn't become 2")
+	assert(r.y == 4, "2 * 2 didn't become 4")
+
+	r = 3 * v
+	assert(r.x == 3, "3 * 1 didn't become 3")
+	assert(r.y == 6, "3 * 2 didn't become 6")
+end
+
+function geometrytest.testVector3Multiply()
+	-- testing accessing Vector3.__mul is intentionally not covered, as it is not the proper usage
+
+	--[[basic usage]]
+	local v = geometry.Vector3()
+	r = v * 0
+	assert(r.x == 0, "0 * 0 didn't equal 0")
+	assert(r.y == 0, "0 * 0 didn't equal 0")
+	assert(r.z == 0, "0 * 0 didn't equal 0")
+
+
+	--[[operator order]]
+	-- uses a spread of different numbers to ensure unique results for each test
+	v = geometry.Vector3(1, 2, 3)
+
+	r = v * 2
+	assert(r.x == 2, "1 * 2 didn't become 2")
+	assert(r.y == 4, "2 * 2 didn't become 4")
+	assert(r.z == 6, "3 * 2 didn't become 6")
+
+	r = 3 * v
+	assert(r.x == 3, "3 * 1 didn't become 3")
+	assert(r.y == 6, "3 * 2 didn't become 6")
+	assert(r.z == 9, "3 * 3 didn't become 9")
 end
 
 function geometrytest.testTransformCreation()

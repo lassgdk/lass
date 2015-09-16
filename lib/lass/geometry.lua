@@ -291,7 +291,7 @@ function Vector3.__mul(a,b)
 	assertOperandsHaveXandY(vector, nil, "nil")
 	assert(type(scalar) == "number", "cannot multiply vector and " .. type(scalar))
 
-	return Vector2(vector.x * scalar, vector.y * scalar, vector.z * scalar)
+	return Vector3(vector.x * scalar, vector.y * scalar, vector.z * scalar)
 end
 
 function Vector3.__div(a,b)
@@ -310,7 +310,7 @@ function Vector3.__div(a,b)
 	assertOperandsHaveXandY(vector, nil, "nil")
 	assert(type(scalar) == "number", "cannot multiply vector and " .. type(scalar))
 
-	return Vector2(vector.x / scalar, vector.y / scalar, vector.z / scalar)
+	return Vector3(vector.x / scalar, vector.y / scalar, vector.z / scalar)
 end
 
 function Vector3:__unm()
