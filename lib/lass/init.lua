@@ -992,10 +992,11 @@ local GameScene = class.define(GameEntity, function(self, transform)
 	self.globals.physicsWorld:setCallbacks(
 		function(fixture1, fixture2, contact)
 			debug.log("begin contact",
-				fixture1:getUserData(),
 				self.globals.physicsFixtures[fixture1].gameObject.name,
 				self.globals.physicsFixtures[fixture2].gameObject.name,
 				self.frame)
+			local x1, y1, x2, y2 = contact:getPositions()
+			debug.log(x1, y1, x2, y2)
 		end,
 
 		--end contact
@@ -1004,6 +1005,8 @@ local GameScene = class.define(GameEntity, function(self, transform)
 				self.globals.physicsFixtures[fixture1].gameObject.name,
 				self.globals.physicsFixtures[fixture2].gameObject.name,
 				self.frame)
+			local x1, y1, x2, y2 = contact:getPositions()
+			debug.log(x1, y1, x2, y2)
 		end
 
 	-- 	-- --pre-solve

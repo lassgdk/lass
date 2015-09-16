@@ -213,9 +213,7 @@ function Collider:__tostring()
 	return "Collider"
 end
 
-
 function Collider.events.physicsPreUpdate.play(self, source, data)
-
 	self.solid = self.solid
 
 	if self.body then

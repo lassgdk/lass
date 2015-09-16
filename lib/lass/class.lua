@@ -6,6 +6,14 @@
 require("lass.stdext")
 local class = {}
 
+local reserved = {
+    base = true,
+    class = true,
+    __get = true,
+    __set = true,
+    __protected = true,
+}
+
 local function callable(v)
     return type(v) == "function" or (type(v) == "table" and v.__call)
 end
@@ -56,10 +64,15 @@ function class.define(base, init)
             return c.__get[key](self)
         else
             local v = c[key]
-            if v ~= nil then
+            if v ~= nil or reserved[key] then
                 return v
             elseif c.__genericget then
-                return c.__genericget(self, key)
+
+                local r = c.__genericget(self, key)
+                return r
+            -- else
+            --     debug.log("hi")
+            --     return c.__genericget(self, key)
             end
         end
     end
@@ -74,6 +87,14 @@ function class.define(base, init)
             rawset(self, key, value)
         end
     end
+
+    -- a replacement for __index
+    -- c.__genericget = function() end
+
+    -- -- a replacement for __newindex
+    -- c.__genericset = function(self, key, value)
+    --     rawset(self, key, value)
+    -- end
 
     --if there's still no init, make one
     if not init then
@@ -91,14 +112,12 @@ function class.define(base, init)
     local mt = {}
     mt.__call = function(self, ...)
 
-        --when a callable table is called, the table itself is passed as the first argument.
-        --we don't want to pass the class to its own constructor, so we erase self
-        self = {}
-        setmetatable(self,c)
-        self.class = c
-        init(self,...)
+        local object = {}
+        setmetatable(object,c)
+        object.class = c
+        init(object,...)
 
-        return self
+        return object
     end
 
     -- the class looks for any undefined keys in its superclass
@@ -116,7 +135,6 @@ function class.define(base, init)
                     local r = table.pack(value(first, ...))
 
                     -- revert base and return everything
-                    -- (setting to nil allows object to get .base from the __index)
                     first.base = nil
                     return unpack(r)
                 else
@@ -126,23 +144,6 @@ function class.define(base, init)
         else
             rawset(self, key, value)
         end
-    end
-
-    c.init = function(obj, ...)
-        --prevent infinitely recursive self.base.init() calls
-        if obj then
-            obj.base = c.base
-        end
-
-        -- init would not normally return a value, but no reason to forbid it...
-        local r = init(obj, ...)
-
-        -- revert base to nil, so it can be retrieved from __index
-        if obj then
-            obj.base = nil
-        end
-
-        return r
     end
 
     c.instanceof = function(self, ...)
@@ -174,6 +175,11 @@ function class.define(base, init)
     end
 
     setmetatable(c, mt)
+
+    --now that the metatable has been applied,
+    --this will be wrapped with the func defined in mt.__newindex
+
+    c.init = init
 
     -- if c.__protected then
     --     local protected = {}
