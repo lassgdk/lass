@@ -924,6 +924,8 @@ local function maintainCollisions(self, colliderToCheck)
 		local enter = {}
 		local exit = {}
 
+		-- debug.log(collider.gameObject.name)
+
 		-- check for collisions that just started
 		for other in pairs(others.colliding) do
 			-- collision just started
@@ -963,11 +965,13 @@ local function maintainCollisions(self, colliderToCheck)
 		-- end
 
 		for i, v in ipairs(enter) do
+			debug.log(collider.gameObject.name, v.gameObject.name)
 			collider.gameObject:collisionenter(v)
 		end
 
 		local noCollisionsLeft = not next(collider.collidingWith)
 		for i, v in ipairs(exit) do
+			debug.log("exit", collider.gameObject.name, v.gameObject.name)
 			collider.gameObject:collisionexit(v, noCollisionsLeft)
 		end
 	end
@@ -991,33 +995,45 @@ local GameScene = class.define(GameEntity, function(self, transform)
 
 	self.globals.physicsWorld:setCallbacks(
 		function(fixture1, fixture2, contact)
-			debug.log("begin contact",
-				self.globals.physicsFixtures[fixture1].gameObject.name,
-				self.globals.physicsFixtures[fixture2].gameObject.name,
-				self.frame)
-			local x1, y1, x2, y2 = contact:getPositions()
-			debug.log(x1, y1, x2, y2)
+			-- debug.log("begin contact",
+			-- 	self.globals.physicsFixtures[fixture1].gameObject.name,
+			-- 	self.globals.physicsFixtures[fixture2].gameObject.name,
+			-- 	self.frame)
+			-- local x1, y1, x2, y2 = contact:getPositions()
+			-- debug.log(x1, y1, x2, y2)
+			local collider1 = self.globals.physicsFixtures[fixture1]
+			local collider2 = self.globals.physicsFixtures[fixture2]
+
+			local data = {frame = self.frame}
+			collider1.collidingWith[collider2] = data
+			collider2.collidingWith[collider1] = collections.copy(data)
 		end,
 
 		--end contact
 		function(fixture1, fixture2, contact)
-			debug.log("end contact",
-				self.globals.physicsFixtures[fixture1].gameObject.name,
-				self.globals.physicsFixtures[fixture2].gameObject.name,
-				self.frame)
-			local x1, y1, x2, y2 = contact:getPositions()
-			debug.log(x1, y1, x2, y2)
+			-- debug.log("end contact",
+			-- 	self.globals.physicsFixtures[fixture1].gameObject.name,
+			-- 	self.globals.physicsFixtures[fixture2].gameObject.name,
+			-- 	self.frame)
+			-- local x1, y1, x2, y2 = contact:getPositions()
+			-- debug.log(x1, y1, x2, y2)
+			local collider1 = self.globals.physicsFixtures[fixture1]
+			local collider2 = self.globals.physicsFixtures[fixture2]
+
+			local data = {frame = self.frame}
+			collider1.collidingWith[collider2] = data
+			collider2.collidingWith[collider1] = collections.copy(data)
 		end
 
-	-- 	-- --pre-solve
-	-- 	-- function(...)
-	-- 	-- 	debug.log("pre-solve", ...)
-	-- 	-- end,
+		-- --pre-solve
+		-- function(...)
+		-- 	debug.log("pre-solve", ...)
+		-- end,
 
-	-- 	-- --post-solve
-	-- 	-- function(...)
-	-- 	-- 	debug.log("post-solve", ...)
-	-- 	-- end
+		-- --post-solve
+		-- function(...)
+		-- 	debug.log("post-solve", ...)
+		-- end
 	)
 
 	self:addEvent("physicsPreUpdate")
