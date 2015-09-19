@@ -882,7 +882,40 @@ local function maintainCollisions(self, colliderToCheck)
 							not collisionData[collider].colliding[layer[j]] and
 							not collisionData[collider].notColliding[layer[j]]
 						) then
-							local r, d = collider:isCollidingWith(layer[j], nil, true)
+							local r, d
+
+							--if box2d already checked the collision, let's see what it said
+							if collider.solid and layer[j].solid then
+								local col = collider.collidingWith[layer[j]]
+								local ncol = collider.notCollidingWith[layer[j]]
+								if not (col or ncol) then
+									r = false
+									collider.notCollidingWith[layer[j]] = {frame = self.frame}
+									layer[j].notCollidingWith[collider] = {frame = self.frame}
+								elseif col and not ncol then
+									r = true
+									collider.collidingWith[layer[j]] = {frame = self.frame}
+									layer[j].collidingWith[collider] = {frame = self.frame}
+									d = collider.collidingWith[layer[j]]
+								elseif ncol and not col then
+									r = false
+									collider.notCollidingWith[layer[j]] = {frame = self.frame}
+									layer[j].notCollidingWith[collider] = {frame = self.frame}
+								elseif col.frame > ncol.frame then
+									r = true
+									collider.collidingWith[layer[j]] = {frame = self.frame}
+									layer[j].collidingWith[collider] = {frame = self.frame}
+									d = collider.collidingWith[layer[j]]
+								else
+									r = false
+									r = false
+									collider.notCollidingWith[layer[j]] = {frame = self.frame}
+									layer[j].notCollidingWith[collider] = {frame = self.frame}
+								end
+							--else, check it ourselves
+							else
+								r, d = collider:isCollidingWith(layer[j], nil, true)
+							end
 							if r then
 								collisionData[collider].colliding[layer[j]] = d
 								collisionData[layer[j]].colliding[collider] = d
@@ -954,24 +987,12 @@ local function maintainCollisions(self, colliderToCheck)
 			end
 		end
 
-		-- collider.collidingWith = collections.copy(others.colliding)
-
-		-- if next(enter) then
-		-- 	collider.gameObject:collisionenter(collections.copy(enter))
-		-- end
-		-- if next(exit) then
-		-- 	local noCollisionsLeft = not next(enter)
-		-- 	collider.gameObject:collisionexit(collections.copy(exit), noCollisionsLeft)
-		-- end
-
 		for i, v in ipairs(enter) do
-			debug.log(collider.gameObject.name, v.gameObject.name)
 			collider.gameObject:collisionenter(v)
 		end
 
 		local noCollisionsLeft = not next(collider.collidingWith)
 		for i, v in ipairs(exit) do
-			debug.log("exit", collider.gameObject.name, v.gameObject.name)
 			collider.gameObject:collisionexit(v, noCollisionsLeft)
 		end
 	end
@@ -1021,8 +1042,9 @@ local GameScene = class.define(GameEntity, function(self, transform)
 			local collider2 = self.globals.physicsFixtures[fixture2]
 
 			local data = {frame = self.frame}
-			collider1.collidingWith[collider2] = data
-			collider2.collidingWith[collider1] = collections.copy(data)
+			collider1.notCollidingWith[collider2] = data
+			collider2.notCollidingWith[collider1] = collections.copy(data)
+			-- debug.log("end contact", self.frame, collider1.gameObject.name, collider2.gameObject.name)
 		end
 
 		-- --pre-solve
