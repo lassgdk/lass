@@ -894,20 +894,23 @@ local function maintainCollisions(self, colliderToCheck)
 									layer[j].notCollidingWith[collider] = {frame = self.frame}
 								elseif col and not ncol then
 									r = true
-									collider.collidingWith[layer[j]] = {frame = self.frame}
-									layer[j].collidingWith[collider] = {frame = self.frame}
-									d = collider.collidingWith[layer[j]]
+									if col.frame ~= self.frame then 
+										collider.collidingWith[layer[j]] = {frame = self.frame}
+										layer[j].collidingWith[collider] = {frame = self.frame}
+									end
+									d = collections.copy(collider.collidingWith[layer[j]])
 								elseif ncol and not col then
 									r = false
 									collider.notCollidingWith[layer[j]] = {frame = self.frame}
 									layer[j].notCollidingWith[collider] = {frame = self.frame}
 								elseif col.frame > ncol.frame then
 									r = true
-									collider.collidingWith[layer[j]] = {frame = self.frame}
-									layer[j].collidingWith[collider] = {frame = self.frame}
-									d = collider.collidingWith[layer[j]]
+									if col.frame ~= self.frame then
+										collider.collidingWith[layer[j]] = {frame = self.frame}
+										layer[j].collidingWith[collider] = {frame = self.frame}
+									end
+									d = collections.copy(collider.collidingWith[layer[j]])
 								else
-									r = false
 									r = false
 									collider.notCollidingWith[layer[j]] = {frame = self.frame}
 									layer[j].notCollidingWith[collider] = {frame = self.frame}
@@ -988,10 +991,16 @@ local function maintainCollisions(self, colliderToCheck)
 		end
 
 		for i, v in ipairs(enter) do
-			collider.gameObject:collisionenter(v)
+			collider.gameObject:collisionenter(v, collider.collidingWith[v])
 		end
 
-		local noCollisionsLeft = not next(collider.collidingWith)
+		local noCollisionsLeft = true
+		for c, d in pairs(collider.collidingWith) do
+			if d.frame == self.frame then
+				noCollisionsLeft = false
+				break
+			end
+		end
 		for i, v in ipairs(exit) do
 			collider.gameObject:collisionexit(v, noCollisionsLeft)
 		end
@@ -1028,6 +1037,8 @@ local GameScene = class.define(GameEntity, function(self, transform)
 			local data = {frame = self.frame}
 			collider1.collidingWith[collider2] = data
 			collider2.collidingWith[collider1] = collections.copy(data)
+
+			self.globals.contact = contact
 		end,
 
 		--end contact
@@ -1045,17 +1056,24 @@ local GameScene = class.define(GameEntity, function(self, transform)
 			collider1.notCollidingWith[collider2] = data
 			collider2.notCollidingWith[collider1] = collections.copy(data)
 			-- debug.log("end contact", self.frame, collider1.gameObject.name, collider2.gameObject.name)
+		end,
+
+		--pre-solve
+		nil,
+
+		--post-solve
+		function(fixture1, fixture2, contact, normalImpulse1, tangentImpulse1, normalImpulse2, tangentImpulse2)
+			-- debug.log(contact == self.globals.contact, normalImpulse1, normalImpulse2, tangentImpulse1, tangentImpulse2, self.frame)
+			local collider1 = self.globals.physicsFixtures[fixture1]
+			local collider2 = self.globals.physicsFixtures[fixture2]
+
+			local data = {
+				frame = self.frame,
+				normalImpulses = {normalImpulse1, normalImpulse2},
+				tangentImpulses = {tangentImpulse1, tangentImpulse2},
+			}
+			collider1.collidingWith[collider2] = data
 		end
-
-		-- --pre-solve
-		-- function(...)
-		-- 	debug.log("pre-solve", ...)
-		-- end,
-
-		-- --post-solve
-		-- function(...)
-		-- 	debug.log("post-solve", ...)
-		-- end
 	)
 
 	self:addEvent("physicsPreUpdate")
@@ -1197,13 +1215,14 @@ function GameScene:update(dt)
 		self.base.update(self, dt * self.timeScale, self.frame)
 
 		self.globals.events.physicsPreUpdate:play(self)
-		self.globals.physicsWorld:update(dt)
+		self.globals.physicsWorld:update(dt * self.timeScale)
 		self.globals.events.physicsPostUpdate:play(self)
 		-- debug.log("maintaining Collisions")
 		maintainCollisions(self)
 
+		-- debug.log(self.globals.canvases[])
+
 		self.frame = self.frame + 1
-		
 	end
 end
 
