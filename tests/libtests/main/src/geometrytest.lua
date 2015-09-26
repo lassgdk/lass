@@ -392,10 +392,6 @@ function geometrytest.testVector3Divide()
 	assert(r.z == 4, "16 / 4 didn't become 4")
 end
 
-function geometrytest.testVector3Divide()
-
-end
-
 function geometrytest.testTransformCreation()
 
 	--[[incorrect creation]]
