@@ -13,10 +13,8 @@ geometrytest.tests={
 	"testVector2And3Subtract",
 	"testVector2Multiply",
 	"testVector3Multiply",
-	-- "testVector2And3Multiply",
-	-- "testVector2Divide",
-	-- "testVector3Divide",
-	-- "testVector2And3Divide",
+	"testVector2Divide",
+	"testVector3Divide",
 	"testTransformCreation",
 	"testTransformCreationWithTransform",
 	"testGlobalRectangle", -- placeholder
@@ -196,7 +194,6 @@ function geometrytest.testVector2And3Add()
 	assert(r.x == 11, "10 + 1 didn't equal 11")
 	assert(r.y == 25, "20 + 5 didn't equal 25")
 	assert(r.z == 30, "30 + 0 didn't equal 30")
-
 end
 
 function geometrytest.testVector2Subtract()
@@ -309,7 +306,7 @@ function geometrytest.testVector2Multiply()
 
 	--[[operator order]]
 	-- uses a spread of different numbers to ensure unique results for each test
-	v = geometry.Vector3(1, 2)
+	v = geometry.Vector2(1, 2)
 
 	r = v * 2
 	assert(r.x == 2, "1 * 2 didn't become 2")
@@ -344,6 +341,59 @@ function geometrytest.testVector3Multiply()
 	assert(r.x == 3, "3 * 1 didn't become 3")
 	assert(r.y == 6, "3 * 2 didn't become 6")
 	assert(r.z == 9, "3 * 3 didn't become 9")
+end
+
+function geometrytest.testVector2Divide()
+	-- testing accessing Vector2.__div is intentionally not covered, as it is not the proper usage
+
+	--[[basic usage]]
+	local v = geometry.Vector2()
+	r = v / 1
+	assert(r.x == 0, "0 / 1 didn't equal 0")
+	assert(r.y == 0, "0 / 1 didn't equal 0")
+
+
+	--[[operator order]]
+	-- uses a spread of different numbers to ensure unique results for each test
+	v = geometry.Vector2(4, 8)
+
+	r = v / 2
+	assert(r.x == 2, "4 / 2 didn't become 2")
+	assert(r.y == 4, "8 / 2 didn't become 4")
+
+	r = 4 / v
+	assert(r.x == 1, "4 / 4 didn't become 1")
+	assert(r.y == 2, "8 / 4 didn't become 2")
+end
+
+function geometrytest.testVector3Divide()
+	-- testing accessing Vector3.__div is intentionally not covered, as it is not the proper usage
+
+	--[[basic usage]]
+	local v = geometry.Vector3()
+	r = v / 1
+	assert(r.x == 0, "0 / 1 didn't equal 0")
+	assert(r.y == 0, "0 / 1 didn't equal 0")
+	assert(r.z == 0, "0 / 1 didn't equal 0")
+
+
+	--[[operator order]]
+	-- uses a spread of different numbers to ensure unique results for each test
+	v = geometry.Vector3(4, 8, 16)
+
+	r = v / 2
+	assert(r.x == 2, "4 / 2 didn't become 2")
+	assert(r.y == 4, "8 / 2 didn't become 4")
+	assert(r.z == 8, "16 / 2 didn't become 8")
+
+	r = 4 / v
+	assert(r.x == 1, "4 / 4 didn't become 1")
+	assert(r.y == 2, "8 / 4 didn't become 2")
+	assert(r.z == 4, "16 / 4 didn't become 4")
+end
+
+function geometrytest.testVector3Divide()
+
 end
 
 function geometrytest.testTransformCreation()
