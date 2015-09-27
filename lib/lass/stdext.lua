@@ -4,6 +4,26 @@ standard library overrides
 
 local _print = print
 local _tonumber = tonumber
+local _ipairs = ipairs
+
+local function iter(a, i)
+
+	if type(a) ~= "table" then
+		error("bad argument #1 to 'ipairs' (table expected, got " .. type(a) .. ")")
+	end
+	i = i + 1
+
+	--default ipairs seems to use rawget(a, i) instead of a[i]
+	local v = a[i]
+	if v then
+		return i, v
+	end
+end
+
+-- ipairs = function(a)
+
+-- 	return iter, a, 0
+-- end
 
 print = function(...)
 

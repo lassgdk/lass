@@ -475,7 +475,7 @@ function GameObject.fromPrefab(scene, object, parent)
 			-- 	end
 			-- end
 			evaluateDelayObjects(comp.arguments)
-			gameObject:addComponent(componentClass(comp.arguments))
+			gameObject:addComponent(componentClass(comp.arguments), false)
 		end
 
 		if pf.children then
@@ -501,23 +501,11 @@ function GameObject.fromPrefab(scene, object, parent)
 	if object.components then
 		for i, comp in ipairs(object.components) do
 			local componentClass = require(comp.script)
-			-- print(componentClass, require("lass.builtins.graphics.RectangleRenderer"))
 
-			-- print("hey", comp.script)
-			-- for k,v in pairs(comp.arguments) do print(k,v) end
-
-			-- print("checking inheritance for " .. object.name)
 			assert(class.subclassof(componentClass, Component), comp.script.." does not return a Component")
 
-			--evaluate delayed arguments
-			-- debug.log(i, comp, comp.arguments)
-			-- for arg, value in pairs(comp.arguments) do
-			-- 	if class.instanceof(value, DelayObject) then
-			-- 		comp.arguments[i] = arg()
-			-- 	end
-			-- end
 			evaluateDelayObjects(comp.arguments)
-			gameObject:addComponent(componentClass(comp.arguments))
+			gameObject:addComponent(componentClass(comp.arguments), false)
 		end
 	end
 
@@ -534,6 +522,11 @@ function GameObject.fromPrefab(scene, object, parent)
 		for i, event in ipairs(object.events) do
 			scene:addEventListener(event, gameObject)
 		end
+	end
+
+	--call awake() on components
+	for i, component in ipairs(gameObject.components) do
+		component:awake(true)
 	end
 
 	return gameObject
@@ -655,10 +648,14 @@ function GameObject:addChild(child)
 	self.base.addChild(self, child)
 end
 
-function GameObject:addComponent(component)
+function GameObject:addComponent(component, callAwake)
 
 	--status, result = pcall(component.is_a, component, Component)
 	-- assert(class.instanceof(component, Component), "component must be Component")
+
+	if callAwake == nil then
+		callAwake = true
+	end
 
 	if self.components then
 		self.components[#self.components + 1] = component
@@ -672,11 +669,13 @@ function GameObject:addComponent(component)
 
 	if component.active == nil then
 		component.active = true
+		if callAwake then
+			component:awake(true)
+		end
 	else
 		component:activate()
 	end
 
-	component:awake(true)
 end
 
 function GameObject:removeComponent(component)
@@ -930,7 +929,7 @@ local function maintainCollisions(self, colliderToCheck)
 
 						::continue::
 					end
-				else
+				elseif self.globals.colliders[layerNameToCheck] then
 					for i, other in ipairs(self.globals.colliders[layerNameToCheck]) do
 						if not collisionData[other] then
 							collisionData[other] = {colliding={}, notColliding={}}
@@ -1022,6 +1021,7 @@ local GameScene = class.define(GameEntity, function(self, transform)
 	self.globals.events = {}
 	self.globals.physicsFixtures = {}
 	self.globals.physicsWorld = love.physics.newWorld(0, 0, true)
+	self.globals.physicsLayers = {}
 
 	self.globals.physicsWorld:setCallbacks(
 		function(fixture1, fixture2, contact)
@@ -1147,6 +1147,7 @@ function GameScene:applySettings()
 	self.globals.gravity = geometry.Vector2(self.settings.physics.gravity)
 	self.globals.pixelsPerMeter = self.settings.physics.pixelsPerMeter
 	love.physics.setMeter(self.settings.physics.pixelsPerMeter)
+	self.globals.physicsLayers = self.settings.physics.layers
 
 	local grav = geometry.Vector2(self.globals.gravity)
 	-- grav.x = grav.x / self.settings.physics.pixelsPerMeter

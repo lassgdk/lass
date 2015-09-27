@@ -13,6 +13,9 @@ return {
       x = 0,
       y = -9.80665 * 20
     },
-    pixelsPerMeter = 20
+    pixelsPerMeter = 20,
+    layers = {
+      "main"
+    }
   }
 }

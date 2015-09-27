@@ -35,7 +35,48 @@ local Collider = class.define(lass.Component, function(self, arguments)
 	arguments.restitution = arguments.restitution or 0
 
 	self.base.init(self, arguments)
+
 end)
+
+-- local CollisionLayerList = class.define(function(self, list)
+
+-- 	for i, layer in ipairs(list) do
+-- 		debug.log(i, layer)
+-- 		self[i] = layer
+-- 	end
+-- end)
+
+-- function CollisionLayerList:__len()
+
+-- 	crash()
+-- 	local n = 0
+-- 	for i in ipairs(self) do
+-- 		n = i
+-- 	end
+
+-- 	return n
+-- end
+
+-- function CollisionLayerList:__genericget(key)
+
+-- 	if type(key) == "number" and key > 0 then
+-- 		--use negation of the key as a "private" variable
+-- 		return rawget(self, -key)
+-- 	end
+-- end
+
+-- function CollisionLayerList:__genericset(key, value)
+
+-- 	if type(key) == "number" and key > 0 then
+-- 		--use negation of the key as a "private" variable
+-- 		rawset(self, -key, value)
+-- 		if self.callback then
+-- 			self:callback(key, value)
+-- 		end
+-- 	else
+-- 		rawset(self, key, value)
+-- 	end
+-- end
 
 local function shapeToPhysicsShape(self, shape, physicsShape, oldTransform)
 	-- create or modify a physics shape using a geometry.Shape
@@ -172,6 +213,88 @@ function Collider.__set.rigidbody(self)
 	error("attempted to set \"rigidbody\" (a read-only property)")
 end
 
+local function setCategory(self)
+
+	local categories = {}
+	-- debug.log(self.layers[1])
+	for i, layer in ipairs(self.layers) do
+		categories[#categories + 1] = collections.index(self.globals.physicsLayers, layer)
+	end
+
+	self.fixture:setCategory(unpack(categories))
+end
+
+local function setMask(self)
+
+	local masks = {}
+	local categoriesToCheck = {}
+
+	for i, layer in ipairs(self.layersToCheck) do
+		local index = collections.index(self.globals.physicsLayers, layer)
+		if index then
+			categoriesToCheck[index] = true
+		end
+	end
+
+	-- each layer in masks is a layer to NOT check
+	for i = 1, 16 do
+		if not categoriesToCheck[i] then
+			masks[#masks + 1] = i
+		end
+	end
+
+	self.fixture:setMask(unpack(masks))
+end
+
+function Collider.__get.layers(self)
+
+	return self._layers
+end
+
+function Collider.__set.layers(self, value)
+
+	-- debug.log("about to cretae a new layer list")
+	-- local cll = CollisionLayerList(value)
+
+	-- --set function that is called whenever a slot in _layers changes
+	-- cll.callback = function(object, key, value2)
+	-- 	if self.solid then
+	-- 		setCategory(self)
+	-- 	end
+	-- end
+
+	-- self._layers = cll
+
+	self._layers = value
+
+	if self.fixture then
+		setCategory(self)
+	end
+end
+
+function Collider.__get.layersToCheck(self)
+
+	return self._layersToCheck
+end
+
+function Collider.__set.layersToCheck(self, value)
+
+	-- self._layersToCheck = CollisionLayerList(value)
+
+	-- --set function that is called whenever a slot in _layers changes
+	-- self._layersToCheck.callback = function(object, key, value2)
+	-- 	if self.solid then
+	-- 		setMask(self)
+	-- 	end
+	-- end
+
+	self._layersToCheck = value
+
+	if self.fixture then
+		setMask(self)
+	end
+end
+
 function Collider:awake(firstAwake)
 
 	if self.shapeSource and firstAwake then
@@ -195,18 +318,17 @@ function Collider:awake(firstAwake)
 		end
 	end
 
-	-- if self.gameObject.name == "floor" then
-		self.gameScene:addEventListener("physicsPreUpdate", self.gameObject, true)
-		self.gameScene:addEventListener("physicsPostUpdate", self.gameObject, true)
-	-- end
-
-	-- for i,v in ipairs(self.gameObject.events) do
-		-- debug.log(i,v)
-	-- end
+	self.gameScene:addEventListener("physicsPreUpdate", self.gameObject, true)
+	self.gameScene:addEventListener("physicsPostUpdate", self.gameObject, true)
 
 	-- if self.solid is true but self.body was destroyed, setting self.solid to
 	-- true again will trigger construction of a new self.body
 	self.solid = self.solid
+
+	debug.log(self.layers[1])
+	self.layers = self.layers
+	debug.log(self.layers[1])
+	self.layersToCheck = self.layersToCheck
 end
 
 function Collider:__tostring()
@@ -243,13 +365,37 @@ function Collider.events.physicsPreUpdate.play(self, source, data)
 			self.fixture = love.physics.newFixture(self.body, shape, 6)
 		end
 
+		self.layers = self.layers
+		self.layersToCheck = self.layersToCheck
 		self.fixture:setRestitution(self.restitution)
+
+		debug.log(self.gameObject.name, self.fixture:getGroupIndex())
+		local m = collections.map(
+			function(c) return self.globals.physicsLayers[c] or "?" end,
+			table.pack(self.fixture:getCategory())
+		)
+		for i,v in ipairs(m) do
+			debug.log("\t",i,v)
+		end
+
+		m = collections.map(
+			function(c) return self.globals.physicsLayers[c] or "?" end,
+			table.pack(self.fixture:getMask())
+		)
+		for i,v in ipairs(m) do
+			debug.log("\t",i,v)
+		end
 	end
 end
 
 function Collider.events.physicsPostUpdate.play(self, source, data)
 
 	self._oldTransform = geometry.Transform(self.gameObject.globalTransform)
+
+	-- debug.log("=================")
+	-- debug.log(self.gameObject.name, self.layers[1])
+	-- local a,b = self.fixture:getCategory()
+	-- debug.log(self.gameObject.name, a,b, self.layers[1], self.layers[2])
 end
 
 

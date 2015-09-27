@@ -92,6 +92,16 @@ local function deepcopy(t, found)
 	end
 end
 
+local function map(func, list)
+
+	local mapped = {}
+	for i, v in ipairs(list) do
+		mapped[i] = func(v)
+	end
+
+	return mapped
+end
+
 local function _get(object, calculateValue, ...)
 
 	local lastObject = nil
@@ -174,6 +184,7 @@ return {
 	deepcopy = deepcopy,
 	index = index,
 	indices = indices,
+	map = map,
 	set = set,
 	get = get,
 	getkey = getkey,
