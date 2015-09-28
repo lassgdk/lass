@@ -1076,6 +1076,10 @@ local GameScene = class.define(GameEntity, function(self, transform)
 		end
 	)
 
+	self.globals.physicsWorld:setContactFilter(function(fixture1, fixture2)
+		return true
+	end)
+
 	self:addEvent("physicsPreUpdate")
 	self:addEvent("physicsPostUpdate")
 
