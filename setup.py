@@ -130,5 +130,7 @@ setup(
     scripts = scripts,
     console = console,
     data_files = DATA_FILES,
-    cmdclass = {"install": CustomInstall}
+    cmdclass = {"install": CustomInstall},
+    options = {'py2exe': {'bundle_files': 1, 'compressed': True}},
+    zipfile = None
 )
