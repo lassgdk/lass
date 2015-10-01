@@ -12,8 +12,7 @@ except:
 #load config file
 #if on windows, look in directory where lasspm lives
 if sys.platform == "win32":
-	# XDG_CONFIG_HOME = os.path.dirname(os.path.realpath(__file__))
-	DIR_LASS_CONF = os.path.dirname(os.path.realpath(sys.argv[0]))
+	DIR_LASS_CONF = os.path.dirname(os.path.realpath(sys.path[0]))
 #else, look in the $HOME directory
 else:
 	try:

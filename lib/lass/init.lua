@@ -3,6 +3,7 @@
 -- decky coss (cosstropolis.com)
 
 require("lass.stdext")
+local bit = require("bit")
 local class = require("lass.class")
 local collections = require("lass.collections")
 local geometry = require("lass.geometry")
@@ -1077,7 +1078,16 @@ local GameScene = class.define(GameEntity, function(self, transform)
 	)
 
 	self.globals.physicsWorld:setContactFilter(function(fixture1, fixture2)
-		return true
+
+		local collider1 = self.globals.physicsFixtures[fixture1]
+		local collider2 = self.globals.physicsFixtures[fixture2]
+
+		local mask1, mask2 = collider1.mask, collider2.mask
+		local cat1, cat2 = collider1.category, collider2.category
+
+		local r = (bit.band(cat1, mask2) ~= 0) or (bit.band(cat2, mask1) ~= 0)
+		debug.log(r)
+		return r
 	end)
 
 	self:addEvent("physicsPreUpdate")

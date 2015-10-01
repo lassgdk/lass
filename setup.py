@@ -2,7 +2,7 @@
 
 error = ""
 
-import os, subprocess, sys
+import os, subprocess, sys, struct
 from distutils import log
 try:
 	from setuptools import setup
@@ -112,25 +112,30 @@ class CustomInstall(install):
 				os.chown(os.path.join(root, f), UID, GID)
 		log.info("done")
 
+options = {}
 if sys.platform.startswith("win32"):
 	scripts = []
 	console = [os.path.join("bin", "lasspm")]
+
+	# if python is 32-bit, enable bundle_files
+	if struct.calcsize("P") == 4:
+		options["py2exe"] = {'bundle_files': 1, 'compressed': True}
 else:
 	scripts = [os.path.join("bin", "lasspm")]
 	console = []
 
 setup(
-    name = "lass",
-    version = "0.1.0.dev0",
-    author = "Decky Coss",
-    author_email = "coss@cosstropolis.com",
-    description = "A modular development kit for 2D videogames.",
-    packages = [],
-    install_requires = ["jinja2"],
-    scripts = scripts,
-    console = console,
-    data_files = DATA_FILES,
-    cmdclass = {"install": CustomInstall},
-    options = {'py2exe': {'bundle_files': 1, 'compressed': True}},
-    zipfile = None
+	name = "lass",
+	version = "0.1.0.dev0",
+	author = "Decky Coss",
+	author_email = "coss@cosstropolis.com",
+	description = "A modular development kit for 2D videogames.",
+	packages = [],
+	install_requires = ["jinja2"],
+	scripts = scripts,
+	console = console,
+	data_files = DATA_FILES,
+	cmdclass = {"install": CustomInstall},
+	options = options,
+	zipfile = None
 )

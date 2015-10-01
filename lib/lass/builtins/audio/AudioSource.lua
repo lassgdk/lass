@@ -34,15 +34,19 @@ function AudioSource.__set.maxInstances(self, value)
 
 	if value >= 0 then
 
-		if not self._maxInstances or value > self._maxInstances then
+		if not self.instances then
+			self.instances = {}
+		end
+
+		if value > #self.instances then
 			-- add new instances. we want to insert them at the top of the stack so we can
 			-- steal them sooner
-			for i = 1, value - (self._maxInstances or 0) do
-				table.insert(love.audio.newSource(self.filename, self.sourceType))
+			for i = 1, value - #self.instances do
+				table.insert(self.instances, 1, love.audio.newSource(self.filename, self.sourceType))
 			end
-		elseif value < self._maxInstances then
+		elseif value < #self.instances then
 			-- delete extra instances
-			local instances = instancesToSteal(self, self._maxInstances - value)
+			local instances = instancesToSteal(self, #self.instances - value)
 			for i, inst in ipairs(instances) do
 				inst:stop()
 				table.remove(self.instances, collections.index(inst))

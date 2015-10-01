@@ -217,7 +217,34 @@ function Collider.__get.category(self)
 			cat = bit.bor(cat, 2 ^ (index-1))
 		end
 	end
+
+	return cat
 end
+
+function Collider.__set.category(self)
+
+	error("attempted to set readonly property 'category'")
+end
+
+function Collider.__get.mask(self)
+
+	local m = 0
+
+	for i, layerName in ipairs(self.layersToCheck) do
+		local index = collections.index(self.globals.physicsLayers, layerName)
+		if index then
+			m = bit.bor(m, 2 ^ (index-1))
+		end
+	end
+
+	return m
+end
+
+function Collider.__set.mask(self)
+
+	error("attempted to set readonly property 'mask'")
+end
+
 -- function Collider.__get.layers(self)
 
 -- 	return self._layers
@@ -338,8 +365,8 @@ function Collider.events.physicsPreUpdate.play(self, source, data)
 		self.layers = self.layers
 		self.layersToCheck = self.layersToCheck
 		self.fixture:setRestitution(self.restitution)
+		-- self.fixture:setFilterData(0)
 
-		debug.log(self.gameObject.name, self.fixture:getFilterData())
 		-- local m = collections.map(
 		-- 	function(c) return self.globals.physicsLayers[c] or "?" end,
 		-- 	table.pack(self.fixture:getCategory())
