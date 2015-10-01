@@ -25,8 +25,9 @@ return {
       arguments = {
         targets = {
           {"gameObject", "getComponent", "lass.builtins.animation.PeriodicInterpolator", "play"},
-          {"gameObject", "getComponent", "lass.builtins.audio.AudioSource", "source", "rewind"},
-          {"gameObject", "getComponent", "lass.builtins.audio.AudioSource", "source", "play"},
+          -- {"gameObject", "getComponent", "lass.builtins.audio.AudioSource", "source", "rewind"},
+          -- {"gameObject", "getComponent", "lass.builtins.audio.AudioSource", "source", "play"},
+          {"gameObject", "getComponent", "lass.builtins.audio.AudioSource", "play"},
         },
         conditions = {
           event = "mousepressed",
@@ -72,6 +73,7 @@ return {
         }),
         sourceType = "static",
         autoplay = false,
+        maxInstances = 2
       }
     }
   }

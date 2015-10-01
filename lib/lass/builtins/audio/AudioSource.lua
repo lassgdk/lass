@@ -5,9 +5,9 @@ local geometry = require("lass.geometry")
 
 local AudioSource = class.define(lass.Component, function(self, arguments)
 
-	arguments.source = love.audio.newSource(
-		arguments.filename or "", arguments.sourceType or "static"
-	)
+	-- arguments.source = love.audio.newSource(
+	-- 	arguments.filename or "", arguments.sourceType or "static"
+	-- )
 	arguments.autoplay = arguments.autoplay or false
 	arguments.maxInstances = arguments.maxInstances or 1
 
@@ -61,9 +61,21 @@ end
 
 function AudioSource:awake()
 
+	self._currentInstance = 0
 	if self.autoplay then
-		self.source:play()
+		self:play()
 	end
+end
+
+function AudioSource:play()
+
+	self._currentInstance = (self._currentInstance + 1) % self.maxInstances
+	if self._currentInstance == 0 then
+		self._currentInstance = self.maxInstances
+	end
+
+	self.instances[self._currentInstance]:rewind()
+	self.instances[self._currentInstance]:play()
 end
 
 return AudioSource
