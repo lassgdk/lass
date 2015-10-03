@@ -197,7 +197,7 @@ def newgame(game, projects=False):
 		except OSError:
 			print("Could not create %s folder")
 
-	for t in ["main.lua", "settings.lua", "scene_main.lua"]:
+	for t in ["main.lua", "settings.lua", "scene_main.lua", "conf.lua"]:
 		shutil.copy(os.path.join(DIR_TEMPLATES_LUA, t), "src")
 
 def playgame(game, scene="", **kwargs):
