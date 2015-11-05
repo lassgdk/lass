@@ -898,10 +898,10 @@ local function maintainCollisions(self, colliderToCheck)
 									layer[j].notCollidingWith[collider] = {frame = self.frame}
 								elseif col and not ncol then
 									r = true
-									if col.frame ~= self.frame then 
-										collider.collidingWith[layer[j]] = {frame = self.frame}
-										layer[j].collidingWith[collider] = {frame = self.frame}
-									end
+									-- if col.frame ~= self.frame then 
+									-- 	collider.collidingWith[layer[j]] = {frame = self.frame}
+									-- 	layer[j].collidingWith[collider] = {frame = self.frame}
+									-- end
 									d = collections.copy(collider.collidingWith[layer[j]])
 								elseif ncol and not col then
 									r = false
@@ -909,10 +909,10 @@ local function maintainCollisions(self, colliderToCheck)
 									layer[j].notCollidingWith[collider] = {frame = self.frame}
 								elseif col.frame > ncol.frame then
 									r = true
-									if col.frame ~= self.frame then
-										collider.collidingWith[layer[j]] = {frame = self.frame}
-										layer[j].collidingWith[collider] = {frame = self.frame}
-									end
+									-- if col.frame ~= self.frame then
+									-- 	collider.collidingWith[layer[j]] = {frame = self.frame}
+									-- 	layer[j].collidingWith[collider] = {frame = self.frame}
+									-- end
 									d = collections.copy(collider.collidingWith[layer[j]])
 								else
 									r = false
@@ -1078,6 +1078,7 @@ local GameScene = class.define(GameEntity, function(self, transform)
 				tangentImpulses = {tangentImpulse1, tangentImpulse2},
 			}
 			collider1.collidingWith[collider2] = data
+			collider2.collidingWith[collider1] = collections.deepcopy(data)
 		end
 	)
 
