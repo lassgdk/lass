@@ -23,11 +23,13 @@ end)
 
 for i, f in ipairs({"play", "stop", "pause", "seek"}) do
 	Event[f] = function(self, source, data)
-		self:post(f, source, data)
+		return self:post(f, source, data)
 	end
 end
 
 function Event:post(action, source, data)
+
+	response = {}
 
 	for listener in pairs(self.listeners) do
 		if listener.active then
@@ -37,11 +39,13 @@ function Event:post(action, source, data)
 					component.events[self.name] and
 					component.events[self.name][action]
 				then
-					component.events[self.name][action](component, source, data)
+					response[component] = component.events[self.name][action](component, source, data)
 				end
 			end
 		end
 	end
+
+	return response
 end
 
 --[[

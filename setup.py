@@ -78,7 +78,9 @@ else:
 	sys.exit("OS Error: Operating system not supported")
 
 DATA_FILES =\
-	reduce(lambda a,b: a + b, [listAll(x, True, DIR_LASS_DATA) for x in ("examples", "engine", "templates")])
+	reduce(lambda a,b: a + b, [
+		listAll(x, True, DIR_LASS_DATA) for x in ("examples", "engine", "templates", "docs")
+	])
 
 os.chdir("lib")
 DATA_FILES += listAll("lass", True, headPrefix=DIR_LUA, filePrefix="lib")
@@ -121,7 +123,7 @@ if sys.platform.startswith("win32"):
 	if struct.calcsize("P") == 4:
 		options["py2exe"] = {'bundle_files': 1, 'compressed': True}
 else:
-	scripts = [os.path.join("bin", "lasspm")]
+	scripts = [os.path.join("bin", "lasspm")]#, os.path.join("bin", "lassdoc")]
 	console = []
 
 setup(
