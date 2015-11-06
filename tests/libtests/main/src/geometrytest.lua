@@ -3,36 +3,6 @@ local geometry = require "lass.geometry"
 local geometrytest = {}
 local NaN = math.huge / math.huge
 
-geometrytest.tests={
-	"assertIncorrectVectorAlgebra",
-	"testVector2Add",
-	"testVector3Add",
-	"testVector2And3Add",
-	"testVector2Subtract",
-	"testVector3Subtract",
-	"testVector2And3Subtract",
-	"testVector2Multiply",
-	"testVector3Multiply",
-	"testVector2Divide",
-	"testVector3Divide",
-	"testTransformCreation",
-	"testTransformCreationWithTransform",
-	"testGlobalRectangle", -- placeholder
-	"testCircleCreation",
-	"testRectangleCreation",
-	"testVector2Creation",
-	"testVector3Creation",
-	"testVector2CreationWithVectors",
-	"testVector3CreationWithVectors",
-	"testIntersectingCirclesAndVectors",
-	"testCircleWithRadiusZero",
-	"testIntersectingRectanglesAndVectors",
-	"testIntersectingRectangleAndCircle",
-	"testIntersectingPolygonsAndVectors",
-	"testIntersectingPolygonAndCircle",
-	"testIntersectingPolygons",
-}
-
 local function assertIncorrectCreation(class, className, variables, default)
 
 	for _, badValue in ipairs({-1, "1", false, math.huge, -math.huge, NaN}) do

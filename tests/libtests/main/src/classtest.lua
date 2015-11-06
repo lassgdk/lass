@@ -2,14 +2,6 @@ local class = require "lass.class"
 
 local classtest = {}
 
---specify order in which to run the tests
-classtest.tests = {
-	-- "testClassDefine",
-	"testClassInheritance",
-	"testNilInit",
-	"testInstanceOf"
-}
-
 local function testMemberAssignment(object, varName, varValue)
 	--ensure that assignment to an instance member works
 	--(this will modify the instance)

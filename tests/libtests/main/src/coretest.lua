@@ -2,10 +2,6 @@ local lass = require("lass")
 local geometry = require("lass.geometry")
 
 local coretest = {}
-coretest.tests = {
-	"testGameObjectMovement",
-	"testGameObjectChildMovement"
-}
 
 local function testLocalPosition(object, assertedPosition)
 	local s1, s2 = tostring(assertedPosition), tostring(object.transform.position)
