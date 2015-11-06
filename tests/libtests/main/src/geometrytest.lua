@@ -55,7 +55,7 @@ local function assertIncorrectCreation(class, className, variables, default)
 	end
 end
 
-function _assertIncorrectVectorAlgebra(vectorName, vector)
+local function _assertIncorrectVectorAlgebra(vectorName, vector)
 
 	for i, badValue in ipairs({{}, 1, "1", false, math.huge, -math.huge, NaN}) do
 		operands = {vector, badValue}
