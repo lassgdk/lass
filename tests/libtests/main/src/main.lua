@@ -5,11 +5,7 @@ local system = require("lass.system")
 
 local scene = {}
 local opts = system.getopt(arg, "scene")
-local testModules = {
-	"coretest",
-	"geometrytest",
-	"classtest"
-}
+local testModules = require("testmodules")
 
 function love.load()
 
@@ -27,8 +23,19 @@ function love.load()
 		print("---" .. testModules[i] .. "---")
 		local testsRun = 0
 		local failures = 0
+		
+		local testNames = {}
+		local i = 1
+		for k, v in pairs(loadedModule) do
+			if type(v) == "function" then
+				testNames[i] = k
+				i = i + 1
+			end
+		end
 
-		for j, testName in ipairs(loadedModule.tests) do
+		table.sort(testNames)
+
+		for j, testName in ipairs(testNames) do
 
 			testsRun = testsRun + 1
 

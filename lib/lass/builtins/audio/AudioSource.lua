@@ -67,7 +67,7 @@ function AudioSource:awake()
 	end
 end
 
-function AudioSource:play()
+function AudioSource:play(instance)
 
 	self._currentInstance = (self._currentInstance + 1) % self.maxInstances
 	if self._currentInstance == 0 then

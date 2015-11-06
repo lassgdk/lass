@@ -1,0 +1,5 @@
+return {
+	"coretest",
+	"geometrytest",
+	"classtest"
+}

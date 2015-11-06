@@ -34,7 +34,7 @@ local function testMemberAssignment(object, varName, varValue)
 	)
 end
 
-function classtest.testClassDefine(scene)
+local function testClassDefine(scene)
 	--ensure that defining a base class will work, with or w/o a constructor
 
 	local Animal = class.define()

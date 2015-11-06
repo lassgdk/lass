@@ -102,6 +102,20 @@ local function map(func, list)
 	return mapped
 end
 
+local function range(start, stop, skip)
+
+	skip = skip or 1
+	list = {}
+
+	i = 1
+	for v = start, stop, skip do
+		list[i] = v
+		i = i + 1
+	end
+
+	return list
+end
+
 local function _get(object, calculateValue, ...)
 
 	local lastObject = nil
@@ -184,6 +198,7 @@ return {
 	deepcopy = deepcopy,
 	index = index,
 	indices = indices,
+	range = range,
 	map = map,
 	set = set,
 	get = get,
