@@ -1091,7 +1091,7 @@ local GameScene = class.define(GameEntity, function(self, transform)
 		local cat1, cat2 = collider1.category, collider2.category
 
 		local r = (bit.band(cat1, mask2) ~= 0) or (bit.band(cat2, mask1) ~= 0)
-		debug.log(r)
+		-- debug.log(r)
 		return r
 	end)
 

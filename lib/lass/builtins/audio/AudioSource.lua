@@ -14,16 +14,16 @@ local AudioSource = class.define(lass.Component, function(self, arguments)
 	self.base.init(self, arguments)
 end)
 
-function instancesToSteal(self, num)
+-- function instancesToSteal(self, num)
 
-	--self.instances is a stack, with the least recently played (or never played) at the top
-	instances = {}
-	for i = 1, num do
-		instances[i] = self.instances[i]
-	end
+-- 	--self._instances is a queue, with the least recently played (or never played) at the top
+-- 	instances = {}
+-- 	for i = 1, num do
+-- 		instances[i] = self._instances[i]
+-- 	end
 
-	return instances
-end
+-- 	return instances
+-- end
 
 function AudioSource.__get.maxInstances(self)
 
@@ -34,22 +34,38 @@ function AudioSource.__set.maxInstances(self, value)
 
 	if value >= 0 then
 
-		if not self.instances then
-			self.instances = {}
+		if not self._highestInstanceID then
+			self._highestInstanceID = 0
 		end
 
-		if value > #self.instances then
-			-- add new instances. we want to insert them at the top of the stack so we can
-			-- steal them sooner
-			for i = 1, value - #self.instances do
-				table.insert(self.instances, 1, love.audio.newSource(self.filename, self.sourceType))
+		if not self._instances then
+			self._instances = {}
+		end
+
+		if not self.instanceQueue then
+			self.instanceQueue = {}
+		end
+
+		if value > #self.instanceQueue then
+			-- add new instances
+			for i = 1, value - #self.instanceQueue do
+
+				local source = love.audio.newSource(self.filename, self.sourceType)
+				self._highestInstanceID = self._highestInstanceID + 1
+				self._instances[self._highestInstanceID] = source
+
+				-- insert at the top of the queue so it can be used sooner
+				table.insert(self.instanceQueue, 1, self._highestInstanceID)
 			end
-		elseif value < #self.instances then
+		elseif value < #self.instanceQueue then
 			-- delete extra instances
-			local instances = instancesToSteal(self, #self.instances - value)
-			for i, inst in ipairs(instances) do
-				inst:stop()
-				table.remove(self.instances, collections.index(inst))
+			for i = value + 1, #self.instanceQueue do
+
+				local instanceID = self.instanceQueue[i]
+				self.instanceQueue[i] = nil
+
+				self._instances[instanceID]:stop()
+				table.remove(self._instances, instanceID)
 			end
 		end
 
@@ -61,21 +77,122 @@ end
 
 function AudioSource:awake()
 
-	self._currentInstance = 0
 	if self.autoplay then
 		self:play()
 	end
 end
 
-function AudioSource:play(instance)
+function AudioSource.__get.lastInstanceID(self)
 
-	self._currentInstance = (self._currentInstance + 1) % self.maxInstances
-	if self._currentInstance == 0 then
-		self._currentInstance = self.maxInstances
+	return self.instanceQueue[#self.instanceQueue]
+end
+
+function AudioSource.__set.lastInstanceID(self)
+
+	error("attempted to set readonly property 'lastInstanceID'")
+end
+
+function AudioSource.__get.firstInstanceID(self)
+
+	return self.instanceQueue[1]
+end
+
+function AudioSource.__set.firstInstanceID(self)
+
+	error("attempted to set readonly property 'firstInstanceID'")
+end
+
+local function playSource(source)
+
+	if source:isPlaying() then
+		source:rewind()
 	end
 
-	self.instances[self._currentInstance]:rewind()
-	self.instances[self._currentInstance]:play()
+	source:play()
+end
+
+local function stopSource(source)
+	source:stop()
+end
+
+local function pauseSource(source)
+	source:pause()
+end
+
+local function unpauseSource(source)
+	source:resume()
+end
+
+local function rewindSource(source)
+	source:rewind()
+end
+
+for k, v in pairs({
+	play = playSource,
+	unpause = unpauseSource
+}) do
+	AudioSource[k] = function(self, instanceID)
+
+		-- send the specified instanceID to the back of the queue.
+		-- if instanceID is not specified, pull it from the front of the queue
+		if not instanceID then
+			instanceID = table.remove(self.instanceQueue, 1)
+			self.instanceQueue[#self.instanceQueue + 1] = instanceID
+		else
+			local index = collections.index(self.instanceQueue, instanceID)
+			if not index then
+				error("instance " .. tostring(instanceID) .. " not found")
+			end
+
+			table.remove(self.instanceQueue, index)
+			self.instanceQueue[#self.instanceQueue + 1] = instanceID
+		end
+
+		v(self._instances[instanceID])
+
+		return instanceID
+	end
+end
+
+for k, v in pairs({
+	stop = stopSource,
+	rewind = rewindSource,
+	pause = pauseSource,
+}) do
+	AudioSource[k] = function(self, instanceID)
+
+		-- send the specified instanceID to the front of the queue.
+		-- if instanceID is not specified, pull it from the back of the queue
+		if not instanceID then
+			instanceID = table.remove(self.instanceQueue, #self.instanceQueue)
+			table.insert(self.instanceQueue, 1, instanceID)
+		else
+			local index = collections.index(self.instanceQueue, instanceID)
+			if not index then
+				error("instance " .. tostring(instanceID) .. " not found")
+			end
+
+			table.remove(self.instanceQueue, index)
+			table.insert(self.instanceQueue, 1, instanceID)
+		end
+
+		v(self._instances[instanceID])
+		return instanceID
+	end
+end
+
+for k, v in pairs({
+	playAll = playSource,
+	stopAll = stopSource,
+	rewindAll = rewindSource,
+	pauseAll = pauseSource,
+	unpauseAll = unpauseSource
+}) do
+	AudioSource[k] = function(self)
+		for i, instanceID in ipairs(self.instanceQueue) do
+			v(self._instances[instanceID])
+		end
+	end
 end
 
 return AudioSource
