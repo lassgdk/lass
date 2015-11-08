@@ -25,6 +25,47 @@ end)
 -- 	return instances
 -- end
 
+local function newInstance(self, instance)
+
+	if not instance then
+		return {source = love.audio.newSource(self.filename, self.sourceType)}
+	else
+		return {source = instance.source:clone()}
+	end
+end
+
+local function playInstance(self, instance, target)
+
+	target = target or self.gameObject
+	local source = instance.source
+
+	if not source:isPaused() then
+		instance.target = target
+
+		if source:isPlaying() then
+			source:rewind()
+		end
+	end
+
+	source:play()
+end
+
+local function stopInstance(self, instance)
+	instance.source:stop()
+end
+
+local function pauseInstance(self, instance)
+	instance.source:pause()
+end
+
+local function unpauseInstance(self, instance)
+	instance.source:resume()
+end
+
+local function rewindInstance(self, instance)
+	instance.source:rewind()
+end
+
 function AudioSource.__get.maxInstances(self)
 
 	return self._maxInstances
@@ -48,11 +89,14 @@ function AudioSource.__set.maxInstances(self, value)
 
 		if value > #self.instanceQueue then
 			-- add new instances
+
+			local instance = nil
 			for i = 1, value - #self.instanceQueue do
 
-				local source = love.audio.newSource(self.filename, self.sourceType)
+				instance = newInstance(self, instance)
+
 				self._highestInstanceID = self._highestInstanceID + 1
-				self._instances[self._highestInstanceID] = source
+				self._instances[self._highestInstanceID] = instance
 
 				-- insert at the top of the queue so it can be used sooner
 				table.insert(self.instanceQueue, 1, self._highestInstanceID)
@@ -64,7 +108,7 @@ function AudioSource.__set.maxInstances(self, value)
 				local instanceID = self.instanceQueue[i]
 				self.instanceQueue[i] = nil
 
-				self._instances[instanceID]:stop()
+				self._instances[instanceID].source:stop()
 				table.remove(self._instances, instanceID)
 			end
 		end
@@ -72,13 +116,6 @@ function AudioSource.__set.maxInstances(self, value)
 		self._maxInstances = value
 	else
 		error("maxInstances must be greater than or equal to 0")
-	end
-end
-
-function AudioSource:awake()
-
-	if self.autoplay then
-		self:play()
 	end
 end
 
@@ -102,36 +139,46 @@ function AudioSource.__set.firstInstanceID(self)
 	error("attempted to set readonly property 'firstInstanceID'")
 end
 
-local function playSource(source)
+function AudioSource:awake()
 
-	if source:isPlaying() then
-		source:rewind()
+	if self.autoplay then
+		self:play()
 	end
 
-	source:play()
+	self.gameScene:addEventListener("physicsPostUpdate", self.gameObject)
 end
 
-local function stopSource(source)
-	source:stop()
-end
+function AudioSource.events.physicsPostUpdate.play(self)
 
-local function pauseSource(source)
-	source:pause()
-end
-
-local function unpauseSource(source)
-	source:resume()
-end
-
-local function rewindSource(source)
-	source:rewind()
+	for i, instanceID in ipairs(self.instanceQueue) do
+		local instance = self._instances[instanceID]
+		if instance.target then
+			local position = instance.target.globalTransform.position
+			instance.source:setPosition(position.x, position.y * self.globals.ySign)
+		end
+	end
 end
 
 for k, v in pairs({
-	play = playSource,
-	unpause = unpauseSource
+	play = playInstance,
+	unpause = unpauseInstance
 }) do
-	AudioSource[k] = function(self, instanceID)
+	AudioSource[k] = function(self, ...)
+
+		local args = table.pack(...)
+		local target = nil
+		local instanceID = nil
+
+		if k == "play" and #args > 0 then
+			if type(args[1]) == "number" then
+				instanceID = args[1]
+			else
+				target = args[1]
+				instanceID = args[2]
+			end
+		elseif k == "unpause" then
+			instanceID = args[1]
+		end
 
 		-- send the specified instanceID to the back of the queue.
 		-- if instanceID is not specified, pull it from the front of the queue
@@ -148,16 +195,16 @@ for k, v in pairs({
 			self.instanceQueue[#self.instanceQueue + 1] = instanceID
 		end
 
-		v(self._instances[instanceID])
+		v(self, self._instances[instanceID], target)
 
 		return instanceID
 	end
 end
 
 for k, v in pairs({
-	stop = stopSource,
-	rewind = rewindSource,
-	pause = pauseSource,
+	stop = stopInstance,
+	rewind = rewindInstance,
+	pause = pauseInstance,
 }) do
 	AudioSource[k] = function(self, instanceID)
 
@@ -176,21 +223,21 @@ for k, v in pairs({
 			table.insert(self.instanceQueue, 1, instanceID)
 		end
 
-		v(self._instances[instanceID])
+		v(self, self._instances[instanceID])
 		return instanceID
 	end
 end
 
 for k, v in pairs({
-	playAll = playSource,
-	stopAll = stopSource,
-	rewindAll = rewindSource,
-	pauseAll = pauseSource,
-	unpauseAll = unpauseSource
+	playAll = playInstance,
+	stopAll = stopInstance,
+	rewindAll = rewindInstance,
+	pauseAll = pauseInstance,
+	unpauseAll = unpauseInstance
 }) do
-	AudioSource[k] = function(self)
+	AudioSource[k] = function(self, ...)
 		for i, instanceID in ipairs(self.instanceQueue) do
-			v(self._instances[instanceID])
+			v(self, self._instances[instanceID], ...)
 		end
 	end
 end

@@ -497,7 +497,7 @@ function GameObject.fromPrefab(scene, object, parent)
 
 		if pf.events then
 			for i, event in ipairs(pf.events) do
-				scene:addEventListener(event, gameObject)
+				scene:addEventListener(event, gameObject, false)
 			end
 		end
 	end
@@ -525,7 +525,7 @@ function GameObject.fromPrefab(scene, object, parent)
 	--set up events
 	if object.events then
 		for i, event in ipairs(object.events) do
-			scene:addEventListener(event, gameObject)
+			scene:addEventListener(event, gameObject, false)
 		end
 	end
 
@@ -1309,7 +1309,11 @@ function GameScene:addEventListener(eventName, listener, addToObjectEventsList)
 	local e = self.globals.events[eventName] or self:addEvent(eventName)
 	e.listeners[listener] = true
 
-	if addToObjectEventsList == true and not collections.index(listener.events, eventName) then
+	if addToObjectEventsList == nil then
+		addToObjectEventsList = true
+	end
+
+	if addToObjectEventsList and not collections.index(listener.events, eventName) then
 		listener.events[#listener.events + 1] = eventName
 	end
 end
