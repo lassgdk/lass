@@ -157,12 +157,15 @@ function Vector2:rotate(angle, useRadians)
 
 	angle = -angle
 	if not useRadians then
-		angle = (angle/180) * math.pi
+		angle = math.rad(angle)
+		-- angle = (angle/180) * math.pi
 	end
+	local cosine = math.round(math.cos(angle), 10)
+	local sine = math.round(math.sin(angle), 10)
 
 	return Vector2({
-		x = (self.x * math.cos(angle)) - (self.y * math.sin(angle)),
-		y = (self.x * math.sin(angle)) + (self.y * math.cos(angle))		
+		x = (self.x * cosine) - (self.y * sine),
+		y = (self.x * sine) + (self.y * cosine)
 	})
 end
 
@@ -735,7 +738,6 @@ function Rectangle:globalRectangle(transform)
 		width = height
 		height = tmp
 	end
-
 	position = position:rotate(r) + transform.position
 
 	return Rectangle(width, height, position)

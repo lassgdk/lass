@@ -99,3 +99,16 @@ math.sign = function(n)
 		return 0
 	end
 end
+
+-- code from http://lua-users.org/wiki/SimpleRound
+-- by Igor Skoric
+math.round = function(num, idp)
+
+	local mult = 10^(idp or 0)
+	
+    if num >= 0 then
+    	return math.floor(num * mult + 0.5) / mult
+    else
+    	return math.ceil(num * mult - 0.5) / mult
+    end
+end
