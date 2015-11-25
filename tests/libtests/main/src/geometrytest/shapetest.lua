@@ -5,26 +5,95 @@ local shapetest = {}
 
 
 local function testBasicRectangleRotation(size)
-    -- assumes rectangle is at origin
+    -- assumes rectangle is at origin, and has equal sides
 
-    local r = geometry.Rectangle(size.x, size.y)
+    local r = geometry.Rectangle(size, size)
     local t = geometry.Transform()
 
     --[[test rotation values 0, 90, 180, 270]]
     repeat
         r = r:globalRectangle(t)
 
-        assert(r.width == size.x,
-            "rectangle width changed from " .. size.x .. " after rotated " .. t.rotation .. " degrees")
-        assert(r.height == size.y,
-            "rectangle height changed from " .. size.y .. " after rotated " .. t.rotation .. " degrees")
-        assert(r.position.x == 0,
-            "rectangle x position changed from 0 after rotated " .. t.rotation .. " degrees")
-        assert(r.position.y == 0,
-            "rectangle y position changed from 0 after rotated " .. t.rotation .. " degrees")
+        assert(r.width == size, "rectangle width changed after a rotation of " .. t.rotation)
+        assert(r.height == size, "rectangle height changed after a rotation of " .. t.rotation)
+        assert(r.position.x == 0, "rectangle x position changed after a rotation of " .. t.rotation)
+        assert(r.position.y == 0, "rectangle y position changed after a rotation of " .. t.rotation)
 
         t.rotation = t.rotation + 90
     until(t.rotation == 0)
+
+end
+
+local function testRectanglePositionWithRotation(rotation)
+    -- assumes rectangle is at origin, and has unequal sides
+
+    local width = 1
+    local height = 2
+    local r1 = geometry.Rectangle(width, height)
+    local t = geometry.Transform()
+
+    if rotation % 90 == 0 and rotation % 180 ~= 0 then
+        -- turning 90 or 270 degrees means the height/width swap
+        local temp = width
+        width = height
+        height = temp
+    end
+
+    t = geometry.Transform({x=1}, rotation)
+    r2 = r1:globalRectangle(t)
+    assert(r2.width == width, "rectangle width changed by moving position, rotation is " .. rotation)
+    assert(r2.height == height, "rectangle height changed by moving position, rotation is " .. rotation)
+    assert(r2.position.x == 1, "rectangle x position wasn't transformed, rotation is " .. rotation)
+    assert(r2.position.y == 0, "rectangle y position was incorrectly transformed, rotation is " .. rotation)
+
+    t = geometry.Transform({x=-1}, rotation)
+    r2 = r1:globalRectangle(t)
+    assert(r2.width == width, "rectangle width changed after transforming rectangle position")
+    assert(r2.height == height, "rectangle height changed after transforming rectangle position")
+    assert(r2.position.x == -1, "rectangle x position wasn't transformed, rotation is " .. rotation)
+    assert(r2.position.y == 0, "rectangle y position was incorrectly transformed, rotation is " .. rotation)
+
+    t = geometry.Transform({y=1}, rotation)
+    r2 = r1:globalRectangle(t)
+    assert(r2.width == width, "rectangle width changed after transforming rectangle position")
+    assert(r2.height == height, "rectangle height changed after transforming rectangle position")
+    assert(r2.position.x == 0, "rectangle x position was incorrectly transformed, rotation is " .. rotation)
+    assert(r2.position.y == 1, "rectangle y position wasn't transformed, rotation is " .. rotation)
+
+    t = geometry.Transform({y=-1}, rotation)
+    r2 = r1:globalRectangle(t)
+    assert(r2.width == width, "rectangle width changed after transforming rectangle position")
+    assert(r2.height == height, "rectangle height changed after transforming rectangle position")
+    assert(r2.position.x == 0, "rectangle x position was incorrectly transformed, rotation is " .. rotation)
+    assert(r2.position.y == -1, "rectangle y position wasn't transformed, rotation is " .. rotation)
+
+    t = geometry.Transform({x=1, y=1}, rotation)
+    r2 = r1:globalRectangle(t)
+    assert(r2.width == width, "rectangle width changed after transforming rectangle position")
+    assert(r2.height == height, "rectangle height changed after transforming rectangle position")
+    assert(r2.position.x == 1, "rectangle x position wasn't transformed, rotation is " .. rotation)
+    assert(r2.position.y == 1, "rectangle y position wasn't transformed, rotation is " .. rotation)
+
+    t = geometry.Transform({x=1, y=-1}, rotation)
+    r2 = r1:globalRectangle(t)
+    assert(r2.width == width, "rectangle width changed after transforming rectangle position")
+    assert(r2.height == height, "rectangle height changed after transforming rectangle position")
+    assert(r2.position.x == 1, "rectangle x position wasn't transformed, rotation is " .. rotation)
+    assert(r2.position.y == -1, "rectangle y position wasn't transformed, rotation is " .. rotation)
+
+    t = geometry.Transform({x=-1, y=-1}, rotation)
+    r2 = r1:globalRectangle(t)
+    assert(r2.width == width, "rectangle width changed after transforming rectangle position")
+    assert(r2.height == height, "rectangle height changed after transforming rectangle position")
+    assert(r2.position.x == -1, "rectangle x position wasn't transformed, rotation is " .. rotation)
+    assert(r2.position.y == -1, "rectangle y position wasn't transformed, rotation is " .. rotation)
+
+    t = geometry.Transform({x=-1, y=1}, rotation)
+    r2 = r1:globalRectangle(t)
+    assert(r2.width == width, "rectangle width changed after transforming rectangle position")
+    assert(r2.height == height, "rectangle height changed after transforming rectangle position")
+    assert(r2.position.x == -1, "rectangle x position wasn't transformed, rotation is " .. rotation)
+    assert(r2.position.y == 1, "rectangle y position wasn't transformed, rotation is " .. rotation)
 
 end
 
@@ -41,16 +110,21 @@ function shapetest.testGlobalRectangle()
     assert(r2.position.y == 0, "rectangle y position changed from a transform that does nothing")
 
 
-    --[[basic rotation]]
+    --[[origin based rotation]]
     for _, size in pairs({0, 1, 2, 5000000}) do
-        testBasicRectangleRotation({x=size, y=size})
+        testBasicRectangleRotation(size)
     end
 
 
     --[[non-origin based rotation]]
     r1 = geometry.Rectangle(0, 0, geometry.Vector2(0, 1))
-    t = geometry.Transform(nil, 90)
 
+    t = geometry.Transform(nil, 0)
+    r2 = r1:globalRectangle(t)
+    assert(r2.position.x == 0, "rectangle didn't rotate position correctly")
+    assert(r2.position.y == 1, "rectangle didn't rotate position correctly")
+
+    t.rotation = 90
     r2 = r1:globalRectangle(t)
     assert(r2.position.x == 1, "rectangle didn't rotate position correctly")
     assert(r2.position.y == 0, "rectangle didn't rotate position correctly")
@@ -68,8 +142,8 @@ function shapetest.testGlobalRectangle()
 
     --[[basic size transform]]
     r1 = geometry.Rectangle(1, 1, geometry.Vector2(1, 1))
-    t = geometry.Transform(nil, nil, {x=2})
 
+    t = geometry.Transform(nil, nil, {x=2})
     r2 = r1:globalRectangle(t)
     assert(r2.width == 2, "rectangle width didn't get transformed by 2")
     assert(r2.height == 1, "rectangle height changed from a transform that does nothing to height")
@@ -77,7 +151,6 @@ function shapetest.testGlobalRectangle()
     assert(r2.position.y == 1, "rectangle y position changed from a transform that does nothing to position y")
 
     t = geometry.Transform(nil, nil, {y=2})
-
     r2 = r1:globalRectangle(t)
     assert(r2.width == 1, "rectangle width changed from a transform that does nothing to width")
     assert(r2.height == 2, "rectangle height didn't get transformed by 2")
@@ -85,15 +158,109 @@ function shapetest.testGlobalRectangle()
     assert(r2.position.y == 1, "rectangle y position changed from a transform that does nothing to position y")
 
     t = geometry.Transform(nil, nil, {x=2, y=2})
-
     r2 = r1:globalRectangle(t)
     assert(r2.width == 2, "rectangle width didn't get transformed by 2")
     assert(r2.height == 2, "rectangle height didn't get transformed by 2")
     assert(r2.position.x == 1, "rectangle x position changed from a transform that does nothing to position x")
     assert(r2.position.y == 1, "rectangle y position changed from a transform that does nothing to position y")
 
-end
 
+    --[[rotation of an uneven rectangle]]
+    r1 = geometry.Rectangle(1, 2)
+
+    t = geometry.Transform(nil, 0)
+    r2 = r1:globalRectangle(t)
+    assert(r2.width == 1, "rectangle width didn't get rotated correctly")
+    assert(r2.height == 2, "rectangle height didn't get rotated correctly")
+    assert(r2.position.x == 0, "rectangle x position changed from a transform that does nothing to position x")
+    assert(r2.position.y == 0, "rectangle y position changed from a transform that does nothing to position y")
+
+    t.rotation = 90
+    r2 = r1:globalRectangle(t)
+    assert(r2.width == 2, "rectangle width didn't get rotated correctly")
+    assert(r2.height == 1, "rectangle height didn't get rotated correctly")
+    assert(r2.position.x == 0, "rectangle x position changed from a transform that does nothing to position x")
+    assert(r2.position.y == 0, "rectangle y position changed from a transform that does nothing to position y")
+
+    t.rotation = 180
+    r2 = r1:globalRectangle(t)
+    assert(r2.width == 1, "rectangle width didn't get rotated correctly")
+    assert(r2.height == 2, "rectangle height didn't get rotated correctly")
+    assert(r2.position.x == 0, "rectangle x position changed from a transform that does nothing to position x")
+    assert(r2.position.y == 0, "rectangle y position changed from a transform that does nothing to position y")
+
+    t.rotation = 270
+    r2 = r1:globalRectangle(t)
+    assert(r2.width == 2, "rectangle width didn't get rotated correctly")
+    assert(r2.height == 1, "rectangle height didn't get rotated correctly")
+    assert(r2.position.x == 0, "rectangle x position changed from a transform that does nothing to position x")
+    assert(r2.position.y == 0, "rectangle y position changed from a transform that does nothing to position y")
+
+
+    --[[basic position transform]]
+    testRectanglePositionWithRotation(0)
+
+
+    --[[origin based rotation with position transform]]
+    testRectanglePositionWithRotation(90)
+    testRectanglePositionWithRotation(180)
+    testRectanglePositionWithRotation(270)
+
+
+    --[[non-origin based rotation with position transform]]
+    r1 = geometry.Rectangle(1, 1, geometry.Vector2(0, 1))
+
+    t = geometry.Transform({x=2, y=2})
+    r2 = r1:globalRectangle(t)
+    assert(r2.position.x == 2, "rectangle x position wasn't transformed correctly")
+    assert(r2.position.y == 3, "rectangle y position wasn't transformed correctly")
+
+    t.rotation = 90
+    r2 = r1:globalRectangle(t)
+    assert(r2.position.x == 3, "rectangle x position wasn't transformed correctly")
+    assert(r2.position.y == 2, "rectangle y position wasn't transformed correctly")
+
+    t.rotation = 180
+    r2 = r1:globalRectangle(t)
+    assert(r2.position.x == 2, "rectangle x position wasn't transformed correctly")
+    assert(r2.position.y == 1, "rectangle y position wasn't transformed correctly")
+
+    t.rotation = 270
+    r2 = r1:globalRectangle(t)
+    assert(r2.position.x == 1, "rectangle x position wasn't transformed correctly")
+    assert(r2.position.y == 2, "rectangle y position wasn't transformed correctly")
+
+
+    --[[rotation with size transform]]
+    r1 = geometry.Rectangle(1, 1)
+
+    t = geometry.Transform(nil, 90, {x=2, y=3})
+    r2 = r1:globalRectangle(t)
+    assert(r2.width == 3, "rectangle width wasn't resized and/or rotated correctly")
+    assert(r2.height == 2, "rectangle height wasn't resized and/or rotated correctly")
+
+    t.rotation = 180
+    r2 = r1:globalRectangle(t)
+    assert(r2.width == 2, "rectangle width wasn't resized and/or rotated correctly")
+    assert(r2.height == 3, "rectangle height wasn't resized and/or rotated correctly")
+
+    t.rotation = 270
+    r2 = r1:globalRectangle(t)
+    assert(r2.width == 3, "rectangle width wasn't resized and/or rotated correctly")
+    assert(r2.height == 2, "rectangle height wasn't resized and/or rotated correctly")
+
+
+    --[[testing all three transform options together]]
+    r1 = geometry.Rectangle(1, 2, geometry.Vector2(0, 1))
+
+    t = geometry.Transform({x=1, y=-1}, 90, {x=3, y=0.5})
+    r2 = r1:globalRectangle(t)
+    assert(r2.width == 1, "rectangle width wasn't transformed correctly")
+    assert(r2.height == 3, "rectangle height wasn't transformed correctly")
+    assert(r2.position.x == 2, "rectangle x position wasn't transformed correctly")
+    assert(r2.position.y == -1, "rectangle y position wasn't transformed correctly")
+
+end
 
 function shapetest.testCircleCreation()
 
@@ -131,7 +298,6 @@ function shapetest.testCircleCreation()
     assert(c.position.y == -1, "circle y position changed from given value of -1")
 
 end
-
 
 function shapetest.testRectangleCreation()
 
