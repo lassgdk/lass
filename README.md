@@ -69,3 +69,12 @@ There is no uninstall command in setup.py just yet, so if you wish to uninstall 
 
 **Windows**  
 Lass for Windows is entirely portable: the setup.py script doesn't create any files other than those generated in the "dist" folder. Simply deleting the Lass program folder is enough to remove it from your system.
+
+License
+-------
+
+Copyright 2014, 2015 Decky Coss and Nikki Bee.
+
+Lass is licensed under the terms of the GNU Lesser General Public License. These terms can be found in the files `license-lgpl.txt` and `license-gpl.txt`. You must agree to these terms in order to modify, redistribute, or develop with Lass.
+
+Lass is intended to be used with LÖVE. If you use Lass with LÖVE, then you must also agree to the terms of the LÖVE license.

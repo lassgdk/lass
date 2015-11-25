@@ -4,6 +4,7 @@ build
 record.txt
 venv
 
+notes
 ignore
 update.sh
 *.sublime-*
