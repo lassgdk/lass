@@ -68,11 +68,19 @@ end)
 
 function Vector2.__add(a, b)
 
+	if class.instanceof(a, Vector3) or class.instanceof(b, Vector3) then
+		return Vector3.__add(a, b)
+	end
+
 	assertOperandsHaveXandY(a, b)
 	return Vector2(a.x+b.x, a.y+b.y)
 end
 
 function Vector2.__sub(a, b)
+
+	if class.instanceof(a, Vector3) or class.instanceof(b, Vector3) then
+		return Vector3.__add(a, b)
+	end
 
 	assertOperandsHaveXandY(a, b)
 	return Vector2(a.x-b.x, a.y-b.y)
