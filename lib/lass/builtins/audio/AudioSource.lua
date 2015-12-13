@@ -1,5 +1,6 @@
 local lass = require("lass")
 local class = require("lass.class")
+local operators = require("lass.operators")
 local collections = require("lass.collections")
 local geometry = require("lass.geometry")
 
@@ -8,8 +9,9 @@ local AudioSource = class.define(lass.Component, function(self, arguments)
 	-- arguments.source = love.audio.newSource(
 	-- 	arguments.filename or "", arguments.sourceType or "static"
 	-- )
-	arguments.autoplay = arguments.autoplay or false
-	arguments.maxInstances = arguments.maxInstances or 1
+	arguments.autoplay = operators.nilOr(arguments.autoplay, false)
+	arguments.streaming = arguments.streaming or false
+	arguments.maxInstances = operators.nilOr(arguments.maxInstances, 1)
 
 	self.base.init(self, arguments)
 end)
@@ -28,7 +30,15 @@ end)
 local function newInstance(self, instance)
 
 	if not instance then
-		return {source = love.audio.newSource(self.filename, self.sourceType)}
+
+		local sourceType
+		if self.streaming then
+			sourceType = "stream"
+		else
+			sourceType = "static"
+		end
+
+		return {source = love.audio.newSource(self.filename, sourceType)}
 	else
 		return {source = instance.source:clone()}
 	end
@@ -64,6 +74,14 @@ end
 
 local function rewindInstance(self, instance)
 	instance.source:rewind()
+end
+
+local function setCurrentTimeOfInstance(self, instance, time)
+	instance.source:seek(time, "seconds")
+end
+
+local function setCurrentSampleOfInstance(self, instance, sample)
+	instance.source:seek(time, "samples")
 end
 
 function AudioSource.__get.maxInstances(self)
@@ -120,24 +138,14 @@ function AudioSource.__set.maxInstances(self, value)
 end
 
 function AudioSource.__get.lastInstanceID(self)
-
 	return self.instanceQueue[#self.instanceQueue]
 end
-
-function AudioSource.__set.lastInstanceID(self)
-
-	error("attempted to set readonly property 'lastInstanceID'")
-end
+AudioSource.__set.lastInstanceID = nil
 
 function AudioSource.__get.firstInstanceID(self)
-
 	return self.instanceQueue[1]
 end
-
-function AudioSource.__set.firstInstanceID(self)
-
-	error("attempted to set readonly property 'firstInstanceID'")
-end
+AudioSource.__set.firstInstanceID = nil
 
 function AudioSource:awake()
 
@@ -157,6 +165,97 @@ function AudioSource.events.physicsPostUpdate.play(self)
 			instance.source:setPosition(position.x, position.y * self.globals.ySign)
 		end
 	end
+end
+
+--[[
+property getters
+]]
+
+function AudioSource.__get.static(self)
+	return self._instances[self.instanceQueue[1]]:isStatic()
+end
+AudioSource.__set.static = nil
+
+function AudioSource.__get.numChannels(self)
+	return self._instances[self.instanceQueue[1]]:channels()
+end
+AudioSource.__set.numChannels = nil
+
+--[[
+state getters
+
+these methods and getters return information about a Source's playing state.
+when an instance ID isn't specified, we pick the instance at the front of the queue.
+]]
+
+function AudioSource:getCurrentTime(instanceID)
+
+	instanceID = operators.nilOr(instanceID, self.instanceQueue[1])
+	return self._instances[instanceID]:tell("seconds")
+end
+
+function AudioSource.__get.currentTime(self)
+	return self:getCurrentTime()
+end
+
+function AudioSource:getCurrentSample(instanceID)
+
+	instanceID = operators.nilOr(instanceID, self.instanceQueue[1])
+	return self._instances[instanceID]:tell("samples")
+end
+
+function AudioSource.__get.currentSample(self)
+	return self:getCurrentSample()
+end
+
+for k, v in pairs({
+	isPlaying = "playing",
+	isPaused = "paused",
+	isStopped = "stopped"
+}) do
+
+	AudioSource[k] = function(self, instanceID)
+
+		--if no instance ID is specified, pick the front of the queue
+		instanceID = operators.nilOr(instanceID, self.instanceQueue[1])
+		local instance = self._instances[instanceID]
+		return instance[k](instance)
+	end
+
+	AudioSource.__get[v] = function(self)
+		return AudioSource[k](self)
+	end
+
+	AudioSource.__set[v] = nil
+
+	AudioSource.__get[v .. "All"] = function(self)
+
+		for i, instanceID in ipairs(self.instanceQueue) do
+			if not AudioSource[k](self, instanceID) then
+				return false
+			end
+		end
+
+		return true
+	end
+
+	AudioSource.__set[v .. "All"] = nil
+end
+
+--[[
+state changers
+
+these methods and getters change a Source's playing state.
+play and unpause move the chosen instance to the back of the queue.
+all others move the instance to the front of the queue.
+]]
+
+function AudioSource.__set.currentTime(self, value)
+	self:setCurrentTime(value)
+end
+
+function AudioSource.__set.currentSample(self, value)
+	self:setCurrentSample(value)
 end
 
 for k, v in pairs({
@@ -205,8 +304,14 @@ for k, v in pairs({
 	stop = stopInstance,
 	rewind = rewindInstance,
 	pause = pauseInstance,
+	setCurrentTime = setCurrentTimeOfInstance,
+	setCurrentSample = setCurrentSampleOfInstance
 }) do
-	AudioSource[k] = function(self, instanceID)
+	AudioSource[k] = function(self, instanceID, extra)
+
+		if k == "setCurrentTime" or k == "setCurrentSample" then
+			instanceID, extra = extra, instanceID
+		end
 
 		-- send the specified instanceID to the front of the queue.
 		-- if instanceID is not specified, pull it from the back of the queue
@@ -223,7 +328,7 @@ for k, v in pairs({
 			table.insert(self.instanceQueue, 1, instanceID)
 		end
 
-		v(self, self._instances[instanceID])
+		v(self, self._instances[instanceID], extra)
 		return instanceID
 	end
 end
@@ -234,6 +339,8 @@ for k, v in pairs({
 	rewindAll = rewindInstance,
 	pauseAll = pauseInstance,
 	unpauseAll = unpauseInstance
+	setCurrentTimeAll = setCurrentTimeOfInstance,
+	setCurrentSampleAll = setCurrentSampleOfInstance
 }) do
 	AudioSource[k] = function(self, ...)
 		for i, instanceID in ipairs(self.instanceQueue) do

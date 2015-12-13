@@ -81,6 +81,8 @@ function class.define(base, init)
     c.__newindex = function(self, key, value)
         if c.__set[key] then
             c.__set[key](self, value)
+        elseif c.__get[key] then
+            error("attempt to set read-only property '" .. key .. "'")
         elseif c.__genericset then
             c.__genericset(self, key, value)
         else
