@@ -1,5 +1,7 @@
 local class = require("lass.class")
 
+local geometry = {}
+
 --[[
 Vector2
 ]]
@@ -23,7 +25,6 @@ local function assertOperandsHaveXandY(a, b, otherAllowedType, otherAllowedTypeP
 		end
 	end
 end
-
 
 local function assertValueIsValidNumber(class, key, value)
 	if type(value) ~= "number" then
@@ -68,7 +69,7 @@ end)
 
 function Vector2.__add(a, b)
 
-	if class.instanceof(a, Vector3) or class.instanceof(b, Vector3) then
+	if class.instanceof(a, geometry.Vector3) or class.instanceof(b, geometry.Vector3) then
 		return Vector3.__add(a, b)
 	end
 
@@ -1002,7 +1003,7 @@ end
 getters and setters
 ]]
 
-local geometry = {
+geometry = {
 	Transform = Transform,
 	Vector2 = Vector2,
 	Vector3 = Vector3,
