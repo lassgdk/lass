@@ -3,6 +3,8 @@ local helpers = require("geometrytest.helpers")
 
 local vectortest = {}
 
+-- cross multiplication / division of Vector2 and 3 is not tested, as it is not possible
+
 
 local function _assertIncorrectVectorAlgebra(vectorName, vector)
 
@@ -50,7 +52,7 @@ end
 function vectortest.testVector2Creation()
 
     --[[incorrect creation]]
-    helpers.assertIncorrectCreation(geometry.Circle, "vector2", {"x", "y"})
+    helpers.assertIncorrectCreation(geometry.Vector2, "vector2", {"x", "y"}, nil, false)
 
 
     --[[purely default creation]]
@@ -109,7 +111,7 @@ end
 function vectortest.testVector3Creation()
 
     --[[incorrect creation]]
-    helpers.assertIncorrectCreation(geometry.Circle, "vector3", {"x", "y", "z"})
+    helpers.assertIncorrectCreation(geometry.Vector3, "vector3", {"x", "y", "z"}, nil, false)
 
 
     --[[purely default creation]]
@@ -353,7 +355,7 @@ function vectortest.testVector2And3Add()
 
     r = v3 + v2
     assert(r:instanceof(geometry.Vector2), "Vector3 should be valid as Vector2")
-    assert(r:instanceof(geometry.Vector3), "Vector2 addition didn't return Vector3")
+    assert(r:instanceof(geometry.Vector3), "Vector3 addition didn't return Vector3")
     assert(r.x == 0, "0 + 0 didn't equal 0")
     assert(r.y == 0, "0 + 0 didn't equal 0")
     assert(r.z == 0, "0 + 0 didn't equal 0")
@@ -454,7 +456,7 @@ function vectortest.testVector2And3Subtract()
 
     r = v3 - v2
     assert(r:instanceof(geometry.Vector2), "Vector3 should be valid as Vector2")
-    assert(r:instanceof(geometry.Vector3), "Vector2 addition didn't return Vector3")
+    assert(r:instanceof(geometry.Vector3), "Vector3 addition didn't return Vector3")
     assert(r.x == 0, "0 - 0 didn't equal 0")
     assert(r.y == 0, "0 - 0 didn't equal 0")
     assert(r.z == 0, "0 - 0 didn't equal 0")

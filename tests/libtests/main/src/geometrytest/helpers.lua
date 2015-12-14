@@ -1,8 +1,19 @@
 local helpers = {}
 
-function helpers.assertIncorrectCreation(class, className, variables, default)
+function helpers.assertIncorrectCreation(class, className, variables, default, useNegative)
 
-    for _, badValue in ipairs({-1, "1", false, math.huge, -math.huge, math.huge / math.huge}) do
+    badValues = {"1", false, math.huge, -math.huge, math.huge / math.huge}
+
+    if default == nil then
+        default = 0
+    end
+
+    -- sometimes negative values are allowed, so this is optional
+    if useNegative or useNegative == nil then
+        table.insert(badValues, -1)
+    end
+
+    for _, badValue in ipairs(badValues) do
 
         local params = {}
         for i, var in ipairs(variables) do
@@ -12,7 +23,7 @@ function helpers.assertIncorrectCreation(class, className, variables, default)
         for i, var in ipairs(variables) do
             params[i] = badValue
 
-            success = pcall(class, unpack(params))
+            success, result = pcall(class, unpack(params))
             if success then
                 error(className .. "." .. var .. " incorrectly created with " .. tostring(badValue))
             end
