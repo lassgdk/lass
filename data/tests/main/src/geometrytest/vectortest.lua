@@ -347,15 +347,15 @@ function vectortest.testVector2And3Add()
     v3 = geometry.Vector3()
 
     r = v2 + v3
-    assert(r:instanceof(geometry.Vector2), "Vector2 addition didn't return Vector2")
-    assert(r:instanceof(geometry.Vector3) == false, "Vector2 addition shouldn't return Vector3")
+    assert(r:instanceof(geometry.Vector2), "Vector3 should be valid as Vector2")
+    assert(r:instanceof(geometry.Vector3), "addition with Vector3 didn't return Vector3")
     assert(r.x == 0, "0 + 0 didn't equal 0")
     assert(r.y == 0, "0 + 0 didn't equal 0")
-    assert(r.z == nil, "Vector2 shouldn't have a z value")
+    assert(r.z == 0, "0 + 0 didn't equal 0")
 
     r = v3 + v2
     assert(r:instanceof(geometry.Vector2), "Vector3 should be valid as Vector2")
-    assert(r:instanceof(geometry.Vector3), "Vector3 addition didn't return Vector3")
+    assert(r:instanceof(geometry.Vector3), "addition with Vector3 didn't return Vector3")
     assert(r.x == 0, "0 + 0 didn't equal 0")
     assert(r.y == 0, "0 + 0 didn't equal 0")
     assert(r.z == 0, "0 + 0 didn't equal 0")
@@ -369,7 +369,7 @@ function vectortest.testVector2And3Add()
     r = v2 + v3
     assert(r.x == 11, "1 + 10 didn't equal 11")
     assert(r.y == 25, "5 + 20 didn't equal 25")
-    assert(r.z == nil, "Vector2 shouldn't have a z value")
+    assert(r.z == 30, "0 + 30 didn't equal 30")
 
     r = v3 + v2
     assert(r.x == 11, "10 + 1 didn't equal 11")
@@ -448,15 +448,15 @@ function vectortest.testVector2And3Subtract()
     v3 = geometry.Vector3()
 
     r = v2 - v3
-    assert(r:instanceof(geometry.Vector2), "Vector2 addition didn't return Vector2")
-    assert(r:instanceof(geometry.Vector3) == false, "Vector2 addition shouldn't return Vector3")
+    assert(r:instanceof(geometry.Vector2), "Vector3 should be valid as Vector2")
+    assert(r:instanceof(geometry.Vector3), "subtraction with Vector3 didn't return Vector3")
     assert(r.x == 0, "0 - 0 didn't equal 0")
     assert(r.y == 0, "0 - 0 didn't equal 0")
-    assert(r.z == nil, "Vector2 shouldn't have a z value")
+    assert(r.z == 0, "0 - 0 didn't equal 0")
 
     r = v3 - v2
     assert(r:instanceof(geometry.Vector2), "Vector3 should be valid as Vector2")
-    assert(r:instanceof(geometry.Vector3), "Vector3 addition didn't return Vector3")
+    assert(r:instanceof(geometry.Vector3), "subtraction with Vector3 didn't return Vector3")
     assert(r.x == 0, "0 - 0 didn't equal 0")
     assert(r.y == 0, "0 - 0 didn't equal 0")
     assert(r.z == 0, "0 - 0 didn't equal 0")
@@ -470,7 +470,7 @@ function vectortest.testVector2And3Subtract()
     r = v2 - v3
     assert(r.x == -9, "1 - 10 didn't equal -9")
     assert(r.y == -15, "5 - 20 didn't equal -15")
-    assert(r.z == nil, "Vector2 shouldn't have a z value")
+    assert(r.z == -30, "0 - 30 didn't equal -30")
 
     r = v3 - v2
     assert(r.x == 9, "10 - 1 didn't equal 9")
