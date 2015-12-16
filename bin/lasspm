@@ -123,8 +123,10 @@ def main():
 			args.target = "l"
 		args.__dict__.pop("love_only")
 
-	# print(args.__dict__)
-	command[0](**args.__dict__)
+	try:
+		command[0](**args.__dict__)
+	except Exception as e:
+		sys.exit("{0}: {1}".format(type(e).__name__, e.message))
 
 if __name__ == "__main__":
 	main()

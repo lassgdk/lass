@@ -89,7 +89,7 @@ def buildGame(game, sendToTemp=False, projects=False, examples=False, tests=Fals
 	args:
 		game: name of game project
 		sendToTemp: store compiled game in temp folder
-		projects: search for project in default projects folder
+		projects: search for project in default projects folder (deprecated)
 		examples: search for project in examples folder, if not found in projects
 		tests: search for project in tests folder, if not found in examples
 		target: target platform--must be combination of w, l, o
@@ -103,7 +103,8 @@ def buildGame(game, sendToTemp=False, projects=False, examples=False, tests=Fals
 	#search for game in projects folder first, then examples
 	else:
 		if os.path.isabs(game):
-			sys.exit("OS Error: Can't use -p or -e options with absolute path")
+			# sys.exit("OS Error: Can't use -p or -e options with absolute path")
+			raise OSError("Can't use -e option with absolute path")
 		dirs = []
 		if projects:
 			dirs.append(DIR_PROJECTS)
@@ -130,9 +131,9 @@ def buildGame(game, sendToTemp=False, projects=False, examples=False, tests=Fals
 	#make sure project exists and can be compiled
 	try:
 		if not "main.lua" in os.listdir(sourcePath):
-			sys.exit("Build Error: Cannot find main.lua in project")
+			raise OSError("Cannot find main.lua in project")
 	except OSError as e:
-		sys.exit("OS Error: Cannot find " + sourcePath)
+		raise OSError("Cannot find " + sourcePath)
 
 	if not sendToTemp and not "build" in os.listdir(projPath):
 		os.mkdir(buildPath)
@@ -191,8 +192,8 @@ def newGame(game, projects=False):
 	"""
 
 	if projects and game==".":
-		sys.exit(
-			"Error: Cannot initiate project in %s - try supplying project name" % os.path.join(DIR_PROJECTS, game)
+		raise OSError(
+			"Cannot initiate project in %s - try supplying project name" % os.path.join(DIR_PROJECTS, game)
 		)
 	elif projects:
 		projPath = os.path.join(DIR_PROJECTS, game)
@@ -204,7 +205,7 @@ def newGame(game, projects=False):
 		try:
 			os.mkdir(projPath)
 		except OSError as e:
-			sys.exit("OS Error: Cannot create directory %s" % projPath)
+			raise OSError("OS Error: Cannot create directory %s" % projPath)
 
 	#make project subdirectories
 	os.chdir(projPath)
@@ -212,9 +213,9 @@ def newGame(game, projects=False):
 	for folder in ["build", "include", "src"]:
 		try:
 			os.mkdir(folder)
-			print("Created %s folder" % folder)
+			print("Created {} folder".format(folder))
 		except OSError:
-			print("Could not create %s folder")
+			raise OSError("Could not create {} folder".format(folder))
 
 	for t in ["main.lua", "settings.lua", "scene_main.lua"]:
 		shutil.copy(os.path.join(DIR_TEMPLATES_LUA, t), "src")
@@ -251,9 +252,18 @@ def newPrefab(fileName):
 def loadScene(fileName):
 
 	lua = lupa.LuaRuntime(unpack_returned_tuples=True)
-	scene = lua.eval("loadfile('{}')".format(fileName))
+	lua.execute("t = loadfile('{}')".format(fileName))
+	scene = None
 
-	
+	if lua.globals().t:
+		try:
+			scene = lua.globals().t()
+		except lupa.LuaError as e:
+			raise e("Could not parse " + fileName)
+	else:
+		raise OSError("{} not found".format(fileName))
+
+	print(scene.gameObjects)
 
 #helper functions
 
