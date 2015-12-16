@@ -77,20 +77,25 @@ elif sys.platform.startswith("win32"):
 else:
 	sys.exit("OS Error: Operating system not supported")
 
+os.chdir("data")
 DATA_FILES =\
 	reduce(lambda a,b: a + b, [
-		listAll(x, True, DIR_LASS_DATA) for x in ("examples", "engine", "templates", "docs")
+		listAll(x, True, DIR_LASS_DATA, "data") for x in (
+			"examples", "engine", "templates", "docs", "tests"
+		)
 	])
 
-os.chdir("lib")
+os.chdir(os.path.join("..", "lib"))
 DATA_FILES += listAll("lass", True, headPrefix=DIR_LUA, filePrefix="lib")
 os.chdir(os.path.join("..", "conf"))
 DATA_FILES += listAll(".", headPrefix=DIR_LASS_CONF, filePrefix="conf")
-os.chdir(os.path.join("..", "tests", "libtests"))
-DATA_FILES += listAll(
-	".", True, headPrefix=os.path.join(DIR_LASS_DATA, "tests"), filePrefix=os.path.join("tests", "libtests")
-)
-os.chdir(os.path.join("..", ".."))
+# os.chdir(os.path.join("..", "tests", "libtests"))
+# DATA_FILES += listAll(
+# 	".", True, headPrefix=os.path.join(DIR_LASS_DATA, "tests"), filePrefix=os.path.join("tests", "libtests")
+# )
+# os.chdir(os.path.join("..", ".."))
+
+os.chdir("..")
 
 #find the owner of a data file; assume for now that all data files share this owner
 UID = os.stat(DATA_FILES[0][1][0]).st_uid
