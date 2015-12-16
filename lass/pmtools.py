@@ -23,6 +23,7 @@ try:
 	import ConfigParser as configparser
 except:
 	import configparser
+import lupa
 
 #set a bunch of global constants
 
@@ -246,6 +247,13 @@ def newPrefab(fileName):
 		os.path.join(DIR_TEMPLATES_LUA, "prefab.lua"),
 		os.path.join("src", fileName)
 	)
+
+def loadScene(fileName):
+
+	lua = lupa.LuaRuntime(unpack_returned_tuples=True)
+	scene = lua.eval("loadfile('{}')".format(fileName))
+
+	
 
 #helper functions
 

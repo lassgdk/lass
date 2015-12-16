@@ -1,4 +1,5 @@
 local class = require("lass.class")
+local operators = require("lass.operators")
 
 local geometry = {}
 
@@ -26,7 +27,10 @@ local function assertOperandsHaveXandY(a, b, otherAllowedType, otherAllowedTypeP
 	end
 end
 
-local function assertValueIsValidNumber(class, key, value)
+local function assertValueIsValidNumber(class, key, value, allowNegative)
+
+	allowNegative = operators.nilOr(allowNegative, true)
+
 	if type(value) ~= "number" then
 		error(class .. "." .. key .. " must be number")
 	elseif value == math.huge then
@@ -35,6 +39,8 @@ local function assertValueIsValidNumber(class, key, value)
 		error(class .. "." .. key .. " cannot be negative infinity")
 	elseif value ~= value then
 		error(class .. "." .. key .. " cannot be NaN")
+	elseif not allowNegative and value < 0 then
+		error(class .. "." .. key .. " must not be negative")
 	end
 end
 
@@ -430,8 +436,8 @@ local Shape = class.define()
 
 local Circle = class.define(Shape, function(self, radius, position)
 
-	assert(type(radius) == "number", "radius must be a number")
-	assert(radius >= 0, "radius must be greater than or equal to 0")
+	-- assert(type(radius) == "number", "radius must be a number")
+	-- assert(radius >= 0, "radius must be greater than or equal to 0")
 	assert(class.instanceof(position, Vector2) or position == nil, "position must be Vector2 or nil")
 
 	self.radius = radius
@@ -693,10 +699,10 @@ Rectangle
 local Rectangle = class.define(Shape, function(self, width, height, position)
 	-- position always points to the center of the rectangle
 
-	assert(type(width) == "number", "width must be number")
-	assert(type(height) == "number", "height must be number")
-	assert(width >= 0, "width must be 0 or greater")
-	assert(height >= 0, "height must be 0 or greater")
+	-- assert(type(width) == "number", "width must be number")
+	-- assert(type(height) == "number", "height must be number")
+	-- assert(width >= 0, "width must be 0 or greater")
+	-- assert(height >= 0, "height must be 0 or greater")
 	assert(class.instanceof(position, Vector2) or position == nil, "position must be Vector2 or nil")
 
 	self.width = width
@@ -1021,8 +1027,8 @@ for i, gClassTable in ipairs({
 	{"Vector2", x="number", y="number"},
 	{"Vector3", x="number", y="number", z="number"},
 	{"Transform", position={Vector3=Vector3}, size={Vector3=Vector3}},
-	{"Rectangle", width="number", height="number", position={Vector2=Vector2}},
-	{"Circle", radius="number", position={Vector2=Vector2}},
+	{"Rectangle", width="number+", height="number+", position={Vector2=Vector2}},
+	{"Circle", radius="number+", position={Vector2=Vector2}},
 	{"Polygon", vertices="table", position={Vector2=Vector2}},
 }) do
 	local gClass = gClassTable[1]
@@ -1033,9 +1039,12 @@ for i, gClassTable in ipairs({
 			return self["_" .. property]
 		end
 
-		if propertyType == "number" then
+		if propertyType == "number" or propertyType == "number+" then
+
+			allowNegative = propertyType ~= "number+"
+
 			geometry[gClass]["__set"][property] = function(self, value)
-				assertValueIsValidNumber(gClass, property, value)
+				assertValueIsValidNumber(gClass, property, value, allowNegative)
 
 				self["_" .. property] = value
 
