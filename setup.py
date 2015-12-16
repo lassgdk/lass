@@ -132,7 +132,7 @@ setup(
 	author = "Decky Coss",
 	author_email = "coss@cosstropolis.com",
 	description = "A modular development kit for 2D videogames.",
-	packages = [],
+	packages = ["lass"],
 	install_requires = ["jinja2"],
 	scripts = scripts,
 	console = console,

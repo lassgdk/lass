@@ -5,7 +5,7 @@
 # This file is part of Lass.
 
 # Lass is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
+# it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 
@@ -14,12 +14,12 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 
-# You should have received a copy of the GNU General Public License
+# You should have received a copy of the GNU Lesser General Public License
 # along with Lass.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import print_function
 import sys, os, argparse
-import lass
+from lass import pmtools
 
 def main():
 
@@ -35,7 +35,7 @@ def main():
 	projects_help = "search for game in default projects folder (currently %s). takes precedence over -e"
 
 	commands = {
-		"build": (lass.buildgame, [
+		"build": (pmtools.buildGame, [
 			(("game",), {
 				"type":str,
 				"default":".",
@@ -58,7 +58,7 @@ def main():
 				"help":"search for game in examples folder"
 			})
 		]),
-		"new": (lass.newgame, [
+		"new": (pmtools.newGame, [
 			(("game",), {
 				"type":str,
 				"default":".",
@@ -66,7 +66,7 @@ def main():
 				"help":"name of new game project directory"
 			}),
 		]),
-		"new-prefab": (lass.newprefab, [
+		"new-prefab": (pmtools.newPrefab, [
 			(("fileName",), {
 				"type":str,
 				# "default":"prefab",
@@ -74,7 +74,7 @@ def main():
 				"help":"file name of new prefab"
 			}),
 		]),
-		"play": (lass.playgame, [
+		"play": (pmtools.playGame, [
 			(("game",), {
 				"type":str,
 				"default":".",

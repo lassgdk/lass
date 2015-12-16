@@ -70,7 +70,7 @@ end)
 function Vector2.__add(a, b)
 
 	if class.instanceof(a, geometry.Vector3) or class.instanceof(b, geometry.Vector3) then
-		return Vector3.__add(a, b)
+		return geometry.Vector3.__add(a, b)
 	end
 
 	assertOperandsHaveXandY(a, b)
@@ -80,7 +80,7 @@ end
 function Vector2.__sub(a, b)
 
 	if class.instanceof(a, geometry.Vector3) or class.instanceof(b, geometry.Vector3) then
-		return Vector3.__sub(a, b)
+		return geometry.Vector3.__sub(a, b)
 	end
 
 	assertOperandsHaveXandY(a, b)
