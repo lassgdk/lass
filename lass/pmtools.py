@@ -17,13 +17,14 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with Lass.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import print_function
+from __future__ import print_function, unicode_literals
 import os, sys, shutil, zipfile, subprocess
 try:
 	import ConfigParser as configparser
 except:
 	import configparser
 import lupa
+from lass import luatools, six
 
 #set a bunch of global constants
 
@@ -80,6 +81,7 @@ ID_WINDOWS = "w"
 ID_LINUX = "l"
 ID_OSX = "o"
 
+# class ProjectManager(object):
 #main functions
 
 def buildGame(game, sendToTemp=False, projects=False, examples=False, tests=False, target="l"):
@@ -263,9 +265,26 @@ def loadScene(fileName):
 	else:
 		raise OSError("{} not found".format(fileName))
 
-	print(scene.gameObjects)
+	return _luaTableToObjectList(scene.gameObjects)
 
 #helper functions
+
+def _luaTableToObjectList(table):
+
+	gameObjects = []
+
+	for node in table:
+		o = {"data": {
+			"name": six.text_type(node.name) or "",
+			"components": luatools.luaTableToDict(node.components) or {},
+			"transform": luatools.luaTableToDict(node.transform) or {}
+		}}
+
+		o["children"] = _luaTableToObjectList(node.children)
+
+		gameObjects.append(o)
+
+	return gameObjects
 
 def findGame(game, *folders):
 	"""

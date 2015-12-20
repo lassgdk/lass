@@ -14,8 +14,75 @@ local reserved = {
     __protected = true,
 }
 
-local function callable(v)
-    return type(v) == "function" or (type(v) == "table" and v.__call)
+local function isCallable(v)
+
+    if type(v) == "function" then
+        return true
+    elseif type(v) == "table" then
+        mt = getmetatable(v)
+        return mt ~= nil and mt.__call ~= nil
+    else
+        return false
+    end
+end
+
+local getterTable = {}
+
+-- function getterTable:__newindex(key, value)
+--     class.bind(self.__class, key, value)
+-- end
+
+--[[
+__get can be function
+__set can be function or false
+
+MyClass.__get.something = function(self, key, value) end
+]]
+--the metatable assigned to all classes
+class.metaclass = {}
+
+function class.metaclass:__call(...)
+
+    local object = {}
+    setmetatable(object, self)
+
+    self.init(object, ...)
+
+    return object
+
+end
+
+function class.metaclass:__index(key)
+    --use the base (super) class as the index
+
+    return self.base[key]
+end
+
+-- automatically wrap all class functions to prevent infinite self.base loops
+function class.metaclass:__newindex(key, value)
+
+    class.bind(self, key, value)
+
+    if type(value) == "function" then
+        rawset(self, key, function(first, ...)
+            if type(first) == "table" and first.base == self then
+
+                -- temporarily change base to prevent loop
+                first.base = self.base
+                local r = table.pack(value(first, ...))
+
+                -- revert base and return everything
+                first.base = nil
+                return unpack(r)
+            else
+                return value(first, ...)
+            end
+        end)
+    -- elseif key == "__get" then
+        -- rawset(self, )
+    else
+        rawset(self, key, value)
+    end
 end
 
 function class.define(base, init)
@@ -127,25 +194,7 @@ function class.define(base, init)
 
     -- automatically wrap all class functions to prevent infinite self.base loops
     mt.__newindex = function(self, key, value)
-
-        if type(value) == "function" then
-            rawset(self, key, function(first, ...)
-                if type(first) == "table" and first.base == self then
-
-                    -- temporarily change base to prevent loop
-                    first.base = self.base
-                    local r = table.pack(value(first, ...))
-
-                    -- revert base and return everything
-                    first.base = nil
-                    return unpack(r)
-                else
-                    return value(first, ...)
-                end
-            end)
-        else
-            rawset(self, key, value)
-        end
+        class.bind(self, key, value)
     end
 
     c.instanceof = function(self, ...)
@@ -195,11 +244,24 @@ function class.define(base, init)
     return c
 end
 
-function class.addkey(myclass, key, value, inheritReference)
+function class.bind(cl, key, value)
+    if type(value) == "function" then
+        rawset(cl, key, function(first, ...)
+            if type(first) == "table" and first.base == cl then
 
-    myclass[key] = value
-    if inheritReference == false and type(value) == "table" then
-        myclass.__protected[key] = true
+                -- temporarily change base to prevent loop
+                first.base = cl.base
+                local r = table.pack(value(first, ...))
+
+                -- revert base and return everything
+                first.base = nil
+                return unpack(r)
+            else
+                return value(first, ...)
+            end
+        end)
+    else
+        rawset(cl, key, value)
     end
 end
 
@@ -245,5 +307,15 @@ end
 function class.super(object)
     return object.base
 end
+
+--deprecated
+function class.addkey(myclass, key, value, inheritReference)
+
+    myclass[key] = value
+    if inheritReference == false and type(value) == "table" then
+        myclass.__protected[key] = true
+    end
+end
+
 
 return class
