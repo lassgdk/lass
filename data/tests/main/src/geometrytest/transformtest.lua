@@ -7,7 +7,7 @@ transformtest = {}
 function transformtest.testTransformCreation()
 
     --[[incorrect creation]]
-    helpers.assertIncorrectCreation(geometry.Transform, "transform", {"position", "rotation", "size"}, nil, false)
+    helpers.assertIncorrectValues(geometry.Transform, "transform", {"position", "rotation", "size"}, nil, false)
 
 
     --[[basic creation]]

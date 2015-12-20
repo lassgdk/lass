@@ -48,11 +48,10 @@ function vectortest.assertIncorrectVectorAlgebra()
     _assertIncorrectVectorAlgebra("Vector3", geometry.Vector3)
 end
 
-
 function vectortest.testVector2Creation()
 
     --[[incorrect creation]]
-    helpers.assertIncorrectCreation(geometry.Vector2, "vector2", {"x", "y"}, nil, false)
+    helpers.assertIncorrectValues(geometry.Vector2, "vector2", {"x", "y"}, 0, false)
 
 
     --[[purely default creation]]
@@ -111,7 +110,7 @@ end
 function vectortest.testVector3Creation()
 
     --[[incorrect creation]]
-    helpers.assertIncorrectCreation(geometry.Vector3, "vector3", {"x", "y", "z"}, nil, false)
+    helpers.assertIncorrectValues(geometry.Vector3, "vector3", {"x", "y", "z"}, 0, false)
 
 
     --[[purely default creation]]
