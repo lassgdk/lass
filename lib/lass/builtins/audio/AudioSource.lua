@@ -338,7 +338,7 @@ for k, v in pairs({
 	stopAll = stopInstance,
 	rewindAll = rewindInstance,
 	pauseAll = pauseInstance,
-	unpauseAll = unpauseInstance
+	unpauseAll = unpauseInstance,
 	setCurrentTimeAll = setCurrentTimeOfInstance,
 	setCurrentSampleAll = setCurrentSampleOfInstance
 }) do
