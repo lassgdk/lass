@@ -39,7 +39,7 @@ local function assertValueIsValidNumber(class, key, value, allowNegative)
 		error(class .. "." .. key .. " cannot be negative infinity")
 	elseif value ~= value then
 		error(class .. "." .. key .. " cannot be NaN")
-	elseif not allowNegative and value < 0 then
+	elseif (not allowNegative) and (value < 0) then
 		error(class .. "." .. key .. " must not be negative")
 	end
 end
@@ -1041,7 +1041,7 @@ for i, gClassTable in ipairs({
 
 		if propertyType == "number" or propertyType == "number+" then
 
-			allowNegative = propertyType ~= "number+"
+			local allowNegative = propertyType ~= "number+"
 
 			geometry[gClass]["__set"][property] = function(self, value)
 				assertValueIsValidNumber(gClass, property, value, allowNegative)

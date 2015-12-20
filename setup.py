@@ -138,7 +138,7 @@ setup(
 	author_email = "coss@cosstropolis.com",
 	description = "A modular development kit for 2D videogames.",
 	packages = ["lass"],
-	install_requires = ["jinja2"],
+	install_requires = ["jinja2", "lupa", "PyYAML"],
 	scripts = scripts,
 	console = console,
 	data_files = DATA_FILES,
