@@ -33,10 +33,12 @@ local getterTable = {}
 -- end
 
 --[[
-__get can be function
-__set can be function or false
+__get.key can be function
+__set.key can be function or false
 
 MyClass.__get.something = function(self, key, value) end
+
+__get.__class
 ]]
 --the metatable assigned to all classes
 class.metaclass = {}
@@ -55,42 +57,36 @@ end
 function class.metaclass:__index(key)
     --use the base (super) class as the index
 
-    return self.base[key]
-end
-
--- automatically wrap all class functions to prevent infinite self.base loops
-function class.metaclass:__newindex(key, value)
-
-    class.bind(self, key, value)
-
-    if type(value) == "function" then
-        rawset(self, key, function(first, ...)
-            if type(first) == "table" and first.base == self then
-
-                -- temporarily change base to prevent loop
-                first.base = self.base
-                local r = table.pack(value(first, ...))
-
-                -- revert base and return everything
-                first.base = nil
-                return unpack(r)
-            else
-                return value(first, ...)
-            end
-        end)
-    -- elseif key == "__get" then
-        -- rawset(self, )
-    else
-        rawset(self, key, value)
+    local base = rawget(self, "base")
+    if base then
+        return base[key]
     end
 end
 
-function class.define(base, init)
+function class.metaclass:__newindex(key, value)
+    -- automatically wrap all class functions to prevent infinite self.base loops
+
+    class.bind(self, key, value)
+end
+
+local function defineClass(base, init, noAccessors)
+    --[[
+        params (signature 1):
+            base: the base class
+            init: init function
+            noAccessors: if true, disable getters and setters
+        params (signature 2):
+            init: init function
+    ]]
 
     local c = {}     -- a new class instance
+
     c.__protected = {}
-    c.__get = {}
-    c.__set = {}
+    noAccessors = false
+    if not noAccessors then
+        c.__get = {}
+        c.__set = {}
+    end
 
     if not init and type(base) == 'function' then
         init = base
@@ -126,10 +122,24 @@ function class.define(base, init)
     -- the class will be the metatable for all its objects,
     -- and they will look up their methods in it.
     -- this also enables getters
-    c.__index = function(self, key)
-        if c.__get[key] then
-            return c.__get[key](self)
-        else
+
+    if not noAccessors then
+        c.__index = function(self, key)
+            if c.__get[key] then
+                return c.__get[key](self)
+            else
+                local v = c[key]
+                if v ~= nil or reserved[key] then
+                    return v
+                elseif c.__genericget then
+
+                    local r = c.__genericget(self, key)
+                    return r
+                end
+            end
+        end
+    else
+        c.__index = function(self, key)
             local v = c[key]
             if v ~= nil or reserved[key] then
                 return v
@@ -137,9 +147,6 @@ function class.define(base, init)
 
                 local r = c.__genericget(self, key)
                 return r
-            -- else
-            --     debug.log("hi")
-            --     return c.__genericget(self, key)
             end
         end
     end
@@ -177,25 +184,25 @@ function class.define(base, init)
         end
     end
 
-    -- expose a constructor which can be called by <classname>(<args>)
-    local mt = {}
-    mt.__call = function(self, ...)
+    -- -- expose a constructor which can be called by <classname>(<args>)
+    -- local mt = {}
+    -- mt.__call = function(self, ...)
 
-        local object = {}
-        setmetatable(object,c)
-        object.class = c
-        init(object,...)
+    --     local object = {}
+    --     setmetatable(object,c)
+    --     object.class = c
+    --     init(object,...)
 
-        return object
-    end
+    --     return object
+    -- end
 
-    -- the class looks for any undefined keys in its superclass
-    mt.__index = c.base
+    -- -- the class looks for any undefined keys in its superclass
+    -- mt.__index = c.base
 
-    -- automatically wrap all class functions to prevent infinite self.base loops
-    mt.__newindex = function(self, key, value)
-        class.bind(self, key, value)
-    end
+    -- -- automatically wrap all class functions to prevent infinite self.base loops
+    -- mt.__newindex = function(self, key, value)
+    --     class.bind(self, key, value)
+    -- end
 
     c.instanceof = function(self, ...)
 
@@ -225,7 +232,8 @@ function class.define(base, init)
         return r
     end
 
-    setmetatable(c, mt)
+    -- setmetatable(c, mt)
+    setmetatable(c, class.metaclass)
 
     --now that the metatable has been applied,
     --this will be wrapped with the func defined in mt.__newindex
@@ -244,11 +252,15 @@ function class.define(base, init)
     return c
 end
 
+function class.define(base, init)
+    return defineClass(base, init, false)
+end
+
 function class.bind(cl, key, value)
+
     if type(value) == "function" then
         rawset(cl, key, function(first, ...)
             if type(first) == "table" and first.base == cl then
-
                 -- temporarily change base to prevent loop
                 first.base = cl.base
                 local r = table.pack(value(first, ...))
