@@ -14,6 +14,15 @@ local reserved = {
     __protected = true,
 }
 
+local accessorReserved = {
+    init = true,
+    __accessing = true,
+    base = true,
+    class = true,
+    instanceof = true,
+    is = true
+}
+
 local function isCallable(v)
 
     if type(v) == "function" then
@@ -26,21 +35,11 @@ local function isCallable(v)
     end
 end
 
-local getterTable = {}
-
--- function getterTable:__newindex(key, value)
---     class.bind(self.__class, key, value)
--- end
-
 --[[
-__get.key can be function
-__set.key can be function or false
+metaclass
 
-MyClass.__get.something = function(self, key, value) end
-
-__get.__class
+the metatable assigned to all classes
 ]]
---the metatable assigned to all classes
 class.metaclass = {}
 
 function class.metaclass:__call(...)
@@ -49,7 +48,6 @@ function class.metaclass:__call(...)
     setmetatable(object, self)
 
     self.init(object, ...)
-
     return object
 
 end
@@ -66,8 +64,20 @@ end
 function class.metaclass:__newindex(key, value)
     -- automatically wrap all class functions to prevent infinite self.base loops
 
-    class.bind(self, key, value)
+    if key == "__get" then
+        rawset(self, key, class.GetterTable(self, value))
+    elseif key == "__set" then
+        rawset(self, key, class.SetterTable(self, value))
+    else
+        class.bind(self, key, value)
+    end
 end
+
+--[[
+module functions
+]]
+
+--[[internal]]
 
 local function defineClass(base, init, noAccessors)
     --[[
@@ -82,11 +92,6 @@ local function defineClass(base, init, noAccessors)
     local c = {}     -- a new class instance
 
     c.__protected = {}
-    noAccessors = false
-    if not noAccessors then
-        c.__get = {}
-        c.__set = {}
-    end
 
     if not init and type(base) == 'function' then
         init = base
@@ -105,7 +110,8 @@ local function defineClass(base, init, noAccessors)
                 if m then
                     setmetatable(c[k], m)
                 end
-            elseif k == "__protected" or k == "__get" or k == "__set" then
+            -- elseif k == "__protected" or k == "__get" or k == "__set" then
+            elseif k == "__protected" then
                 for k2,v2 in pairs(v) do
                     c[k][k2] = v2
                 end
@@ -125,9 +131,10 @@ local function defineClass(base, init, noAccessors)
 
     if not noAccessors then
         c.__index = function(self, key)
-            if c.__get[key] then
+            if not accessorReserved[key] and c.__get[key] then
                 return c.__get[key](self)
             else
+                -- if key == "instanceof" then crash() end
                 local v = c[key]
                 if v ~= nil or reserved[key] then
                     return v
@@ -138,39 +145,24 @@ local function defineClass(base, init, noAccessors)
                 end
             end
         end
-    else
-        c.__index = function(self, key)
-            local v = c[key]
-            if v ~= nil or reserved[key] then
-                return v
-            elseif c.__genericget then
 
-                local r = c.__genericget(self, key)
-                return r
+        -- enable setters
+        c.__newindex = function(self, key, value)
+            if not accessorReserved[key] then
+                if c.__set[key] then
+                    c.__set[key](self, value)
+                elseif c.__get[key] then
+                    error("attempt to set read-only property '" .. key .. "'")
+                elseif c.__genericset then
+                    c.__genericset(self, key, value)
+                else
+                    rawset(self, key, value)
+                end
+            else
+                rawset(self, key, value)
             end
         end
     end
-
-    -- enable setters
-    c.__newindex = function(self, key, value)
-        if c.__set[key] then
-            c.__set[key](self, value)
-        elseif c.__get[key] then
-            error("attempt to set read-only property '" .. key .. "'")
-        elseif c.__genericset then
-            c.__genericset(self, key, value)
-        else
-            rawset(self, key, value)
-        end
-    end
-
-    -- a replacement for __index
-    -- c.__genericget = function() end
-
-    -- -- a replacement for __newindex
-    -- c.__genericset = function(self, key, value)
-    --     rawset(self, key, value)
-    -- end
 
     --if there's still no init, make one
     if not init then
@@ -183,26 +175,6 @@ local function defineClass(base, init, noAccessors)
             init = function() end
         end
     end
-
-    -- -- expose a constructor which can be called by <classname>(<args>)
-    -- local mt = {}
-    -- mt.__call = function(self, ...)
-
-    --     local object = {}
-    --     setmetatable(object,c)
-    --     object.class = c
-    --     init(object,...)
-
-    --     return object
-    -- end
-
-    -- -- the class looks for any undefined keys in its superclass
-    -- mt.__index = c.base
-
-    -- -- automatically wrap all class functions to prevent infinite self.base loops
-    -- mt.__newindex = function(self, key, value)
-    --     class.bind(self, key, value)
-    -- end
 
     c.instanceof = function(self, ...)
 
@@ -232,34 +204,48 @@ local function defineClass(base, init, noAccessors)
         return r
     end
 
-    -- setmetatable(c, mt)
     setmetatable(c, class.metaclass)
-
-    --now that the metatable has been applied,
-    --this will be wrapped with the func defined in mt.__newindex
-
     c.init = init
 
-    -- if c.__protected then
-    --     local protected = {}
-    --     for k,v in pairs(c.base.__protected) do
-    --         c.__protected[k] = v
-    --     end
-    -- else
-    --     c.__protected = {}
-    -- end
+    if not noAccessors then
+        c.__get = {}
+        c.__set = {}
+    end
 
     return c
 end
+
+--[[public]]
 
 function class.define(base, init)
     return defineClass(base, init, false)
 end
 
-function class.bind(cl, key, value)
+function class.bind(cl, ...)
+
+    local args = table.pack(...)
+    local key, value
+    local obj = cl
+
+    if #args == 0 then
+        error("key must not be nil")
+    elseif #args <= 2 then
+        key = args[1]
+        value = args[2]
+    else
+        --for example, {"__get", "x"} becomes cl.__get.x
+        for i = 1, #args - 2 do
+            obj = obj[args[i]]
+            key = args[i+1]
+        end
+
+        value = args[#args]
+
+        -- debug.log(obj, key, value)
+    end
 
     if type(value) == "function" then
-        rawset(cl, key, function(first, ...)
+        rawset(obj, key, function(first, ...)
             if type(first) == "table" and first.base == cl then
                 -- temporarily change base to prevent loop
                 first.base = cl.base
@@ -273,7 +259,7 @@ function class.bind(cl, key, value)
             end
         end)
     else
-        rawset(cl, key, value)
+        rawset(obj, key, value)
     end
 end
 
@@ -329,5 +315,61 @@ function class.addkey(myclass, key, value, inheritReference)
     end
 end
 
+--[[
+AccessorTable
+]]
+
+class.AccessorTable = defineClass(function(self, cl, t)
+
+    -- crash()
+
+    self.__accessing = cl
+    if t then
+        assert(type(t) == "table", "t must be table")
+
+        for k, v in pairs(t) do
+            if not reserved[k] then
+                self[k] = v
+            end
+        end
+    end
+end, nil, true)
+
+--[[
+GetterTable and SetterTable
+]]
+
+for i, cl in ipairs({
+    {"GetterTable", "__get"},
+    {"SetterTable", "__set"},
+}) do
+    local accessor = cl[2]
+    local newCl = defineClass(class.AccessorTable, nil, true)
+
+    class[cl[1]] = newCl
+
+    rawset(newCl, "__index", function(self, key)
+
+        if accessorReserved[key] then
+            return newCl[key]
+        end
+
+        local base = self.__accessing.base
+
+        if base then
+            return base[accessor][key]
+        else
+            return newCl[key]
+        end
+    end)
+
+    rawset(newCl, "__newindex", function(self, key, value)
+        if not accessorReserved[key] then
+            class.bind(self.__accessing, accessor, key, value)
+        else
+            rawset(self, key, value)
+        end
+    end)
+end
 
 return class
