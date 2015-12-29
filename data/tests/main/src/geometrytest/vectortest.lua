@@ -4,7 +4,9 @@ local class = require("lass.class")
 
 local vectortest = {}
 
+-- [[notes]]
 -- cross multiplication / division of Vector2 and 3 is not tested, as it is not possible
+-- a spread of different numbers is often used to ensure unique results for each individual test
 
 
 local function _assertIncorrectVectorAlgebra(vectorName, vector)
@@ -259,7 +261,7 @@ function vectortest.testVector3CreationWithVectors()
     assert(v.y == 0, "Vector3 y value didn't default to 0")
     assert(v.z == 0, "Vector3 z value didn't default to 0")
     assert(class.instanceof(v, geometry.Vector2), "Vector3 should be valid as Vector2")
-    assert(class.instanceof(v, geometry.Vector3), "Vector3 shouldn't be valid as Vector3")
+    assert(class.instanceof(v, geometry.Vector3), "Vector3 should be valid as Vector3")
 
     v = geometry.Vector3(geometry.Vector3(1, 1, 1))
     assert(v.x == 1, "Vector3 x value changed from 1")
@@ -288,10 +290,11 @@ function vectortest.testVector2Add()
     local r = v1 + v1
     assert(r.x == 0, "0 + 0 didn't equal 0")
     assert(r.y == 0, "0 + 0 didn't equal 0")
+    assert(class.instanceof(r, geometry.Vector2), "Vector2 should be valid as Vector2")
+    assert(class.instanceof(r, geometry.Vector3) == false, "Vector2 shouldn't be valid as Vector3")
 
 
     --[[operator order]]
-    -- uses a spread of different numbers to ensure unique results for each test
     v1 = geometry.Vector2(1, 5)
     local v2 = geometry.Vector2(2, 10)
 
@@ -307,6 +310,26 @@ function vectortest.testVector2Add()
     assert(r.x == 3, "2 + 1 didn't become 3")
     assert(r.y == 15, "10 + 5 didn't become 15")
 
+
+    --[[using tables]]
+    v1 = geometry.Vector2(10, 20)
+    local t = {x=100, y=200, z=300}
+
+    r = v1 + t
+    assert(r.x == 110, "10 + 100 didn't become 110")
+    assert(r.y == 220, "20 + 200 didn't become 220")
+    assert(r.z == nil, "Vector2 shouldn't have a z value")
+    assert(class.instanceof(r, geometry.Vector2), "Vector2 should be valid as Vector2")
+    assert(class.instanceof(r, geometry.Vector3) == false, "Vector2 shouldn't be valid as Vector3")
+
+    r = t + v1
+    assert(r.x == 110, "100 + 10 didn't become 110")
+    assert(r.y == 220, "200 + 20 didn't become 220")
+    assert(r.z == nil, "Vector2 shouldn't have a z value")
+    assert(class.instanceof(r, geometry.Vector2), "Vector2 should be valid as Vector2")
+    assert(class.instanceof(r, geometry.Vector3) == false, "Vector2 shouldn't be valid as Vector3")
+
+
 end
 
 function vectortest.testVector3Add()
@@ -321,7 +344,6 @@ function vectortest.testVector3Add()
 
 
     --[[operator order]]
-    -- uses a spread of different numbers to ensure unique results for each test
     v1 = geometry.Vector3(1, 5, 10)
     local v2 = geometry.Vector3(2, 10, 20)
 
@@ -339,6 +361,25 @@ function vectortest.testVector3Add()
     assert(r.x == 3, "2 + 1 didn't become 3")
     assert(r.y == 15, "10 + 5 didn't become 15")
     assert(r.z == 30, "20 + 10 didn't become 30")
+
+
+    --[[using tables]]
+    v1 = geometry.Vector3(10, 20, 30)
+    local t = {x=100, y=200, z=300}
+
+    r = v1 + t
+    assert(r.x == 110, "10 + 100 didn't become 110")
+    assert(r.y == 220, "20 + 200 didn't become 220")
+    assert(r.z == 330, "30 + 300 didn't become 330")
+    assert(class.instanceof(r, geometry.Vector2), "Vector3 should be valid as Vector2")
+    assert(class.instanceof(r, geometry.Vector3), "Vector3 should be valid as Vector3")
+
+    r = t + v1
+    assert(r.x == 110, "100 + 10 didn't become 110")
+    assert(r.y == 220, "200 + 20 didn't become 220")
+    assert(r.z == 330, "300 + 30 didn't become 330")
+    assert(class.instanceof(r, geometry.Vector2), "Vector3 should be valid as Vector2")
+    assert(class.instanceof(r, geometry.Vector3), "Vector3 should be valid as Vector3")
 
 end
 
@@ -365,7 +406,6 @@ function vectortest.testVector2And3Add()
 
 
     --[[operator order]]
-    -- uses a spread of different numbers to ensure unique results for each test
     v2 = geometry.Vector2(1, 5)
     v3 = geometry.Vector3(10, 20, 30)
 
@@ -392,7 +432,6 @@ function vectortest.testVector2Subtract()
 
 
     --[[operator order]]
-    -- uses a spread of different numbers to ensure unique results for each test
     v1 = geometry.Vector2(1, 5)
     local v2 = geometry.Vector2(2, 10)
 
@@ -408,6 +447,25 @@ function vectortest.testVector2Subtract()
     assert(r.x == 1, "2 - 1 didn't become 1")
     assert(r.y == 5, "10 - 5 didn't become 5")
 
+
+    --[[using tables]]
+    v1 = geometry.Vector2(10, 20, 30)
+    local t = {x=11, y=22, z=33}
+
+    r = v1 - t
+    assert(r.x == -1, "10 - 11 didn't become -1")
+    assert(r.y == -2, "20 - 22 didn't become -2")
+    assert(r.z == nil, "Vector2 shouldn't have a z value")
+    assert(class.instanceof(r, geometry.Vector2), "Vector2 should be valid as Vector2")
+    assert(class.instanceof(r, geometry.Vector3) == false, "Vector3 shouldn't be valid as Vector3")
+
+    r = t - v1
+    assert(r.x == 1, "11 - 10 didn't become 1")
+    assert(r.y == 2, "22 - 20 didn't become 2")
+    assert(r.z == nil, "Vector2 shouldn't have a z value")
+    assert(class.instanceof(r, geometry.Vector2), "Vector2 should be valid as Vector2")
+    assert(class.instanceof(r, geometry.Vector3) == false, "Vector2 shouldn't be valid as Vector3")
+
 end
 
 function vectortest.testVector3Subtract()
@@ -422,7 +480,6 @@ function vectortest.testVector3Subtract()
 
 
     --[[operator order]]
-    -- uses a spread of different numbers to ensure unique results for each test
     v1 = geometry.Vector3(1, 5, 10)
     local v2 = geometry.Vector3(2, 10, 20)
 
@@ -440,6 +497,25 @@ function vectortest.testVector3Subtract()
     assert(r.x == 1, "2 - 1 didn't become 1")
     assert(r.y == 5, "10 - 5 didn't become 5")
     assert(r.z == 10, "20 - 10 didn't become 10")
+
+
+    --[[using tables]]
+    v1 = geometry.Vector3(10, 20, 30)
+    local t = {x=11, y=22, z=33}
+
+    r = v1 - t
+    assert(r.x == -1, "10 - 11 didn't become -1")
+    assert(r.y == -2, "20 - 22 didn't become -2")
+    assert(r.z == -3, "30 - 33 didn't become -3")
+    assert(class.instanceof(r, geometry.Vector2), "Vector3 should be valid as Vector2")
+    assert(class.instanceof(r, geometry.Vector3), "Vector3 should be valid as Vector3")
+
+    r = t - v1
+    assert(r.x == 1, "11 - 10 didn't become 1")
+    assert(r.y == 2, "22 - 20 didn't become 2")
+    assert(r.z == 3, "33 - 30 didn't become 3")
+    assert(class.instanceof(r, geometry.Vector2), "Vector3 should be valid as Vector2")
+    assert(class.instanceof(r, geometry.Vector3), "Vector3 should be valid as Vector3")
 
 end
 
@@ -466,7 +542,6 @@ function vectortest.testVector2And3Subtract()
 
 
     --[[operator order]]
-    -- uses a spread of different numbers to ensure unique results for each test
     v2 = geometry.Vector2(1, 5)
     v3 = geometry.Vector3(10, 20, 30)
 
@@ -493,7 +568,6 @@ function vectortest.testVector2Multiply()
 
 
     --[[operator order]]
-    -- uses a spread of different numbers to ensure unique results for each test
     v = geometry.Vector2(1, 2)
 
     r = v * 2
@@ -518,7 +592,6 @@ function vectortest.testVector3Multiply()
 
 
     --[[operator order]]
-    -- uses a spread of different numbers to ensure unique results for each test
     v = geometry.Vector3(1, 2, 3)
 
     r = v * 2
@@ -544,7 +617,6 @@ function vectortest.testVector2Divide()
 
 
     --[[operator order]]
-    -- uses a spread of different numbers to ensure unique results for each test
     v = geometry.Vector2(4, 8)
 
     r = v / 2
@@ -569,7 +641,6 @@ function vectortest.testVector3Divide()
 
 
     --[[operator order]]
-    -- uses a spread of different numbers to ensure unique results for each test
     v = geometry.Vector3(4, 8, 16)
 
     r = v / 2
