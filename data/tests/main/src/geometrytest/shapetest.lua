@@ -268,7 +268,7 @@ function shapetest.testCircleCreation()
     --[[incorrect creation attempts]]
     assert(pcall(geometry.Circle) ~= true, "circle incorrectly created with no arguments")
 
-    helpers.assertIncorrectValues(geometry.Circle, "circle", {"radius"}, 0, true)
+    helpers.assertIncorrectValues(geometry.Circle, "circle", {"radius"}, 0, true, true)
 
 
     --[[basic creation]]
@@ -309,7 +309,7 @@ function shapetest.testRectangleCreation()
     assert(pcall(geometry.Rectangle) ~= true, "rectangle incorrectly created with no arguments")
     assert(pcall(geometry.Rectangle, 0) ~= true, "rectangle incorrectly created with only one argument")
 
-    helpers.assertIncorrectValues(geometry.Rectangle, "rectangle", {"width", "height"}, 1, true)
+    helpers.assertIncorrectValues(geometry.Rectangle, "rectangle", {"width", "height"}, 1, true, true)
 
 
     --[[verify boundary conditions for size]]

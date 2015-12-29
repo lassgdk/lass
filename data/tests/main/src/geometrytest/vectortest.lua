@@ -52,7 +52,7 @@ end
 function vectortest.testVector2Creation()
 
     --[[incorrect creation]]
-    helpers.assertIncorrectValues(geometry.Vector2, "vector2", {"x", "y"}, 0, false)
+    helpers.assertIncorrectValues(geometry.Vector2, "vector2", {"x", "y"}, 0, false, false)
 
 
     --[[purely default creation]]
@@ -112,7 +112,7 @@ end
 function vectortest.testVector3Creation()
 
     --[[incorrect creation]]
-    helpers.assertIncorrectValues(geometry.Vector3, "vector3", {"x", "y", "z"}, 0, false)
+    helpers.assertIncorrectValues(geometry.Vector3, "vector3", {"x", "y", "z"}, 0, false, false)
 
 
     --[[purely default creation]]

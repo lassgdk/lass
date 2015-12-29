@@ -1,12 +1,17 @@
 local helpers = {}
 
-function helpers.assertIncorrectValues(geometryClass, className, variables, default, useNegative)
+function helpers.assertIncorrectValues(geometryClass, className, variables, default, useNegative, useTable)
 
     local badValues = {"1", false, math.huge, -math.huge, math.huge / math.huge}
 
     -- sometimes negative values are allowed, so this is optional
     if useNegative then
         table.insert(badValues, -1)
+    end
+
+    -- sometimes table values, so this is optional
+    if useTable then
+        table.insert(badValues, {})
     end
 
     for _, badValue in ipairs(badValues) do
