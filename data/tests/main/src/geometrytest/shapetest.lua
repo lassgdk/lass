@@ -271,7 +271,7 @@ function shapetest.testCircleCreation()
 
 
     --[[basic creation]]
-    c = geometry.Circle(0)
+    local c = geometry.Circle(0)
 
     assert(type(c.radius) == "number", "circle radius is not number")
     assert(c.radius == 0, "circle radius changed from given value of 0")

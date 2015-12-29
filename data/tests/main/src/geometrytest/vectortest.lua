@@ -9,13 +9,13 @@ local vectortest = {}
 local function _assertIncorrectVectorAlgebra(vectorName, vector)
 
     for i, badValue in ipairs({{}, 1, "1", false, math.huge, -math.huge, math.huge / math.huge}) do
-        operands = {vector, badValue}
+        local operands = {vector, badValue}
 
         -- goes through (vector, badValue) then (badValue, vector)
         for first, second in pairs({2, 1}) do
 
             if i ~= 1 then
-                success = pcall(function() return operands[first] + operands[second] end)
+                local success = pcall(function() return operands[first] + operands[second] end)
                 if success then
                     error(vectorName .. " improperly added with " .. tostring(badValue))
                 end
@@ -281,7 +281,7 @@ function vectortest.testVector2Add()
 
     --[[basic usage]]
     local v1 = geometry.Vector2()
-    r = v1 + v1
+    local r = v1 + v1
     assert(r.x == 0, "0 + 0 didn't equal 0")
     assert(r.y == 0, "0 + 0 didn't equal 0")
 
@@ -310,7 +310,7 @@ function vectortest.testVector3Add()
 
     --[[basic usage]]
     local v1 = geometry.Vector3()
-    r = v1 + v1
+    local r = v1 + v1
     assert(r.x == 0, "0 + 0 didn't equal 0")
     assert(r.y == 0, "0 + 0 didn't equal 0")
     assert(r.z == 0, "0 + 0 didn't equal 0")
@@ -342,10 +342,10 @@ function vectortest.testVector2And3Add()
     -- test vector addition that crosses vector 2 and 3
 
     --[[basic usage]]
-    v2 = geometry.Vector2()
-    v3 = geometry.Vector3()
+    local v2 = geometry.Vector2()
+    local v3 = geometry.Vector3()
 
-    r = v2 + v3
+    local r = v2 + v3
     assert(r:instanceof(geometry.Vector2), "Vector3 should be valid as Vector2")
     assert(r:instanceof(geometry.Vector3), "addition with Vector3 didn't return Vector3")
     assert(r.x == 0, "0 + 0 didn't equal 0")
@@ -382,9 +382,9 @@ function vectortest.testVector2Subtract()
 
     --[[basic usage]]
     local v1 = geometry.Vector2()
-    v3 = v1 - v1
-    assert(v3.x == 0, "0 - 0 didn't equal 0")
-    assert(v3.y == 0, "0 - 0 didn't equal 0")
+    local r = v1 - v1
+    assert(r.x == 0, "0 - 0 didn't equal 0")
+    assert(r.y == 0, "0 - 0 didn't equal 0")
 
 
     --[[operator order]]
@@ -392,17 +392,17 @@ function vectortest.testVector2Subtract()
     v1 = geometry.Vector2(1, 5)
     local v2 = geometry.Vector2(2, 10)
 
-    v3 = v1 - v1
-    assert(v3.x == 0, "1 - 1 didn't become 0")
-    assert(v3.y == 0, "5 - 5 didn't become 0")
+    r = v1 - v1
+    assert(r.x == 0, "1 - 1 didn't become 0")
+    assert(r.y == 0, "5 - 5 didn't become 0")
 
-    v3 = v1 - v2
-    assert(v3.x == -1, "1 - 2 didn't become -1")
-    assert(v3.y == -5, "5 - 10 didn't become -5")
+    r = v1 - v2
+    assert(r.x == -1, "1 - 2 didn't become -1")
+    assert(r.y == -5, "5 - 10 didn't become -5")
 
-    v3 = v2 - v1
-    assert(v3.x == 1, "2 - 1 didn't become 1")
-    assert(v3.y == 5, "10 - 5 didn't become 5")
+    r = v2 - v1
+    assert(r.x == 1, "2 - 1 didn't become 1")
+    assert(r.y == 5, "10 - 5 didn't become 5")
 
 end
 
@@ -411,10 +411,10 @@ function vectortest.testVector3Subtract()
 
     --[[basic usage]]
     local v1 = geometry.Vector3()
-    v3 = v1 - v1
-    assert(v3.x == 0, "0 - 0 didn't equal 0")
-    assert(v3.y == 0, "0 - 0 didn't equal 0")
-    assert(v3.z == 0, "0 - 0 didn't equal 0")
+    local r = v1 - v1
+    assert(r.x == 0, "0 - 0 didn't equal 0")
+    assert(r.y == 0, "0 - 0 didn't equal 0")
+    assert(r.z == 0, "0 - 0 didn't equal 0")
 
 
     --[[operator order]]
@@ -422,20 +422,20 @@ function vectortest.testVector3Subtract()
     v1 = geometry.Vector3(1, 5, 10)
     local v2 = geometry.Vector3(2, 10, 20)
 
-    v3 = v1 - v1
-    assert(v3.x == 0, "1 - 1 didn't become 0")
-    assert(v3.y == 0, "5 - 5 didn't become 0")
-    assert(v3.z == 0, "10 - 10 didn't become 0")
+    r = v1 - v1
+    assert(r.x == 0, "1 - 1 didn't become 0")
+    assert(r.y == 0, "5 - 5 didn't become 0")
+    assert(r.z == 0, "10 - 10 didn't become 0")
 
-    v3 = v1 - v2
-    assert(v3.x == -1, "1 - 2 didn't become -1")
-    assert(v3.y == -5, "5 - 10 didn't become -5")
-    assert(v3.z == -10, "10 - 20 didn't become -10")
+    r = v1 - v2
+    assert(r.x == -1, "1 - 2 didn't become -1")
+    assert(r.y == -5, "5 - 10 didn't become -5")
+    assert(r.z == -10, "10 - 20 didn't become -10")
 
-    v3 = v2 - v1
-    assert(v3.x == 1, "2 - 1 didn't become 1")
-    assert(v3.y == 5, "10 - 5 didn't become 5")
-    assert(v3.z == 10, "20 - 10 didn't become 10")
+    r = v2 - v1
+    assert(r.x == 1, "2 - 1 didn't become 1")
+    assert(r.y == 5, "10 - 5 didn't become 5")
+    assert(r.z == 10, "20 - 10 didn't become 10")
 
 end
 
@@ -443,10 +443,10 @@ function vectortest.testVector2And3Subtract()
     -- test vector subtraction that crosses vector 2 and 3
 
     --[[basic usage]]
-    v2 = geometry.Vector2()
-    v3 = geometry.Vector3()
+    local v2 = geometry.Vector2()
+    local v3 = geometry.Vector3()
 
-    r = v2 - v3
+    local r = v2 - v3
     assert(r:instanceof(geometry.Vector2), "Vector3 should be valid as Vector2")
     assert(r:instanceof(geometry.Vector3), "subtraction with Vector3 didn't return Vector3")
     assert(r.x == 0, "0 - 0 didn't equal 0")
@@ -483,7 +483,7 @@ function vectortest.testVector2Multiply()
 
     --[[basic usage]]
     local v = geometry.Vector2()
-    r = v * 0
+    local r = v * 0
     assert(r.x == 0, "0 * 0 didn't equal 0")
     assert(r.y == 0, "0 * 0 didn't equal 0")
 
@@ -507,7 +507,7 @@ function vectortest.testVector3Multiply()
 
     --[[basic usage]]
     local v = geometry.Vector3()
-    r = v * 0
+    local r = v * 0
     assert(r.x == 0, "0 * 0 didn't equal 0")
     assert(r.y == 0, "0 * 0 didn't equal 0")
     assert(r.z == 0, "0 * 0 didn't equal 0")
@@ -534,7 +534,7 @@ function vectortest.testVector2Divide()
 
     --[[basic usage]]
     local v = geometry.Vector2()
-    r = v / 1
+    local r = v / 1
     assert(r.x == 0, "0 / 1 didn't equal 0")
     assert(r.y == 0, "0 / 1 didn't equal 0")
 
@@ -558,7 +558,7 @@ function vectortest.testVector3Divide()
 
     --[[basic usage]]
     local v = geometry.Vector3()
-    r = v / 1
+    local r = v / 1
     assert(r.x == 0, "0 / 1 didn't equal 0")
     assert(r.y == 0, "0 / 1 didn't equal 0")
     assert(r.z == 0, "0 / 1 didn't equal 0")

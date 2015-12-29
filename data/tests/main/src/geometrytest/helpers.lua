@@ -2,7 +2,7 @@ local helpers = {}
 
 function helpers.assertIncorrectValues(geometryClass, className, variables, default, useNegative)
 
-    badValues = {"1", false, math.huge, -math.huge, math.huge / math.huge}
+    local badValues = {"1", false, math.huge, -math.huge, math.huge / math.huge}
 
     -- sometimes negative values are allowed, so this is optional
     if useNegative or useNegative == nil then
@@ -20,7 +20,7 @@ function helpers.assertIncorrectValues(geometryClass, className, variables, defa
         for i, var in ipairs(variables) do
 
             -- attempt to set a value to something incorrect
-            success, result = pcall(function() instance[var] = badValue end)
+            local success, result = pcall(function() instance[var] = badValue end)
             -- debug.log(result)
             if success then
                 error(className .. "." .. var .. " incorrectly set to " .. tostring(badValue))
