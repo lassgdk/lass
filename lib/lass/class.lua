@@ -229,12 +229,12 @@ function class.bind(cl, ...)
 
     if #args == 0 then
         error("key must not be nil")
-    elseif #args <= 2 then
+    elseif args.n <= 2 then
         key = args[1]
         value = args[2]
     else
         --for example, {"__get", "x"} becomes cl.__get.x
-        for i = 1, #args - 2 do
+        for i = 1, args.n - 2 do
             obj = obj[args[i]]
             key = args[i+1]
         end
