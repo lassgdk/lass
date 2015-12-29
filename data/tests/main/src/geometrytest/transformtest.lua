@@ -1,5 +1,6 @@
 local geometry = require("lass.geometry")
 local helpers = require("geometrytest.helpers")
+local class = require("lass.class")
 
 transformtest = {}
 
@@ -12,6 +13,8 @@ function transformtest.testTransformCreation()
 
     --[[basic creation]]
     local t = geometry.Transform()
+
+    assert(class.instanceof(t, geometry.Transform), "Transform should be valid as a Transform")
 
     assert(t.position.x == 0, "transform x position didn't default to 0")
     assert(t.position.y == 0, "transform y position didn't default to 0")

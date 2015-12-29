@@ -1,5 +1,6 @@
 local geometry = require("lass.geometry")
 local helpers = require("geometrytest.helpers")
+local class = require("lass.class")
 
 local vectortest = {}
 
@@ -59,7 +60,8 @@ function vectortest.testVector2Creation()
     assert(v.x == 0, "Vector2 x value didn't default to 0")
     assert(v.y == 0, "Vector2 y value didn't default to 0")
     assert(v.z == nil, "Vector2 shouldn't have an existing value for z")
-    assert(v:instanceof(geometry.Vector2), "Vector2 should be valid as Vector2")
+    assert(class.instanceof(v, geometry.Vector2), "Vector2 should be valid as Vector2")
+    assert(class.instanceof(v, geometry.Vector3) ~= true, "Vector2 should not be valid as Vector3")
 
 
     --[[creation with just numbers]]
@@ -118,7 +120,8 @@ function vectortest.testVector3Creation()
     assert(v.x == 0, "Vector3 x value didn't default to 0")
     assert(v.y == 0, "Vector3 y value didn't default to 0")
     assert(v.z == 0, "Vector3 z value didn't default to 0")
-    assert(v:instanceof(geometry.Vector3), "Vector3 should be valid as Vector3")
+    assert(class.instanceof(v, geometry.Vector2), "Vector3 should be valid as Vector2")
+    assert(class.instanceof(v, geometry.Vector3), "Vector3 should be valid as Vector3")
 
 
     --[[creation with just numbers]]
@@ -180,7 +183,8 @@ function vectortest.testVector2CreationWithVectors()
     local v = geometry.Vector2(geometry.Vector2())
     assert(v.x == 0, "Vector2 x value didn't default to 0")
     assert(v.y == 0, "Vector2 y value didn't default to 0")
-    assert(v:instanceof(geometry.Vector2), "Vector2 should be valid as Vector2")
+    assert(class.instanceof(v, geometry.Vector2), "Vector2 should be valid as Vector2")
+    assert(class.instanceof(v, geometry.Vector3) ~= true, "Vector2 should not be valid as Vector3")
 
     v = geometry.Vector2(geometry.Vector2(1, 1))
     assert(v.x == 1, "Vector2 x value changed from 1")
@@ -201,8 +205,8 @@ function vectortest.testVector2CreationWithVectors()
     assert(v.x == 0, "Vector2 x value didn't default to 0")
     assert(v.y == 0, "Vector2 y value didn't default to 0")
     assert(v.z == nil, "Vector2 shouldn't have an existing value for z")
-    assert(v:instanceof(geometry.Vector2), "Vector2 should be valid as Vector2")
-    assert(v:instanceof(geometry.Vector3) == false, "Vector2 shouldn't be valid as Vector3")
+    assert(class.instanceof(v, geometry.Vector2), "Vector2 should be valid as Vector2")
+    assert(class.instanceof(v, geometry.Vector3) == false, "Vector2 shouldn't be valid as Vector3")
 
     v = geometry.Vector2(geometry.Vector3(1, 1, 1))
     assert(v.x == 1, "Vector2 x value changed from 1")
@@ -229,8 +233,8 @@ function vectortest.testVector3CreationWithVectors()
     assert(v.x == 0, "Vector3 x value didn't default to 0")
     assert(v.y == 0, "Vector3 y value didn't default to 0")
     assert(v.z == 0, "Vector3 z value didn't default to 0")
-    assert(v:instanceof(geometry.Vector2), "Vector3 should be valid as Vector2")
-    assert(v:instanceof(geometry.Vector3), "Vector3 should be valid as Vector3")
+    assert(class.instanceof(v, geometry.Vector2), "Vector3 should be valid as Vector2")
+    assert(class.instanceof(v, geometry.Vector3), "Vector3 should be valid as Vector3")
 
     v = geometry.Vector3(geometry.Vector2(1, 1))
     assert(v.x == 1, "Vector3 x value changed from 1")
@@ -254,8 +258,8 @@ function vectortest.testVector3CreationWithVectors()
     assert(v.x == 0, "Vector3 x value didn't default to 0")
     assert(v.y == 0, "Vector3 y value didn't default to 0")
     assert(v.z == 0, "Vector3 z value didn't default to 0")
-    assert(v:instanceof(geometry.Vector2), "Vector3 should be valid as Vector2")
-    assert(v:instanceof(geometry.Vector3), "Vector3 shouldn't be valid as Vector3")
+    assert(class.instanceof(v, geometry.Vector2), "Vector3 should be valid as Vector2")
+    assert(class.instanceof(v, geometry.Vector3), "Vector3 shouldn't be valid as Vector3")
 
     v = geometry.Vector3(geometry.Vector3(1, 1, 1))
     assert(v.x == 1, "Vector3 x value changed from 1")
@@ -346,15 +350,15 @@ function vectortest.testVector2And3Add()
     local v3 = geometry.Vector3()
 
     local r = v2 + v3
-    assert(r:instanceof(geometry.Vector2), "Vector3 should be valid as Vector2")
-    assert(r:instanceof(geometry.Vector3), "addition with Vector3 didn't return Vector3")
+    assert(class.instanceof(r, geometry.Vector2), "Vector3 should be valid as Vector2")
+    assert(class.instanceof(r, geometry.Vector3), "addition with Vector3 didn't return Vector3")
     assert(r.x == 0, "0 + 0 didn't equal 0")
     assert(r.y == 0, "0 + 0 didn't equal 0")
     assert(r.z == 0, "0 + 0 didn't equal 0")
 
     r = v3 + v2
-    assert(r:instanceof(geometry.Vector2), "Vector3 should be valid as Vector2")
-    assert(r:instanceof(geometry.Vector3), "addition with Vector3 didn't return Vector3")
+    assert(class.instanceof(r, geometry.Vector2), "Vector3 should be valid as Vector2")
+    assert(class.instanceof(r, geometry.Vector3), "addition with Vector3 didn't return Vector3")
     assert(r.x == 0, "0 + 0 didn't equal 0")
     assert(r.y == 0, "0 + 0 didn't equal 0")
     assert(r.z == 0, "0 + 0 didn't equal 0")
@@ -447,15 +451,15 @@ function vectortest.testVector2And3Subtract()
     local v3 = geometry.Vector3()
 
     local r = v2 - v3
-    assert(r:instanceof(geometry.Vector2), "Vector3 should be valid as Vector2")
-    assert(r:instanceof(geometry.Vector3), "subtraction with Vector3 didn't return Vector3")
+    assert(class.instanceof(r, geometry.Vector2), "Vector3 should be valid as Vector2")
+    assert(class.instanceof(r, geometry.Vector3), "subtraction with Vector3 didn't return Vector3")
     assert(r.x == 0, "0 - 0 didn't equal 0")
     assert(r.y == 0, "0 - 0 didn't equal 0")
     assert(r.z == 0, "0 - 0 didn't equal 0")
 
     r = v3 - v2
-    assert(r:instanceof(geometry.Vector2), "Vector3 should be valid as Vector2")
-    assert(r:instanceof(geometry.Vector3), "subtraction with Vector3 didn't return Vector3")
+    assert(class.instanceof(r, geometry.Vector2), "Vector3 should be valid as Vector2")
+    assert(class.instanceof(r, geometry.Vector3), "subtraction with Vector3 didn't return Vector3")
     assert(r.x == 0, "0 - 0 didn't equal 0")
     assert(r.y == 0, "0 - 0 didn't equal 0")
     assert(r.z == 0, "0 - 0 didn't equal 0")

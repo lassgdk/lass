@@ -5,7 +5,7 @@ function helpers.assertIncorrectValues(geometryClass, className, variables, defa
     local badValues = {"1", false, math.huge, -math.huge, math.huge / math.huge}
 
     -- sometimes negative values are allowed, so this is optional
-    if useNegative or useNegative == nil then
+    if useNegative then
         table.insert(badValues, -1)
     end
 

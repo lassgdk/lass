@@ -1,5 +1,6 @@
 local geometry = require("lass.geometry")
 local helpers = require("geometrytest.helpers")
+local class = require("lass.class")
 
 local shapetest = {}
 
@@ -267,15 +268,18 @@ function shapetest.testCircleCreation()
     --[[incorrect creation attempts]]
     assert(pcall(geometry.Circle) ~= true, "circle incorrectly created with no arguments")
 
-    helpers.assertIncorrectValues(geometry.Circle, "circle", {"radius"}, 0)
+    helpers.assertIncorrectValues(geometry.Circle, "circle", {"radius"}, 0, true)
 
 
     --[[basic creation]]
     local c = geometry.Circle(0)
 
+    assert(class.instanceof(c, geometry.Circle), "circle should be valid as a circle")
+
     assert(type(c.radius) == "number", "circle radius is not number")
     assert(c.radius == 0, "circle radius changed from given value of 0")
-    assert(c.position:instanceof(geometry.Vector2), "circle position is not Vector2")
+
+    assert(class.instanceof(c.position, geometry.Vector2), "circle position is not Vector2")
     assert(c.position.x == 0, "circle default x position is not 0")
     assert(c.position.y == 0, "circle default y position is not 0")
 
@@ -285,7 +289,7 @@ function shapetest.testCircleCreation()
 
     assert(type(c.radius) == "number", "circle radius is not number")
     assert(c.radius == 1, "circle radius changed from given value of 1")
-    assert(c.position:instanceof(geometry.Vector2), "circle position is not Vector2")
+    assert(class.instanceof(c.position, geometry.Vector2), "circle position is not Vector2")
     assert(c.position.x == 0, "circle x position changed from given value of 0")
     assert(c.position.y == 0, "circle y position changed from given value of 0")
 
@@ -305,7 +309,7 @@ function shapetest.testRectangleCreation()
     assert(pcall(geometry.Rectangle) ~= true, "rectangle incorrectly created with no arguments")
     assert(pcall(geometry.Rectangle, 0) ~= true, "rectangle incorrectly created with only one argument")
 
-    helpers.assertIncorrectValues(geometry.Rectangle, "rectangle", {"width", "height"}, 1)
+    helpers.assertIncorrectValues(geometry.Rectangle, "rectangle", {"width", "height"}, 1, true)
 
 
     --[[verify boundary conditions for size]]
@@ -317,12 +321,14 @@ function shapetest.testRectangleCreation()
     --[[basic creation]]
     r = geometry.Rectangle(1, 1)
 
+    assert(class.instanceof(r, geometry.Rectangle), "rectangle should be valid as a rectangle")
+
     assert(type(r.width) == "number", "rectangle width is not number")
     assert(type(r.height) == "number", "rectangle height is not number")
     assert(r.width == 1, "rectangle width changed from given value of 1")
     assert(r.height == 1, "rectangle height changed from given value of 1")
 
-    assert(r.position:instanceof(geometry.Vector2), "rectangle position is not Vector2")
+    assert(class.instanceof(r.position, geometry.Vector2), "rectangle position is not Vector2")
     assert(r.position.x == 0, "rectangle default x position is not 0")
     assert(r.position.y == 0, "rectangle default y position is not 0")
 
@@ -335,7 +341,7 @@ function shapetest.testRectangleCreation()
     assert(r.width == 1, "rectangle width changed from given value of 1")
     assert(r.height == 1, "rectangle height changed from given value of 1")
 
-    assert(r.position:instanceof(geometry.Vector2), "rectangle position is not Vector2")
+    assert(class.instanceof(r.position, geometry.Vector2), "rectangle position is not Vector2")
     assert(r.position.x == 0, "rectangle x position changed from given value of 0")
     assert(r.position.y == 0, "rectangle y position changed from given value of 0")
 
