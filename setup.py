@@ -3,6 +3,10 @@
 error = ""
 
 import os, subprocess, sys, struct
+try:
+	import ConfigParser as configparser
+except:
+	import configparser
 from distutils import log
 try:
 	from setuptools import setup
@@ -47,16 +51,26 @@ def listAll(dir, joinBase=False, headPrefix="", filePrefix=""):
 
 #if using posix, we'll move all data and lua files according to XDG spec
 if os.name == "posix" or sys.platform == "cygwin":
-	try:
-		XDG_DATA_HOME = os.environ["XDG_DATA_HOME"]
-	except KeyError:
-		XDG_DATA_HOME = os.path.join(os.environ["HOME"], ".local", "share")
-	try:
-		XDG_CONFIG_HOME = os.environ["XDG_CONFIG_HOME"]
-	except KeyError:
-		XDG_CONFIG_HOME = os.path.join(os.environ["HOME"], ".config")
-	DIR_LASS_DATA = os.path.join(XDG_DATA_HOME, "Lass")
-	DIR_LASS_CONF = os.path.join(XDG_CONFIG_HOME, "Lass")
+
+	cparser = configparser.ConfigParser()
+	cparser.add_section("path")
+	cparser.set("path", "DIR_LASS_DATA", "$XDG_DATA_HOME/Lass;$HOME/.local/share/Lass;$HOME/.Lass")
+
+	if not cparser.read(os.path.join("conf", "lassconf.ini")):
+		log.warn("Warning: config/lassconf.ini not found")
+
+	for d in cparser.get("path", "DIR_LASS_DATA").split(";"):
+		d = os.path.expanduser(os.path.expandvars(d))
+		DIR_LASS_DATA = d
+		if os.path.exists(os.path.dirname(d)):
+			break
+
+	for d in ["$XDG_CONFIG_HOME/Lass", "$HOME/.config/Lass"]:
+		d = os.path.expanduser(os.path.expandvars(d))
+		print d
+		DIR_LASS_CONF = d
+		if os.path.exists(os.path.dirname(d)):
+			break
 
 	#if lua5.1 is installed, put lass lib in /usr
 	if not subprocess.call(["which", "lua5.1"], stdout=open(os.devnull, "w"), close_fds=True) or (
@@ -89,11 +103,6 @@ os.chdir(os.path.join("..", "lib"))
 DATA_FILES += listAll("lass", True, headPrefix=DIR_LUA, filePrefix="lib")
 os.chdir(os.path.join("..", "conf"))
 DATA_FILES += listAll(".", headPrefix=DIR_LASS_CONF, filePrefix="conf")
-# os.chdir(os.path.join("..", "tests", "libtests"))
-# DATA_FILES += listAll(
-# 	".", True, headPrefix=os.path.join(DIR_LASS_DATA, "tests"), filePrefix=os.path.join("tests", "libtests")
-# )
-# os.chdir(os.path.join("..", ".."))
 
 os.chdir("..")
 

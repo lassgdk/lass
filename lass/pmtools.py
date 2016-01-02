@@ -42,8 +42,7 @@ else:
 	DIR_LASS_CONF = os.path.join(XDG_CONFIG_HOME, "Lass")
 
 cparser = configparser.ConfigParser({
-	"DIR_LASS_DATA":"$XDG_DATA_HOME/Lass",
-	"FB_DIR_LASS_DATA":"$HOME/.local/share/Lass",
+	"DIR_LASS_DATA":"$XDG_DATA_HOME/Lass;$HOME/.local/share/Lass;$HOME/.Lass",
 	"DIR_PROJECTS":"$HOME/Documents/Lass"
 })
 if not cparser.read(os.path.join(DIR_LASS_CONF, "lassconf.ini")):
@@ -57,15 +56,24 @@ if sys.platform == "win32":
 	DIR_TEMP = os.path.join(DIR_LASS_DATA, "tmp")
 #else, set global variables from config file
 else:
-	try:
-		DIR_LASS_DATA = os.path.expandvars(cparser.get("path", "DIR_LASS_DATA"))
-		os.listdir(DIR_LASS_DATA)
-	except OSError:
-		DIR_LASS_DATA = os.path.expandvars(cparser.get("path", "FB_DIR_LASS_DATA"))
-	try:
-		DIR_LASS_LIB = os.path.join(sys.prefix, "local", "share", "lua", "5.1", "lass")
-		os.listdir(DIR_LASS_LIB)
-	except OSError:
+	# try:
+	# 	DIR_LASS_DATA = os.path.expandvars(cparser.get("path", "DIR_LASS_DATA"))
+	# 	os.listdir(DIR_LASS_DATA)
+	# except OSError:
+	# 	DIR_LASS_DATA = os.path.expandvars(cparser.get("path", "FB_DIR_LASS_DATA"))
+	# try:
+	# 	DIR_LASS_LIB = os.path.join(sys.prefix, "local", "share", "lua", "5.1", "lass")
+	# 	os.listdir(DIR_LASS_LIB)
+	# except OSError:
+	# 	DIR_LASS_LIB = os.path.join(DIR_LASS_DATA, "lua", "5.1", "lass")
+	for d in cparser.get("path", "DIR_LASS_DATA").split(";"):
+		d = os.path.expanduser(os.path.expandvars(d))
+		DIR_LASS_DATA = d
+		if os.path.exists(os.path.dirname(d)):
+			break
+
+	DIR_LASS_LIB = os.path.join(sys.prefix, "local", "share", "lua", "5.1", "lass")
+	if not os.path.exists(DIR_LASS_LIB):
 		DIR_LASS_LIB = os.path.join(DIR_LASS_DATA, "lua", "5.1", "lass")
 
 	DIR_PROJECTS = os.path.expandvars(cparser.get("path", "DIR_PROJECTS"))
