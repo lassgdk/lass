@@ -720,6 +720,37 @@ function vectortest.testVectorComparison()
 
 end
 
+function vectortest.testUnaryMinus()
+
+    --[[testing with Vector2]]
+    local v2 = geometry.Vector2()
+    local r = -v2
+    assert(r == v2, "the result of unary minus on 0,0 should be 0,0")
+
+    v2 = geometry.Vector2(1, 1)
+    r = -v2
+    assert(r == geometry.Vector2(-1, -1), "the result of unary minus on 1,1 should be -1,-1")
+
+    v2 = geometry.Vector2(-1, -1)
+    r = -v2
+    assert(r == geometry.Vector2(1, 1), "the result of unary minus on -1,-1 should be 1,1")
+
+
+    --[[testing with Vector3]]
+    local v3 = geometry.Vector3()
+    local r = -v3
+    assert(r == v3, "the result of unary minus on 0,0 should be 0,0")
+
+    v3 = geometry.Vector3(1, 1, 1)
+    r = -v3
+    assert(r == geometry.Vector3(-1, -1, -1), "the result of unary minus on 1,1,1 should be -1,-1,-1")
+
+    v3 = geometry.Vector3(-1, -1, -1)
+    r = -v3
+    assert(r == geometry.Vector3(1, 1, 1), "the result of unary minus on -1,-1,-1 should be 1,1,1")
+
+end
+
 function vectortest.testVector2MagnitudeAndSqrMagnitude()
 
     --[[0,0 to 0,0]]
