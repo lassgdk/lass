@@ -720,4 +720,100 @@ function vectortest.testVectorComparison()
 
 end
 
+function vectortest.testVector2MagnitudeAndSqrMagnitude()
+
+    --[[0,0 to 0,0]]
+    local origin = geometry.Vector2()
+    local v2 = geometry.Vector2()
+    assert(v2:magnitude(origin) == 0, "the magnitude of 0,0 to 0,0 wasn't 0")
+    assert(v2:sqrMagnitude(origin) == 0, "the square magnitude of 0,0 to 0,0 wasn't 0")
+
+
+    --[[0,0 to all negations of 5,5]]
+    origin = geometry.Vector2()
+    v2 = geometry.Vector2(5, 5)
+    assert(v2:magnitude(origin) == math.sqrt(50), "the magnitude of 5,5 to 0,0 should be sqrt(50)")
+    assert(v2:sqrMagnitude(origin) == 50, "the square magnitude of 5,5 to 0,0 should be 50")
+
+    v2 = geometry.Vector2(-5, 5)
+    assert(v2:magnitude(origin) == math.sqrt(50), "the magnitude of -5,5 to 0,0 should be sqrt(50)")
+    assert(v2:sqrMagnitude(origin) == 50, "the square magnitude of -5,5 to 0,0 should be 50")
+
+    v2 = geometry.Vector2(5, -5)
+    assert(v2:magnitude(origin) == math.sqrt(50), "the magnitude of 5,-5 to 0,0 should be sqrt(50)")
+    assert(v2:sqrMagnitude(origin) == 50, "the square magnitude of 5,-5 to 0,0 should be 50")
+
+    v2 = geometry.Vector2(-5, -5)
+    assert(v2:magnitude(origin) == math.sqrt(50), "the magnitude of -5,-5 to 0,0 should be sqrt(50)")
+    assert(v2:sqrMagnitude(origin) == 50, "the square magnitude of -5,-5 to 0,0 should be 50")
+
+
+    --[[1,1 to all negations of 2,2]]
+    origin = geometry.Vector2(1, 1)
+    v2 = geometry.Vector2(2, 2)
+    assert(v2:magnitude(origin) == math.sqrt(2), "the magnitude of 2,2 to 1,1 should be sqrt(2)")
+    assert(v2:sqrMagnitude(origin) == 2, "the square magnitude of 2,2 to 1,1 should be 2")
+
+    v2 = geometry.Vector2(-2, 2)
+    assert(v2:magnitude(origin) == math.sqrt(10), "the magnitude of -2,2 to 1,1 should be sqrt(10)")
+    assert(v2:sqrMagnitude(origin) == 10, "the square magnitude of -2,2 to 1,1 should be 10")
+
+    v2 = geometry.Vector2(2, -2)
+    assert(v2:magnitude(origin) == math.sqrt(10), "the magnitude of 2,-2 to 1,1 should be sqrt(10)")
+    assert(v2:sqrMagnitude(origin) == 10, "the square magnitude of 2,-2 to 1,1 should be 10")
+
+    v2 = geometry.Vector2(-2, -2)
+    assert(v2:magnitude(origin) == math.sqrt(18), "the magnitude of -2,-2 to 1,1 should be sqrt(18)")
+    assert(v2:sqrMagnitude(origin) == 18, "the square magnitude of -2,-2 to 1,1 should be 18")
+
+end
+
+function vectortest.testVector3MagnitudeAndSqrMagnitude()
+
+    --[[0,0,0 to 0,0,0]]
+    local origin = geometry.Vector3()
+    local v3 = geometry.Vector3()
+    assert(v3:magnitude(origin) == 0, "the magnitude of 0,0,0 to 0,0,0 wasn't 0")
+    assert(v3:sqrMagnitude(origin) == 0, "the square magnitude of 0,0,0 to 0,0,0 wasn't 0")
+
+
+    --[[0,0,0 to all negations of 5,5,5]]
+    origin = geometry.Vector3()
+    v2 = geometry.Vector3(5, 5, 5)
+    assert(v2:magnitude(origin) == math.sqrt(75), "the magnitude of 5,5,5 to 0,0,0 should be sqrt(75)")
+    assert(v2:sqrMagnitude(origin) == 75, "the square magnitude of 5,5,5 to 0,0,0 should be 75")
+
+    v2 = geometry.Vector3(-5, 5, -5)
+    assert(v2:magnitude(origin) == math.sqrt(75), "the magnitude of -5,5,-5 to 0,0,0 should be sqrt(75)")
+    assert(v2:sqrMagnitude(origin) == 75, "the square magnitude of -5,5,-5 to 0,0,0 should be 75")
+
+    v2 = geometry.Vector3(5, -5, 5)
+    assert(v2:magnitude(origin) == math.sqrt(75), "the magnitude of 5,-5,5 to 0,0,0 should be sqrt(75)")
+    assert(v2:sqrMagnitude(origin) == 75, "the square magnitude of 5,-5,5 to 0,0,0 should be 75")
+
+    v2 = geometry.Vector3(-5, -5, -5)
+    assert(v2:magnitude(origin) == math.sqrt(75), "the magnitude of -5,-5,-5 to 0,0,0 should be sqrt(75)")
+    assert(v2:sqrMagnitude(origin) == 75, "the square magnitude of -5,-5,-5 to 0,0,0 should be 75")
+
+
+    --[[1,1,1 to all negations of 2,2,2]]
+    origin = geometry.Vector3(1, 1,1)
+    v2 = geometry.Vector3(2, 2, 2)
+    assert(v2:magnitude(origin) == math.sqrt(3), "the magnitude of 2,2,2 to 1,1,1 should be sqrt(3)")
+    assert(v2:sqrMagnitude(origin) == 3, "the square magnitude of 2,2,2 to 1,1,1 should be 3")
+
+    v2 = geometry.Vector3(-2, 2, -2)
+    assert(v2:magnitude(origin) == math.sqrt(19), "the magnitude of -2,2,-2 to 1,1,1 should be sqrt(19)")
+    assert(v2:sqrMagnitude(origin) == 19, "the square magnitude of -2,2,-2 to 1,1,1 should be 19")
+
+    v2 = geometry.Vector3(2, -2, 2)
+    assert(v2:magnitude(origin) == math.sqrt(11), "the magnitude of 2,-2,2 to 1,1,1 should be sqrt(11)")
+    assert(v2:sqrMagnitude(origin) == 11, "the square magnitude of 2,-2,2 to 1,1,1 should be 11")
+
+    v2 = geometry.Vector3(-2, -2, -2)
+    assert(v2:magnitude(origin) == math.sqrt(27), "the magnitude of -2,-2,-2 to 1,1,1 should be sqrt(27)")
+    assert(v2:sqrMagnitude(origin) == 27, "the square magnitude of -2,-2,-2 to 1,1,1 should be 27")
+
+end
+
 return vectortest

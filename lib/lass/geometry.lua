@@ -147,7 +147,6 @@ end
 
 function Vector2:sqrMagnitude(origin)
 	--return the square magnitude of a vector relative to origin (0,0 by default)
-	--this can also be used as a class/static function (i.e., Vector2.sqrMagnitude(a, b))
 
 	assertOperandsHaveXandY(self, origin, "nil")
 	local vec = self - Vector2(origin)
@@ -156,8 +155,7 @@ function Vector2:sqrMagnitude(origin)
 end
 
 function Vector2:magnitude(origin)
-	--return the square magnitude of a vector relative to origin (0,0 by default)
-	--this can also be used as a class/static function (i.e., Vector2.magnitude(a, b))
+	--return the magnitude of a vector relative to origin (0,0 by default)
 
 	return math.sqrt(Vector2.sqrMagnitude(self, origin))
 end
@@ -347,7 +345,6 @@ end
 
 function Vector3:sqrMagnitude(origin)
 	--return the square magnitude of a vector relative to origin (0,0 by default)
-	--this can also be used as a class/static function (i.e., Vector3.sqrMagnitude(a, b))
 
 	assertOperandsHaveXandY(self, origin, "nil")
 	local vec = self - Vector3(origin)
@@ -357,7 +354,6 @@ end
 
 function Vector3:magnitude(origin)
 	--return the magnitude of a vector relative to origin (0,0 by default)
-	--this can also be used as a class/static function (i.e., Vector3.magnitude(a, b))
 
 	return math.sqrt(Vector3.sqrMagnitude(self, origin))
 end
