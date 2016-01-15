@@ -655,4 +655,69 @@ function vectortest.testVector3Divide()
 
 end
 
+function vectortest.testVectorComparison()
+
+
+    --[[vector2 to vector2]]
+    local v1 = geometry.Vector2()
+    local v2 = geometry.Vector2()
+    assert(v1 == v2, "two default Vector2 should be equal")
+    assert((v1 ~= v2) == false, "two default Vector2 should be equal")
+
+    v1.x = 1
+    assert(v1 ~= v2, "two different Vector2 should not be equal")
+    assert((v1 == v2) == false, "these two Vector2 should not be equal")
+    v2.x = 1
+    assert(v1 == v2, "these two Vector2 should be equal")
+    assert((v1 ~= v2) == false, "these two Vector2 should be equal")
+
+    v1.y = 1
+    assert(v1 ~= v2, "two different Vector2 should not be equal")
+    assert((v1 == v2) == false, "these two Vector2 should not be equal")
+    v2.y = 1
+    assert(v1 == v2, "these two Vector2 should be equal")
+    assert((v1 ~= v2) == false, "these two Vector2 should be equal")
+
+
+    --[[vector3 to vector3]]
+    local v3 = geometry.Vector3()
+    local v4 = geometry.Vector3()
+    assert(v3 == v4, "two default Vector3 should be equal")
+    assert((v3 ~= v4) == false, "two default Vector3 should be equal")
+
+    v3.x = 1
+    assert(v3 ~= v4, "two different Vector3 should not be equal")
+    assert((v3 == v4) == false, "these two Vector3 should not be equal")
+    v4.x = 1
+    assert(v3 == v4, "these two Vector3 should be equal")
+    assert((v3 ~= v4) == false, "these two Vector3 should be equal")
+
+    v3.y = 1
+    assert(v3 ~= v4, "two different Vector3 should not be equal")
+    assert((v3 == v4) == false, "these two Vector3 should not be equal")
+    v4.y = 1
+    assert(v3 == v4, "these two Vector3 should be equal")
+    assert((v3 ~= v4) == false, "these two Vector3 should be equal")
+
+    v3.z = 1
+    assert(v3 ~= v4, "two different Vector3 should not be equal")
+    assert((v3 == v4) == false, "these two Vector3 should not be equal")
+    v4.z = 1
+    assert(v3 == v4, "these two Vector3 should be equal")
+    assert((v3 ~= v4) == false, "these two Vector3 should be equal")
+
+
+    --[[cross-vector comparison]]
+    -- these should always be false!
+    v2 = geometry.Vector2()
+    v3 = geometry.Vector3()
+    assert((v2 == v3) == false, "Vector2 and Vector3 should never be equal")
+    assert(v2 ~= v3, "Vector2 and Vector3 should never be equal")
+
+    v2.z = 0
+    assert((v2 == v3) == false, "Vector2 and Vector3 should never be equal")
+    assert(v2 ~= v3, "Vector2 and Vector3 should never be equal")
+
+end
+
 return vectortest
