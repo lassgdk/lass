@@ -137,7 +137,7 @@ if sys.platform.startswith("win32"):
 	if struct.calcsize("P") == 4:
 		options["py2exe"] = {'bundle_files': 1, 'compressed': True}
 else:
-	scripts = [os.path.join("bin", "lasspm")]#, os.path.join("bin", "lassdoc")]
+	scripts = [os.path.join("bin", "lasspm")]
 	console = []
 
 setup(
@@ -147,7 +147,7 @@ setup(
 	author_email = "coss@cosstropolis.com",
 	description = "A modular development kit for 2D videogames.",
 	packages = ["lass"],
-	install_requires = ["jinja2", "lupa", "PyYAML"],
+	install_requires = ["jinja2", "lupa"],
 	scripts = scripts,
 	console = console,
 	data_files = DATA_FILES,

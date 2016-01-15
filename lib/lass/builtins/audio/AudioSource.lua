@@ -168,6 +168,41 @@ function AudioSource.events.physicsPostUpdate.play(self)
 end
 
 --[[
+level getters
+]]
+
+function AudioSource.__get.volume(self)
+
+	return self._volume
+end
+
+function AudioSource:getVolumeOffset(instanceID)
+
+	return operators.nilOr(self._instances[instanceID].volumeOffset, 0)
+end
+
+--[[
+level setters
+]]
+
+function AudioSource.__set.volume(self, value)
+
+	self._volume = value
+
+	for i, instanceID in ipairs(self.instanceQueue) do
+		local offset = self:getVolumeOffset(instanceID)
+		self._instances[instanceID].source:setVolume(offset + value)
+	end
+end
+
+function AudioSource:setVolumeOffset(instanceID, offset)
+
+	local instance = self._instances[instanceID]
+	instance.volumeOffset = offset
+	instance.source:setVolume(offset + self.volume)
+end
+
+--[[
 property getters
 ]]
 
@@ -191,7 +226,7 @@ when an instance ID isn't specified, we pick the instance at the front of the qu
 function AudioSource:getCurrentTime(instanceID)
 
 	instanceID = operators.nilOr(instanceID, self.instanceQueue[1])
-	return self._instances[instanceID]:tell("seconds")
+	return self._instances[instanceID].source:tell("seconds")
 end
 
 function AudioSource.__get.currentTime(self)
@@ -201,7 +236,7 @@ end
 function AudioSource:getCurrentSample(instanceID)
 
 	instanceID = operators.nilOr(instanceID, self.instanceQueue[1])
-	return self._instances[instanceID]:tell("samples")
+	return self._instances[instanceID].source:tell("samples")
 end
 
 function AudioSource.__get.currentSample(self)

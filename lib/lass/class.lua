@@ -47,6 +47,8 @@ function class.metaclass:__call(...)
     local object = {}
     setmetatable(object, self)
 
+    -- object.class = self
+
     self.init(object, ...)
     return object
 
