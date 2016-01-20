@@ -230,6 +230,14 @@ function Vector2:project(direction)
 
 	-- debug.log(getmetatable(direction).__mul, Vector2.__mul)
 	assertOperandsHaveXandY(self, direction)
+
+	if self.x == 0 and self.y == 0 then
+		error(tostring(self) .. " is not a valid direction vector")
+	end
+	if direction.x == 0 and direction.y == 0 then
+		error(tostring(direction) .. " is not a valid direction vector")
+	end
+
 	return (self:dot(direction) / Vector2.dot(direction, direction)) * direction
 end
 
