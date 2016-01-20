@@ -367,6 +367,11 @@ function Vector3:rotate(angle, useRadians)
 	return vec
 end
 
+function Vector3:dot(other)
+
+	return self.x * other.x + self.y * other.y + self.z * other.z
+end
+
 --[[Transform]]
 
 local Transform = class.define(function(self, position, rotation, size)
