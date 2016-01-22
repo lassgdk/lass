@@ -231,9 +231,6 @@ function Vector2:project(direction)
 	-- debug.log(getmetatable(direction).__mul, Vector2.__mul)
 	assertOperandsHaveXandY(self, direction)
 
-	if self.x == 0 and self.y == 0 then
-		error(tostring(self) .. " is not a valid direction vector")
-	end
 	if direction.x == 0 and direction.y == 0 then
 		error(tostring(direction) .. " is not a valid direction vector")
 	end
@@ -661,9 +658,11 @@ end)
 function Polygon:globalVertices(transform)
 
 	local globalVertices = {}
+	local position = Vector2(transform.position)
+
 	for i, vertex in ipairs(self.vertices) do
 		globalVertices[i] = Vector2(vertex.x * transform.size.x, vertex.y * transform.size.y)
-		globalVertices[i] = globalVertices[i]:rotate(transform.rotation) + transform.position
+		globalVertices[i] = globalVertices[i]:rotate(transform.rotation) + position
 	end
 
 
@@ -739,10 +738,16 @@ end
 function Rectangle:globalVertices(transform, ignoreRotation)
 
 	local globalVertices = {}
+	local position
+
 	for i, vertex in ipairs(self:vertices()) do
 		globalVertices[i] = Vector2(vertex.x * transform.size.x, vertex.y * transform.size.y)
+
 		if not ignoreRotation then
-			globalVertices[i] = globalVertices[i]:rotate(transform.rotation) + transform.position
+			if not position then
+				position = Vector2(transform.position)
+			end
+			globalVertices[i] = globalVertices[i]:rotate(transform.rotation) + position
 		end
 	end
 
