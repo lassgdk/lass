@@ -8,17 +8,18 @@ local class = {}
 
 local reserved = {
     __base = true,
-    class = true,
+    __class = true,
     __get = true,
     __set = true,
     __protected = true,
 }
 
+--keys that we should not attempt to find in an AccessorTable
 local accessorReserved = {
     init = true,
     __accessing = true,
     __base = true,
-    class = true,
+    __class = true,
     instanceof = true,
     is = true
 }
@@ -47,7 +48,6 @@ function class.metaclass:__call(...)
     local object = {}
     setmetatable(object, self)
 
-    -- object.class = self
 
     self.init(object, ...)
     return object
@@ -148,6 +148,11 @@ local function defineClass(base, init, noAccessors)
                 return c.__get[key](self)
 
             else
+                -- next, we check if the key is "__class"
+                if key == "__class" then
+                    return c
+                end
+
                 -- next, we attempt to find the key on the class itself.
                 -- if it isn't found, metaclass.__index will attempt to find it in
                 -- the ancestor classes

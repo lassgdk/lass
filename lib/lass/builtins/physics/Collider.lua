@@ -63,7 +63,7 @@ local function shapeToPhysicsShape(self, shape, physicsShape, oldTransform)
 	transform.position = geometry.Vector3(0,0,0)
 	transform.rotation = 0
 
-	if shape.class == geometry.Rectangle or shape.class == geometry.Polygon then
+	if shape.__class == geometry.Rectangle or shape.__class == geometry.Polygon then
 
 		if physicsShape and oldTransform then
 
@@ -90,7 +90,7 @@ local function shapeToPhysicsShape(self, shape, physicsShape, oldTransform)
 			return love.physics.newPolygonShape(unpack(geometry.flattenedVector2Array(verts)))
 		end
 
-	elseif shape.class == geometry.Circle then
+	elseif shape.__class == geometry.Circle then
 		local cir = shape:globalCircle(transform)
 
 		-- thankfully, we can directly edit the radius and center of a CircleShape
