@@ -73,7 +73,7 @@ Lass for Windows is entirely portable: the setup.py script doesn't create any fi
 License
 -------
 
-Copyright 2014, 2015 Decky Coss and Nikki Bee.
+Copyright 2014–2016 Decky Coss and Nikki Bee.
 
 Lass is licensed under the terms of the GNU Lesser General Public License. These terms can be found in the files `license-lgpl.txt` and `license-gpl.txt`. You must agree to these terms in order to modify, redistribute, or develop with Lass.
 

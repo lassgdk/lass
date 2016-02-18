@@ -55,8 +55,8 @@ function class.metaclass:__call(...)
 end
 
 function class.metaclass:__index(key)
-    --use the base (super) class as the index
 
+    --use the base (super) class as the index
     local base = rawget(self, "base")
     if base then
         return base[key]
@@ -127,19 +127,39 @@ local function defineClass(base, init, noAccessors)
     -- otherwise, objects won't be able to find class methods, and getters/setters
     -- won't work
 
-    -- the class will be the metatable for all its objects,
-    -- and they will look up their methods in it.
-    -- this also enables getters
-
     if not noAccessors then
+
+        -- the __index metamethod for objects.
+        -- when attempting to index an object, we resolve the lookup in the
+        -- following order:
+        -- 1. look in the class's getter table
+        -- 2. look in the ancestor classes' getter tables
+        -- 3. look in the class itself
+        -- 4. look in the ancestor classes
+        -- 5. run genericget
+
         c.__index = function(self, key)
+
+            -- first, we attempt to find the key in the object's class's getter
+            -- table.
+            -- if it isn't found, the getter table will attempt to find it in the
+            -- ancestor classes' getter tables
             if not accessorReserved[key] and c.__get[key] then
                 return c.__get[key](self)
+
             else
-                -- if key == "instanceof" then crash() end
+                -- next, we attempt to find the key on the class itself.
+                -- if it isn't found, metaclass.__index will attempt to find it in
+                -- the ancestor classes
+
+                -- call metaclass.__index
                 local v = c[key]
+
+                -- if the key is found or is a reserved key, then we can stop here
                 if v ~= nil or reserved[key] then
                     return v
+
+                -- finally, since all else has failed, we run genericget
                 elseif c.__genericget then
 
                     local r = c.__genericget(self, key)
@@ -148,7 +168,8 @@ local function defineClass(base, init, noAccessors)
             end
         end
 
-        -- enable setters
+        -- the __newindex metamethod for objects
+
         c.__newindex = function(self, key, value)
             if not accessorReserved[key] then
                 if c.__set[key] then
@@ -356,12 +377,12 @@ for i, cl in ipairs({
             return newCl[key]
         end
 
+        -- attempt to find the key in the AccessorTable of the base of the class
+        -- that the AccessorTable is attached to
         local base = self.__accessing.base
 
         if base then
             return base[accessor][key]
-        else
-            return newCl[key]
         end
     end)
 
