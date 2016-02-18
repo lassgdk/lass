@@ -5,7 +5,7 @@ local geometry = require("lass.geometry")
 local Camera = class.define(lass.Component, function(self, arguments)
 
 	arguments.canvas = arguments.canvas or "main"
-	self.base.init(self, arguments)
+	self.__base.init(self, arguments)
 end)
 
 function Camera:awake()
@@ -16,7 +16,7 @@ end
 function Camera:deactivate()
 
 	self.globals.cameras[self.canvas] = nil
-	self.base.deactivate(self)
+	self.__base.deactivate(self)
 end
 
 function Camera:draw()

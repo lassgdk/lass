@@ -124,6 +124,9 @@ def buildGame(game, sendToTemp=False, projects=False, examples=False, tests=Fals
 			dirs.append(DIR_TESTS)
 		projPath = findGame(game, dirs)
 
+	if not projPath:
+		raise OSError("Project not found")
+
 	#in case game is '.', find the 'real' name
 	game = os.path.basename(os.path.abspath(projPath))
 

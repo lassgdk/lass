@@ -7,7 +7,7 @@ require("lass.stdext")
 local class = {}
 
 local reserved = {
-    base = true,
+    __base = true,
     class = true,
     __get = true,
     __set = true,
@@ -17,7 +17,7 @@ local reserved = {
 local accessorReserved = {
     init = true,
     __accessing = true,
-    base = true,
+    __base = true,
     class = true,
     instanceof = true,
     is = true
@@ -57,14 +57,14 @@ end
 function class.metaclass:__index(key)
 
     --use the base (super) class as the index
-    local base = rawget(self, "base")
+    local base = rawget(self, "__base")
     if base then
         return base[key]
     end
 end
 
 function class.metaclass:__newindex(key, value)
-    -- automatically wrap all class functions to prevent infinite self.base loops
+    -- automatically wrap all class functions to prevent infinite self.__base loops
 
     if key == "__get" then
         rawset(self, key, class.GetterTable(self, value))
@@ -119,7 +119,7 @@ local function defineClass(base, init, noAccessors)
                 end
             end
         end
-        c.base = base
+        c.__base = base
     end
 
     -- when overriding __index or __newindex, make sure that the new function calls
@@ -205,7 +205,7 @@ local function defineClass(base, init, noAccessors)
             local m = getmetatable(self)
             while m do 
                 if m == cl then return cl end
-                m = m.base
+                m = m.__base
             end
         end
 
@@ -269,13 +269,13 @@ function class.bind(cl, ...)
 
     if type(value) == "function" then
         rawset(obj, key, function(first, ...)
-            if type(first) == "table" and first.base == cl then
+            if type(first) == "table" and first.__base == cl then
                 -- temporarily change base to prevent loop
-                first.base = cl.base
+                first.__base = cl.__base
                 local r = table.pack(value(first, ...))
 
                 -- revert base and return everything
-                first.base = nil
+                first.__base = nil
                 return unpack(r)
             else
                 return value(first, ...)
@@ -306,18 +306,18 @@ function class.subclassof(myclass, ...)
     -- check if myclass is a subclass of class(es), regardless of its type.
     -- reeturns false or the first match found
 
-    if not (type(myclass) == "table" and myclass.base) then
+    if not (type(myclass) == "table" and myclass.__base) then
         return false
     else
         local originalClass = myclass
         for _, cl in ipairs({...}) do
 
             myclass = originalClass
-            while myclass.base ~= nil do
-                if myclass.base == cl then
+            while myclass.__base ~= nil do
+                if myclass.__base == cl then
                     return cl
                 else
-                    myclass = myclass.base
+                    myclass = myclass.__base
                 end
             end
         end
@@ -326,7 +326,7 @@ function class.subclassof(myclass, ...)
 end
 
 function class.super(object)
-    return object.base
+    return object.__base
 end
 
 --deprecated
@@ -379,7 +379,7 @@ for i, cl in ipairs({
 
         -- attempt to find the key in the AccessorTable of the base of the class
         -- that the AccessorTable is attached to
-        local base = self.__accessing.base
+        local base = self.__accessing.__base
 
         if base then
             return base[accessor][key]

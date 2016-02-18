@@ -9,7 +9,7 @@ local TileMap = class.define(lass.Component, function(self, arguments)
 	arguments.map = arguments.map or {}
 	arguments.tileSize = geometry.Vector2(arguments.tileSize)
 	arguments.tiles = arguments.tiles or {}
-	self.base.init(self, arguments)
+	self.__base.init(self, arguments)
 end)
 
 function TileMap:awake()

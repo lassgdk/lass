@@ -20,7 +20,7 @@ local PlayerInput = class.define(lass.Component, function(self, arguments)
 	arguments.resizeAmount = arguments.resizeAmount or 0
 
 	--call super constructor
-	self.base.init(self, arguments)
+	self.__base.init(self, arguments)
 
 	--hidden variables
 	self.rotationDirection = 0

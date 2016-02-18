@@ -23,7 +23,7 @@ local ShapeRenderer = class.define(Renderer, function(self, arguments)
 
 	arguments.mode = arguments.mode or "fill"
 
-	self.base.init(self, arguments)
+	self.__base.init(self, arguments)
 end)
 
 local function drawRectangle(self)

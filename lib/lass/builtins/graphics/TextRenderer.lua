@@ -13,13 +13,13 @@ local TextRenderer = class.define(Renderer, function(self, arguments)
 	arguments.offset = geometry.Vector2(arguments.offset)
 	arguments.shearFactor = geometry.Vector2(arguments.shearFactor)
 
-	self.base.init(self, arguments)
+	self.__base.init(self, arguments)
 end)
 
 function TextRenderer:awake()
 
 	self.font = love.graphics.newFont(self.fontSize)
-	self.base.awake(self)
+	self.__base.awake(self)
 end
 
 function TextRenderer:draw()

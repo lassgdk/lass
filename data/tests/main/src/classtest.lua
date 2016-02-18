@@ -44,20 +44,20 @@ local function testClassDefine(scene)
 end
 
 function classtest.testClassInheritance(scene)
-	--ensure that class inheritance (and self.base) works
+	--ensure that class inheritance (and self.__base) works
 
 	local Being = class.define()
 	local Animal = class.define(Being, function(self, legs)
 		-- print(self.legs)
-		-- print(self.base, self.base.init, self, self.init)
+		-- print(self.__base, self.__base.init, self, self.init)
 		-- assert(self.legs ~= 4)
 
 		self.legs = legs or 4
-		self.base.init(self)
+		self.__base.init(self)
 	end)
 	local Dog = class.define(Animal, function(self, legs, breed)
 		self.breed = breed or "unknown"
-		self.base.init(self, legs)
+		self.__base.init(self, legs)
 	end)
 
 	local pom = Dog(3, "pomeranian")

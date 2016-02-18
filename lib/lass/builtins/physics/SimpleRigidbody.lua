@@ -10,7 +10,7 @@ local SimpleRigidbody = class.define(lass.Component, function(self, arguments)
 	arguments.velocity = geometry.Vector2(arguments.velocity)
 
 	self.collisions = {}
-	self.base.init(self, arguments)
+	self.__base.init(self, arguments)
 end)
 
 local function checkCollisions(gameObject, oldPositions, moveBy, alwaysFailOnCollision)

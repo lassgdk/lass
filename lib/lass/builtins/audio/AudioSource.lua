@@ -13,7 +13,7 @@ local AudioSource = class.define(lass.Component, function(self, arguments)
 	arguments.streaming = arguments.streaming or false
 	arguments.maxInstances = operators.nilOr(arguments.maxInstances, 1)
 
-	self.base.init(self, arguments)
+	self.__base.init(self, arguments)
 end)
 
 -- function instancesToSteal(self, num)

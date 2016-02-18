@@ -628,7 +628,7 @@ function GameObject:update(dt, firstUpdate)
 		end
 	end
 
-	self.base.update(self, dt, firstUpdate)
+	self.__base.update(self, dt, firstUpdate)
 end
 
 function GameObject:draw()
@@ -650,7 +650,7 @@ function GameObject:addChild(child)
 	if class.instanceof(child.parent, GameObject) then
 		child.parent:removeChild(child)
 	end
-	self.base.addChild(self, child)
+	self.__base.addChild(self, child)
 end
 
 function GameObject:addComponent(component, callAwake)
@@ -776,7 +776,7 @@ for i, f in ipairs({
 			end
 		end
 		if super then
-			self.base[f](self, ...)
+			self.__base[f](self, ...)
 		end
 	end
 end
@@ -796,7 +796,7 @@ for i, f in ipairs({"mousepressed", "mousereleased"}) do
 				component[f](component, x, y, button, r)
 			end
 		end
-		self.base[f](self, x, y, button)
+		self.__base[f](self, x, y, button)
 	end
 end
 
@@ -1211,7 +1211,7 @@ function GameScene:removeGameObject(gameObject, removeDescendants)
 	end
 
 	gameObject.gameScene = nil
-	self.base.removeChild(self, child, removeDescendants)
+	self.__base.removeChild(self, child, removeDescendants)
 
 	if removeDescendants == true then
 		for i, child in ipairs(gameObject.children) do
@@ -1232,7 +1232,7 @@ function GameScene:update(dt)
 		-- debug.log("============================")
 		-- maintainTransform(self)
 		-- debug.log("updating SimpleRigidbody")
-		self.base.update(self, dt * self.timeScale, self.frame)
+		self.__base.update(self, dt * self.timeScale, self.frame)
 
 		self.globals.events.physicsPreUpdate:play(self)
 		self.globals.physicsWorld:update(dt * self.timeScale)
