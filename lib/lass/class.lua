@@ -6,6 +6,8 @@
 require("lass.stdext")
 local class = {}
 
+-- currently used to prevent running genericget if these keys are undefined,
+-- and to prevent these keys being passed to the AccessorTable constructor
 local reserved = {
     __base = true,
     __class = true,
@@ -14,7 +16,8 @@ local reserved = {
     __protected = true,
 }
 
---keys that we should not attempt to find in an AccessorTable
+-- keys that we should not attempt to find or set in an AccessorTable through
+-- normal means
 local accessorReserved = {
     init = true,
     __accessing = true,
@@ -150,7 +153,7 @@ local function defineClass(base, init, noAccessors)
             else
                 -- next, we check if the key is "__class"
                 if key == "__class" then
-                    return c
+                    return getmetatable(self)
                 end
 
                 -- next, we attempt to find the key on the class itself.
@@ -186,6 +189,8 @@ local function defineClass(base, init, noAccessors)
                 else
                     rawset(self, key, value)
                 end
+            elseif key == "__class" then
+                setmetatable(self, value)
             else
                 rawset(self, key, value)
             end
