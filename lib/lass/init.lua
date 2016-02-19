@@ -375,7 +375,8 @@ local function getComponents(self, componentType, num)
 
 	found = {}
 	for i, component in ipairs(self.components) do
-		if component:instanceof(componentType) then
+		-- if component:instanceof(componentType) then
+		if class.instanceof(component, componentType) then
 			found[#found + 1] = component
 		end
 		if num and #found >= num then

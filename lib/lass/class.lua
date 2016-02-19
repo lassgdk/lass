@@ -23,7 +23,6 @@ local accessorReserved = {
     __accessing = true,
     __base = true,
     __class = true,
-    instanceof = true,
 }
 
 local function isCallable(v)
@@ -208,18 +207,18 @@ local function defineClass(base, init, noAccessors)
         end
     end
 
-    c.instanceof = function(self, ...)
+    -- c.instanceof = function(self, ...)
 
-        for i, cl in ipairs({...}) do 
-            local m = getmetatable(self)
-            while m do 
-                if m == cl then return cl end
-                m = m.__base
-            end
-        end
+    --     for i, cl in ipairs({...}) do 
+    --         local m = getmetatable(self)
+    --         while m do 
+    --             if m == cl then return cl end
+    --             m = m.__base
+    --         end
+    --     end
 
-        return false
-    end
+    --     return false
+    -- end
 
     setmetatable(c, class.metaclass)
     c.init = init
@@ -293,7 +292,24 @@ function class.instanceof(object, ...)
     --     return false
     -- end
 
-    return type(object) == "table" and object.instanceof and object:instanceof(...)
+    if type(object) ~= "table" then
+        return false
+    end
+
+    local objectClass = object.__class
+
+    if objectClass then
+        for i, cl in ipairs({...}) do 
+            while objectClass do 
+                if objectClass == cl then return cl end
+                objectClass = objectClass.__base
+            end
+
+            objectClass = object.__class
+        end
+    end
+
+    return false
 end
 
 function class.subclassof(myclass, ...)

@@ -88,11 +88,10 @@ function classtest.testInstanceOf(scene)
 	local a = Animal()
 	local dog = Dog()
 
-	assert(a.instanceof, "class instance missing instanceof method")
-	assert(a:instanceof(Animal), "a should be instance of Animal class, but isn't")
+	assert(class.instanceof(a, Animal), "a should be instance of Animal class, but isn't")
 
-	assert(dog:instanceof(Dog), "dog should be instance of Dog class, but isn't")
-	assert(dog:instanceof(Animal), "dog should be instance of Animal super class, but isn't")
+	assert(class.instanceof(dog, Dog), "dog should be instance of Dog class, but isn't")
+	assert(class.instanceof(dog, Animal), "dog should be instance of Animal super class, but isn't")
 
 	local Plant = class.define()
 

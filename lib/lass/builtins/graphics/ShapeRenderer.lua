@@ -72,11 +72,15 @@ function ShapeRenderer:draw()
 	love.graphics.setColor(self.color)
 	love.graphics.setLineWidth(1)
 
-	if self.shape:instanceof(geometry.Rectangle) and self.gameObject.globalTransform.rotation == 0 then
-		drawRectangle(self)
-	elseif class.instanceof(self.shape, geometry.Rectangle, geometry.Polygon) then
+	if class.instanceof(self.shape, geometry.Rectangle) then
+		if self.gameObject.globalTransform.rotation == 0 then
+			drawRectangle(self)
+		else
+			drawPolygon(self)
+		end
+	elseif class.instanceof(self.shape, geometry.Polygon) then
 		drawPolygon(self)
-	elseif self.shape:instanceof(geometry.Circle) then
+	elseif class.instanceof(self.shape, geometry.Circle) then
 		drawCircle(self)
 	end
 end
