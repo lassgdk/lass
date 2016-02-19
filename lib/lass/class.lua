@@ -24,7 +24,6 @@ local accessorReserved = {
     __base = true,
     __class = true,
     instanceof = true,
-    is = true
 }
 
 local function isCallable(v)
@@ -220,21 +219,6 @@ local function defineClass(base, init, noAccessors)
         end
 
         return false
-    end
-
-    c.is = function(self, other)
-
-        if self ~= other then
-            return false
-        end
-
-        local __eq = c.__eq
-        c.__eq = nil
-
-        local r = self == other
-
-        c.__eq = __eq
-        return r
     end
 
     setmetatable(c, class.metaclass)
