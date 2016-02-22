@@ -37,37 +37,33 @@ function PlayerInput:update(dt)
 		self.gameObject:rotate(dt * -self.rotationSpeed)
 	end
 
-	-- debug.log(self.gameObject.globalTransform.position, self.gameObject.name)
-
 end
 
-function PlayerInput:mousepressed(x, y, button)
+function PlayerInput:mousepressed(x, y, button, clickedOnSelf)
 
-	if button ~= "l" and button ~= "r" then
-		if button == "wu" and self.resizeAmount and self.resizeAmount ~= 0 then
-			self.gameObject:resize(self.resizeAmount, self.resizeAmount, 0)
-		elseif button == "wd" and self.resizeAmount and self.resizeAmount ~= 0 then
-			self.gameObject:resize(-self.resizeAmount, -self.resizeAmount, 0)
-		end
-		return
-	end
-
-	local collider = self.gameObject:getComponent(Collider)
-	if collider:isCollidingWith(geometry.Vector2(x,-y)) then
-
-		if button == "l" then
+	if clickedOnSelf then
+		if button == 1 then
 			if self.rotationDirection == -1 then
 				self.rotationDirection = 0
 			else
 				self.rotationDirection = -1
 			end
-		elseif button == "r" then
+		elseif button == 2 then
 			if self.rotationDirection == 1 then
 				self.rotationDirection = 0
 			else
 				self.rotationDirection = 1
 			end
 		end
+	end
+end
+
+function PlayerInput:wheelmoved(x, y)
+
+	if y > 0 and self.resizeAmount ~= 0 then
+		self.gameObject:resize(self.resizeAmount, self.resizeAmount, 0)
+	elseif y < 0 and self.resizeAmount ~= 0 then
+		self.gameObject:resize(-self.resizeAmount, -self.resizeAmount, 0)
 	end
 end
 

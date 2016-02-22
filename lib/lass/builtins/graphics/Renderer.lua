@@ -43,7 +43,8 @@ function Renderer:resetCanvas()
 	if love.graphics.getCanvas() ~= cnv then
 		local r,g,b = love.graphics.getBackgroundColor()
 		love.graphics.setCanvas(cnv)
-		cnv:clear(r,g,b)
+		-- cnv:clear(r,g,b)
+		love.graphics.clear(r,g,b)
 	end
 end
 

@@ -31,7 +31,7 @@ return {
         },
         conditions = {
           event = "mousepressed",
-          button = "l",
+          button = 1,
           clickedOnSelf = true,
         },
         targetArguments = {{0}}

@@ -351,7 +351,8 @@ for i, f in ipairs({
 	"windowresize",
 	"textinput",
 	"threaderror",
-	"visible"
+	"visible",
+	"wheelmoved"
 }) do
 	GameEntity[f] = function(self, ...)
 		for i, child in ipairs(self.children) do
@@ -760,6 +761,7 @@ for i, f in ipairs({
 	"textinput",
 	"threaderror",
 	"visible",
+	"wheelmoved",
 
 	{"collisionenter", false},
 	{"collisionexit", false}
@@ -790,7 +792,7 @@ for i, f in ipairs({"mousepressed", "mousereleased"}) do
 
 		local c = self:getComponent(Collider)
 		local ySign = self.gameScene.globals.ySign
-		local r = c ~= nil and c.clickable and c:isCollidingWith(geometry.Vector2(x, y * ySign))
+		local r = c ~= nil and (c.clickable == true) and c:isCollidingWith(geometry.Vector2(x, y * ySign))
 
 		for i, component in ipairs(self.components) do
 			if component[f] then

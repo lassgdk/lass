@@ -20,7 +20,8 @@ return {
     {
       script = "lass.builtins.physics.Collider",
       arguments = {
-        shapeSource = {"gameObject", "getComponent", "lass.builtins.graphics.Renderer"}
+        shapeSource = {"gameObject", "getComponent", "lass.builtins.graphics.Renderer"},
+        clickable = true,
       }
     },
     {

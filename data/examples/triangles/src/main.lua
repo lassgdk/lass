@@ -30,7 +30,8 @@ for i, f in ipairs({
 	"resize",
 	"textinput",
 	"threaderror",
-	"visible"
+	"visible",
+	"wheelmoved"
 }) do
 	if f == "resize" then
 		love[f] = function(...)

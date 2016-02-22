@@ -49,10 +49,8 @@ function class.metaclass:__call(...)
     local object = {}
     setmetatable(object, self)
 
-
     self.init(object, ...)
     return object
-
 end
 
 function class.metaclass:__index(key)
@@ -113,7 +111,6 @@ local function defineClass(base, init, noAccessors)
                 if m then
                     setmetatable(c[k], m)
                 end
-            -- elseif k == "__protected" or k == "__get" or k == "__set" then
             elseif k == "__protected" then
                 for k2,v2 in pairs(v) do
                     c[k][k2] = v2
