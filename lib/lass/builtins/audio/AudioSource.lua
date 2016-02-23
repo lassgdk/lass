@@ -160,7 +160,7 @@ function AudioSource.events.physicsPostUpdate.play(self)
 
 	for i, instanceID in ipairs(self.instanceQueue) do
 		local instance = self._instances[instanceID]
-		if instance.target then
+		if instance.target and instance.source:getChannels() == 1 then
 			local position = instance.target.globalTransform.position
 			instance.source:setPosition(position.x, position.y * self.globals.ySign)
 		end
