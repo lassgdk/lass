@@ -9,8 +9,10 @@ local TextRenderer = class.define(Renderer, function(self, arguments)
 	local text = operators.nilOr(arguments.text, "")
 	arguments.text = nil
 	arguments.color = arguments.color or {0,0,0}
+	arguments.box = operators.nilOr(arguments.box, geometry.Rectangle(100, 100))
+	-- arguments.boxSize = geometry.Vector2(operators.nilOr(arguments.boxSize, {x=100, y=100})
 	arguments.fontSize = arguments.fontSize or 18
-	arguments.boxWidth = arguments.boxWidth or 1000
+	-- arguments.boxWidth = arguments.boxWidth or 1000
 	arguments.align = arguments.align or "left"
 	arguments.offset = geometry.Vector2(arguments.offset)
 	arguments.shearFactor = geometry.Vector2(arguments.shearFactor)
@@ -45,7 +47,7 @@ end
 function TextRenderer.__set.text(self, value)
 
 	self._text = value
-	getTextObject(self):setf(value, self.boxWidth, self.align)
+	getTextObject(self):setf(value, self.box.width, self.align)
 end
 
 function TextRenderer:awake()
@@ -58,38 +60,30 @@ end
 function TextRenderer:draw()
 
 	local gt = self.gameObject.globalTransform
+	local size = gt.size
 	local r = math.rad(gt.rotation)
 	local ySign = self.globals.ySign
+
+	--set size to 1, so we can use the draw function for scaling.
+	--note that globalTransform is accessed via a getter, so modifying it
+	--isn't permanent
+	gt.size = geometry.Vector3(1,1,1)
+	local rect = self.box:globalRectangle(gt)
 
 	self:resetCanvas()
 	love.graphics.setColor(self.color)
 	love.graphics.draw(
 		self._textObject,
-		gt.position.x,
-		gt.position.y * ySign,
+		rect.position.x,
+		rect.position.y * ySign,
 		r,
-		gt.size.x,
-		gt.size.y,
-		-self.offset.x + self.boxWidth/2,
-		-self.offset.y * ySign,
+		size.x,
+		size.y,
+		rect.width/2,-- 0,
+		-rect.height/2 * ySign,
 		self.shearFactor.x,
 		self.shearFactor.y
 	)
-	-- love.graphics.setFont(self._font)
-	-- love.graphics.printf(
-	-- 	self.text,
-	-- 	gt.position.x,
-	-- 	gt.position.y * ySign,
-	-- 	self.boxWidth,
-	-- 	self.align,
-	-- 	r,
-	-- 	gt.size.x,
-	-- 	gt.size.y,
-	-- 	-self.offset.x + self.boxWidth/2,
-	-- 	-self.offset.y * ySign,
-	-- 	self.shearFactor.x,
-	-- 	self.shearFactor.y
-	-- )
 end
 
 return TextRenderer

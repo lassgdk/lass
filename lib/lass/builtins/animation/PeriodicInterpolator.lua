@@ -22,7 +22,8 @@ arguments (optional):
 		example 2: {"gameObject", "getComponent", "MyComponent", "myvar"}
 	amplitude (number, default=1) - amplitude by which to multiply Y
 	offset (Vector2, default={0,0}) - the amounts to add to X and Y
-	sampleLength - the highest possible value of X (minus offset.x). can be infinite.
+	sampleLength (number, default=math.pi*2) - the highest possible value of X (minus offset.x). can
+	    be infinite.
 	period (number, default=1) - duration of the interpolation in seconds.
 		or, if sampleLength is infinite, rate at which X increases.
 ]]
