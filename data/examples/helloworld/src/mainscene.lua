@@ -8,7 +8,7 @@ return {settings = {
     transform = {
       position = {
         x = 160,
-        y = -10,
+        y = -40,
       }
     },
     components = {
