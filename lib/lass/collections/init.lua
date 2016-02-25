@@ -1,8 +1,8 @@
 class = require("lass.class")
 
---[[list functions]]
+local collections = {}
 
-local function index(list, value, keyfunc)
+function collections.index(list, value, keyfunc)
 	--find first index of value in an ordered list
 
 	for i, entity in ipairs(list) do
@@ -12,7 +12,7 @@ local function index(list, value, keyfunc)
 	end
 end
 
-local function indices(list, value, keyfunc)
+function collections.indices(list, value, keyfunc)
 	--find all indices of value in an ordered list
 
 	local indices = nil
@@ -30,7 +30,7 @@ local function indices(list, value, keyfunc)
 	return indices
 end
 
-local function copy(t, firstIndex, lastIndex)
+function collections.copy(t, firstIndex, lastIndex)
 	--shallow copy
 
 	if type(t) == "table" then
@@ -54,14 +54,16 @@ local function copy(t, firstIndex, lastIndex)
 	end
 end
 
-local function deepcopy(t, found)
+function collections.deepcopy(t, found)
 	--recursive deepcopy (avoid using for very large/deep tables)
 	--circular references will not be copied
 
 	if type(t) == "table" then
 
-		if not found or not index(found, t) then
-			found = copy(found) or {}
+		if not found or not collections.index(found, t) then
+			--use a copy of found, to prevent the original being altered down
+			--the stack
+			found = collections.copy(found) or {}
 			found[#found + 1] = t
 
 			local _copy = {}
@@ -78,7 +80,7 @@ local function deepcopy(t, found)
 					_copy[k] = v
 				-- else, deep copy it
 				else
-					_copy[k] = deepcopy(v, found)
+					_copy[k] = collections.deepcopy(v, found)
 				end
 			end
 
@@ -92,7 +94,7 @@ local function deepcopy(t, found)
 	end
 end
 
-local function map(func, list)
+function collections.map(func, list)
 
 	local mapped = {}
 	for i, v in ipairs(list) do
@@ -102,7 +104,7 @@ local function map(func, list)
 	return mapped
 end
 
-local function range(start, stop, skip)
+function collections.range(start, stop, skip)
 
 	skip = skip or 1
 	list = {}
@@ -155,17 +157,17 @@ local function _get(object, calculateValue, ...)
 	end
 end
 
-local function get(object, ...)
+function collections.get(object, ...)
 
 	return _get(object, true, ...)
 end
 
-local function getkey(object, ...)
+function collections.getkey(object, ...)
 
 	return _get(object, false, ...)
 end
 
-local function set(l)
+function collections.set(l)
 
 	s = {}
 	for i, v in ipairs(l) do
@@ -175,7 +177,7 @@ local function set(l)
 	return s
 end
 
-local function keys(t)
+function collections.keys(t)
 
 	local _keys = {}
 
@@ -186,23 +188,11 @@ local function keys(t)
 	return _keys
 end
 
-local function random(l)
+function collections.random(l)
 
 	if #l then
 		return l[math.random(1, #l)]
 	end
 end
 
-return {
-	copy = copy,
-	deepcopy = deepcopy,
-	index = index,
-	indices = indices,
-	range = range,
-	map = map,
-	set = set,
-	get = get,
-	getkey = getkey,
-	keys = keys,
-	random = random
-}
+return collections

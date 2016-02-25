@@ -1,6 +1,7 @@
 local lass = require("lass")
 local class = require("lass.class")
 local geometry = require("lass.geometry")
+local collections = require("lass.collections")
 local operators = require("lass.operators")
 local Renderer = require("lass.builtins.graphics.Renderer")
 
@@ -14,6 +15,7 @@ local TextRenderer = class.define(Renderer, function(self, arguments)
 	arguments.fontSize = arguments.fontSize or 18
 	-- arguments.boxWidth = arguments.boxWidth or 1000
 	arguments.align = arguments.align or "left"
+	arguments.hideOverflow = operators.nilOr(arguments.hideOverflow, true)
 	arguments.offset = geometry.Vector2(arguments.offset)
 	arguments.shearFactor = geometry.Vector2(arguments.shearFactor)
 
@@ -47,14 +49,17 @@ end
 function TextRenderer.__set.text(self, value)
 
 	self._text = value
+	if self.hideOverflow then
+		local _, lines = getFont(self):getWrap(value, self.box.width)
+		local lineHeight = getFont(self):getHeight()
+		local maxLines = self.box.height / lineHeight
+		
+		if #lines > maxLines then
+			value = string.join("\n", collections.copy(lines, 1, maxLines))
+			debug.log(value)
+		end
+	end
 	getTextObject(self):setf(value, self.box.width, self.align)
-end
-
-function TextRenderer:awake()
-
-	-- self._font = love.graphics.newFont(self.fontSize)
-	-- self._textObject = love.graphics.newText()
-	self.__base.awake(self)
 end
 
 function TextRenderer:draw()

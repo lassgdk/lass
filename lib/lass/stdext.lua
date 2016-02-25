@@ -112,3 +112,18 @@ math.round = function(num, idp)
     	return math.ceil(num * mult - 0.5) / mult
     end
 end
+
+string.join = function(j, list)
+
+	local joined = ""
+
+	for i, s in ipairs(list) do
+		if i > 1 then
+			joined = joined .. j .. s
+		else
+			joined = joined .. s
+		end
+	end
+
+	return joined
+end
