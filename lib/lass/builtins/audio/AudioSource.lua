@@ -6,28 +6,19 @@ local geometry = require("lass.geometry")
 
 local AudioSource = class.define(lass.Component, function(self, arguments)
 
-	-- arguments.source = love.audio.newSource(
-	-- 	arguments.filename or "", arguments.sourceType or "static"
-	-- )
-	arguments.autoplay = operators.nilOr(arguments.autoplay, false)
-	arguments.streaming = arguments.streaming or false
-	arguments.maxInstances = operators.nilOr(arguments.maxInstances, 1)
+	-- create the Source instances before setting any further properties
+	self.filename = arguments.filename
+	self.streaming = operators.nilOr(arguments.streaming, false)
+	self.maxInstances = operators.nilOr(arguments.maxInstances, 1)
 
-	local volume = operators.nilOr(arguments.volume, 1)
-	local minVolume = operators.nilOr(arguments.minVolume, 0)
-	local maxVolume = operators.nilOr(arguments.maxVolume, 1)
-	local looping = operators.nilOr(arguments.looping, false)
-	arguments.volume = nil
-	arguments.minVolume = nil
-	arguments.maxVolume = nil
-	arguments.looping = nil
+	arguments.autoplay = operators.nilOr(arguments.autoplay, false)
+	arguments.volume = operators.nilOr(arguments.volume, 1)
+	arguments.minVolume = operators.nilOr(arguments.minVolume, 0)
+	arguments.maxVolume = operators.nilOr(arguments.maxVolume, 1)
+	arguments.looping = operators.nilOr(arguments.looping, false)
 
 	self.__base.init(self, arguments)
 
-	self.minVolume = minVolume
-	self.maxVolume = maxVolume
-	self.volume = volume
-	self.looping = looping
 end)
 
 local function newInstance(self, instance)
@@ -186,7 +177,6 @@ end
 
 function AudioSource.__get.minVolume(self)
 
-	debug.log(self._instances[self.instanceQueue[1]])
 	local min = self._instances[self.instanceQueue[1]].source:getVolumeLimits()
 	return min
 end
@@ -201,6 +191,16 @@ function AudioSource:getVolumeLimits(self)
 	--at least as fast as getting min and max individually
 
 	return self._instances[self.instanceQueue[1]].source:getVolumeLimits()
+end
+
+function AudioSource.__get.pitch(self)
+
+	return self._pitch
+end
+
+function AudioSource:getPitchOffset(instanceID)
+
+	return operators.nilOr(self._instances[instanceID].pitchOffset, 0)
 end
 
 --[[
@@ -251,6 +251,23 @@ function AudioSource:setVolumeLimits(self, min, max)
 		instance = self._instances[instanceID]
 		instance.source:setVolumeLimits(min, max)
 	end
+end
+
+function AudioSource.__set.pitch(self, value)
+
+	self._pitch = value
+
+	for i, instanceID in ipairs(self.instanceQueue) do
+		local offset = self:getPitchOffset(instanceID)
+		self._instances[instanceID].source:setPitch(offset + value)
+	end
+end
+
+function AudioSource:setPitchOffset(instanceID, offset)
+
+	local instance = self._instances[instanceID]
+	instance.pitchOffset = offset
+	instance.source:setPitch(offset + self.pitch)
 end
 
 --[[
