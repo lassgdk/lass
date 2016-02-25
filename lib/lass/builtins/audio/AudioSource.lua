@@ -13,19 +13,22 @@ local AudioSource = class.define(lass.Component, function(self, arguments)
 	arguments.streaming = arguments.streaming or false
 	arguments.maxInstances = operators.nilOr(arguments.maxInstances, 1)
 
+	local volume = operators.nilOr(arguments.volume, 1)
+	local minVolume = operators.nilOr(arguments.minVolume, 0)
+	local maxVolume = operators.nilOr(arguments.maxVolume, 1)
+	local looping = operators.nilOr(arguments.looping, false)
+	arguments.volume = nil
+	arguments.minVolume = nil
+	arguments.maxVolume = nil
+	arguments.looping = nil
+
 	self.__base.init(self, arguments)
+
+	self.minVolume = minVolume
+	self.maxVolume = maxVolume
+	self.volume = volume
+	self.looping = looping
 end)
-
--- function instancesToSteal(self, num)
-
--- 	--self._instances is a queue, with the least recently played (or never played) at the top
--- 	instances = {}
--- 	for i = 1, num do
--- 		instances[i] = self._instances[i]
--- 	end
-
--- 	return instances
--- end
 
 local function newInstance(self, instance)
 
@@ -181,6 +184,25 @@ function AudioSource:getVolumeOffset(instanceID)
 	return operators.nilOr(self._instances[instanceID].volumeOffset, 0)
 end
 
+function AudioSource.__get.minVolume(self)
+
+	debug.log(self._instances[self.instanceQueue[1]])
+	local min = self._instances[self.instanceQueue[1]].source:getVolumeLimits()
+	return min
+end
+
+function AudioSource.__get.maxVolume(self)
+
+	local _, max = self._instances[self.instanceQueue[1]].source:getVolumeLimits()
+	return max
+end
+
+function AudioSource:getVolumeLimits(self)
+	--at least as fast as getting min and max individually
+
+	return self._instances[self.instanceQueue[1]].source:getVolumeLimits()
+end
+
 --[[
 level setters
 ]]
@@ -202,17 +224,62 @@ function AudioSource:setVolumeOffset(instanceID, offset)
 	instance.source:setVolume(offset + self.volume)
 end
 
+function AudioSource.__set.minVolume(self, value)
+
+	local instance
+	for i, instanceID in ipairs(self.instanceQueue) do
+		instance = self._instances[instanceID]
+		instance.source:setVolumeLimits(value, self.maxVolume)
+	end
+end
+
+function AudioSource.__set.maxVolume(self, value)
+
+	local instance
+	for i, instanceID in ipairs(self.instanceQueue) do
+		instance = self._instances[instanceID]
+		instance.source:setVolumeLimits(self.minVolume, value)
+	end
+end
+
+function AudioSource:setVolumeLimits(self, min, max)
+	--faster than individually setting min and max, as long as you're changing
+	--both
+
+	local instance
+	for i, instanceID in ipairs(self.instanceQueue) do
+		instance = self._instances[instanceID]
+		instance.source:setVolumeLimits(min, max)
+	end
+end
+
+--[[
+misc getters
+]]
+
+function AudioSource.__get.looping(self)
+	return self._instances[self.instanceQueue[1]].source:isLooping()
+end
+
+--[[
+misc setters
+]]
+
+function AudioSource.__set.looping(self, value)
+
+	local instance
+	for i, instanceID in ipairs(self.instanceQueue) do
+		instance = self._instances[instanceID]
+		instance.source:setLooping(value)
+	end
+end
+
 --[[
 property getters
 ]]
 
-function AudioSource.__get.static(self)
-	return self._instances[self.instanceQueue[1]]:isStatic()
-end
-AudioSource.__set.static = nil
-
 function AudioSource.__get.numChannels(self)
-	return self._instances[self.instanceQueue[1]]:channels()
+	return self._instances[self.instanceQueue[1]].source:channels()
 end
 AudioSource.__set.numChannels = nil
 
