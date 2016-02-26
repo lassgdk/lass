@@ -1,0 +1,3 @@
+return {
+	message = "hello world"
+}

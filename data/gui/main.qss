@@ -1,0 +1,60 @@
+QWidget[objectName="gameObjectTreeContainer"] {
+	min-width: 200px;
+}
+
+QTreeView {
+	font-size: 11pt;
+}
+
+QTreeView::branch:selected{
+	background-color: rgb(245, 77, 175);
+}
+
+QTreeView::branch:has-children:closed {
+	image: url(:img/branch-closed.png);
+}
+
+QTreeView::branch:has-children:open {
+	image: url(:img/branch-open.png);
+}
+
+QTreeView::item:selected {
+	background-color: rgba(240, 0, 140, 70%);
+	color: white;
+}
+
+QTreeView QLineEdit {
+	selection-background-color: rgb(245, 77, 175);
+	color: white;
+}
+/*
+QTreeView[dragging="true"]::item:selected {
+	background-color: rgba(245, 77, 175, 50%);
+}*/
+
+QToolButton[objectName="createGameObjectButton"],
+QPushButton[objectName="deleteGameObjectButton"],
+QToolButton[objectName="createGameObjectButtonOptions"] {
+	min-height: 30px;
+	max-height: 30px;
+}
+
+QPushButton[objectName="deleteGameObjectButton"] {
+	min-width: 30px;
+	max-width: 30px;
+}
+
+QToolButton[objectName="createGameObjectButton"] {
+	min-width: 40px;
+	max-width: 40px;
+}
+
+QFrame[objectName="inspector"],
+QFrame[objectName="gameObjectTree"] {
+	border: 1px solid #aaa;
+}
+
+/*QToolButton[objectName="createGameObjectButton"]::menu-button {
+    width: 20px;
+}
+*/

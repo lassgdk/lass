@@ -95,7 +95,7 @@ os.chdir("data")
 DATA_FILES =\
 	reduce(lambda a,b: a + b, [
 		listAll(x, True, DIR_LASS_DATA, "data") for x in (
-			"examples", "engine", "templates", "docs", "tests"
+			"examples", "engine", "templates", "docs", "tests", "gui"
 		)
 	])
 
@@ -137,7 +137,7 @@ if sys.platform.startswith("win32"):
 	if struct.calcsize("P") == 4:
 		options["py2exe"] = {'bundle_files': 1, 'compressed': True}
 else:
-	scripts = [os.path.join("bin", "lasspm")]
+	scripts = [os.path.join("bin", "lasspm"), os.path.join("bin", "lass")]
 	console = []
 
 setup(
@@ -146,8 +146,8 @@ setup(
 	author = "Decky Coss",
 	author_email = "coss@cosstropolis.com",
 	description = "A modular development kit for 2D videogames.",
-	packages = ["lass"],
-	install_requires = ["jinja2", "lupa"],
+	packages = ["lass", "lass.gui", "lass.gui.ui"],
+	install_requires = ["jinja2", "lupa", "six"],
 	scripts = scripts,
 	console = console,
 	data_files = DATA_FILES,
