@@ -56,7 +56,6 @@ function TextRenderer.__set.text(self, value)
 		
 		if #lines > maxLines then
 			value = string.join("\n", collections.copy(lines, 1, maxLines))
-			debug.log(value)
 		end
 	end
 	getTextObject(self):setf(value, self.box.width, self.align)

@@ -29,3 +29,14 @@ def luaTableToDict(table, runtime=None):
 				d["__metatable"] = luaTableToDict(mt, runtime)
 
 	return d
+
+def ipairs(table):
+
+	i = 1
+	node = table[i]
+
+	while node:
+		yield i, node
+
+		i += 1
+		node = table[i]

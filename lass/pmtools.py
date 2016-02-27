@@ -19,65 +19,19 @@
 
 from __future__ import print_function, unicode_literals
 import os, sys, shutil, zipfile, subprocess
-try:
-	import ConfigParser as configparser
-except:
-	import configparser
-import lupa
-from lass import luatools, six
+from distutils import sysconfig
+import lupa, six
+import luatools
 
 #set a bunch of global constants
 
-#load config file
-#if on windows, look in directory where lasspm lives
-if sys.platform == "win32":
-	# XDG_CONFIG_HOME = os.path.dirname(os.path.realpath(__file__))
-	DIR_LASS_CONF = os.path.dirname(os.path.realpath(sys.argv[0]))
-#else, look in the $HOME directory
+if getattr(sys, 'frozen', False):
+	# The application is frozen
+	DIR_LASS_DATA = os.path.join(os.path.dirname(sys.executable))
 else:
-	try:
-		XDG_CONFIG_HOME = os.environ["XDG_CONFIG_HOME"]
-	except KeyError:
-		XDG_CONFIG_HOME = os.path.join(os.environ["HOME"], ".config")
-	DIR_LASS_CONF = os.path.join(XDG_CONFIG_HOME, "Lass")
-
-cparser = configparser.ConfigParser({
-	"DIR_LASS_DATA":"$XDG_DATA_HOME/Lass;$HOME/.local/share/Lass;$HOME/.Lass",
-	"DIR_PROJECTS":"$HOME/Documents/Lass"
-})
-if not cparser.read(os.path.join(DIR_LASS_CONF, "lassconf.ini")):
-	raise IOError(os.path.join(DIR_LASS_CONF, "lassconf.ini") + " could not be loaded")
-
-#if windows, assume everything lives in the program folder
-if sys.platform == "win32":
-	DIR_LASS_DATA = DIR_LASS_CONF
-	DIR_LASS_LIB = os.path.join(DIR_LASS_DATA, "lua", "5.1", "lass")
-	DIR_PROJECTS = os.path.join(DIR_LASS_DATA, "projects")
-	DIR_TEMP = os.path.join(DIR_LASS_DATA, "tmp")
-#else, set global variables from config file
-else:
-	# try:
-	# 	DIR_LASS_DATA = os.path.expandvars(cparser.get("path", "DIR_LASS_DATA"))
-	# 	os.listdir(DIR_LASS_DATA)
-	# except OSError:
-	# 	DIR_LASS_DATA = os.path.expandvars(cparser.get("path", "FB_DIR_LASS_DATA"))
-	# try:
-	# 	DIR_LASS_LIB = os.path.join(sys.prefix, "local", "share", "lua", "5.1", "lass")
-	# 	os.listdir(DIR_LASS_LIB)
-	# except OSError:
-	# 	DIR_LASS_LIB = os.path.join(DIR_LASS_DATA, "lua", "5.1", "lass")
-	for d in cparser.get("path", "DIR_LASS_DATA").split(";"):
-		d = os.path.expanduser(os.path.expandvars(d))
-		DIR_LASS_DATA = d
-		if os.path.exists(os.path.dirname(d)):
-			break
-
-	DIR_LASS_LIB = os.path.join(sys.prefix, "local", "share", "lua", "5.1", "lass")
-	if not os.path.exists(DIR_LASS_LIB):
-		DIR_LASS_LIB = os.path.join(DIR_LASS_DATA, "lua", "5.1", "lass")
-
-	DIR_PROJECTS = os.path.expandvars(cparser.get("path", "DIR_PROJECTS"))
-	DIR_TEMP = "/tmp"
+	# The application is not frozen
+	# Change this bit to match where you store your data files:
+	DIR_LASS_DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 
 DIR_ENGINE_WINDOWS = os.path.join(DIR_LASS_DATA, "engine", "windows")
 DIR_ENGINE_OSX = os.path.join(DIR_LASS_DATA, "engine", "osx")
@@ -85,39 +39,39 @@ DIR_EXAMPLES = os.path.join(DIR_LASS_DATA, "examples")
 DIR_TESTS = os.path.join(DIR_LASS_DATA, "tests")
 DIR_TEMPLATES_LUA = os.path.join(DIR_LASS_DATA, "templates", "lua")
 
-ID_WINDOWS = "w"
-ID_LINUX = "l"
-ID_OSX = "o"
+if sys.platform == "win32":
+	DIR_TEMP = os.path.join(DIR_LASS_DATA, "tmp")
+	DIR_LASS_LIB = os.path.join(DIR_LASS_DATA, "lua", "5.1", "lass")
+else:
+	DIR_TEMP = "/tmp"
+	DIR_LASS_LIB = os.path.join(sys.prefix, "local", "share", "lua", "5.1", "lass")
+	if not os.path.exists(DIR_LASS_LIB):
+		DIR_LASS_LIB = os.path.join(DIR_LASS_DATA, "lua", "5.1", "lass")
 
-# class ProjectManager(object):
 #main functions
 
-def buildGame(game, sendToTemp=False, projects=False, examples=False, tests=False, target="l"):
+def buildGame(game, sendToTemp=False, examples=False, tests=False, target="l"):
 	"""
 	build a .love file, plus optional binary distributions
 
 	args:
 		game: name of game project
 		sendToTemp: store compiled game in temp folder
-		projects: search for project in default projects folder (deprecated)
-		examples: search for project in examples folder, if not found in projects
+		examples: search for project in examples folder
 		tests: search for project in tests folder, if not found in examples
 		target: target platform--must be combination of w, l, o
 	"""
 
-	if not (projects or examples or tests):
+	if not (examples or tests):
 		if os.path.isabs(game):
 			projPath = game
 		else:
 			projPath = os.path.join(os.getcwd(), game)
-	#search for game in projects folder first, then examples
+	#search for game in examples folder first, then test
 	else:
 		if os.path.isabs(game):
-			# sys.exit("OS Error: Can't use -p or -e options with absolute path")
 			raise OSError("Can't use -e option with absolute path")
 		dirs = []
-		if projects:
-			dirs.append(DIR_PROJECTS)
 		if examples:
 			dirs.append(DIR_EXAMPLES)
 		if tests:
@@ -195,23 +149,22 @@ def buildGame(game, sendToTemp=False, projects=False, examples=False, tests=Fals
 
 	return os.path.abspath(os.path.join(buildPath, loveFileName))
 
-def newGame(game, projects=False):
+def newGame(game):
 	"""
 	create a new Lass project
 
 	args:
 		game: name of new project
-		projects: set location of new project to default projects folder
 	"""
 
-	if projects and game==".":
-		raise OSError(
-			"Cannot initiate project in %s - try supplying project name" % os.path.join(DIR_PROJECTS, game)
-		)
-	elif projects:
-		projPath = os.path.join(DIR_PROJECTS, game)
-	else:
-		projPath = os.path.abspath(game)
+	# if projects and game==".":
+	# 	raise OSError(
+	# 		"Cannot initiate project in %s - try supplying project name" % os.path.join(DIR_PROJECTS, game)
+	# 	)
+	# elif projects:
+	# 	projPath = os.path.join(DIR_PROJECTS, game)
+	# else:
+	projPath = os.path.abspath(game)
 
 	#make project directory
 	if game!=".":
@@ -238,8 +191,8 @@ def playGame(game, scene="", **kwargs):
 	temporarily build and play a Lass project
 
 	args:
-		projects: search for project in default projects folder
-		examples: search for project in examples folder, if not found in projects
+		scene: filename of scene to play
+		examples: search for project in examples folder
 	"""
 
 	game = buildGame(game, sendToTemp=True, **kwargs)
@@ -276,6 +229,7 @@ def loadScene(fileName):
 	else:
 		raise OSError("{} not found".format(fileName))
 
+	return scene.gameObjects
 	return _luaTableToObjectList(scene.gameObjects)
 
 #helper functions
@@ -284,7 +238,7 @@ def _luaTableToObjectList(table):
 
 	gameObjects = []
 
-	for node in table:
+	for node in luatoolstable:
 		o = {"data": {
 			"name": six.text_type(node.name) or "",
 			"components": luatools.luaTableToDict(node.components) or {},

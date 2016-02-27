@@ -358,7 +358,7 @@ class InspectorContainer(QtGui.QWidget):
         self.inspectorLayout.setContentsMargins(0, -1, -1, -1)
         self.inspectorLayout.setObjectName("inspectorLayout")
         self.label = QtGui.QLabel()
-        self.label.setText("Inspector")
+        self.label.setText("Object Editor")
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Maximum)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -373,5 +373,3 @@ class InspectorContainer(QtGui.QWidget):
         self.inspector.setObjectName("inspector")
         self.inspectorLayout.addWidget(self.inspector)
         self.verticalLayout_2.addLayout(self.inspectorLayout)
-
-        self.label.setText("Object Editor")
