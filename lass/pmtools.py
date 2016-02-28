@@ -45,272 +45,278 @@ else:
 	if not os.path.exists(DIR_LASS_LIB):
 		DIR_LASS_LIB = os.path.join(DIR_LASS_DATA, "lua", "5.1", "lass")
 
-#main functions
+class ProjectManager(object):
 
-def buildGame(game, sendToTemp=False, examples=False, tests=False, target="l"):
-	"""
-	build a .love file, plus optional binary distributions
+	#main functions
 
-	args:
-		game: name of game project
-		sendToTemp: store compiled game in temp folder
-		examples: search for project in examples folder
-		tests: search for project in tests folder, if not found in examples
-		target: target platform--must be combination of w, l, o
-	"""
+	def __init__(self, lua=None):
 
-	if not (examples or tests):
-		if os.path.isabs(game):
-			projPath = game
+		self.lua = lua or lupa.LuaRuntime(unpack_returned_tuples=True)
+
+	def buildGame(self, game, sendToTemp=False, examples=False, tests=False, target="l"):
+		"""
+		build a .love file, plus optional binary distributions
+
+		args:
+			game: name of game project
+			sendToTemp: store compiled game in temp folder
+			examples: search for project in examples folder
+			tests: search for project in tests folder, if not found in examples
+			target: target platform--must be combination of w, l, o
+		"""
+
+		if not (examples or tests):
+			if os.path.isabs(game):
+				projPath = game
+			else:
+				projPath = os.path.join(os.getcwd(), game)
+		#search for game in examples folder first, then test
 		else:
-			projPath = os.path.join(os.getcwd(), game)
-	#search for game in examples folder first, then test
-	else:
-		if os.path.isabs(game):
-			raise OSError("Can't use -e option with absolute path")
-		dirs = []
-		if examples:
-			dirs.append(DIR_EXAMPLES)
-		if tests:
-			dirs.append(DIR_TESTS)
-		projPath = findGame(game, dirs)
+			if os.path.isabs(game):
+				raise OSError("Can't use -e option with absolute path")
+			dirs = []
+			if examples:
+				dirs.append(DIR_EXAMPLES)
+			if tests:
+				dirs.append(DIR_TESTS)
+			projPath = self.findGame(game, dirs)
 
-	if not projPath:
-		raise OSError("Project not found")
+		if not projPath:
+			raise OSError("Project not found")
 
-	#in case game is '.', find the 'real' name
-	game = os.path.basename(os.path.abspath(projPath))
+		#in case game is '.', find the 'real' name
+		game = os.path.basename(os.path.abspath(projPath))
 
-	if sendToTemp:
-		buildPath = DIR_TEMP
+		if sendToTemp:
+			buildPath = DIR_TEMP
+			try:
+				os.listdir(DIR_TEMP)
+			except OSError:
+				os.mkdir(DIR_TEMP)
+		else:
+			buildPath = os.path.join(projPath, "build")
+
+		sourcePath = os.path.join(projPath, "src")
+
+		#make sure project exists and can be compiled
 		try:
-			os.listdir(DIR_TEMP)
-		except OSError:
-			os.mkdir(DIR_TEMP)
-	else:
-		buildPath = os.path.join(projPath, "build")
-
-	sourcePath = os.path.join(projPath, "src")
-
-	#make sure project exists and can be compiled
-	try:
-		if not "main.lua" in os.listdir(sourcePath):
-			raise OSError("Cannot find main.lua in project")
-	except OSError as e:
-		raise OSError("Cannot find " + sourcePath)
-
-	if not sendToTemp and not "build" in os.listdir(projPath):
-		os.mkdir(buildPath)
-
-	origDir = os.getcwd()
-
-	# projFiles = os.listdir(sourcePath)
-	projFiles = []
-	os.chdir(sourcePath)
-
-	for layer in os.walk("."):
-		pr = layer[0]
-		if pr == ".":
-			pr = ""
-
-		for d in layer[1]:
-			projFiles.append(os.path.join(pr, d))
-		for f in layer[2]:
-			projFiles.append(os.path.join(pr, f))
-
-	os.chdir(origDir)
-
-	loveFileName = game + ".love"
-
-	with zipfile.ZipFile(os.path.join(buildPath, loveFileName), mode='w') as loveFile:
-
-		#add project files
-		for f in projFiles:
-			if f != "build":
-				loveFile.write(os.path.join(sourcePath, f), f)
-
-		#add lass library
-		os.chdir(DIR_LASS_LIB)
-		for i, wtup in enumerate(os.walk(".")):
-			for j, f in enumerate(wtup[2]):
-				fullName = os.path.join(wtup[0], f)
-				loveFile.write(fullName, os.path.join("lass", fullName))
-
-	os.chdir(origDir)
-
-	if not sendToTemp:
-		if "w" in target:
-			buildExe(os.path.join(buildPath, loveFileName), dest=buildPath)
-		elif "o" in target:
-			buildApp(os.path.join(buildPath, loveFileName), dest=buildPath)
-
-	return os.path.abspath(os.path.join(buildPath, loveFileName))
-
-def newGame(game):
-	"""
-	create a new Lass project
-
-	args:
-		game: name of new project
-	"""
-
-	# if projects and game==".":
-	# 	raise OSError(
-	# 		"Cannot initiate project in %s - try supplying project name" % os.path.join(DIR_PROJECTS, game)
-	# 	)
-	# elif projects:
-	# 	projPath = os.path.join(DIR_PROJECTS, game)
-	# else:
-	projPath = os.path.abspath(game)
-
-	#make project directory
-	if game!=".":
-		try:
-			os.mkdir(projPath)
+			if not "main.lua" in os.listdir(sourcePath):
+				raise OSError("Cannot find main.lua in project")
 		except OSError as e:
-			raise OSError("OS Error: Cannot create directory %s" % projPath)
+			raise OSError("Cannot find " + sourcePath)
 
-	#make project subdirectories
-	os.chdir(projPath)
+		if not sendToTemp and not "build" in os.listdir(projPath):
+			os.mkdir(buildPath)
 
-	for folder in ["build", "include", "src"]:
-		try:
-			os.mkdir(folder)
-			print("Created {} folder".format(folder))
-		except OSError:
-			raise OSError("Could not create {} folder".format(folder))
+		origDir = os.getcwd()
 
-	for t in ["main.lua", "settings.lua", "scene_main.lua"]:
-		shutil.copy(os.path.join(DIR_TEMPLATES_LUA, t), "src")
+		# projFiles = os.listdir(sourcePath)
+		projFiles = []
+		os.chdir(sourcePath)
 
-def playGame(game, scene="", **kwargs):
-	"""
-	temporarily build and play a Lass project
+		for layer in os.walk("."):
+			pr = layer[0]
+			if pr == ".":
+				pr = ""
 
-	args:
-		scene: filename of scene to play
-		examples: search for project in examples folder
-	"""
+			for d in layer[1]:
+				projFiles.append(os.path.join(pr, d))
+			for f in layer[2]:
+				projFiles.append(os.path.join(pr, f))
 
-	game = buildGame(game, sendToTemp=True, **kwargs)
+		os.chdir(origDir)
 
-	# argString = ""
-	args = ["--scene=" + scene] if scene else []
+		loveFileName = game + ".love"
 
-	# os.system(getLoveEngineCommand().format(game, argString))
-	proc = subprocess.Popen(getLoveEngineCommand(game, args), stdout=subprocess.PIPE)
-	while proc.poll() == None:
-		out = proc.stdout.readline()
-		sys.stdout.write(out)
-		sys.stdout.flush()
+		with zipfile.ZipFile(os.path.join(buildPath, loveFileName), mode='w') as loveFile:
 
-	os.remove(game)
+			#add project files
+			for f in projFiles:
+				if f != "build":
+					loveFile.write(os.path.join(sourcePath, f), f)
 
-def newPrefab(fileName):
-	shutil.copy(
-		os.path.join(DIR_TEMPLATES_LUA, "prefab.lua"),
-		os.path.join("src", fileName)
-	)
+			#add lass library
+			os.chdir(DIR_LASS_LIB)
+			for i, wtup in enumerate(os.walk(".")):
+				for j, f in enumerate(wtup[2]):
+					fullName = os.path.join(wtup[0], f)
+					loveFile.write(fullName, os.path.join("lass", fullName))
 
-def loadScene(fileName):
+		os.chdir(origDir)
 
-	lua = lupa.LuaRuntime(unpack_returned_tuples=True)
-	lua.execute("t = loadfile('{}')".format(fileName))
-	scene = None
+		if not sendToTemp:
+			if "w" in target:
+				buildExe(os.path.join(buildPath, loveFileName), dest=buildPath)
+			elif "o" in target:
+				buildApp(os.path.join(buildPath, loveFileName), dest=buildPath)
 
-	if lua.globals().t:
-		try:
-			scene = lua.globals().t()
-		except lupa.LuaError as e:
-			raise e("Could not parse " + fileName)
-	else:
-		raise OSError("{} not found".format(fileName))
+		return os.path.abspath(os.path.join(buildPath, loveFileName))
 
-	return _luaTableToObjectList(scene.gameObjects, runtime)
+	def newGame(self, game):
+		"""
+		create a new Lass project
 
-#helper functions
+		args:
+			game: name of new project
+		"""
 
-def _luaTableToObjectList(table, runtime):
+		# if projects and game==".":
+		# 	raise OSError(
+		# 		"Cannot initiate project in %s - try supplying project name" % os.path.join(DIR_PROJECTS, game)
+		# 	)
+		# elif projects:
+		# 	projPath = os.path.join(DIR_PROJECTS, game)
+		# else:
+		projPath = os.path.abspath(game)
 
-	if lupa.lua_type(table) != "table":
-		return
+		#make project directory
+		if game!=".":
+			try:
+				os.mkdir(projPath)
+			except OSError as e:
+				raise OSError("OS Error: Cannot create directory %s" % projPath)
 
-	gameObjects = []
+		#make project subdirectories
+		os.chdir(projPath)
 
-	for i, node in luatools.ipairs(table):
-		o = {"data": {
-			"name": six.text_type(node.name) or "",
-			"components": luatools.luaTableToDict(node.components, runtime) or {},
-			"transform": luatools.luaTableToDict(node.transform, runtime) or {}
-		}}
+		for folder in ["build", "include", "src"]:
+			try:
+				os.mkdir(folder)
+				print("Created {} folder".format(folder))
+			except OSError:
+				raise OSError("Could not create {} folder".format(folder))
 
-		o["children"] = _luaTableToObjectList(node.children)
+		for t in ["main.lua", "settings.lua", "scene_main.lua"]:
+			shutil.copy(os.path.join(DIR_TEMPLATES_LUA, t), "src")
 
-		gameObjects.append(o)
+	def playGame(self, game, scene="", **kwargs):
+		"""
+		temporarily build and play a Lass project
 
-	return gameObjects
+		args:
+			scene: filename of scene to play
+			examples: search for project in examples folder
+		"""
 
-def findGame(game, *folders):
-	"""
-	search through list of folders until game project is found
-	(assumes game is a relative path)
-	"""
+		game = self.buildGame(game, sendToTemp=True, **kwargs)
 
-	if hasattr(folders[0], "__iter__"):
-		folders = folders[0]
+		# argString = ""
+		args = ["--scene=" + scene] if scene else []
 
-	for f in folders:
-		if game in os.listdir(f):
-			return os.path.join(os.path.abspath(f), game)
+		# os.system(_getLoveEngineCommand().format(game, argString))
+		proc = subprocess.Popen(self._getLoveEngineCommand(game, args), stdout=subprocess.PIPE)
+		while proc.poll() == None:
+			out = proc.stdout.readline()
+			sys.stdout.write(out)
+			sys.stdout.flush()
 
-# careful with the default args value--only copy or concatenate it
-def getLoveEngineCommand(game, args=[]):
-	if sys.platform.startswith("win32"):
-		return [os.path.join(DIR_ENGINE_WINDOWS, "love.exe"), game] + args
-	elif sys.platform.startswith("darwin"):
-		return ["open", game, "-a", os.path.join(DIR_ENGINE_OSX, "love.app"), "--args"] + args
-	else:
-		return ["love", game] + args
+		os.remove(game)
 
-def buildApp(loveFileNameFull, appFolderName=None, dest="."):
+	def newPrefab(self, fileName):
+		shutil.copy(
+			os.path.join(DIR_TEMPLATES_LUA, "prefab.lua"),
+			os.path.join("src", fileName)
+		)
 
-	gameName = ".".join(os.path.basename(loveFileNameFull).split(".")[:-1])
+	def loadScene(self, fileName):
 
-	if not appFolderName:
-		appFolderName = gameName + ".app"
+		# lua = lupa.LuaRuntime(unpack_returned_tuples=True)
+		self.lua.execute("t = loadfile('{}')".format(fileName))
+		scene = None
 
-	if appFolderName in os.listdir(dest):
-		shutil.rmtree(os.path.join(dest, appFolderName))
+		if self.lua.globals().t:
+			try:
+				scene = self.lua.globals().t()
+			except lupa.LuaError as e:
+				raise e("Could not parse " + fileName)
+		else:
+			raise OSError("{} not found".format(fileName))
 
-	# copy and rename love.app
-	shutil.copytree(os.path.join(DIR_ENGINE_OSX, "love.app"), os.path.join(dest, appFolderName))
+		return self._luaTableToObjectList(scene.gameObjects)
 
-	#add love file to app folder
-	shutil.copy(loveFileNameFull, os.path.join(dest, appFolderName, "Contents", "Resources"))
+	#helper functions
 
-	#TODO: update Info.plist file with custom metadata
+	def _luaTableToObjectList(self, table):
 
-def buildExe(loveFileNameFull, exeFolderName=None, exeFileName=None, dest="."):
+		if lupa.lua_type(table) != "table":
+			return
 
-	gameName = ".".join(os.path.basename(loveFileNameFull).split(".")[:-1])
+		gameObjects = []
 
-	if not exeFileName:
-		exeFileName = gameName + ".exe"
-	if not exeFolderName:
-		exeFolderName = gameName
+		for i, node in luatools.ipairs(table):
+			o = {"data": {
+				"name": six.text_type(node.name) or "",
+				"components": luatools.luaTableToDict(node.components, self.lua) or {},
+				"transform": luatools.luaTableToDict(node.transform, self.lua) or {}
+			}}
 
-	if exeFolderName in os.listdir(dest):
-		shutil.rmtree(os.path.join(dest, exeFolderName))
+			o["children"] = _luaTableToObjectList(node.children)
 
-	shutil.copytree(DIR_ENGINE_WINDOWS, os.path.join(dest, exeFolderName))
+			gameObjects.append(o)
 
-	exeFileNameFull = os.path.join(dest, exeFolderName, exeFileName)
-	# loveFileNameFull = os.path.join(dest, exeFolderName, exeFileName)
+		return gameObjects
 
-	#rename love.exe
-	os.rename(os.path.join(dest, exeFolderName, "love.exe"), exeFileNameFull)
+	def findGame(self, game, *folders):
+		"""
+		search through list of folders until game project is found
+		(assumes game is a relative path)
+		"""
 
-	#append love file to renamed love.exe
-	with open(exeFileNameFull, "ab") as exeFile, open(loveFileNameFull, "rb") as loveFile:
-		bytes = loveFile.read()
-		exeFile.write(bytes)
+		if hasattr(folders[0], "__iter__"):
+			folders = folders[0]
+
+		for f in folders:
+			if game in os.listdir(f):
+				return os.path.join(os.path.abspath(f), game)
+
+	# careful with the default args value--only copy or concatenate it
+	def _getLoveEngineCommand(self, game, args=[]):
+		if sys.platform.startswith("win32"):
+			return [os.path.join(DIR_ENGINE_WINDOWS, "love.exe"), game] + args
+		elif sys.platform.startswith("darwin"):
+			return ["open", game, "-a", os.path.join(DIR_ENGINE_OSX, "love.app"), "--args"] + args
+		else:
+			return ["love", game] + args
+
+	def buildApp(self, loveFileNameFull, appFolderName=None, dest="."):
+
+		gameName = ".".join(os.path.basename(loveFileNameFull).split(".")[:-1])
+
+		if not appFolderName:
+			appFolderName = gameName + ".app"
+
+		if appFolderName in os.listdir(dest):
+			shutil.rmtree(os.path.join(dest, appFolderName))
+
+		# copy and rename love.app
+		shutil.copytree(os.path.join(DIR_ENGINE_OSX, "love.app"), os.path.join(dest, appFolderName))
+
+		#add love file to app folder
+		shutil.copy(loveFileNameFull, os.path.join(dest, appFolderName, "Contents", "Resources"))
+
+		#TODO: update Info.plist file with custom metadata
+
+	def buildExe(self, loveFileNameFull, exeFolderName=None, exeFileName=None, dest="."):
+
+		gameName = ".".join(os.path.basename(loveFileNameFull).split(".")[:-1])
+
+		if not exeFileName:
+			exeFileName = gameName + ".exe"
+		if not exeFolderName:
+			exeFolderName = gameName
+
+		if exeFolderName in os.listdir(dest):
+			shutil.rmtree(os.path.join(dest, exeFolderName))
+
+		shutil.copytree(DIR_ENGINE_WINDOWS, os.path.join(dest, exeFolderName))
+
+		exeFileNameFull = os.path.join(dest, exeFolderName, exeFileName)
+		# loveFileNameFull = os.path.join(dest, exeFolderName, exeFileName)
+
+		#rename love.exe
+		os.rename(os.path.join(dest, exeFolderName, "love.exe"), exeFileNameFull)
+
+		#append love file to renamed love.exe
+		with open(exeFileNameFull, "ab") as exeFile, open(loveFileNameFull, "rb") as loveFile:
+			bytes = loveFile.read()
+			exeFile.write(bytes)
