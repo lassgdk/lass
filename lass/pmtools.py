@@ -21,16 +21,13 @@ from __future__ import print_function, unicode_literals
 import os, sys, shutil, zipfile, subprocess
 from distutils import sysconfig
 import lupa, six
-import luatools
+from . import luatools
 
 #set a bunch of global constants
 
 if getattr(sys, 'frozen', False):
-	# The application is frozen
 	DIR_LASS_DATA = os.path.join(os.path.dirname(sys.executable))
 else:
-	# The application is not frozen
-	# Change this bit to match where you store your data files:
 	DIR_LASS_DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 
 DIR_ENGINE_WINDOWS = os.path.join(DIR_LASS_DATA, "engine", "windows")
@@ -229,20 +226,22 @@ def loadScene(fileName):
 	else:
 		raise OSError("{} not found".format(fileName))
 
-	return scene.gameObjects
-	return _luaTableToObjectList(scene.gameObjects)
+	return _luaTableToObjectList(scene.gameObjects, runtime)
 
 #helper functions
 
-def _luaTableToObjectList(table):
+def _luaTableToObjectList(table, runtime):
+
+	if lupa.lua_type(table) != "table":
+		return
 
 	gameObjects = []
 
-	for node in luatoolstable:
+	for i, node in luatools.ipairs(table):
 		o = {"data": {
 			"name": six.text_type(node.name) or "",
-			"components": luatools.luaTableToDict(node.components) or {},
-			"transform": luatools.luaTableToDict(node.transform) or {}
+			"components": luatools.luaTableToDict(node.components, runtime) or {},
+			"transform": luatools.luaTableToDict(node.transform, runtime) or {}
 		}}
 
 		o["children"] = _luaTableToObjectList(node.children)
