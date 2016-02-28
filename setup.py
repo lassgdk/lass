@@ -21,7 +21,7 @@ class CustomInstall(install):
 
 	def run(self):
 
-		install.run(self)
+		install.do_egg_install(self)
 
 		data_home = os.path.join("lass", "data")
 		lua_home = "lib"
@@ -45,8 +45,8 @@ class CustomInstall(install):
 			lua_destination = os.path.join(data_destination, "lua", "5.1")
 
 		#copy all data and lua files
-		dir_util.copy_tree(data_home, data_destination, update=1, preserve_mode=1)
-		dir_util.copy_tree(lua_home, lua_destination, update=1, preserve_mode=1)
+		self.copy_tree(data_home, data_destination, preserve_mode=1)
+		self.copy_tree(lua_home, lua_destination, preserve_mode=1)
 
 		if sys.platform.startswith("win32"):
 			log.info("done")
@@ -72,7 +72,7 @@ setup(
 	author_email = "coss@cosstropolis.com",
 	description = "A modular development kit for 2D videogames.",
 	packages = ["lass", "lass.gui", "lass.gui.ui"],
-	install_requires = ["jinja2", "lupa", "six", "pyside"],
+	install_requires = ["jinja2", "lupa", "six", "PySide"],
 	scripts = [os.path.join("bin", "lasspm"), os.path.join("bin", "lass")],
 	cmdclass = {"install": CustomInstall},
 	include_package_data=True
