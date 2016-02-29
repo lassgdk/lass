@@ -5,7 +5,6 @@ build
 record.txt
 venv
 
-lass/gui/resources.py
 notes
 ignore
 update.sh

@@ -26,7 +26,7 @@ from . import luatools
 #set a bunch of global constants
 
 if getattr(sys, 'frozen', False):
-	DIR_LASS_DATA = os.path.join(os.path.dirname(sys.executable))
+	DIR_LASS_DATA = os.path.join(os.path.dirname(sys.executable), "data")
 else:
 	DIR_LASS_DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 

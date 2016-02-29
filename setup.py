@@ -2,11 +2,7 @@
 
 error = ""
 
-import os, subprocess, sys, struct
-try:
-	import ConfigParser as configparser
-except:
-	import configparser
+import os, subprocess, sys
 from distutils import log, dir_util, sysconfig
 try:
 	from setuptools import setup

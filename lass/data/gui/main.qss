@@ -2,6 +2,10 @@ QWidget[objectName="gameObjectTreeContainer"] {
 	min-width: 200px;
 }
 
+QLabel {
+	font-size: 10pt;
+}
+
 QTreeView {
 	font-size: 11pt;
 }
@@ -25,7 +29,7 @@ QTreeView::item:selected {
 
 QTreeView QLineEdit {
 	selection-background-color: rgb(245, 77, 175);
-	color: white;
+	selection-color: white;
 }
 /*
 QTreeView[dragging="true"]::item:selected {
