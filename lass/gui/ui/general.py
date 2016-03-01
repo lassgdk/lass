@@ -2,35 +2,38 @@ from __future__ import unicode_literals
 import os
 from PySide import QtGui, QtCore, QtUiTools
 
-from .. import resources
-from ...pmtools import DIR_LASS_DATA
-from .. import models
-from .. import delegates
+from .. import resources, models, delegates
+from ..application import app
+from ... import pmtools
 
-def loadUi(filename):
+# def loadUi(filename):
 
-    loader = QtUiTools.QUiLoader()
-    file = QtCore.QFile(filename)
-    file.open(QtCore.QFile.ReadOnly)
-    ui = loader.load(file)
-    file.close()
+#     loader = QtUiTools.QUiLoader()
+#     file = QtCore.QFile(filename)
+#     file.open(QtCore.QFile.ReadOnly)
+#     ui = loader.load(file)
+#     file.close()
 
-    return ui
+#     return ui
 
 class MainMenuBar(QtGui.QMenuBar):
     def __init__(self):
 
         QtGui.QMenuBar.__init__(self)
 
-        fileMenu = self.addMenu("File")
-        newAction = fileMenu.addAction("New")
-        openAction = fileMenu.addAction("Open")
+        self.fileMenu = self.addMenu("File")
+        self.newAction = self.fileMenu.addAction("New Project")
+        self.newSceneAction = self.fileMenu.addAction("New Scene")
+        self.openAction = self.fileMenu.addAction("Open Project")
+        self.openSceneAction = self.fileMenu.addAction("Open Scene")
 
-        newAction.setShortcut(QtGui.QKeySequence.New)
-    #     newAction.triggered.connect(self.newActionTriggered)
+        self.openSceneAction.setShortcut(QtGui.QKeySequence.Open)
+        self.openSceneAction.triggered.connect(self.openSceneActionTriggered)
 
-    # def newActionTriggered(self):
-    #     print self.window().gameObjectTreeContainer.gameObjectTree.model().rootItem.child(0).data(0)
+    def openSceneActionTriggered(self):
+
+        fname, _ = QtGui.QFileDialog.getOpenFileName(self, "Open Scene", ".", "Scene files (*.lua)")
+        app.loadScene(fname)
 
 class MainWindow(QtGui.QMainWindow):
 
@@ -64,7 +67,7 @@ class MainWindow(QtGui.QMainWindow):
         self.setWindowState(QtCore.Qt.WindowMaximized)
 
     def reloadStyle(self):
-        with open(os.path.join(DIR_LASS_DATA, "gui", "main.qss")) as styleSheetFile:
+        with open(os.path.join(pmtools.DIR_LASS_DATA, "gui", "main.qss")) as styleSheetFile:
             self.setStyleSheet(styleSheetFile.read())
 
 class GameObjectTreeContainer(QtGui.QWidget):

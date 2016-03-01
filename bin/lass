@@ -1,18 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import sys, os
-from PySide import QtGui
-from lass.pmtools import DIR_LASS_DATA
-from lass.gui.ui.general import MainWindow
+import sys
+from lass.gui.application import app
 
 if __name__ == '__main__':
-
-    app = QtGui.QApplication(sys.argv)
-    # with open(os.path.join(DIR_LASS_DATA, "gui", "main.qss")) as styleSheetFile:
-        # app.setStyleSheet(styleSheetFile.read())
-    window = MainWindow()
-    window.reloadStyle()
-    window.show()
-    ret = app.exec_()
-    sys.exit( ret )
+	sys.exit(app.run())

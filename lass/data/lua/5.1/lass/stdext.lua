@@ -25,11 +25,11 @@ end
 -- 	return iter, a, 0
 -- end
 
-print = function(...)
+-- print = function(...)
 
-	_print(...)
-	io.flush()
-end
+-- 	_print(...)
+-- 	io.flush()
+-- end
 
 tonumber = function(x, b)
 

@@ -4,6 +4,7 @@ dist
 build
 record.txt
 venv
+setup.cfg
 
 notes
 ignore

@@ -35,15 +35,12 @@ DIR_ENGINE_OSX = os.path.join(DIR_LASS_DATA, "engine", "osx")
 DIR_EXAMPLES = os.path.join(DIR_LASS_DATA, "examples")
 DIR_TESTS = os.path.join(DIR_LASS_DATA, "tests")
 DIR_TEMPLATES_LUA = os.path.join(DIR_LASS_DATA, "templates", "lua")
+DIR_LASS_LIB = os.path.join(DIR_LASS_DATA, "lua", "5.1", "lass")
 
 if sys.platform == "win32":
 	DIR_TEMP = os.path.join(DIR_LASS_DATA, "tmp")
-	DIR_LASS_LIB = os.path.join(DIR_LASS_DATA, "lua", "5.1", "lass")
 else:
 	DIR_TEMP = "/tmp"
-	DIR_LASS_LIB = os.path.join(sys.prefix, "local", "share", "lua", "5.1", "lass")
-	if not os.path.exists(DIR_LASS_LIB):
-		DIR_LASS_LIB = os.path.join(DIR_LASS_DATA, "lua", "5.1", "lass")
 
 class ProjectManager(object):
 
@@ -234,6 +231,8 @@ class ProjectManager(object):
 
 		return self._luaTableToObjectList(scene.gameObjects)
 
+	# def loadPrefab(self, fileName):
+
 	#helper functions
 
 	def _luaTableToObjectList(self, table):
@@ -250,7 +249,7 @@ class ProjectManager(object):
 				"transform": luatools.luaTableToDict(node.transform, self.lua) or {}
 			}}
 
-			o["children"] = _luaTableToObjectList(node.children)
+			o["children"] = self._luaTableToObjectList(node.children)
 
 			gameObjects.append(o)
 
