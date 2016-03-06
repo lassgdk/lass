@@ -173,14 +173,15 @@ class TreeModel(QtCore.QAbstractItemModel):
 
         # parent = parent or self.rootItem
         # parent = self.item(parentIndex)
-
         if position == None:
             position = self.rowCount(parentIndex)
+
+        indices = []
 
         for node in nodes:
             data = []
             for header in self.headers:
-                data.append(node["data"][header])
+                data.append(node["data"].get(header, self.defaults[header]))
 
             # child = self.newItem(data)
             # parent.appendChild(child)
@@ -188,6 +189,8 @@ class TreeModel(QtCore.QAbstractItemModel):
 
             childIndex = self.index(position, 0, parentIndex)
             child = self.item(childIndex)
+
+            indices.append(childIndex)
 
             for i, datum in enumerate(data):
                 self.setData(self.index(position, i, parentIndex), datum, QtCore.Qt.EditRole)
@@ -200,6 +203,12 @@ class TreeModel(QtCore.QAbstractItemModel):
                 self.initializeTree(node["children"], childIndex)
 
             position += 1
+
+        return indices
+
+    def clearTree(self):
+
+        self.removeRows(0, self.rowCount())
 
     def setData(self, index, value, role):
 

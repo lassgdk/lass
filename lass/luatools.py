@@ -30,13 +30,31 @@ def luaTableToDict(table, runtime=None):
 
 	return d
 
+def luaTableToList(table, runtime=None):
+
+	if lupa.lua_type(table) != "table":
+		return TypeError("table must be Lua table")
+
+	l = []
+
+	for i, v in ipairs(table):
+		l.append(luaTableToDict(v, runtime))
+
+	return l
+
 def ipairs(table):
 
 	i = 1
-	node = table[i]
+	try:
+		node = table[i]
+	except (KeyError, IndexError):
+		return
 
 	while node:
 		yield i, node
 
 		i += 1
-		node = table[i]
+		try:
+			node = table[i]
+		except (KeyError, IndexError):
+			break

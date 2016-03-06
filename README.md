@@ -13,28 +13,30 @@ The following must be installed before you build Lass:
 **Linux, Windows, and OS X**  
 * Python 2.7 or higher (https://www.python.org/)
 * setuptools (https://pypi.python.org/pypi/setuptools)
+* lupa
+* PySide
 
 **Additional requirements for Linux**  
 * LÖVE (https://love2d.org/)
 
 **Additional requirements for Windows**  
-* py2exe (http://www.py2exe.org/)
+* cx_Freeze
 
 Build and Install
 -----------------
 
 **Linux, Windows, and OS X**  
-1. Download the Windows ("32-bit zipped") and OS X ("64-bit zipped") distributions of the LÖVE engine (https://love2d.org/).  
+1. Download the Windows ("32-bit zipped") and OS X ("64-bit zipped") distributions of LÖVE 0.10.1 (https://love2d.org/).  
 2. Unzip the Windows .zip file and move everything inside the main folder (but not the folder itself) to `engine/windows`.  
 3. Unzip the OS X .zip file and move the love.app file to `engine/osx`.
 
 **Additional instructions for Linux and OS X**  
 The command to compile and install Lass is `python setup.py install`.
 
-You will probably have to run it as root using the "sudo" prefix: `sudo python setup.py install`.
+You may have to run it as root using the "sudo" prefix: `sudo python setup.py install`.
 
 **Additional instructions for Windows**  
-1. `python setup.py py2exe` will create a new folder, called "dist", containing the compiled program.  
+1. `python cx_setup.py build_exe` will create a new folder, called "dist", containing the compiled program.  
 2. Move the contents of the newly created "dist" folder wherever it pleases you to.  
 3. (Optional) Add the location of the installed program directory to your system Path variable (http://www.computerhope.com/issues/ch000549.htm).
 

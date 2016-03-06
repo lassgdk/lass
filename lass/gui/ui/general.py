@@ -1,8 +1,10 @@
 from __future__ import unicode_literals
 import os
 from PySide import QtGui, QtCore, QtUiTools
+import lupa
 
-from .. import resources, models, delegates
+from . import loaders
+from .. import resources, models, delegates, dialogs
 from ..application import app
 from ... import pmtools
 
@@ -17,10 +19,11 @@ from ... import pmtools
 #     return ui
 
 class MainMenuBar(QtGui.QMenuBar):
-    def __init__(self):
+    def __init__(self, window):
 
         QtGui.QMenuBar.__init__(self)
 
+        self.window = window
         self.fileMenu = self.addMenu("File")
         self.newAction = self.fileMenu.addAction("New Project")
         self.newSceneAction = self.fileMenu.addAction("New Scene")
@@ -28,12 +31,7 @@ class MainMenuBar(QtGui.QMenuBar):
         self.openSceneAction = self.fileMenu.addAction("Open Scene")
 
         self.openSceneAction.setShortcut(QtGui.QKeySequence.Open)
-        self.openSceneAction.triggered.connect(self.openSceneActionTriggered)
-
-    def openSceneActionTriggered(self):
-
-        fname, _ = QtGui.QFileDialog.getOpenFileName(self, "Open Scene", ".", "Scene files (*.lua)")
-        app.loadScene(fname)
+        self.openSceneAction.triggered.connect(window.openSceneActionTriggered)
 
 class MainWindow(QtGui.QMainWindow):
 
@@ -63,12 +61,37 @@ class MainWindow(QtGui.QMainWindow):
         self.gameObjectTreeContainer.gameObjectTree.dragStarted.connect(self.reloadStyle)
         self.gameObjectTreeContainer.gameObjectTree.dropStarted.connect(self.reloadStyle)
 
-        self.setMenuBar(MainMenuBar())
+        self.setMenuBar(MainMenuBar(self))
         self.setWindowState(QtCore.Qt.WindowMaximized)
 
     def reloadStyle(self):
         with open(os.path.join(pmtools.DIR_LASS_DATA, "gui", "main.qss")) as styleSheetFile:
             self.setStyleSheet(styleSheetFile.read())
+
+    def openSceneActionTriggered(self):
+
+        # fname, _ = QtGui.QFileDialog.getOpenFileName(self, "Open Scene", ".", "Scene files (*.lua)")
+        # error = ""
+
+        # try:
+        #     sceneIndex, scene = app.loadScene(fname)
+        # except lupa.LuaError:
+        #     error = dialogs.errors["couldNotParseScene"]
+        # except Exception as e:
+        #     error = dialogs.errors["couldNotLoadScene"]
+
+        # if error:
+        #     QtGui.QMessageBox.critical(self, "Could not load scene", error, buttons=QtGui.QMessageBox.Ok)
+        #     return
+
+        try:
+            scene, sceneIndex = loaders.loadScene(self)
+        except TypeError:
+            return
+
+        treeModel = self.gameObjectTreeContainer.gameObjectTree.model()
+        treeModel.clearTree()
+        treeModel.initializeTree(scene.gameObjects)
 
 class GameObjectTreeContainer(QtGui.QWidget):
 
@@ -113,25 +136,26 @@ class GameObjectTree(QtGui.QTreeView):
 
         QtGui.QTreeView.__init__(self, parent)
 
-        tree = [
-            {
-                "data": {"name": "Test Object 1", "components": 4},
-                "children":[
-                    {
-                        "data": {"name": "Test Child 1", "components": 1}
-                    },
-                    {
-                        "data": {"name": "Test Child 2", "components": 1}
-                    }
-                ]
-            },
-            {
-                "data": {"name": "Test Object 2", "components": 6}
-            }
-        ]
+        tree = []
+        # tree = [
+        #     {
+        #         "data": {"name": "Test Object 1", "components": 4},
+        #         "children":[
+        #             {
+        #                 "data": {"name": "Test Child 1", "components": 1}
+        #             },
+        #             {
+        #                 "data": {"name": "Test Child 2", "components": 1}
+        #             }
+        #         ]
+        #     },
+        #     {
+        #         "data": {"name": "Test Object 2", "components": 6}
+        #     }
+        # ]
 
-        headers = ["name", "components"]
-        defaults = {"name": "Game Object", "components": 0}
+        headers = app.gameObjectDataHeaders
+        defaults = app.gameObjectDataDefaults
 
         g = models.TreeModel(tree, headers, defaults=defaults, itemClass=models.GameObjectTreeItem)
         d = delegates.TreeItemDelegate()
@@ -144,7 +168,9 @@ class GameObjectTree(QtGui.QTreeView):
         self.setExpandsOnDoubleClick(False)
         self.setObjectName("gameObjectTree")
         self.setIndentation(20)
-        self.hideColumn(1)
+
+        for i in range(1, len(headers)):
+            self.hideColumn(i)
         self.setDragDropMode(QtGui.QAbstractItemView.DragDrop)
         # self.setFocusPolicy(QtCore.Qt.ClickFocus)
         self.setDropIndicatorShown(True);
@@ -206,7 +232,6 @@ class GameObjectTree(QtGui.QTreeView):
 
         self.setProperty("dragging", "true")
         # self.setStyleSheet("QTreeView::item:selected {background-color: rgba(245, 77, 175, 50%);}")
-        print self.styleSheet()
         QtGui.QTreeView.startDrag(self, event)
 
     def selectionChanged(self, selected, deselected):
@@ -225,9 +250,11 @@ class GameObjectTree(QtGui.QTreeView):
 
         QtGui.QTreeView.selectionChanged(self, selected, deselected)
 
-    def createGameObject(self, createAsChild=False):
+    def createGameObject(self, createAsChild=False, data=None):
 
         selected = self.selectedIndexes()
+
+        # set position and parent
         if len(selected) == 1 and createAsChild:
             position = self.model().rowCount(selected[0])
             parent = selected[0]
@@ -239,21 +266,43 @@ class GameObjectTree(QtGui.QTreeView):
             position = self.model().rowCount()
             parent = None
 
+        # create the game object
+        node = data or {"data":{}}
         if parent:
-            self.model().insertRows(position, 1, parentIndex=parent)
-            index = self.model().index(position, 0, parent)
-            # self.expand(parent)
-            # self.setCurrentIndex()
+            indices = self.model().initializeTree([node], parentIndex=parent, position=position)
         else:
-            self.model().insertRows(position, 1)
-            index = self.model().index(position, 0)
+            indices = self.model().initializeTree([node], position=position)
+
+        index = indices[0]
+
+        # if parent:
+        #     self.model().insertRows(position, 1, parentIndex=parent)
+        #     index = self.model().index(position, 0, parent)
+        #     # self.expand(parent)
+        #     # self.setCurrentIndex()
+        # else:
+        #     self.model().insertRows(position, 1)
+        #     index = self.model().index(position, 0)
 
         self.setCurrentIndex(index)
 
+        # if data:
+        #     self.model().initializeTree([data], position=)
+
         self.edit(index)
 
-    def createGameObjectAsChild(self):
+    def createChildGameObject(self):
         self.createGameObject(True)
+
+    def createGameObjectFromPrefab(self):
+
+        prefab = loaders.loadPrefab(self)
+        if not prefab:
+            return
+
+        data = prefab.toGameObject()
+
+        self.createGameObject(data=data)
 
     def deleteGameObject(self):
 
@@ -298,6 +347,7 @@ class GameObjectTreeToolbar(QtGui.QFrame):
         self.deleteGameObjectButton = QtGui.QPushButton()
         self.deleteGameObjectButton.setObjectName("deleteGameObjectButton")
         self.deleteGameObjectButton.setToolTip("Delete Game Object")
+        self.deleteGameObjectButton.setShortcut(QtGui.QKeySequence("Del"))
 
         layout.addWidget(self.createGameObjectButton)
         layout.addWidget(self.deleteGameObjectButton)
@@ -305,8 +355,11 @@ class GameObjectTreeToolbar(QtGui.QFrame):
         self.createGameObjectButton.newObjectAction.triggered.connect(
             self.parent().gameObjectTree.createGameObject
         )
-        self.createGameObjectButton.newObjectAsChildAction.triggered.connect(
-            self.parent().gameObjectTree.createGameObjectAsChild
+        self.createGameObjectButton.newChildObject.triggered.connect(
+            self.parent().gameObjectTree.createChildGameObject
+        )
+        self.createGameObjectButton.newObjectFromPrefabAction.triggered.connect(
+            self.parent().gameObjectTree.createGameObjectFromPrefab
         )
 
         self.setChildActionsEnabled(False)
@@ -315,7 +368,7 @@ class GameObjectTreeToolbar(QtGui.QFrame):
 
     def setChildActionsEnabled(self, enable):
 
-        actions = (self.createGameObjectButton.newObjectAsChildAction,)
+        actions = (self.createGameObjectButton.newChildObject,)
         for action in actions:
             action.setEnabled(enable)
 
@@ -332,10 +385,8 @@ class CreateGameObjectButton(QtGui.QToolButton):
         self.createGameObjectButtonMenu.setObjectName("createGameObjectButtonMenu")
 
         self.newObjectAction = self.createGameObjectButtonMenu.addAction("New Object")
-        self.newObjectAsChildAction = self.createGameObjectButtonMenu.addAction("New Child Object")
+        self.newChildObject = self.createGameObjectButtonMenu.addAction("New Child Object")
         self.newObjectFromPrefabAction = self.createGameObjectButtonMenu.addAction("New Object from Prefab")
-
-        self.newObjectFromPrefabAction.setEnabled(False)
 
         self.setMenu(self.createGameObjectButtonMenu)
         self.setToolTip("Create Game Object")

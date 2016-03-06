@@ -215,45 +215,55 @@ class ProjectManager(object):
 			os.path.join("src", fileName)
 		)
 
-	def loadScene(self, fileName):
+	def _loadLuaModule(self, fileName):
 
-		# lua = lupa.LuaRuntime(unpack_returned_tuples=True)
 		self.lua.execute("t = loadfile('{}')".format(fileName))
-		scene = None
+		module = None
 
 		if self.lua.globals().t:
 			try:
-				scene = self.lua.globals().t()
+				module = self.lua.globals().t()
 			except lupa.LuaError as e:
-				raise e("Could not parse " + fileName)
+				raise lupa.LuaError("Could not parse " + fileName)
 		else:
 			raise OSError("{} not found".format(fileName))
 
-		return self._luaTableToObjectList(scene.gameObjects)
+		return module
+
+	def loadScene(self, fileName):
+
+		module = self._loadLuaModule(fileName)
+		return Scene(fileName, module, self.lua)
+
+	def loadPrefab(self, fileName):
+
+		module = self._loadLuaModule(fileName)
+		return Prefab(fileName, module, self.lua)
+
 
 	# def loadPrefab(self, fileName):
 
 	#helper functions
 
-	def _luaTableToObjectList(self, table):
+	# def _luaTableToObjectList(self, table):
 
-		if lupa.lua_type(table) != "table":
-			return
+	# 	if lupa.lua_type(table) != "table":
+	# 		return
 
-		gameObjects = []
+	# 	gameObjects = []
 
-		for i, node in luatools.ipairs(table):
-			o = {"data": {
-				"name": six.text_type(node.name) or "",
-				"components": luatools.luaTableToDict(node.components, self.lua) or {},
-				"transform": luatools.luaTableToDict(node.transform, self.lua) or {}
-			}}
+	# 	for i, node in luatools.ipairs(table):
+	# 		o = {"data": {
+	# 			"name": six.text_type(node.name) or "",
+	# 			"components": luatools.luaTableToDict(node.components, self.lua) or {},
+	# 			"transform": luatools.luaTableToDict(node.transform, self.lua) or {}
+	# 		}}
 
-			o["children"] = self._luaTableToObjectList(node.children)
+	# 		o["children"] = self._luaTableToObjectList(node.children)
 
-			gameObjects.append(o)
+	# 		gameObjects.append(o)
 
-		return gameObjects
+	# 	return gameObjects
 
 	def findGame(self, game, *folders):
 		"""
@@ -319,3 +329,68 @@ class ProjectManager(object):
 		with open(exeFileNameFull, "ab") as exeFile, open(loveFileNameFull, "rb") as loveFile:
 			bytes = loveFile.read()
 			exeFile.write(bytes)
+
+class Scene(object):
+
+	def __init__(self, name, data, lua):
+		self.name = name
+		self.data = data
+		self.lua = lua
+
+	def _gameObjects(self, table):
+
+		objects = []
+
+		for i, node in luatools.ipairs(table or {}):
+			o = {"data": {
+				"name": six.text_type(node.name),
+				"prefab": six.text_type(node.prefab),
+				"prefabComponents": luatools.luaTableToList(node.prefabComponents or self.lua.table(), self.lua),
+				"components": luatools.luaTableToList(node.components or self.lua.table(), self.lua),
+				"transform": luatools.luaTableToDict(node.transform, self.lua) or {}
+			}}
+
+			o["children"] = self._gameObjects(node.children)
+
+			objects.append(o)
+
+		return objects
+
+	@property
+	def gameObjects(self):
+
+		# objects = []
+		# for i, gameObject in luatools.ipairs(self.data.gameObjects or {}):
+		# 	objects.append(luatools.luaTableToDict(gameObject, self.lua))
+
+		# return objects
+
+		return self._gameObjects(self.data.gameObjects)
+
+	@property
+	def settings(self):
+
+		return luatools.luaTableToDict(self.data.settings, self.lua)
+
+class Prefab(object):
+
+	def __init__(self, name, data, lua):
+		self.name = name
+		self.data = data
+		self.lua = lua
+
+	def toGameObject(self):
+
+		o = {"data": {
+			"name": self.data.name or "",
+			"prefab": self.name,
+			"prefabComponents": luatools.luaTableToList(self.data.components or self.lua.table(), self.lua),
+			"components": [],
+			"transform": {},
+		}, "children":[]}
+
+		# for i, child in luatools.ipairs(self.data.children or self.lua.table()):
+		# 	prefab = 
+		# , "children": luatools.luaTableToList(self.data.children or self.lua.table(), self.lua)}
+
+		return o
