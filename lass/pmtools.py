@@ -341,7 +341,7 @@ class Scene(object):
 
 		objects = []
 
-		for i, node in luatools.ipairs(table or {}):
+		for i, node in luatools.ipairs(table):
 			o = {"data": {
 				"name": six.text_type(node.name),
 				"prefab": six.text_type(node.prefab),
@@ -359,11 +359,8 @@ class Scene(object):
 	@property
 	def gameObjects(self):
 
-		# objects = []
-		# for i, gameObject in luatools.ipairs(self.data.gameObjects or {}):
-		# 	objects.append(luatools.luaTableToDict(gameObject, self.lua))
-
-		# return objects
+		if not self.data.gameObjects:
+			raise AttributeError("scene is missing 'gameObjects' property")
 
 		return self._gameObjects(self.data.gameObjects)
 
@@ -381,16 +378,20 @@ class Prefab(object):
 
 	def toGameObject(self):
 
+		if not self.data.name:
+			raise AttributeError("prefab is missing 'name' property")
+
 		o = {"data": {
-			"name": self.data.name or "",
-			"prefab": self.name,
+			"name": self.data.name,
+			"prefab": self.name or self.data.prefab,
 			"prefabComponents": luatools.luaTableToList(self.data.components or self.lua.table(), self.lua),
 			"components": [],
 			"transform": {},
 		}, "children":[]}
 
-		# for i, child in luatools.ipairs(self.data.children or self.lua.table()):
-		# 	prefab = 
+		for i, child in luatools.ipairs(self.data.children or self.lua.table()):
+			childPrefab = Prefab(None, child, self.lua)
+			o["children"].append(childPrefab.toGameObject())
 		# , "children": luatools.luaTableToList(self.data.children or self.lua.table(), self.lua)}
 
 		return o

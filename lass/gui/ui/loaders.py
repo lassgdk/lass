@@ -1,8 +1,9 @@
+from __future__ import unicode_literals
 import sys, traceback
 import lupa
 from PySide import QtGui
 
-from .. import dialogs
+from . import modals
 from ..application import app
 
 def _loadPrefabOrScene(module_type, parent):
@@ -10,36 +11,40 @@ def _loadPrefabOrScene(module_type, parent):
     if module_type == "prefab":
         method = app.loadPrefab
         dialogName = "Prefab"
-        args = ("Load Prefab", ".", "Prefab files (*.lua)")
+        args = ("Load Prefab", ".", "Prefab files (*.prefab.lua);; Lua files (*.lua)")#, ~QtGui.QFileDialog.HideNameFilterDetails)
     elif module_type == "scene":
         method = app.loadScene
         dialogName = "Scene"
-        args = ("Open Scene", ".", "Scene files (*.lua)")
+        args = ("Open Scene", ".", "Scene files (*.scene.lua);; Lua files (*.lua)")#, ~QtGui.QFileDialog.HideNameFilterDetails)
     else:
         return
 
     fname, _ = QtGui.QFileDialog.getOpenFileName(parent, *args)
-    error = ""
+    errorMessageBox = None
+
+    if not fname:
+        return
 
     try:
         r = method(fname)
     except lupa.LuaError:
-        error = dialogs.errors["couldNotParse{0}".format(dialogName)]
+        if module_type == "prefab":
+            errorMessageBox = modals.CouldNotParsePrefabMB(parent, sys.exc_info()[2])
+        else:
+            errorMessageBox = modals.CouldNotParseSceneMB(parent, sys.exc_info()[2])
     except Exception as e:
-        error = dialogs.errors["couldNotLoad{0}".format(dialogName)]
-        # tb = sys.exc_info()[2]
-        # traceback.print_exc(tb)
+        if module_type == "prefab":
+            errorMessageBox = modals.CouldNotLoadPrefabMB(parent, sys.exc_info()[2])
+        else:
+            errorMessageBox = modals.CouldNotLoadSceneMB(parent, sys.exc_info()[2])
 
-    if error:
-        QtGui.QMessageBox.critical(
-            parent, "Could not load {0}".format(module_type), error, buttons=QtGui.QMessageBox.Ok
-        )
-        return
+    if errorMessageBox:
+        return errorMessageBox.exec_()
 
     return r
 
-
 def loadPrefab(parent):
+
     prefab = _loadPrefabOrScene("prefab", parent)
 
     if not prefab:
@@ -47,8 +52,9 @@ def loadPrefab(parent):
 
     try:
         prefab.toGameObject()
-    except lupa.LuaError:
-        error = dialogs.errors["couldNotParse{0}".format(dialogName)]
+    except (lupa.LuaError, AttributeError):
+        modals.CouldNotParsePrefabMB(parent, sys.exc_info()[2]).exec_()
+        return
 
     return prefab
 

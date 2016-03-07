@@ -1,9 +1,9 @@
 from __future__ import unicode_literals
-import os
+import os, sys
 from PySide import QtGui, QtCore, QtUiTools
 import lupa
 
-from . import loaders
+from . import loaders, modals
 from .. import resources, models, delegates, dialogs
 from ..application import app
 from ... import pmtools
@@ -70,23 +70,15 @@ class MainWindow(QtGui.QMainWindow):
 
     def openSceneActionTriggered(self):
 
-        # fname, _ = QtGui.QFileDialog.getOpenFileName(self, "Open Scene", ".", "Scene files (*.lua)")
-        # error = ""
-
-        # try:
-        #     sceneIndex, scene = app.loadScene(fname)
-        # except lupa.LuaError:
-        #     error = dialogs.errors["couldNotParseScene"]
-        # except Exception as e:
-        #     error = dialogs.errors["couldNotLoadScene"]
-
-        # if error:
-        #     QtGui.QMessageBox.critical(self, "Could not load scene", error, buttons=QtGui.QMessageBox.Ok)
-        #     return
-
         try:
             scene, sceneIndex = loaders.loadScene(self)
         except TypeError:
+            return
+
+        try:
+            gameObjects = scene.gameObjects
+        except AttributeError:
+            modals.CouldNotParseSceneMB(self, sys.exc_info()[2]).exec_()
             return
 
         treeModel = self.gameObjectTreeContainer.gameObjectTree.model()
@@ -119,13 +111,6 @@ class GameObjectTreeContainer(QtGui.QWidget):
         self.gameObjectTreeLayout.addWidget(self.gameObjectTree)
 
         self.label.setText("Game Objects")
-
-    #     self.retranslateUi(GameObjectTreeContainer)
-    #     QtCore.QMetaObject.connectSlotsByName(GameObjectTreeContainer)
-
-    # def retranslateUi(self, GameObjectTreeContainer):
-    #     GameObjectTreeContainer.setWindowTitle(QtGui.QApplication.translate("GameObjectTreeContainer", "Form", None, QtGui.QApplication.UnicodeUTF8))
-    #     self.label.setText("Game Objects")
 
 class GameObjectTree(QtGui.QTreeView):
 
