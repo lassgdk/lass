@@ -19,7 +19,6 @@
 
 from __future__ import print_function, unicode_literals
 import os, sys, shutil, zipfile, subprocess
-from distutils import sysconfig
 import lupa, six
 from . import luatools
 

@@ -19,7 +19,7 @@
 # along with Lass.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import print_function
-import sys, os, argparse, distutils.sysconfig
+import sys, os, argparse
 from lass import pmtools
 
 def main():

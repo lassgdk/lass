@@ -2,12 +2,18 @@
 
 error = ""
 
-import os, sys, struct
-from distutils import log, dir_util, sysconfig
 try:
 	from cx_Freeze import setup, Executable 
 except ImportError:
 	error += "ImportError: cx_Freeze not found (http://cx-freeze.sourceforge.net/)\n"
+
+import distutils
+import opcode
+import os, sys, struct
+
+# this makes cx_freeze work with virtual environments on Windows
+# solution from https://gist.github.com/nicoddemus/ca0acd93a20acbc42d1d
+distutils_path = os.path.join(os.path.dirname(opcode.__file__), 'distutils')
 
 if error:
 	sys.exit(error)
@@ -48,6 +54,8 @@ for d, subdirs, files in os.walk("lib"):
 		out = os.path.join("data", "lua", "5.1", *(split_path(d)[1:] + [f]))
 		data.append((os.path.join(d,f), out))
 
+data.append((distutils_path, "distutils"))
+
 setup(
 	name = "lass",
 	version = "0.1.0.dev0",
@@ -62,7 +70,8 @@ setup(
 	],
 	options = {
 		"build_exe":{
-			"include_files":data,
+			"include_files": data,
+			"excludes": ["distutils"],
 			"packages": ["lass", "lass.gui", "lass.gui.ui", "jinja2", "lupa", "six", "PySide"]
 		}
 	}
