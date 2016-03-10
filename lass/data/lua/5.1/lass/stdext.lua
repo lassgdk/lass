@@ -20,15 +20,18 @@ local function iter(a, i)
 	end
 end
 
+local _print = print
+
+
+print = function(...)
+
+	_print(...)
+	io.flush()
+end
+
 -- ipairs = function(a)
 
 -- 	return iter, a, 0
--- end
-
--- print = function(...)
-
--- 	_print(...)
--- 	io.flush()
 -- end
 
 tonumber = function(x, b)
@@ -84,10 +87,9 @@ debug.log = function(...)
 		end
 	end
 
-	print() -- newline
-
-	io.flush()
+	print() -- newline and io flush
 end
+
 
 math.sign = function(n)
 
