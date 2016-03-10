@@ -19,7 +19,7 @@
 # along with Lass.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import print_function
-import sys, os, argparse
+import sys, os, argparse, traceback
 from lass import pmtools
 
 def main():
@@ -129,7 +129,7 @@ def main():
 	try:
 		command[0](**args.__dict__)
 	except Exception as e:
-		sys.exit("{0}: {1}".format(type(e).__name__, e.message))
+		sys.exit(traceback.format_exc(sys.exc_info()[2]))
 
 if __name__ == "__main__":
 	main()
