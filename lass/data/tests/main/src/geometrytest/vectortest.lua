@@ -427,4 +427,51 @@ function vectortest.testVector3MagnitudeAndSqrMagnitude()
 
 end
 
+function vectortest.testVectorToString()
+
+    --[[testing Vector2]]
+    local v2 = geometry.Vector2()
+    assert(tostring(v2) == "{x=0.00, y=0.00}")
+
+    v2 = geometry.Vector2(1, 2)
+    assert(tostring(v2) == "{x=1.00, y=2.00}")
+
+    v2 = geometry.Vector2(1.1, 2.2)
+    assert(tostring(v2) == "{x=1.10, y=2.20}")
+
+    v2 = geometry.Vector2(3.33, 4.44)
+    assert(tostring(v2) == "{x=3.33, y=4.44}")
+
+    -- account for rounding
+    v2 = geometry.Vector2(5.555, 6.666)
+    assert(tostring(v2) == "{x=5.55, y=6.67}")
+
+    -- negative, and negative rounding
+    v2 = geometry.Vector2(-5.00, -8.009)
+    assert(tostring(v2) == "{x=-5.00, y=-8.01}")
+
+
+    --[[testing Vector3]]
+    local v3 = geometry.Vector3()
+    assert(tostring(v3) == "{x=0.00, y=0.00, z=0.00}")
+
+    v3 = geometry.Vector3(1, 2, 3)
+    assert(tostring(v3) == "{x=1.00, y=2.00, z=3.00}")
+
+    v3 = geometry.Vector3(1.1, 2.2, 3.3)
+    assert(tostring(v3) == "{x=1.10, y=2.20, z=3.30}")
+
+    v3 = geometry.Vector3(3.33, 4.44, 5.55)
+    assert(tostring(v3) == "{x=3.33, y=4.44, z=5.55}")
+
+    -- account for rounding
+    v3 = geometry.Vector3(5.555, 6.666, 7.777)
+    assert(tostring(v3) == "{x=5.55, y=6.67, z=7.78}")
+
+    -- negative, and negative rounding
+    v3 = geometry.Vector3(-5.00, -8.009, -12.005)
+    assert(tostring(v3) == "{x=-5.00, y=-8.01, z=-12.01}")
+
+end
+
 return vectortest

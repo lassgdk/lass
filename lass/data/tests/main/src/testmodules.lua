@@ -1,8 +1,8 @@
 return {
-	"coretest",
+    "coretest",
+	"classtest",
     "geometrytest.transformtest",
     "geometrytest.shapetest",
     "geometrytest.vectortest",
     "geometrytest.vectoralgebratest",
-	"classtest"
 }
