@@ -146,11 +146,12 @@ def main():
 			args.target = "l"
 		args.__dict__.pop("love_only")
 
+	verbose = args.__dict__.pop("verbose", False)
+
 	try:
 		command[0](**args.__dict__)
 	except Exception as e:
 		info = sys.exc_info()
-		verbose = getattr(args, "verbose", False)
 
 		if verbose:
 			sys.exit(traceback.format_exc(info[2]))
