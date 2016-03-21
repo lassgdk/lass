@@ -447,7 +447,7 @@ function vectortest.testVectorToString()
     assert(tostring(v2) == "{x=5.55, y=6.67}")
 
     -- negative, and negative rounding
-    v2 = geometry.Vector2(-5.00, -8.009)
+    v2 = geometry.Vector2(-5.001, -8.009)
     assert(tostring(v2) == "{x=-5.00, y=-8.01}")
 
 
@@ -469,8 +469,302 @@ function vectortest.testVectorToString()
     assert(tostring(v3) == "{x=5.55, y=6.67, z=7.78}")
 
     -- negative, and negative rounding
-    v3 = geometry.Vector3(-5.00, -8.009, -12.005)
+    v3 = geometry.Vector3(-5.001, -8.009, -12.005)
     assert(tostring(v3) == "{x=-5.00, y=-8.01, z=-12.01}")
+
+end
+
+function vectortest.testVectorDot()
+
+    --[[testing Vector2]]
+    local v1 = geometry.Vector2()
+    local v2 = geometry.Vector2()
+    assert(v1:dot(v2) == 0, "(0 * 0) + (0 * 0) wasn't 0")
+
+    v1 = geometry.Vector2(1, 1)
+    v2 = geometry.Vector2(0, 0)
+    assert(v1:dot(v2) == 0, "(1 * 0) + (1 * 0) wasn't 0")
+
+    v1 = geometry.Vector2(2, 2)
+    v2 = geometry.Vector2(3, 5)
+    assert(v1:dot(v2) == 16, "(2 * 3) + (2 * 5) wasn't 16")
+
+    v1 = geometry.Vector2(2, 2)
+    v2 = geometry.Vector2(1, -1)
+    assert(v1:dot(v2) == 0, "(2 * 1) + (2 * -1) wasn't 0")
+
+    v1 = geometry.Vector2(2, 2)
+    v2 = geometry.Vector2(-3, -5)
+    assert(v1:dot(v2) == -16, "(2 * -3) + (2 * -5) wasn't -16")
+
+
+    --[[testing Vector3]]
+    v1 = geometry.Vector3()
+    v2 = geometry.Vector3()
+    assert(v1:dot(v2) == 0, "(0 * 0) + (0 * 0) + (0 * 0) wasn't 0")
+
+    v1 = geometry.Vector3(1, 1, 1)
+    v2 = geometry.Vector3(0, 0, 0)
+    assert(v1:dot(v2) == 0, "(1 * 0) + (1 * 0) + (1 * 0) wasn't 0")
+
+    v1 = geometry.Vector3(2, 2, 2)
+    v2 = geometry.Vector3(3, 5, 7)
+    assert(v1:dot(v2) == 30, "(2 * 3) + (2 * 5) + (2 * 7) wasn't 30")
+
+    v1 = geometry.Vector3(2, 2, 2)
+    v2 = geometry.Vector3(1, -1, 0)
+    assert(v1:dot(v2) == 0, "(2 * 1) + (2 * -1) + (2 * 0) wasn't 0")
+
+    v1 = geometry.Vector3(2, 2, 2)
+    v2 = geometry.Vector3(-3, -5, -7)
+    assert(v1:dot(v2) == -30, "(2 * -3) + (2 * -5) + (2 * -7) wasn't -30")
+
+end
+
+function vectortest.testVector2Project()
+
+    --[[incorrect usage]]
+    local v2 = geometry.Vector2()
+    local dir = geometry.Vector2()
+
+    assert(pcall(function() v2:project(dir) end) == false, "an invalid direction vector was accepted")
+
+
+    --[[basic usage]]
+    v2 = geometry.Vector2()
+    local horiz = geometry.Vector2(1, 0)
+    local vert = geometry.Vector2(0, 1)
+    local upward = geometry.Vector2(1, 1)
+    local downward = geometry.Vector2(-1, 1)
+
+    local r = v2:project(horiz)
+    assert(r.x == 0, "vector x position didn't project horizontally to 0")
+    assert(r.y == 0, "vector y position projected horizontally didn't equal 0")
+
+    r = v2:project(vert)
+    assert(r.x == 0, "vector x position projected horizontally didn't equal 0")
+    assert(r.y == 0, "vector y position didn't project horizontally to 0")
+
+    r = v2:project(upward)
+    assert(r.x == 0, "vector x position didn't project diagonally upwards to 0")
+    assert(r.y == 0, "vector y position didn't project diagonally upwards to 0")
+
+    r = v2:project(downward)
+    assert(r.x == 0, "vector x position didn't project diagonally downwards to 0")
+    assert(r.y == 0, "vector y position didn't project diagonally downwards to 0")
+
+
+    --[[simple / first quadrant projection]]
+    -- only this section should repeat the x/y == 0 for horiz/vert projections,
+    -- since after that we know a non-zero starting point will always be rendered correctly
+    v2 = geometry.Vector2(1, 5)
+
+    r = v2:project(horiz)
+    assert(r.x == 1, "vector x position didn't project horizontally to 1")
+    assert(r.y == 0, "vector y position projected horizontally didn't equal 0")
+
+    r = v2:project(vert)
+    assert(r.x == 0, "vector x position projected horizontally didn't equal 0")
+    assert(r.y == 5, "vector y position didn't project horizontally to 5")
+
+    r = v2:project(upward)
+    assert(r.x == 3, "vector x position didn't project diagonally upwards to 3")
+    assert(r.y == 3, "vector y position didn't project diagonally upwards to 3")
+
+    r = v2:project(downward)
+    assert(r.x == -2, "vector x position didn't project diagonally downwards to -2")
+    assert(r.y == 2, "vector y position didn't project diagonally downwards to 2")
+
+
+    --[[second quadrant projection]]
+    v2 = geometry.Vector2(-1, 5)
+
+    r = v2:project(horiz)
+    assert(r.x == -1, "vector x position didn't project horizontally to -1")
+
+    r = v2:project(vert)
+    assert(r.y == 5, "vector y position didn't project horizontally to 5")
+
+    r = v2:project(upward)
+    assert(r.x == 2, "vector x position didn't project diagonally upwards to 2")
+    assert(r.y == 2, "vector y position didn't project diagonally upwards to 2")
+
+    r = v2:project(downward)
+    assert(r.x == -3, "vector x position didn't project diagonally downwards to -3")
+    assert(r.y == 3, "vector y position didn't project diagonally downwards to 3")
+
+
+    --[[third quadrant projection]]
+    v2 = geometry.Vector2(-1, -5)
+
+    r = v2:project(horiz)
+    assert(r.x == -1, "vector x position didn't project horizontally to -1")
+
+    r = v2:project(vert)
+    assert(r.y == -5, "vector y position didn't project horizontally to -5")
+
+    r = v2:project(upward)
+    assert(r.x == -3, "vector x position didn't project diagonally upwards to -3")
+    assert(r.y == -3, "vector y position didn't project diagonally upwards to -3")
+
+    r = v2:project(downward)
+    assert(r.x == 2, "vector x position didn't project diagonally downwards to 2")
+    assert(r.y == -2, "vector y position didn't project diagonally downwards to -2")
+
+
+    --[[fourth quadrant projection]]
+    v2 = geometry.Vector2(1, -5)
+
+    r = v2:project(horiz)
+    assert(r.x == 1, "vector x position didn't project horizontally to 1")
+
+    r = v2:project(vert)
+    assert(r.y == -5, "vector y position didn't project horizontally to -5")
+
+    r = v2:project(upward)
+    assert(r.x == -2, "vector x position didn't project diagonally upwards to -2")
+    assert(r.y == -2, "vector y position didn't project diagonally upwards to -2")
+
+    r = v2:project(downward)
+    assert(r.x == 3, "vector x position didn't project diagonally downwards to 3")
+    assert(r.y == -3, "vector y position didn't project diagonally downwards to -3")
+
+
+    --[[equivelance of >1 magnitude direction vectors]]
+    v2 = geometry.Vector2(1, 5)
+    horiz = geometry.Vector2(10, 0)
+    vert = geometry.Vector2(0, 100)
+    upward = geometry.Vector2(20, 20)
+    downward = geometry.Vector2(-25, 25)
+    
+    r = v2:project(horiz)
+    assert(r.x == 1, "vector x position didn't project horizontally to 1")
+    assert(r.y == 0, "vector y position projected horizontally didn't equal 0")
+
+    r = v2:project(vert)
+    assert(r.x == 0, "vector x position projected horizontally didn't equal 0")
+    assert(r.y == 5, "vector y position didn't project horizontally to 5")
+
+    r = v2:project(upward)
+    assert(r.x == 3, "vector x position didn't project diagonally upwards to 3")
+    assert(r.y == 3, "vector y position didn't project diagonally upwards to 3")
+
+    r = v2:project(downward)
+    assert(r.x == -2, "vector x position didn't project diagonally downwards to -2")
+    assert(r.y == 2, "vector y position didn't project diagonally downwards to 2")
+
+
+    --[[equivelance of negated direction vectors]]
+    v2 = geometry.Vector2(1, 5)
+    horiz = geometry.Vector2(-1, 0)
+    vert = geometry.Vector2(0, -1)
+    upward = geometry.Vector2(-1, -1)
+    downward = geometry.Vector2(1, -1)
+
+    r = v2:project(horiz)
+    assert(r.x == 1, "vector x position didn't project horizontally to 1")
+    assert(r.y == 0, "vector y position projected horizontally didn't equal 0")
+
+    r = v2:project(vert)
+    assert(r.x == 0, "vector x position projected horizontally didn't equal 0")
+    assert(r.y == 5, "vector y position didn't project horizontally to 5")
+
+    r = v2:project(upward)
+    assert(r.x == 3, "vector x position didn't project diagonally upwards to 3")
+    assert(r.y == 3, "vector y position didn't project diagonally upwards to 3")
+
+    r = v2:project(downward)
+    assert(r.x == -2, "vector x position didn't project diagonally downwards to -2")
+    assert(r.y == 2, "vector y position didn't project diagonally downwards to 2")
+
+
+end
+
+function vectortest.testVector2Angle()
+
+    local degrees_conv = 180/math.pi
+
+    --[[basic usage]]
+    local v2 = geometry.Vector2()
+    assert(v2:angle(true) == math.huge, "the radians angle to 0,0 wasn't inf")
+    assert(v2:angle() == math.huge, "the degrees angle to 0,0 wasn't inf")
+
+
+    --[[simple 8 directions]]
+    v2 = geometry.Vector2(1, 0)
+    assert(v2:angle(true) == 0, "the radians angle to 1,0 wasn't 0")
+    assert(v2:angle() == 0, "the degrees angle to 1,0 wasn't 0")
+
+    v2 = geometry.Vector2(1, 1)
+    assert(v2:angle(true) == math.rad(45), "the radians angle to 1,0 wasn't math.rad(45)")
+    assert(v2:angle() == 45, "the degrees angle to 1,0 wasn't 45")
+
+    v2 = geometry.Vector2(0, 1)
+    assert(v2:angle(true) == math.pi * 0.5, "the radians angle to 0,1 wasn't pi*0.5")
+    assert(v2:angle() == math.deg(math.pi * 0.5), "the degrees angle to 0,1 wasn't math.deg(pi*0.5)")
+
+    v2 = geometry.Vector2(-1, 1)
+    assert(v2:angle(true) == math.rad(135), "the radians angle to 1,0 wasn't math.rad(135)")
+    assert(v2:angle() == 135, "the degrees angle to 1,0 wasn't 135")
+
+    v2 = geometry.Vector2(-1, 0)
+    assert(v2:angle(true) == math.rad(180), "the radians angle to 1,0 wasn't math.rad(180)")
+    assert(v2:angle() == 180, "the degrees angle to 1,0 wasn't 180")
+
+    v2 = geometry.Vector2(-1, -1)
+    assert(v2:angle(true) == math.rad(225), "the radians angle to 1,0 wasn't math.rad(225)")
+    assert(v2:angle() == 225, "the degrees angle to 1,0 wasn't 225")
+
+    v2 = geometry.Vector2(0, -1)
+    assert(v2:angle(true) == math.pi * 1.5, "the radians angle to 0,1 wasn't pi*1.5")
+    assert(v2:angle() == math.deg(math.pi * 1.5), "the degrees angle to 0,1 wasn't math.deg(pi*1.5)")
+
+    v2 = geometry.Vector2(1, -1)
+    assert(v2:angle(true) == math.rad(315), "the radians angle to 1,0 wasn't math.rad(315)")
+    assert(v2:angle() == 315, "the degrees angle to 1,0 wasn't 315")
+
+end
+
+function vectortest.testVector3Angle()
+
+    --[[basic usage]]
+    local v3 = geometry.Vector3()
+    assert(v3:angle(true) == math.huge, "the radians angle to 0,0 wasn't inf")
+    assert(v3:angle() == math.huge, "the degrees angle to 0,0 wasn't inf")
+
+
+    --[[simple 8 directions]]
+    v3 = geometry.Vector3(1, 0, 5)
+    assert(v3:angle(true) == 0, "the radians angle to 1,0 wasn't 0")
+    assert(v3:angle() == 0, "the degrees angle to 1,0 wasn't 0")
+
+    v3 = geometry.Vector3(1, 1, 50)
+    assert(v3:angle(true) == math.rad(45), "the radians angle to 1,0 wasn't math.rad(45)")
+    assert(v3:angle() == 45, "the degrees angle to 1,0 wasn't 45")
+
+    v3 = geometry.Vector3(0, 1, 55)
+    assert(v3:angle(true) == math.pi * 0.5, "the radians angle to 0,1 wasn't pi*0.5")
+    assert(v3:angle() == math.deg(math.pi * 0.5), "the degrees angle to 0,1 wasn't math.deg(pi*0.5)")
+
+    v3 = geometry.Vector3(-1, 1, 500)
+    assert(v3:angle(true) == math.rad(135), "the radians angle to 1,0 wasn't math.rad(135)")
+    assert(v3:angle() == 135, "the degrees angle to 1,0 wasn't 135")
+
+    v3 = geometry.Vector3(-1, 0, 505)
+    assert(v3:angle(true) == math.rad(180), "the radians angle to 1,0 wasn't math.rad(180)")
+    assert(v3:angle() == 180, "the degrees angle to 1,0 wasn't 180")
+
+    v3 = geometry.Vector3(-1, -1, 555)
+    assert(v3:angle(true) == math.rad(225), "the radians angle to 1,0 wasn't math.rad(225)")
+    assert(v3:angle() == 225, "the degrees angle to 1,0 wasn't 225")
+
+    v3 = geometry.Vector3(0, -1, 5000)
+    assert(v3:angle(true) == math.pi * 1.5, "the radians angle to 0,1 wasn't pi*1.5")
+    assert(v3:angle() == math.deg(math.pi * 1.5), "the degrees angle to 0,1 wasn't math.deg(pi*1.5)")
+
+    v3 = geometry.Vector3(1, -1, 5005)
+    assert(v3:angle(true) == math.rad(315), "the radians angle to 1,0 wasn't math.rad(315)")
+    assert(v3:angle() == 315, "the degrees angle to 1,0 wasn't 315")
 
 end
 

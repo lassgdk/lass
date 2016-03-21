@@ -185,7 +185,6 @@ end
 function Vector2:angle(useRadians)
 	--return the angle of this vector relative to the origin
 
-
 	local c = 1
 	if not useRadians then
 		c = 180/math.pi
@@ -203,11 +202,11 @@ function Vector2:angle(useRadians)
 	end
 
 	--tangent = opposite / adjacent
-	local ang =  math.atan(self.y / self.x)
+	local ang = math.atan(self.y / self.x)
 
 	-- right now the angle doesn't tell us which quadrant the vector is in
 
-	-- top-left quadrant should be between 90 and 180;
+	-- top-left quadrant should be between 90 and 180,
 	-- bottom-left quadrant should be between 180 and 270
 	if self.x < 0 then
 		return (ang + math.pi) * c
