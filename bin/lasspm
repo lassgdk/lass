@@ -59,6 +59,11 @@ def main():
 				"action":"store_true",
 				"default":False,
 				"help":"search for game in examples folder"
+			}),
+			(("-v", "--verbose"), {
+				"action":"store_true",
+				"default":False,
+				"help": "print verbose error messages"
 			})
 		]),
 		"new": (pm.newGame, [
@@ -68,6 +73,11 @@ def main():
 				"nargs":"?",
 				"help":"name of new game project directory"
 			}),
+			(("-v", "--verbose"), {
+				"action":"store_true",
+				"default":False,
+				"help": "print verbose error messages"
+			})
 		]),
 		"new-prefab": (pm.newPrefab, [
 			(("fileName",), {
@@ -76,6 +86,11 @@ def main():
 				# "nargs":1,
 				"help":"file name of new prefab"
 			}),
+			(("-v", "--verbose"), {
+				"action":"store_true",
+				"default":False,
+				"help": "print verbose error messages"
+			})
 		]),
 		"play": (pm.playGame, [
 			(("game",), {
@@ -98,6 +113,11 @@ def main():
 				"type":str,
 				"default":"",
 				"help":"name of scene to play"
+			}),
+			(("-v", "--verbose"), {
+				"action":"store_true",
+				"default":False,
+				"help": "print verbose error messages"
 			})
 		]),
 	}
@@ -129,7 +149,13 @@ def main():
 	try:
 		command[0](**args.__dict__)
 	except Exception as e:
-		sys.exit(traceback.format_exc(sys.exc_info()[2]))
+		info = sys.exc_info()
+		verbose = getattr(args, "verbose", False)
+
+		if verbose:
+			sys.exit(traceback.format_exc(info[2]))
+		else:
+			sys.exit("".join(traceback.format_exception_only(info[0], info[1])))
 
 if __name__ == "__main__":
 	main()
