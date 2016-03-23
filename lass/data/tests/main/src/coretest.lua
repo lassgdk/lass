@@ -24,6 +24,39 @@ local function testGlobalPosition(object, assertedPosition)
 
 end
 
+local function searchTreeDepth(list, value, depth)
+
+	for i, entity in ipairs(list) do
+		if entity == value then
+			return depth
+		else
+			local found = searchTreeDepth(entity.children, value, depth+1)
+			if found then
+				return found
+			end
+		end
+	end
+
+end
+
+local function searchTreeCount(list, value, count)
+
+	if count == nil then
+		count = 0
+	end
+
+	for i, entity in ipairs(list) do
+		if entity == value then
+			count = count + 1
+		end
+		debug.log(value.name, entity.name, count)
+		count = searchTreeCount(entity.children, value, count)
+	end
+
+	return count
+
+end
+
 function coretest.testGameObjectMovement(scene)
 
 	--[[setup]]
@@ -381,13 +414,32 @@ end
 function coretest.testGameObjectRemovalWithoutChildren(scene)
 
 	--[[GameScene:removeGameObject]]
-	local numChildren = #scene.children
 	local object = lass.GameObject(scene, "testing object")
-
 	scene:removeGameObject(object)
-	-- assert(object == nil, "object was not removed")
+
 	assert(object.active == false, "object was not deactivated")
-	assert(collections.index(scene.children, object) == nil, "object was not removed from scene")
+	assert(searchTreeDepth(scene.children, object, 1) == nil, "object was not removed from scene")
+	assert(searchTreeDepth(scene.gameObjects, object, 1) == nil, "object was not removed from scene")
+	-- assert(searchTreeCount(scene.children, object) == 0, "object was not removed from scene")
+	-- assert(searchTreeCount(scene.gameObjects, object) == 0, "object was not removed from scene")
+
+
+	--[[GameObject:destroy]]
+	object = lass.GameObject(scene, "testing object")
+	object:destroy()
+
+	assert(object.active == false, "object was not deactivated")
+	assert(searchTreeDepth(scene.children, object, 1) == nil, "object was not removed from scene")
+	assert(searchTreeDepth(scene.gameObjects, object, 1) == nil, "object was not removed from scene")
+
+
+	--[[GameScene:removeChild]]
+	object = lass.GameObject(scene, "testing object")
+	scene:removeChild(object)
+
+	-- assert(object.active == false, "object was not deactivated")
+	-- assert(searchTreeDepth(scene.children, object, 1) == nil, "object was not removed from scene")
+	-- assert(searchTreeDepth(scene.gameObjects, object, 1) == nil, "object was not removed from scene")
 
 end
 

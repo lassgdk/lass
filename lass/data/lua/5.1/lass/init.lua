@@ -300,6 +300,10 @@ end
 
 function GameEntity:removeChild(child, removeDescendants)
 
+	if child == nil then
+		error("'child' must not be nil")
+	end
+
 	local index
 	if removeDescendants == nil then
 		removeDescendants = true

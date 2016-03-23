@@ -10,8 +10,6 @@ local testModules = require("testmodules")
 function love.load()
 
 	math.randomseed(os.time())
-	scene = lass.GameScene()
-	scene:loadSettings("settings.lua")
 
 	local loadedModules = {}
 	for i, v in ipairs(testModules) do
@@ -39,6 +37,8 @@ function love.load()
 
 			testsRun = testsRun + 1
 
+			scene = lass.GameScene()
+			scene:loadSettings("settings.lua")
 			local r, d = xpcall(loadedModule[testName], debug.traceback, scene)
 			-- local r, d = pcall(loadedModule[testName], scene)
 
