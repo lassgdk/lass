@@ -1,5 +1,6 @@
 local lass = require("lass")
 local geometry = require("lass.geometry")
+local collections = require("lass.collections")
 
 local coretest = {}
 
@@ -374,6 +375,28 @@ function coretest.testGlobalRotation(scene)
 	child:rotateTo(-361)
 	assert(object.globalRotation == 0, "object wasn't correctly globally rotated to 0")
 	assert(child.globalRotation == 359, "child wasn't correctly globally rotated to 359")
+
+end
+
+function coretest.testGameObjectRemovalWithoutChildren(scene)
+
+	--[[GameScene:removeGameObject]]
+	local numChildren = #scene.children
+	local object = lass.GameObject(scene, "testing object")
+
+	scene:removeGameObject(object)
+	-- assert(object == nil, "object was not removed")
+	assert(object.active == false, "object was not deactivated")
+	assert(collections.index(scene.children, object) == nil, "object was not removed from scene")
+
+end
+
+function coretest.testGameObjectRemovalWithChildren(scene)
+
+	--[[setup]]
+	local object = lass.GameObject(scene, "test")
+	local child = lass.GameObject(scene, "test child")
+	object:addChild(child)
 
 end
 

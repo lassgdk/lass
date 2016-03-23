@@ -1282,7 +1282,7 @@ function GameScene:removeGameObject(gameObject, removeDescendants)
 	end
 
 	gameObject.gameScene = nil
-	self.__base.removeChild(self, child, removeDescendants)
+	self.__base.removeChild(self, gameObject, removeDescendants)
 
 	if removeDescendants == true then
 		for i, child in ipairs(gameObject.children) do
