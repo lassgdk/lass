@@ -198,4 +198,183 @@ function coretest.testGameObjectRotation(scene)
 
 end
 
+function coretest.testGameObjectChildRotation(scene)
+
+	--[[setup]]
+	local object = lass.GameObject(scene, "test")
+	local child = lass.GameObject(scene, "test child")
+	object:addChild(child)
+
+	assert(child.transform.rotation == 0, "default child rotation wasn't 0")
+	assert(child.globalTransform.rotation == 0, "default child global rotation wasn't 0")
+
+
+	--[[GameObject.rotate]]
+	object:rotate(45)
+	assert(child.transform.rotation == 0, "child rotation didn't stay at 0")
+	assert(child.globalTransform.rotation == 45, "child wasn't correctly globally rotated to 45")
+
+	child:rotate(45)
+	assert(child.transform.rotation == 45, "child wasn't correctly rotated to 45")
+	assert(child.globalTransform.rotation == 90, "child wasn't correctly globally rotated to 90")
+
+	object:rotate(-40)
+	assert(child.transform.rotation == 45, "child didn't maintain rotation")
+	assert(child.globalTransform.rotation == 50, "child wasn't correctly globally rotated to 50")
+
+	child:rotate(-20)
+	assert(child.transform.rotation == 25, "child didn't maintain rotation")
+	assert(child.globalTransform.rotation == 30, "child wasn't correctly globally rotated to 30")
+
+	object:rotate(360)
+	child:rotate(-360)
+	assert(child.transform.rotation == 25, "child didn't maintain rotation")
+	assert(child.globalTransform.rotation == 30, "child didn't maintain global rotation")
+
+
+	--[[GameObject.rotate]]
+	object:rotateTo(0)
+	child:rotateTo(0)
+	assert(child.transform.rotation == 0, "child wasn't correctly rotated to 0")
+	assert(child.globalTransform.rotation == 0, "child wasn't correctly globally rotated to 0")
+
+	object:rotateTo(70)
+	assert(child.transform.rotation == 0, "child didn't maintain rotation")
+	assert(child.globalTransform.rotation == 70, "child wasn't correctly globally rotated to 70")
+
+	child:rotateTo(80)
+	assert(child.transform.rotation == 80, "child wasn't correctly rotated to 80")
+	assert(child.globalTransform.rotation == 150, "child wasn't correctly globally rotated to 150")
+
+	object:rotateTo(360)
+	child:rotateTo(-361)
+	assert(child.transform.rotation == 359, "child wasn't correctly rotated to 359")
+	assert(child.globalTransform.rotation == 359, "child wasn't correctly globally rotated to 359")
+
+end
+
+function coretest.testGlobalPosition(scene)
+
+	--[[setup]]
+	local object = lass.GameObject(scene, "test")
+	local child = lass.GameObject(scene, "test child")
+	object:addChild(child)
+
+	assert(object.globalPosition == geometry.Vector3(0, 0, 0), "object global position didn't default correctly")
+	assert(child.globalPosition == geometry.Vector3(0, 0, 0), "child global position didn't default correctly")
+
+
+	--[[GameObject.move]]
+	object:move(5,5)
+	child:move(0,1)
+	assert(object.globalPosition == geometry.Vector3(5, 5, 0), "object global position didn't move correctly")
+	assert(child.globalPosition == geometry.Vector3(5, 6, 0), "child global position didn't move correctly")
+
+	object:move(-5,-5)
+	child:move(0,-1)
+	assert(object.globalPosition == geometry.Vector3(0, 0, 0), "object global position didn't move correctly")
+	assert(child.globalPosition == geometry.Vector3(0, 0, 0), "child global position didn't move correctly")
+
+
+	--[[GameObject.moveTo]]
+	object:moveTo(10,10)
+	child:moveTo(-2,0)
+	assert(object.globalPosition == geometry.Vector3(10, 10, 0), "object global position didn't move correctly")
+	assert(child.globalPosition == geometry.Vector3(8, 10, 0), "child global position didn't move correctly")
+
+	object:moveTo(0,0)
+	assert(object.globalPosition == geometry.Vector3(0, 0, 0), "object global position didn't move correctly")
+	assert(child.globalPosition == geometry.Vector3(-2, 0, 0), "child global position didn't move correctly")
+
+	child:moveTo(0,0)
+	assert(object.globalPosition == geometry.Vector3(0, 0, 0), "object global position didn't stay in place")
+	assert(child.globalPosition == geometry.Vector3(0, 0, 0), "child global position didn't move correctly")
+
+
+	--[[GameObject.moveGlobal]]
+	object:moveGlobal(5,5)
+	child:moveGlobal(0,1)
+	assert(object.globalPosition == geometry.Vector3(5, 5, 0), "object global position didn't move correctly")
+	assert(child.globalPosition == geometry.Vector3(5, 6, 0), "child global position didn't move correctly")
+
+	object:moveGlobal(-5,-5)
+	assert(object.globalPosition == geometry.Vector3(0, 0, 0), "object global position didn't move correctly")
+	assert(child.globalPosition == geometry.Vector3(0, 1, 0), "child global position didn't move correctly")
+
+	child:moveGlobal(0,-1)
+	assert(object.globalPosition == geometry.Vector3(0, 0, 0), "object global position didn't stay in place")
+	assert(child.globalPosition == geometry.Vector3(0, 0, 0), "child global position didn't move correctly")
+
+
+	--[[GameObject.moveToGlobal]]
+	object:moveToGlobal(-2,10)
+	child:moveToGlobal(5,5)
+	assert(object.globalPosition == geometry.Vector3(-2, 10, 0), "object global position didn't move correctly")
+	assert(child.globalPosition == geometry.Vector3(5, 5, 0), "child global position didn't move correctly")
+
+	object:moveToGlobal(0,0)
+	assert(object.globalPosition == geometry.Vector3(0, 0, 0), "object global position didn't move correctly")
+	assert(child.globalPosition == geometry.Vector3(7, -5, 0), "child global position didn't move correctly")
+
+	child:moveToGlobal(0,0)
+	assert(object.globalPosition == geometry.Vector3(0, 0, 0), "object global position didn't stay in place")
+	assert(child.globalPosition == geometry.Vector3(0, 0, 0), "child global position didn't move correctly")
+
+end
+
+function coretest.testGlobalRotation(scene)
+
+	--[[setup]]
+	local object = lass.GameObject(scene, "test")
+	local child = lass.GameObject(scene, "test child")
+	object:addChild(child)
+
+	assert(object.globalRotation == 0, "default object rotation wasn't 0")
+	assert(child.globalRotation == 0, "default child global rotation wasn't 0")
+
+
+	--[[GameObject.rotate]]
+	object:rotate(45)
+	assert(object.globalRotation == 45, "object wasn't correctly globally rotated to 45")
+	assert(child.globalRotation == 45, "child wasn't correctly globally rotated to 45")
+
+	child:rotate(45)
+	assert(object.globalRotation == 45, "object didn't maintain global rotation")
+	assert(child.globalRotation == 90, "child wasn't correctly globally rotated to 90")
+
+	object:rotate(-40)
+	assert(object.globalRotation == 5, "object wasn't correctly globally rotated to 5")
+	assert(child.globalRotation == 50, "child wasn't correctly globally rotated to 50")
+
+	child:rotate(-20)
+	assert(object.globalRotation == 5, "object didn't maintain global rotation")
+	assert(child.globalRotation == 30, "child wasn't correctly globally rotated to 30")
+
+	object:rotate(360)
+	child:rotate(-360)
+	assert(object.globalRotation == 5, "object didn't maintain global rotation")
+	assert(child.globalRotation == 30, "child didn't maintain global rotation")
+
+
+	--[[GameObject.rotate]]
+	object:rotateTo(0)
+	child:rotateTo(0)
+	assert(object.globalRotation == 0, "object wasn't correctly globally rotated to 0")
+	assert(child.globalRotation == 0, "child wasn't correctly globally rotated to 0")
+
+	object:rotateTo(70)
+	assert(object.globalRotation == 70, "object wasn't correctly globally rotated to 70")
+	assert(child.globalRotation == 70, "child wasn't correctly globally rotated to 70")
+
+	child:rotateTo(80)
+	assert(object.globalRotation == 70, "object didn't maintain global rotation")
+	assert(child.globalRotation == 150, "child wasn't correctly globally rotated to 150")
+
+	object:rotateTo(360)
+	child:rotateTo(-361)
+	assert(object.globalRotation == 0, "object wasn't correctly globally rotated to 0")
+	assert(child.globalRotation == 359, "child wasn't correctly globally rotated to 359")
+
+end
+
 return coretest

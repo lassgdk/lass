@@ -101,6 +101,18 @@ GameEntity
 
 --[[internal]]
 
+local function retrieveParent(self)
+	-- returns the most suitable parent, 
+
+	if self.parent then
+		return self.parent.globalTransform
+	elseif self.gameScene then
+		return self.gameScene.transform
+	end
+	-- otherwise, fall back on returning nil
+
+end
+
 -- local function maintainTransform(self, updateDescendants, descendantToExclude)
 -- 	--maintain global position and rotation
 
@@ -167,17 +179,11 @@ end)
 
 function GameEntity.__get.globalTransform(self)
 
-	-- self.transform.rotation = self.transform.rotation % 360
-
 	local t = self.transform
-	local p = nil
+	local p = retrieveParent(self)
 
-	if self.parent and next(self.parent) ~= nil then
-		p = self.parent.globalTransform
-	elseif self.gameScene and next(self.gameScene) ~= nil then
-		p = self.gameScene.transform
-	else
-		return geometry.Transform(self.transform)
+	if p == nil then
+		return geometry.Transform(t)
 	end
 
 	local gt = geometry.Transform({
@@ -202,6 +208,68 @@ end
 function GameEntity.__set.globalTransform(self)
 
 	error("attempt to set read-only field \"globalTransform\"")
+end
+
+function GameEntity.__get.globalPosition(self)
+
+	local t = self.transform
+	local p = retrieveParent(self)
+
+	if p == nil then
+		return geometry.Transform(t.position)
+	end
+
+	return geometry.Vector3({
+		x = p.position.x + (t.position.x * p.size.x),
+		y = p.position.y + (t.position.y * p.size.y),
+		z = p.position.z + (t.position.z * p.size.z),
+	}):rotate(p.rotation)
+
+end
+
+function GameEntity.__set.globalPosition(self)
+
+	error("attempt to set read-only field \"globalPosition\"")
+end
+
+function GameEntity.__get.globalSize(self)
+
+	local t = self.transform
+	local p = retrieveParent(self)
+
+	if p == nil then
+		return geometry.Transform(t.size)
+	end
+
+	return geometry.Vector3({
+		x = t.size.x * p.size.x,
+		y = t.size.y * p.size.y,
+		z = t.size.z * p.size.z,
+	})
+
+end
+
+function GameEntity.__set.globalSize(self)
+
+	error("attempt to set read-only field \"globalSize\"")
+end
+
+function GameEntity.__get.globalRotation(self)
+
+	local t = self.transform
+	local p = retrieveParent(self)
+
+	if p == nil then
+		return geometry.Transform(t.rotation)
+	end
+
+	return t.rotation + p.rotation
+
+end
+
+function GameEntity.__set.globalRotation(self)
+
+	error("attempt to set read-only field \"globalRotation\"")
 end
 
 -- trackParent should normally be false if GameEntity is scene and child is GameObject
