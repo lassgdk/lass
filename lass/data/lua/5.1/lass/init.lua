@@ -636,8 +636,10 @@ end
 -- end
 
 function GameObject:destroy(destroyDescendants)
-
-	self.gameScene:removeGameObject(self, destroyDescendants)
+	
+	if self.gameScene then
+		self.gameScene:removeGameObject(self, destroyDescendants)
+	end
 end
 
 function GameObject:activate(activateDescendants)
