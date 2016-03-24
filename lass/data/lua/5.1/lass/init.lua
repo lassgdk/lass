@@ -1294,11 +1294,11 @@ function GameScene:removeGameObject(gameObject, removeDescendants)
 		for i, child in ipairs(gameObject.children) do
 			self:removeGameObject(child, true)
 		end
-	-- if this object has no parent, its children must become children of the scene
-	elseif not class.instanceof(gameObject.parent, GameObject) then
-		for i, child in ipairs(gameObject.children) do
-			self:addChild(child, false)
-		end
+	-- -- if this object has no parent, its children must become children of the scene
+	-- elseif not class.instanceof(gameObject.parent, GameObject) then
+	-- 	for i, child in ipairs(gameObject.children) do
+	-- 		self:addChild(child, false)
+	-- 	end
 	end
 end
 
