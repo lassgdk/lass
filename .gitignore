@@ -12,3 +12,4 @@ update.sh
 *.sublime-*
 setup.bat
 docs
+lass/data/tests/*/src/turtlemode.lua

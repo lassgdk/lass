@@ -40,12 +40,11 @@ function love.load()
 			scene = lass.GameScene()
 			scene:loadSettings("settings.lua")
 			local r, d = xpcall(loadedModule[testName], debug.traceback, scene)
-			-- local r, d = pcall(loadedModule[testName], scene)
 
 			if not r then
 				print(testName .. " gave the following error:")
 
-				--indent the error message
+				-- indent the error message
 				print("    " .. d:gsub("\n", "\n    "))
 
 				failures = failures + 1
