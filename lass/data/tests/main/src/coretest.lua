@@ -420,11 +420,10 @@ function coretest.testGameObjectRemovalWithoutChildren(scene)
 
 	--[[GameScene:removeGameObject]]
 	local object = lass.GameObject(scene, "testing object")
-	scene:removeGameObject(object)
 
+	scene:removeGameObject(object)
 	assert(object.active == false, "object was not deactivated")
 	assert(searchTreeDepth(scene.children, object) == nil, "object was not removed from scene")
-	assert(searchTreeDepth(scene.gameObjects, object) == nil, "object was not removed from scene")
 
 	-- a second call should produce no error
 	scene:removeGameObject(object)
@@ -432,11 +431,10 @@ function coretest.testGameObjectRemovalWithoutChildren(scene)
 
 	--[[GameObject:destroy]]
 	object = lass.GameObject(scene, "testing object")
-	object:destroy()
 
+	object:destroy()
 	assert(object.active == false, "object was not deactivated")
 	assert(searchTreeDepth(scene.children, object) == nil, "object was not removed from scene")
-	assert(searchTreeDepth(scene.gameObjects, object) == nil, "object was not removed from scene")
 
 	-- a second call should produce no error
 	object:destroy()
@@ -444,18 +442,18 @@ function coretest.testGameObjectRemovalWithoutChildren(scene)
 
 	--[[GameScene:removeChild]]
 	object = lass.GameObject(scene, "testing object")
-	scene:removeChild(object)
 
+	scene:removeChild(object)
 	assert(object.active == true, "object was incorrectly deactivated")
 	assert(searchTreeDepth(scene.children, object) == nil, "object was not removed from scene children")
-	assert(searchTreeDepth(scene.gameObjects, object) == 1,
-			"object was incorrectly removed from scene gameObjects")
 
-	-- a second call should not change anything
-	scene:removeChild(object)
+
+	--[[GameObject:removeChild]]
+	object = lass.GameObject(scene, "testing object")
+
+	object:removeChild(object)
 	assert(object.active == true, "object was incorrectly deactivated")
-	assert(searchTreeDepth(scene.gameObjects, object) == 1,
-			"object was incorrectly removed from scene gameObjects")
+	assert(searchTreeDepth(scene.children, object) == 1, "object was incorrectly removed from scene children")
 
 end
 
@@ -465,28 +463,25 @@ function coretest.testGameObjectRemovalWithChildren(scene)
 	local object = lass.GameObject(scene, "test")
 	local child = lass.GameObject(scene, "test child")
 	object:addChild(child)
-	scene:removeGameObject(object, true)
 
+	scene:removeGameObject(object, true)
 	assert(child.active == false, "child was not deactivated")
 	assert(searchTreeDepth(scene.children, child) == nil, "child was not removed from scene")
-	assert(searchTreeDepth(scene.gameObjects, child) == nil, "child was not removed from scene")
+	-- assert(searchTreeDepth(object.children, child) == nil, "child was not removed from object")
 
 	object = lass.GameObject(scene, "test")
 	child = lass.GameObject(scene, "test child")
 	object:addChild(child)
-	scene:removeGameObject(object, false)
 
+	scene:removeGameObject(object, false)
 	assert(child.active == true, "child was incorrectly deactivated")
-	assert(searchTreeDepth(scene.children, child) == 1, "child was incorrectly not made a child of the scene")
-	assert(searchTreeDepth(scene.gameObjects, child) == 1, "child was incorrectly removed from gameObjects")
+	assert(searchTreeDepth(scene.children, child) == 1, "child was not made a child of the scene")
 	assert(searchTreeCount(scene.children, child) == 1, "child reference count is incorrect")
-	assert(searchTreeCount(scene.gameObjects, child) == 1, "child was incorrectly removed or duplicated")
 
 	scene:removeGameObject(child)
-
 	assert(child.active == false, "child was not deactivated")
 	assert(searchTreeDepth(scene.children, child) == nil, "child was not removed from scene")
-	assert(searchTreeDepth(scene.gameObjects, child) == nil, "child was not removed from scene")
+	-- assert(searchTreeDepth(object.children, child) == nil, "child was not removed from object")
 
 
 	--[[GameObject:destroy]]
@@ -494,17 +489,75 @@ function coretest.testGameObjectRemovalWithChildren(scene)
 	child = lass.GameObject(scene, "test child")
 	object:addChild(child)
 
+	object:destroy(true)
+	assert(child.active == false, "child was not deactivated")
+	assert(searchTreeDepth(scene.children, child) == nil, "child was not removed from scene")
+
+	object = lass.GameObject(scene, "test")
+	child = lass.GameObject(scene, "test child")
+	object:addChild(child)
+
+	object:destroy(false)
+	assert(child.active == true, "child was incorrectly deactivated")
+	assert(searchTreeDepth(scene.children, child) == 1, "child was not made a child of the scene")
+	assert(searchTreeCount(scene.children, child) == 1, "child reference count is incorrect")
+
+	-- this shouldn't do anything, since the object was already destroyed
+	object:destroy(true)
+	assert(child.active == true, "child was incorrectly deactivated")
+
+	child:destroy()
+	assert(child.active == false, "child was not deactivated")
+	assert(searchTreeDepth(scene.children, child) == nil, "child was not removed from scene")
+
+	-- a second call should produce no error
+	child:destroy()
+
 
 	--[[GameScene:removeChild]]
 	object = lass.GameObject(scene, "test")
 	child = lass.GameObject(scene, "test child")
 	object:addChild(child)
 
+	scene:removeChild(object, true)
+	assert(child.active == true, "child was incorrectly deactivated")
+	assert(searchTreeDepth(scene.children, child) == nil, "child was not removed from scene")
+	assert(searchTreeDepth(object.children, child) == 1, "child was incorrectly removed from object")
+
+	object = lass.GameObject(scene, "test")
+	child = lass.GameObject(scene, "test child")
+	object:addChild(child)
+
+	scene:removeChild(child)
+	assert(child.active == true, "child was incorrectly deactivated")
+	assert(searchTreeDepth(scene.children, child) == 2,
+		"child was removed from scene children, even though it's not a direct child")
+	assert(searchTreeDepth(object.children, child) == 1, "child was incorrectly removed from object")
+
+	scene:removeChild(object, false)
+	assert(child.active == true, "child was incorrectly deactivated")
+	assert(searchTreeDepth(scene.children, child) == 1, "child was not made a child of the scene")
+	assert(searchTreeCount(scene.children, child) == 1, "child reference count is incorrect")
+	assert(searchTreeDepth(object.children, child) == 1, "child was incorrectly removed from object")
+
+	scene:removeChild(child)
+	assert(child.active == true, "child was incorrectly deactivated")
+	assert(searchTreeDepth(scene.children, child) == nil, "child was not removed from scene")
+
 
 	--[[GameObject:removeChild]]
 	object = lass.GameObject(scene, "test")
 	child = lass.GameObject(scene, "test child")
 	object:addChild(child)
+
+	child:removeChild(child)
+	assert(child.active == true, "child was incorrectly deactivated")
+	assert(searchTreeDepth(scene.children, child) == 2, "child was incorrectly removed from scene children")
+
+	object:removeChild(child)
+	assert(child.active == true, "child was incorrectly deactivated")
+	assert(searchTreeDepth(scene.children, child) == nil, "child was not removed from scene")
+	assert(searchTreeDepth(object.children, child) == nil, "child was not removed from object")
 
 end
 
