@@ -24,6 +24,26 @@ local function testGlobalPosition(object, assertedPosition)
 
 end
 
+local function testLocalSize(object, assertedSize)
+
+	local s1, s2 = tostring(assertedSize), tostring(object.transform.size)
+	assert(
+		object.transform.size == assertedSize,
+		"local transform size should be" .. s1 .. " but is " .. s2
+	)
+
+end
+
+local function testGlobalSize(object, assertedSize)
+
+	local s1, s2 = tostring(assertedSize), tostring(object.globalSize)
+	assert(
+		object.globalSize == assertedSize,
+		"global transform size should be" .. s1 .. " but is " .. s2
+	)
+
+end
+
 local function searchTreeDepth(list, value, depth)
 
 	if depth == nil then
@@ -183,6 +203,59 @@ function coretest.testGameObjectChildMovement(scene)
 
 end
 
+function coretest.testGameObjectResizing(scene)
+
+	--[[setup]]
+	local object = lass.GameObject(scene, "test")
+
+	testLocalSize(object, geometry.Vector3(1, 1, 1))
+	testGlobalSize(object, geometry.Vector3(1, 1, 1))
+
+
+	--[[GameEntity.resize]]
+	object:resize(1, 1, 1)
+	testLocalSize(object, geometry.Vector3(2, 2, 2))
+	testGlobalSize(object, geometry.Vector3(2, 2, 2))
+
+	object:resize(5, 5, 5)
+	testLocalSize(object, geometry.Vector3(7, 7, 7))
+	testGlobalSize(object, geometry.Vector3(7, 7, 7))
+
+	object:resize(2, 4, 7)
+	testLocalSize(object, geometry.Vector3(9, 11, 14))
+	testGlobalSize(object, geometry.Vector3(9, 11, 14))
+
+
+	--[[testing useNegative]]
+	object:resize(-100, -100, -100, false)
+	testLocalSize(object, geometry.Vector3(0, 0, 0))
+	testGlobalSize(object, geometry.Vector3(0, 0, 0))
+
+	object:resize(-2, -4, -7, true)
+	testLocalSize(object, geometry.Vector3(-2, -4, -7))
+	testGlobalSize(object, geometry.Vector3(-2, -4, -7))
+
+	object:resize(-2, -4, -7, false)
+	testLocalSize(object, geometry.Vector3(0, 0, 0))
+	testGlobalSize(object, geometry.Vector3(0, 0, 0))
+
+	object:resize(-2, -4, -7, true)
+	object:resize(-2, -4, -7, true)
+	testLocalSize(object, geometry.Vector3(-4, -8, -14))
+	testGlobalSize(object, geometry.Vector3(-4, -8, -14))
+
+end
+
+function coretest.testGameObjectChildResizing(scene)
+
+	--[[setup]]
+	local object = lass.GameObject(scene, "test")
+	local child = lass.GameObject(scene, "test child")
+	object:addChild(child)
+
+
+end
+
 function coretest.testGameObjectRotation(scene)
 
 	--[[setup]]
@@ -289,14 +362,6 @@ function coretest.testGameObjectChildRotation(scene)
 	child:rotateTo(-361)
 	assert(child.transform.rotation == 359, "child wasn't correctly rotated to 359")
 	assert(child.globalTransform.rotation == 359, "child wasn't correctly globally rotated to 359")
-
-end
-
-function coretest.testGameObjectResizing(scene)
-
-	--[[setup]]
-	local object = lass.GameObject(scene, "test")
-
 
 end
 
