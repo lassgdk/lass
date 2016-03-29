@@ -253,6 +253,54 @@ function coretest.testGameObjectChildResizing(scene)
 	local child = lass.GameObject(scene, "test child")
 	object:addChild(child)
 
+	testLocalSize(child, geometry.Vector3(1, 1, 1))
+	testGlobalSize(child, geometry.Vector3(1, 1, 1))
+
+
+	--[[GameEntity.resize]]
+	object:resize(1, 1, 1)
+	testLocalSize(child, geometry.Vector3(1, 1, 1))
+	testGlobalSize(child, geometry.Vector3(2, 2, 2))
+
+	child:resize(2, 2, 2)
+	testLocalSize(child, geometry.Vector3(3, 3, 3))
+	testGlobalSize(child, geometry.Vector3(6, 6, 6))
+
+	child:resize(1, 2, 3)
+	testLocalSize(child, geometry.Vector3(4, 5, 6))
+	testGlobalSize(child, geometry.Vector3(8, 10, 12))
+
+
+	--[[testing useNegative]]
+	object:resize(-100, -100, -100, false)
+	testLocalSize(child, geometry.Vector3(4, 5, 6))
+	testGlobalSize(child, geometry.Vector3(0, 0, 0))
+
+	child:resize(-100, -100, -100, false)
+	testLocalSize(child, geometry.Vector3(0, 0, 0))
+	testGlobalSize(child, geometry.Vector3(0, 0, 0))
+
+	object:resize(-1, -2, -3, true)
+	testLocalSize(child, geometry.Vector3(0, 0, 0))
+	testGlobalSize(child, geometry.Vector3(0, 0, 0))
+
+	child:resize(1, 1, 1, false)
+	testLocalSize(child, geometry.Vector3(1, 1, 1))
+	testGlobalSize(child, geometry.Vector3(-1, -2, -3))
+
+	child:resize(-3, -3, -3, true)
+	testLocalSize(child, geometry.Vector3(-2, -2, -2))
+	testGlobalSize(child, geometry.Vector3(2, 4, 6))
+
+	child:resize(-2, -2, -2, false)
+	testLocalSize(child, geometry.Vector3(0, 0, 0))
+	testGlobalSize(child, geometry.Vector3(0, 0, 0))
+
+	child:resize(-2, -2, -2, true)
+	child:resize(-2, -2, -2, true)
+	testLocalSize(child, geometry.Vector3(-4, -4, -4))
+	testGlobalSize(child, geometry.Vector3(4, 8, 12))
+
 
 end
 
