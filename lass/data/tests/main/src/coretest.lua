@@ -16,9 +16,9 @@ end
 
 local function testGlobalPosition(object, assertedPosition)
 
-	local s1, s2 = tostring(assertedPosition), tostring(object.globalTransform.position)
+	local s1, s2 = tostring(assertedPosition), tostring(object.globalPosition)
 	assert(
-		object.globalTransform.position == assertedPosition,
+		object.globalPosition == assertedPosition,
 		"global transform position should be" .. s1 .. " but is " .. s2
 	)
 
@@ -189,51 +189,51 @@ function coretest.testGameObjectRotation(scene)
 	local object = lass.GameObject(scene, "test")
 
 	assert(object.transform.rotation == 0, "default object rotation wasn't 0")
-	assert(object.globalTransform.rotation == 0, "default object global rotation wasn't 0")
+	assert(object.globalRotation == 0, "default object global rotation wasn't 0")
 
 
 	--[[GameObject.rotate]]
 	object:rotate(45)
 	assert(object.transform.rotation == 45, "object wasn't correctly rotated to 45")
-	assert(object.globalTransform.rotation == 45, "object wasn't correctly globally rotated to 45")
+	assert(object.globalRotation == 45, "object wasn't correctly globally rotated to 45")
 
 	object:rotate(45)
 	assert(object.transform.rotation == 90, "object wasn't correctly rotated to 90")
-	assert(object.globalTransform.rotation == 90, "object wasn't correctly globally rotated to 90")
+	assert(object.globalRotation == 90, "object wasn't correctly globally rotated to 90")
 
 	object:rotate(-40)
 	assert(object.transform.rotation == 50, "object wasn't correctly rotated to 50")
-	assert(object.globalTransform.rotation == 50, "object wasn't correctly globally rotated to 50")
+	assert(object.globalRotation == 50, "object wasn't correctly globally rotated to 50")
 
 	object:rotate(360)
 	assert(object.transform.rotation == 50, "object didn't maintain rotation")
-	assert(object.globalTransform.rotation == 50, "object didn't maintain global rotation")
+	assert(object.globalRotation == 50, "object didn't maintain global rotation")
 
 	object:rotate(-360)
 	assert(object.transform.rotation == 50, "object didn't maintain rotation")
-	assert(object.globalTransform.rotation == 50, "object didn't maintain global rotation")
+	assert(object.globalRotation == 50, "object didn't maintain global rotation")
 
 
 	--[[GameObject.rotate]]
 	object:rotateTo(0)
 	assert(object.transform.rotation == 0, "object wasn't correctly rotated to 0")
-	assert(object.globalTransform.rotation == 0, "object wasn't correctly globally rotated to 0")
+	assert(object.globalRotation == 0, "object wasn't correctly globally rotated to 0")
 
 	object:rotateTo(78)
 	assert(object.transform.rotation == 78, "object wasn't correctly rotated to 78")
-	assert(object.globalTransform.rotation == 78, "object wasn't correctly globally rotated to 78")
+	assert(object.globalRotation == 78, "object wasn't correctly globally rotated to 78")
 
 	object:rotateTo(192)
 	assert(object.transform.rotation == 192, "object wasn't correctly rotated to 192")
-	assert(object.globalTransform.rotation == 192, "object wasn't correctly globally rotated to 192")
+	assert(object.globalRotation == 192, "object wasn't correctly globally rotated to 192")
 
 	object:rotateTo(360)
 	assert(object.transform.rotation == 0, "object wasn't correctly rotated to 0")
-	assert(object.globalTransform.rotation == 0, "object wasn't correctly globally rotated to 0")
+	assert(object.globalRotation == 0, "object wasn't correctly globally rotated to 0")
 
 	object:rotateTo(-361)
 	assert(object.transform.rotation == 359, "object wasn't correctly rotated to 359")
-	assert(object.globalTransform.rotation == 359, "object wasn't correctly globally rotated to 359")
+	assert(object.globalRotation == 359, "object wasn't correctly globally rotated to 359")
 
 end
 
@@ -289,6 +289,14 @@ function coretest.testGameObjectChildRotation(scene)
 	child:rotateTo(-361)
 	assert(child.transform.rotation == 359, "child wasn't correctly rotated to 359")
 	assert(child.globalTransform.rotation == 359, "child wasn't correctly globally rotated to 359")
+
+end
+
+function coretest.testGameObjectResizing(scene)
+
+	--[[setup]]
+	local object = lass.GameObject(scene, "test")
+
 
 end
 
