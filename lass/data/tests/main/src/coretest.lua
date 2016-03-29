@@ -1,27 +1,22 @@
 local lass = require("lass")
 local geometry = require("lass.geometry")
-local collections = require("lass.collections")
+local turtlemode = require("turtlemode")
 
 local coretest = {}
 
+
 local function testLocalPosition(object, assertedPosition)
 
-	local s1, s2 = tostring(assertedPosition), tostring(object.transform.position)
-	assert(
-		object.transform.position == assertedPosition,
-		"local transform position should be" .. s1 .. " but is " .. s2
+	turtlemode.assert_equal(
+		object.transform.position, assertedPosition, "local transform position"
 	)
-
 end
 
 local function testGlobalPosition(object, assertedPosition)
 
-	local s1, s2 = tostring(assertedPosition), tostring(object.globalPosition)
-	assert(
-		object.globalPosition == assertedPosition,
-		"global transform position should be" .. s1 .. " but is " .. s2
+	turtlemode.assert_equal(
+		object.globalTransform.position, assertedPosition, "global transform position"
 	)
-
 end
 
 local function testLocalSize(object, assertedSize)
@@ -83,7 +78,6 @@ local function searchTreeCount(list, value, count)
 end
 
 function coretest.testGameObjectMovement(scene)
-
 	--[[setup]]
 	local object = lass.GameObject(scene, "test")
 
