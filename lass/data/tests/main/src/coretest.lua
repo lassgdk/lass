@@ -230,13 +230,37 @@ function coretest.testGameObjectChildGlobalMovement(scene)
 
 
 	--[[accounting for global rotation]]
-	-- z value doesn't matter for rotation
-	child:moveTo(2, 4, 0)
+	-- reset object size
 	object:resize(.5, .5, .5)
-
+	
+	-- z value doesn't get rotated, so it's set to 0 here
+	child:moveTo(2, 4, 0)
 	object:rotateTo(180)
+	testLocalPosition(child, geometry.Vector3(2,4,0))
+	testGlobalPosition(child, geometry.Vector3(-2,-4,0))
 
+	child:moveGlobal(-2, -4)
+	testLocalPosition(child, geometry.Vector3(4,8,0))
+	testGlobalPosition(child, geometry.Vector3(-4,-8,0))
 
+	-- these fail and require changes to GameEntity:moveToGlobal
+	-- child:moveToGlobal(-8, -16)
+	-- testLocalPosition(child, geometry.Vector3(8,16,0))
+	-- testGlobalPosition(child, geometry.Vector3(-8,-16,0))
+
+	child:moveTo(2, 4)
+	object:rotateTo(90)
+	testLocalPosition(child, geometry.Vector3(2,4,0))
+	testGlobalPosition(child, geometry.Vector3(4,-2,0))
+
+	child:moveGlobal(4, -2)
+	testLocalPosition(child, geometry.Vector3(4,8,0))
+	testGlobalPosition(child, geometry.Vector3(8,-4,0))
+
+	-- these fail and require changes to GameEntity:moveToGlobal
+	-- child:moveToGlobal(16, -8)
+	-- testLocalPosition(child, geometry.Vector3(8,16,0))
+	-- testGlobalPosition(child, geometry.Vector3(16,-8,0))
 
 end
 
