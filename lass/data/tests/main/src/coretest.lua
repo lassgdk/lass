@@ -235,7 +235,7 @@ function coretest.testGameObjectChildGlobalMovement(scene)
 	object:resize(.5, .5, .5)
 
 	object:rotateTo(180)
-	
+
 
 
 end
@@ -403,50 +403,50 @@ function coretest.testGameObjectChildRotation(scene)
 	object:addChild(child)
 
 	assert(child.transform.rotation == 0, "default child rotation wasn't 0")
-	assert(child.globalTransform.rotation == 0, "default child global rotation wasn't 0")
+	assert(child.globalRotation == 0, "default child global rotation wasn't 0")
 
 
 	--[[GameObject.rotate]]
 	object:rotate(45)
 	assert(child.transform.rotation == 0, "child rotation didn't stay at 0")
-	assert(child.globalTransform.rotation == 45, "child wasn't correctly globally rotated to 45")
+	assert(child.globalRotation == 45, "child wasn't correctly globally rotated to 45")
 
 	child:rotate(45)
 	assert(child.transform.rotation == 45, "child wasn't correctly rotated to 45")
-	assert(child.globalTransform.rotation == 90, "child wasn't correctly globally rotated to 90")
+	assert(child.globalRotation == 90, "child wasn't correctly globally rotated to 90")
 
 	object:rotate(-40)
 	assert(child.transform.rotation == 45, "child didn't maintain rotation")
-	assert(child.globalTransform.rotation == 50, "child wasn't correctly globally rotated to 50")
+	assert(child.globalRotation == 50, "child wasn't correctly globally rotated to 50")
 
 	child:rotate(-20)
 	assert(child.transform.rotation == 25, "child didn't maintain rotation")
-	assert(child.globalTransform.rotation == 30, "child wasn't correctly globally rotated to 30")
+	assert(child.globalRotation == 30, "child wasn't correctly globally rotated to 30")
 
 	object:rotate(360)
 	child:rotate(-360)
 	assert(child.transform.rotation == 25, "child didn't maintain rotation")
-	assert(child.globalTransform.rotation == 30, "child didn't maintain global rotation")
+	assert(child.globalRotation == 30, "child didn't maintain global rotation")
 
 
 	--[[GameObject.rotate]]
 	object:rotateTo(0)
 	child:rotateTo(0)
 	assert(child.transform.rotation == 0, "child wasn't correctly rotated to 0")
-	assert(child.globalTransform.rotation == 0, "child wasn't correctly globally rotated to 0")
+	assert(child.globalRotation == 0, "child wasn't correctly globally rotated to 0")
 
 	object:rotateTo(70)
 	assert(child.transform.rotation == 0, "child didn't maintain rotation")
-	assert(child.globalTransform.rotation == 70, "child wasn't correctly globally rotated to 70")
+	assert(child.globalRotation == 70, "child wasn't correctly globally rotated to 70")
 
 	child:rotateTo(80)
 	assert(child.transform.rotation == 80, "child wasn't correctly rotated to 80")
-	assert(child.globalTransform.rotation == 150, "child wasn't correctly globally rotated to 150")
+	assert(child.globalRotation == 150, "child wasn't correctly globally rotated to 150")
 
 	object:rotateTo(360)
 	child:rotateTo(-361)
 	assert(child.transform.rotation == 359, "child wasn't correctly rotated to 359")
-	assert(child.globalTransform.rotation == 359, "child wasn't correctly globally rotated to 359")
+	assert(child.globalRotation == 359, "child wasn't correctly globally rotated to 359")
 
 end
 
