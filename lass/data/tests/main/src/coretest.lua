@@ -81,50 +81,50 @@ function coretest.testGameObjectMovement(scene)
 	--[[setup]]
 	local object = lass.GameObject(scene, "test")
 
-	testLocalPosition(object, geometry.Vector3(0,0,0))
-	testGlobalPosition(object, geometry.Vector3(0,0,0))
+	testLocalPosition(object, geometry.Vector3(0, 0, 0))
+	testGlobalPosition(object, geometry.Vector3(0, 0, 0))
 
 
 	--[[GameObject.move]]
-	object:move(5,5)
-	object:move(0,1)
-	testLocalPosition(object, geometry.Vector3(5,6,0))
-	testGlobalPosition(object, geometry.Vector3(5,6,0))
+	object:move(5, 5)
+	object:move(0, 1)
+	testLocalPosition(object, geometry.Vector3(5, 6, 0))
+	testGlobalPosition(object, geometry.Vector3(5, 6, 0))
 
-	object:move(-5,-6)
-	testLocalPosition(object, geometry.Vector3(0,0,0))
-	testGlobalPosition(object, geometry.Vector3(0,0,0))
+	object:move(-5, -6)
+	testLocalPosition(object, geometry.Vector3(0, 0, 0))
+	testGlobalPosition(object, geometry.Vector3(0, 0, 0))
 
 
 	--[[GameObject.moveTo]]
-	object:moveTo(-2,10)
-	testLocalPosition(object, geometry.Vector3(-2,10,0))
-	testGlobalPosition(object, geometry.Vector3(-2,10,0))
+	object:moveTo(-2, 10)
+	testLocalPosition(object, geometry.Vector3(-2, 10, 0))
+	testGlobalPosition(object, geometry.Vector3(-2, 10, 0))
 
-	object:moveTo(0,0)
-	testLocalPosition(object, geometry.Vector3(0,0,0))
-	testGlobalPosition(object, geometry.Vector3(0,0,0))
+	object:moveTo(0, 0)
+	testLocalPosition(object, geometry.Vector3(0, 0, 0))
+	testGlobalPosition(object, geometry.Vector3(0, 0, 0))
 
 
 	--[[GameObject.moveGlobal]]
-	object:moveGlobal(5,5)
-	object:moveGlobal(0,1)
-	testLocalPosition(object, geometry.Vector3(5,6,0))
-	testGlobalPosition(object, geometry.Vector3(5,6,0))
+	object:moveGlobal(5, 5)
+	object:moveGlobal(0, 1)
+	testLocalPosition(object, geometry.Vector3(5, 6, 0))
+	testGlobalPosition(object, geometry.Vector3(5, 6, 0))
 
-	object:moveGlobal(-5,-6)
-	testLocalPosition(object, geometry.Vector3(0,0,0))
-	testGlobalPosition(object, geometry.Vector3(0,0,0))
+	object:moveGlobal(-5, -6)
+	testLocalPosition(object, geometry.Vector3(0, 0, 0))
+	testGlobalPosition(object, geometry.Vector3(0, 0, 0))
 
 
 	--[[GameObject.moveToGlobal]]
-	object:moveToGlobal(-2,10)
-	testLocalPosition(object, geometry.Vector3(-2,10,0))
-	testGlobalPosition(object, geometry.Vector3(-2,10,0))
+	object:moveToGlobal(-2, 10)
+	testLocalPosition(object, geometry.Vector3(-2, 10, 0))
+	testGlobalPosition(object, geometry.Vector3(-2, 10, 0))
 
-	object:moveToGlobal(0,0)
-	testLocalPosition(object, geometry.Vector3(0,0,0))
-	testGlobalPosition(object, geometry.Vector3(0,0,0))
+	object:moveToGlobal(0, 0)
+	testLocalPosition(object, geometry.Vector3(0, 0, 0))
+	testGlobalPosition(object, geometry.Vector3(0, 0, 0))
 
 end
 
@@ -135,65 +135,65 @@ function coretest.testGameObjectChildMovement(scene)
 	local child = lass.GameObject(scene, "test child")
 	object:addChild(child)
 
-	testLocalPosition(object, geometry.Vector3(0,0,0))
-	testGlobalPosition(object, geometry.Vector3(0,0,0))
+	testLocalPosition(object, geometry.Vector3(0, 0, 0))
+	testGlobalPosition(object, geometry.Vector3(0, 0, 0))
 
 
 	--[[GameObject.move]]
-	object:move(5,5)
-	child:move(0,1)
-	testLocalPosition(child, geometry.Vector3(0,1,0))
-	testGlobalPosition(child, geometry.Vector3(5,6,0))
+	object:move(5, 5)
+	child:move(0, 1)
+	testLocalPosition(child, geometry.Vector3(0, 1,0))
+	testGlobalPosition(child, geometry.Vector3(5, 6, 0))
 
-	object:move(-5,-5)
-	child:move(0,-1)
-	testLocalPosition(child, geometry.Vector3(0,0,0))
-	testGlobalPosition(child, geometry.Vector3(0,0,0))
+	object:move(-5, -5)
+	child:move(0, -1)
+	testLocalPosition(child, geometry.Vector3(0, 0, 0))
+	testGlobalPosition(child, geometry.Vector3(0, 0, 0))
 
 
 	--[[GameObject.moveTo]]
-	object:moveTo(10,10)
-	child:moveTo(-2,0)
-	testLocalPosition(child, geometry.Vector3(-2,0,0))
-	testGlobalPosition(child, geometry.Vector3(8,10,0))
+	object:moveTo(10, 10)
+	child:moveTo(-2, 0)
+	testLocalPosition(child, geometry.Vector3(-2, 0, 0))
+	testGlobalPosition(child, geometry.Vector3(8, 10, 0))
 
-	object:moveTo(0,0)
-	testLocalPosition(child, geometry.Vector3(-2,0,0))
-	testGlobalPosition(child, geometry.Vector3(-2,0,0))
+	object:moveTo(0, 0)
+	testLocalPosition(child, geometry.Vector3(-2, 0, 0))
+	testGlobalPosition(child, geometry.Vector3(-2, 0, 0))
 
-	child:moveTo(0,0)
-	testLocalPosition(child, geometry.Vector3(0,0,0))
-	testGlobalPosition(child, geometry.Vector3(0,0,0))
+	child:moveTo(0, 0)
+	testLocalPosition(child, geometry.Vector3(0, 0, 0))
+	testGlobalPosition(child, geometry.Vector3(0, 0, 0))
 
 
 	--[[GameObject.moveGlobal]]
-	object:moveGlobal(5,5)
-	child:moveGlobal(0,1)
-	testLocalPosition(child, geometry.Vector3(0,1,0))
-	testGlobalPosition(child, geometry.Vector3(5,6,0))
+	object:moveGlobal(5, 5)
+	child:moveGlobal(0, 1)
+	testLocalPosition(child, geometry.Vector3(0, 1,0))
+	testGlobalPosition(child, geometry.Vector3(5, 6, 0))
 
-	object:moveGlobal(-5,-5)
-	testLocalPosition(child, geometry.Vector3(0,1,0))
-	testGlobalPosition(child, geometry.Vector3(0,1,0))
+	object:moveGlobal(-5, -5)
+	testLocalPosition(child, geometry.Vector3(0, 1,0))
+	testGlobalPosition(child, geometry.Vector3(0, 1,0))
 
-	child:moveGlobal(0,-1)
-	testLocalPosition(child, geometry.Vector3(0,0,0))
-	testGlobalPosition(child, geometry.Vector3(0,0,0))
+	child:moveGlobal(0, -1)
+	testLocalPosition(child, geometry.Vector3(0, 0, 0))
+	testGlobalPosition(child, geometry.Vector3(0, 0, 0))
 
 
 	--[[GameObject.moveToGlobal]]
-	object:moveToGlobal(-2,10)
-	child:moveToGlobal(5,5)
-	testLocalPosition(child, geometry.Vector3(7,-5,0))
-	testGlobalPosition(child, geometry.Vector3(5,5,0))
+	object:moveToGlobal(-2, 10)
+	child:moveToGlobal(5, 5)
+	testLocalPosition(child, geometry.Vector3(7, -5, 0))
+	testGlobalPosition(child, geometry.Vector3(5, 5, 0))
 
-	object:moveToGlobal(0,0)
-	testLocalPosition(child, geometry.Vector3(7,-5,0))
-	testGlobalPosition(child, geometry.Vector3(7,-5,0))
+	object:moveToGlobal(0, 0)
+	testLocalPosition(child, geometry.Vector3(7, -5, 0))
+	testGlobalPosition(child, geometry.Vector3(7, -5, 0))
 
-	child:moveToGlobal(0,0)
-	testLocalPosition(child, geometry.Vector3(0,0,0))
-	testGlobalPosition(child, geometry.Vector3(0,0,0))
+	child:moveToGlobal(0, 0)
+	testLocalPosition(child, geometry.Vector3(0, 0, 0))
+	testGlobalPosition(child, geometry.Vector3(0, 0, 0))
 
 end
 
@@ -210,23 +210,23 @@ function coretest.testGameObjectChildGlobalMovement(scene)
 	--[[accounting for global size]]
 	child:moveTo(2, 2, 2)
 	object:resize(1, 1, 1)
-	testLocalPosition(child, geometry.Vector3(2,2,2))
-	testGlobalPosition(child, geometry.Vector3(4,4,4))
+	testLocalPosition(child, geometry.Vector3(2, 2, 2))
+	testGlobalPosition(child, geometry.Vector3(4, 4, 4))
 
 	-- these fail and require changes to GameEntity:moveGlobal
 	-- child:moveGlobal(-2, -2, -2)
-	-- testLocalPosition(child, geometry.Vector3(1,1,1))
-	-- testGlobalPosition(child, geometry.Vector3(2,0,0))
+	-- testLocalPosition(child, geometry.Vector3(1, 1, 1))
+	-- testGlobalPosition(child, geometry.Vector3(2, 0, 0))
 
 	-- these fail and require changes to GameEntity:moveToGlobal
 	-- child:moveToGlobal(8, 8, 8)
-	-- testLocalPosition(child, geometry.Vector3(4,4,4))
-	-- testGlobalPosition(child, geometry.Vector3(8,8,8))
+	-- testLocalPosition(child, geometry.Vector3(4, 4, 4))
+	-- testGlobalPosition(child, geometry.Vector3(8, 8, 8))
 
 	child:moveTo(2, 2, 2)
 	object:resize(-1.5, -1.5, -1.5)
-	testLocalPosition(child, geometry.Vector3(2,2,2))
-	testGlobalPosition(child, geometry.Vector3(1,1,1))
+	testLocalPosition(child, geometry.Vector3(2, 2, 2))
+	testGlobalPosition(child, geometry.Vector3(1, 1, 1))
 
 
 	--[[accounting for global rotation]]
@@ -236,31 +236,31 @@ function coretest.testGameObjectChildGlobalMovement(scene)
 	-- z value doesn't get rotated, so it's set to 0 here
 	child:moveTo(2, 4, 0)
 	object:rotateTo(180)
-	testLocalPosition(child, geometry.Vector3(2,4,0))
-	testGlobalPosition(child, geometry.Vector3(-2,-4,0))
+	testLocalPosition(child, geometry.Vector3(2, 4, 0))
+	testGlobalPosition(child, geometry.Vector3(-2, -4, 0))
 
 	child:moveGlobal(-2, -4)
-	testLocalPosition(child, geometry.Vector3(4,8,0))
+	testLocalPosition(child, geometry.Vector3(4, 8, 0))
 	testGlobalPosition(child, geometry.Vector3(-4,-8,0))
 
 	-- these fail and require changes to GameEntity:moveToGlobal
 	-- child:moveToGlobal(-8, -16)
-	-- testLocalPosition(child, geometry.Vector3(8,16,0))
-	-- testGlobalPosition(child, geometry.Vector3(-8,-16,0))
+	-- testLocalPosition(child, geometry.Vector3(8, 16, 0))
+	-- testGlobalPosition(child, geometry.Vector3(-8, -16, 0))
 
 	child:moveTo(2, 4)
 	object:rotateTo(90)
-	testLocalPosition(child, geometry.Vector3(2,4,0))
-	testGlobalPosition(child, geometry.Vector3(4,-2,0))
+	testLocalPosition(child, geometry.Vector3(2, 4, 0))
+	testGlobalPosition(child, geometry.Vector3(4, -2, 0))
 
 	child:moveGlobal(4, -2)
-	testLocalPosition(child, geometry.Vector3(4,8,0))
-	testGlobalPosition(child, geometry.Vector3(8,-4,0))
+	testLocalPosition(child, geometry.Vector3(4, 8, 0))
+	testGlobalPosition(child, geometry.Vector3(8, -4,0))
 
 	-- these fail and require changes to GameEntity:moveToGlobal
 	-- child:moveToGlobal(16, -8)
-	-- testLocalPosition(child, geometry.Vector3(8,16,0))
-	-- testGlobalPosition(child, geometry.Vector3(16,-8,0))
+	-- testLocalPosition(child, geometry.Vector3(8, 16, 0))
+	-- testGlobalPosition(child, geometry.Vector3(16, -8, 0))
 
 end
 
@@ -486,58 +486,58 @@ function coretest.testGlobalPosition(scene)
 
 
 	--[[GameObject.move]]
-	object:move(5,5)
-	child:move(0,1)
+	object:move(5, 5)
+	child:move(0, 1)
 	assert(object.globalPosition == geometry.Vector3(5, 5, 0), "object global position didn't move correctly")
 	assert(child.globalPosition == geometry.Vector3(5, 6, 0), "child global position didn't move correctly")
 
-	object:move(-5,-5)
-	child:move(0,-1)
+	object:move(-5, -5)
+	child:move(0, -1)
 	assert(object.globalPosition == geometry.Vector3(0, 0, 0), "object global position didn't move correctly")
 	assert(child.globalPosition == geometry.Vector3(0, 0, 0), "child global position didn't move correctly")
 
 
 	--[[GameObject.moveTo]]
-	object:moveTo(10,10)
-	child:moveTo(-2,0)
+	object:moveTo(10, 10)
+	child:moveTo(-2, 0)
 	assert(object.globalPosition == geometry.Vector3(10, 10, 0), "object global position didn't move correctly")
 	assert(child.globalPosition == geometry.Vector3(8, 10, 0), "child global position didn't move correctly")
 
-	object:moveTo(0,0)
+	object:moveTo(0, 0)
 	assert(object.globalPosition == geometry.Vector3(0, 0, 0), "object global position didn't move correctly")
 	assert(child.globalPosition == geometry.Vector3(-2, 0, 0), "child global position didn't move correctly")
 
-	child:moveTo(0,0)
+	child:moveTo(0, 0)
 	assert(object.globalPosition == geometry.Vector3(0, 0, 0), "object global position didn't stay in place")
 	assert(child.globalPosition == geometry.Vector3(0, 0, 0), "child global position didn't move correctly")
 
 
 	--[[GameObject.moveGlobal]]
-	object:moveGlobal(5,5)
-	child:moveGlobal(0,1)
+	object:moveGlobal(5, 5)
+	child:moveGlobal(0, 1)
 	assert(object.globalPosition == geometry.Vector3(5, 5, 0), "object global position didn't move correctly")
 	assert(child.globalPosition == geometry.Vector3(5, 6, 0), "child global position didn't move correctly")
 
-	object:moveGlobal(-5,-5)
+	object:moveGlobal(-5, -5)
 	assert(object.globalPosition == geometry.Vector3(0, 0, 0), "object global position didn't move correctly")
 	assert(child.globalPosition == geometry.Vector3(0, 1, 0), "child global position didn't move correctly")
 
-	child:moveGlobal(0,-1)
+	child:moveGlobal(0, -1)
 	assert(object.globalPosition == geometry.Vector3(0, 0, 0), "object global position didn't stay in place")
 	assert(child.globalPosition == geometry.Vector3(0, 0, 0), "child global position didn't move correctly")
 
 
 	--[[GameObject.moveToGlobal]]
-	object:moveToGlobal(-2,10)
-	child:moveToGlobal(5,5)
+	object:moveToGlobal(-2, 10)
+	child:moveToGlobal(5, 5)
 	assert(object.globalPosition == geometry.Vector3(-2, 10, 0), "object global position didn't move correctly")
 	assert(child.globalPosition == geometry.Vector3(5, 5, 0), "child global position didn't move correctly")
 
-	object:moveToGlobal(0,0)
+	object:moveToGlobal(0, 0)
 	assert(object.globalPosition == geometry.Vector3(0, 0, 0), "object global position didn't move correctly")
 	assert(child.globalPosition == geometry.Vector3(7, -5, 0), "child global position didn't move correctly")
 
-	child:moveToGlobal(0,0)
+	child:moveToGlobal(0, 0)
 	assert(object.globalPosition == geometry.Vector3(0, 0, 0), "object global position didn't stay in place")
 	assert(child.globalPosition == geometry.Vector3(0, 0, 0), "child global position didn't move correctly")
 
