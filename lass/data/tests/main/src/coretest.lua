@@ -197,6 +197,49 @@ function coretest.testGameObjectChildMovement(scene)
 
 end
 
+function coretest.testGameObjectChildGlobalMovement(scene)
+
+	-- tests on global movement of a child accounting for the parent's global size/rotation
+
+	--[[setup]]
+	local object = lass.GameObject(scene, "test")
+	local child = lass.GameObject(scene, "test child")
+	object:addChild(child)
+
+
+	--[[accounting for global size]]
+	child:moveTo(2, 2, 2)
+	object:resize(1, 1, 1)
+	testLocalPosition(child, geometry.Vector3(2,2,2))
+	testGlobalPosition(child, geometry.Vector3(4,4,4))
+
+	-- these fail and require changes to GameEntity:moveGlobal
+	-- child:moveGlobal(-2, -2, -2)
+	-- testLocalPosition(child, geometry.Vector3(1,1,1))
+	-- testGlobalPosition(child, geometry.Vector3(2,0,0))
+
+	-- these fail and require changes to GameEntity:moveToGlobal
+	-- child:moveToGlobal(8, 8, 8)
+	-- testLocalPosition(child, geometry.Vector3(4,4,4))
+	-- testGlobalPosition(child, geometry.Vector3(8,8,8))
+
+	child:moveTo(2, 2, 2)
+	object:resize(-1.5, -1.5, -1.5)
+	testLocalPosition(child, geometry.Vector3(2,2,2))
+	testGlobalPosition(child, geometry.Vector3(1,1,1))
+
+
+	--[[accounting for global rotation]]
+	-- z value doesn't matter for rotation
+	child:moveTo(2, 4, 0)
+	object:resize(.5, .5, .5)
+
+	object:rotateTo(180)
+	
+
+
+end
+
 function coretest.testGameObjectResizing(scene)
 
 	--[[setup]]
