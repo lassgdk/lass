@@ -7,14 +7,14 @@ local coretest = {}
 
 local function testLocalPosition(object, assertedPosition)
 
-	turtlemode.assert_equal(
+	turtlemode.assertEqual(
 		object.transform.position, assertedPosition, "local transform position"
 	)
 end
 
 local function testGlobalPosition(object, assertedPosition)
 
-	turtlemode.assert_equal(
+	turtlemode.assertEqual(
 		object.globalTransform.position, assertedPosition, "global transform position"
 	)
 end
