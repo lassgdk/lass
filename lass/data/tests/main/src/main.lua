@@ -3,13 +3,15 @@
 local lass = require("lass")
 local system = require("lass.system")
 
-local scene = {}
+local scene = lass.GameScene()
 local opts = system.getopt(arg, "scene")
 local testModules = require("testmodules")
 
 function love.load()
 
 	math.randomseed(os.time())
+	scene:loadSettings("settings.lua")
+	-- turtlemode.run()
 
 	local loadedModules = {}
 	for i, v in ipairs(testModules) do
@@ -37,8 +39,9 @@ function love.load()
 
 			testsRun = testsRun + 1
 
-			scene = lass.GameScene()
-			scene:loadSettings("settings.lua")
+			-- scene = lass.GameScene()
+			-- scene:loadSettings("settings.lua")
+			scene:init()
 			local r, d = xpcall(loadedModule[testName], debug.traceback, scene)
 
 			if not r then

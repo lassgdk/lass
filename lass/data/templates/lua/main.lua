@@ -4,13 +4,12 @@
 local lass = require("lass")
 local system = require("lass.system")
 
-local scene = {}
+local scene = lass.GameScene()
 local opts = system.getopt(arg, "scene")
 
 function love.load()
 
 	math.randomseed(os.time())
-	scene = lass.GameScene()
 	scene:loadSettings("settings.lua")
 
 	-- if opts.scene is nil, firstScene from settings.lua will be used
