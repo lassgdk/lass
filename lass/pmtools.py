@@ -34,7 +34,7 @@ DIR_ENGINE_OSX = os.path.join(DIR_LASS_DATA, "engine", "osx")
 DIR_EXAMPLES = os.path.join(DIR_LASS_DATA, "examples")
 DIR_TESTS = os.path.join(DIR_LASS_DATA, "tests")
 DIR_TEMPLATES_LUA = os.path.join(DIR_LASS_DATA, "templates", "lua")
-DIR_LASS_LIB = os.path.join(DIR_LASS_DATA, "lua", "5.1", "lass")
+DIR_LUA_LIB = os.path.join(DIR_LASS_DATA, "lua", "5.1")
 
 if sys.platform == "win32":
 	DIR_TEMP = os.path.join(DIR_LASS_DATA, "tmp")
@@ -49,7 +49,7 @@ class ProjectManager(object):
 
 		self.lua = lua or lupa.LuaRuntime(unpack_returned_tuples=True)
 
-	def buildGame(self, game, sendToTemp=False, examples=False, tests=False, target="l"):
+	def buildGame(self, game, sendToTemp=False, examples=False, tests=False, target="l", packages=tuple()):
 		"""
 		build a .love file, plus optional binary distributions
 
@@ -59,6 +59,7 @@ class ProjectManager(object):
 			examples: search for project in examples folder
 			tests: search for project in tests folder, if not found in examples
 			target: target platform--must be combination of w, l, o
+			packages: list of lua packages to include, in addition to lass
 		"""
 
 		if not (examples or tests):
@@ -75,6 +76,8 @@ class ProjectManager(object):
 				dirs.append(DIR_EXAMPLES)
 			if tests:
 				dirs.append(DIR_TESTS)
+				if not "turtlemode" in packages:
+					packages = list(packages) + ["turtlemode"]
 			projPath = self.findGame(game, dirs)
 
 		if not projPath:
@@ -132,11 +135,23 @@ class ProjectManager(object):
 					loveFile.write(os.path.join(sourcePath, f), f)
 
 			#add lass library
-			os.chdir(DIR_LASS_LIB)
+			os.chdir(os.path.join(DIR_LUA_LIB, "lass"))
 			for i, wtup in enumerate(os.walk(".")):
 				for j, f in enumerate(wtup[2]):
 					fullName = os.path.join(wtup[0], f)
 					loveFile.write(fullName, os.path.join("lass", fullName))
+
+			#add other libraries
+			os.chdir(DIR_LUA_LIB)
+			for lib in packages:
+				if os.path.isdir(lib):
+					for i, wtup in enumerate(os.walk(lib)):
+						for j, f in enumerate(wtup[2]):
+							fullName = os.path.join(wtup[0], f)
+							loveFile.write(fullName)
+				else:
+					name = lib + ".lua"
+					loveFile.write(name)
 
 		os.chdir(origDir)
 

@@ -60,6 +60,11 @@ def main():
 				"default":False,
 				"help":"search for game in examples folder"
 			}),
+			(("-p", "--packages"), {
+				"type":str,
+				"nargs":"+",
+				"help":"names of lua packages to include (omit .lua extension)"
+			}),
 			(("-v", "--verbose"), {
 				"action":"store_true",
 				"default":False,
@@ -108,6 +113,12 @@ def main():
 				"action":"store_true",
 				"default":False,
 				"help":"search for game in tests folder"
+			}),
+			(("-p", "--packages"), {
+				"type":str,
+				"nargs":"+",
+				"default":tuple(),
+				"help":"names of lua packages to include (omit .lua extension)"
 			}),
 			(("-s", "--scene"), {
 				"type":str,
