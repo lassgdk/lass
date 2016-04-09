@@ -138,8 +138,6 @@ function m.run(scene)
 
 			testsRun = testsRun + 1
 
-			-- scene = lass.GameScene()
-			-- scene:loadSettings("settings.lua")
 			scene:init()
 			local r, d = xpcall(loadedModule[testName], debug.traceback, scene)
 
