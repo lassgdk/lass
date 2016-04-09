@@ -1,8 +1,9 @@
 local geometry = require("lass.geometry")
 local helpers = require("geometrytest.helpers")
 local class = require("lass.class")
+local turtlemode = require("turtlemode")
 
-local vectoralgebratest = {}
+local vectoralgebratest = turtlemode.testModule()
 
 -- [[notes]]
 -- cross multiplication / division of Vector2 and 3 is not tested, as it is not possible

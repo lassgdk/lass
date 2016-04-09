@@ -1,8 +1,9 @@
 local geometry = require("lass.geometry")
 local helpers = require("geometrytest.helpers")
 local class = require("lass.class")
+local turtlemode = require("turtlemode")
 
-transformtest = {}
+transformtest = turtlemode.testModule()
 
 
 function transformtest.testTransformCreation()

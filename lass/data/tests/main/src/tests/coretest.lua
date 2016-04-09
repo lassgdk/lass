@@ -2,7 +2,7 @@ local lass = require("lass")
 local geometry = require("lass.geometry")
 local turtlemode = require("turtlemode")
 
-local coretest = {}
+local coretest = turtlemode.testModule()
 
 
 local function testLocalPosition(object, assertedPosition)

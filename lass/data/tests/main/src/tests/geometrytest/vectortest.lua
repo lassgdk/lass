@@ -1,8 +1,9 @@
 local geometry = require("lass.geometry")
 local helpers = require("geometrytest.helpers")
 local class = require("lass.class")
+local turtlemode = require("turtlemode")
 
-local vectortest = {}
+local vectortest = turtlemode.testModule()
 
 
 function vectortest.testVector2Creation()

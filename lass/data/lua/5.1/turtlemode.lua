@@ -57,6 +57,108 @@ local function wraptest(got, msg, reason)
 	error(backspace .. newPrefix .. message)
 end
 
+local function startsWith(s, sub)
+
+	return string.find(s, sub) == 1
+end
+
+local function endsWith(s, sub)
+
+	return string.find(s, sub, #sub) ~= nil
+end
+
+local function gatherTestFiles(dir)
+
+	dir = dir or ""
+	local files = {}
+	local ext = ".lua"
+	local testPrefixOrSuffix = "test"
+
+	if not love.filesystem.isDirectory(dir) then
+		error(string.format("'%s' is not a directory", dir))
+	end
+
+	for i, v in ipairs(love.filesystem.getDirectoryItems(dir)) do
+
+		local fullName = dir .. "/" .. v
+
+		--only gather files and folders whose names begin or end with "test"
+		if startsWith(v, testPrefixOrSuffix) or endsWith(v, testPrefixOrSuffix) then
+
+			--lua files
+			if love.filesystem.isFile(fullName) and string.find(v, ext, #ext) then
+
+				files[#files + 1] = fullName
+			-- folders
+			elseif love.filesystem.isDirectory(fullName) then
+
+				for i2, v2 in ipairs(gatherTestFiles(fullName)) do
+					files[#files + 1] = v2
+				end
+			end
+		end
+	end
+
+	return files
+end
+
+local TestModule = {}
+
+function TestModule:__newindex(key, value)
+
+	if startsWith(key, "test") or endsWith(key, "test") then
+		self._testNames[#self._testNames + 1] = key
+	end
+	rawset(self, key, value)
+end
+
+function m.testModule()
+
+	t = {}
+	t._testNames = {}
+	setmetatable(t, TestModule)
+	return t
+end
+
+function m.run(scene)
+
+	local loadedModules, loadedModuleNames = {}, {}
+	for i, v in ipairs(gatherTestFiles("tests")) do
+		loadedModules[#loadedModules + 1] = love.filesystem.load(v)()
+		loadedModuleNames[#loadedModuleNames + 1] = v
+	end
+
+
+	for i, loadedModule in ipairs(loadedModules) do
+		print("---" .. loadedModuleNames[i] .. "---")
+		local testsRun = 0
+		local failures = 0
+
+		for j, testName in ipairs(loadedModule._testNames) do
+
+			testsRun = testsRun + 1
+
+			-- scene = lass.GameScene()
+			-- scene:loadSettings("settings.lua")
+			scene:init()
+			local r, d = xpcall(loadedModule[testName], debug.traceback, scene)
+
+			if not r then
+				print(testName .. " gave the following error:")
+
+				-- indent the error message
+				print("    " .. d:gsub("\n", "\n    "))
+
+				failures = failures + 1
+			end
+		end
+
+		print("Completed " .. testsRun .. " tests. Assertion failures: " .. failures)
+	end
+
+	print("All tests complete")
+end
+
 ---got == true.
 -- (Named "assertTrue" to not conflict with standard assert.)
 -- @param msg Message to display with the result.

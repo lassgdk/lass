@@ -2,62 +2,63 @@
 
 local lass = require("lass")
 local system = require("lass.system")
+local turtlemode = require("turtlemode")
 
 local scene = lass.GameScene()
 local opts = system.getopt(arg, "scene")
-local testModules = require("testmodules")
+-- local testModules = require("testmodules")
 
 function love.load()
 
 	math.randomseed(os.time())
 	scene:loadSettings("settings.lua")
-	-- turtlemode.run()
+	turtlemode.run(scene)
 
-	local loadedModules = {}
-	for i, v in ipairs(testModules) do
-		loadedModules[i] = require(v)
-	end
+	-- local loadedModules = {}
+	-- for i, v in ipairs(testModules) do
+	-- 	loadedModules[i] = require(v)
+	-- end
 
-	for i, loadedModule in ipairs(loadedModules) do
+	-- for i, loadedModule in ipairs(loadedModules) do
 
-		print("---" .. testModules[i] .. "---")
-		local testsRun = 0
-		local failures = 0
+	-- 	print("---" .. testModules[i] .. "---")
+	-- 	local testsRun = 0
+	-- 	local failures = 0
 		
-		local testNames = {}
-		local i = 1
-		for k, v in pairs(loadedModule) do
-			if type(v) == "function" then
-				testNames[i] = k
-				i = i + 1
-			end
-		end
+	-- 	local testNames = {}
+	-- 	local i = 1
+	-- 	for k, v in pairs(loadedModule) do
+	-- 		if type(v) == "function" then
+	-- 			testNames[i] = k
+	-- 			i = i + 1
+	-- 		end
+	-- 	end
 
-		table.sort(testNames)
+	-- 	table.sort(testNames)
 
-		for j, testName in ipairs(testNames) do
+	-- 	for j, testName in ipairs(testNames) do
 
-			testsRun = testsRun + 1
+	-- 		testsRun = testsRun + 1
 
-			-- scene = lass.GameScene()
-			-- scene:loadSettings("settings.lua")
-			scene:init()
-			local r, d = xpcall(loadedModule[testName], debug.traceback, scene)
+	-- 		-- scene = lass.GameScene()
+	-- 		-- scene:loadSettings("settings.lua")
+	-- 		scene:init()
+	-- 		local r, d = xpcall(loadedModule[testName], debug.traceback, scene)
 
-			if not r then
-				print(testName .. " gave the following error:")
+	-- 		if not r then
+	-- 			print(testName .. " gave the following error:")
 
-				-- indent the error message
-				print("    " .. d:gsub("\n", "\n    "))
+	-- 			-- indent the error message
+	-- 			print("    " .. d:gsub("\n", "\n    "))
 
-				failures = failures + 1
-			end
-		end
+	-- 			failures = failures + 1
+	-- 		end
+	-- 	end
 
-		print("Completed " .. testsRun .. " tests. Assertion failures: " .. failures)
-	end
+	-- 	print("Completed " .. testsRun .. " tests. Assertion failures: " .. failures)
+	-- end
 
-	print("All tests complete")
+	-- print("All tests complete")
 
 	love.event.quit()
 end

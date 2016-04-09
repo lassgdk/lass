@@ -1,6 +1,7 @@
 local class = require "lass.class"
+local turtlemode = require("turtlemode")
 
-local classtest = {}
+local classtest = turtlemode.testModule()
 
 local function testMemberAssignment(object, varName, varValue)
 	--ensure that assignment to an instance member works
