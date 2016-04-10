@@ -1,7 +1,7 @@
 local geometry = require("lass.geometry")
-local helpers = require("geometrytest.helpers")
 local class = require("lass.class")
 local turtlemode = require("turtlemode")
+local helpers = require("tests.geometrytest.helpers")
 
 local shapetest = turtlemode.testModule()
 
