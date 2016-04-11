@@ -147,6 +147,10 @@ local function gatherTestFiles(dir)
 	return files
 end
 
+--[[
+local classes
+]]
+
 local metaclass = {}
 
 function metaclass:__call(...)
@@ -177,17 +181,23 @@ local function class(base, init)
 	return c
 end
 
-
 local SkipIf = class(nil, function(self, reason, testModule)
 
 	self.reason = reason
 	self._testModule = testModule
+
+	-- the Skip table isn't necessary to track, even though we want to insert
+	-- test names into it, because can get it easily from _testModule
 end)
 
 function SkipIf:__newindex(key, value)
 
 	if key ~= "_testModule" then
+
 		rawset(self._testModule.skip, key, self.reason)
+
+		-- we don't use rawset here because we want to activate testModule's
+		-- __newindex method
 		self._testModule[key] = value
 	else
 		rawset(self, key, value)
@@ -214,6 +224,10 @@ function Skip:__call(condition, reason)
 	assert(type(reason) == "string", "'reason' must be a string")
 
 	if condition then
+		-- return a SkipIf table, which will insert the test name into this
+		-- table along with the reason
+		-- (we don't want to return self because then we wouldn't be able to
+		-- store the reason)
 		return SkipIf(reason, self._testModule)
 	else
 		return self
@@ -221,19 +235,13 @@ function Skip:__call(condition, reason)
 end
 
 
+local Fail = 
+
+--[[
+public
+]]
+
 m.testModule = class(nil, function(self)
-
-	-- local mod = {}
-	-- local sk = {}
-
-	-- setmetatable(sk, Skip)
-
-	-- mod._testNames = {}
-	-- mod.fail = {}
-	-- mod.skip = sk
-
-	-- setmetatable(mod, TestModule)
-	-- return mod
 
 	-- self.fail = Fail(self)
 	self.skip = Skip(self)
