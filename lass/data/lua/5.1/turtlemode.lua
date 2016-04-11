@@ -147,22 +147,105 @@ local function gatherTestFiles(dir)
 	return files
 end
 
-local TestModule = {}
+local metaclass = {}
 
-function TestModule:__newindex(key, value)
+function metaclass:__call(...)
+
+	local o = {}
+	setmetatable(o, self)
+	self.init(o, ...)
+
+	return o
+end
+
+function metaclass:__index(key)
+
+	local b = rawget(self, "__base")
+	if b then
+		return b[key]
+	end
+end
+
+local function class(base, init)
+
+	local c = {}
+	setmetatable(c, metaclass)
+	c.init = init or function() end
+	c.__base = base
+	c.__index = c
+
+	return c
+end
+
+
+local SkipIf = class(nil, function(self, reason, testModule)
+
+	self.reason = reason
+	self._testModule = testModule
+end)
+
+function SkipIf:__newindex(key, value)
+
+	if key ~= "_testModule" then
+		rawset(self._testModule.skip, key, self.reason)
+		self._testModule[key] = value
+	else
+		rawset(self, key, value)
+	end
+end
+
+
+local Skip = class(nil, function(self, testModule)
+	self._testModule = testModule
+end)
+
+function Skip:__newindex(key, value)
+
+	if key ~= "_testModule" then
+		rawset(self, key, true)
+		self._testModule[key] = value
+	else
+		rawset(self, key, value)
+	end
+end
+
+function Skip:__call(condition, reason)
+
+	assert(type(reason) == "string", "'reason' must be a string")
+
+	if condition then
+		return SkipIf(reason, self._testModule)
+	else
+		return self
+	end
+end
+
+
+m.testModule = class(nil, function(self)
+
+	-- local mod = {}
+	-- local sk = {}
+
+	-- setmetatable(sk, Skip)
+
+	-- mod._testNames = {}
+	-- mod.fail = {}
+	-- mod.skip = sk
+
+	-- setmetatable(mod, TestModule)
+	-- return mod
+
+	-- self.fail = Fail(self)
+	self.skip = Skip(self)
+	self._testNames = {}
+end)
+
+function m.testModule:__newindex(key, value)
 
 	if startsWith(key, "test") or endsWith(key, "test") then
 		self._testNames[#self._testNames + 1] = key
 	end
 	rawset(self, key, value)
-end
-
-function m.testModule()
-
-	t = {}
-	t._testNames = {}
-	setmetatable(t, TestModule)
-	return t
 end
 
 function m.run(scene)
@@ -181,9 +264,12 @@ function m.run(scene)
 
 		for j, testName in ipairs(loadedModule._testNames) do
 
-			testsRun = testsRun + 1
-
 			scene:init()
+
+			if loadedModule.skip[testName] then
+				goto continue
+			end
+
 			local r, d = xpcall(loadedModule[testName], debug.traceback, scene)
 
 			if not r then
@@ -194,6 +280,10 @@ function m.run(scene)
 
 				failures = failures + 1
 			end
+
+			testsRun = testsRun + 1
+
+			::continue::
 		end
 
 		print("Completed " .. testsRun .. " tests. Assertion failures: " .. failures)
