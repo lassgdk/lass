@@ -192,7 +192,7 @@ end)
 
 function SkipIf:__newindex(key, value)
 
-	if key ~= "_testModule" then
+	if key ~= "_testModule" and key ~= "reason" then
 
 		rawset(self._testModule.skip, key, self.reason)
 
@@ -235,7 +235,19 @@ function Skip:__call(condition, reason)
 end
 
 
-local Fail = 
+local Fail = class(nil, function(self, testModule)
+	self._testModule = testModule
+end)
+
+function Fail:__newindex(key, value)
+
+	if key ~= "_testModule" then
+		rawset(self, key, true)
+		self._testModule[key] = value
+	else
+		rawset(self, key, value)
+	end
+end
 
 --[[
 public
@@ -274,7 +286,10 @@ function m.run(scene)
 
 			scene:init()
 
-			if loadedModule.skip[testName] then
+			local skip = loadedModule.skip[testName]
+
+			if skip then
+				print(string.format("Skipping %s: %s", testName, skip))
 				goto continue
 			end
 
