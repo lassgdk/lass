@@ -356,17 +356,22 @@ end
 
 function GameEntity:moveGlobal(x, y, z)
 
-	if not self:hasParent() then
-		return self:move(x, y, z)
-	end
+    if not self:hasParent() then
+        return self:move(x, y, z)
+    end
 
-	local moveBy = geometry.Vector2(x,y,z)
+    local s = self.parent.globalSize
+    z = z or 0
+    -- the local change can be calculated by dividing the global change by the global size
+    local moveBy = geometry.Vector3(x/s.x, y/s.y, z/s.z)
+    -- local moveBy = geometry.Vector2(x,y,z)
 
-	local r = self.parent.globalTransform.rotation
-	-- local rotated = geometry.Vector2(moveBy.x, moveBy.y):rotate(-r)
-	-- rotated.z = moveBy.z
+    local r = self.parent.globalRotation
+    -- local r = self.parent.globalTransform.rotation
+    -- local rotated = geometry.Vector2(moveBy.x, moveBy.y):rotate(-r)
+    -- rotated.z = moveBy.z
 
-	return self:move(moveBy:rotate(-r))
+    return self:move(moveBy:rotate(-r))
 end
 
 function GameEntity:moveToGlobal(x, y, z)
