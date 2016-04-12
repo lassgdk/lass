@@ -197,7 +197,7 @@ function coretest.testGameObjectChildMovement(scene)
 
 end
 
-function coretest.testGameObjectChildGlobalMovement(scene)
+function coretest.fail.testGameObjectChildGlobalMovement(scene)
 
 	-- tests on global movement of a child accounting for the parent's global size/rotation
 
@@ -213,15 +213,13 @@ function coretest.testGameObjectChildGlobalMovement(scene)
 	testLocalPosition(child, geometry.Vector3(2, 2, 2))
 	testGlobalPosition(child, geometry.Vector3(4, 4, 4))
 
-	-- these fail and require changes to GameEntity:moveGlobal
-	-- child:moveGlobal(-2, -2, -2)
-	-- testLocalPosition(child, geometry.Vector3(1, 1, 1))
-	-- testGlobalPosition(child, geometry.Vector3(2, 0, 0))
+	child:moveGlobal(-2, -2, -2)
+	testLocalPosition(child, geometry.Vector3(1, 1, 1))
+	testGlobalPosition(child, geometry.Vector3(2, 0, 0))
 
-	-- these fail and require changes to GameEntity:moveToGlobal
-	-- child:moveToGlobal(8, 8, 8)
-	-- testLocalPosition(child, geometry.Vector3(4, 4, 4))
-	-- testGlobalPosition(child, geometry.Vector3(8, 8, 8))
+	child:moveToGlobal(8, 8, 8)
+	testLocalPosition(child, geometry.Vector3(4, 4, 4))
+	testGlobalPosition(child, geometry.Vector3(8, 8, 8))
 
 	child:moveTo(2, 2, 2)
 	object:resize(-1.5, -1.5, -1.5)
@@ -243,10 +241,9 @@ function coretest.testGameObjectChildGlobalMovement(scene)
 	testLocalPosition(child, geometry.Vector3(4, 8, 0))
 	testGlobalPosition(child, geometry.Vector3(-4,-8,0))
 
-	-- these fail and require changes to GameEntity:moveToGlobal
-	-- child:moveToGlobal(-8, -16)
-	-- testLocalPosition(child, geometry.Vector3(8, 16, 0))
-	-- testGlobalPosition(child, geometry.Vector3(-8, -16, 0))
+	child:moveToGlobal(-8, -16)
+	testLocalPosition(child, geometry.Vector3(8, 16, 0))
+	testGlobalPosition(child, geometry.Vector3(-8, -16, 0))
 
 	child:moveTo(2, 4)
 	object:rotateTo(90)
@@ -257,10 +254,9 @@ function coretest.testGameObjectChildGlobalMovement(scene)
 	testLocalPosition(child, geometry.Vector3(4, 8, 0))
 	testGlobalPosition(child, geometry.Vector3(8, -4,0))
 
-	-- these fail and require changes to GameEntity:moveToGlobal
-	-- child:moveToGlobal(16, -8)
-	-- testLocalPosition(child, geometry.Vector3(8, 16, 0))
-	-- testGlobalPosition(child, geometry.Vector3(16, -8, 0))
+	child:moveToGlobal(16, -8)
+	testLocalPosition(child, geometry.Vector3(8, 16, 0))
+	testGlobalPosition(child, geometry.Vector3(16, -8, 0))
 
 end
 
