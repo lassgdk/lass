@@ -257,6 +257,7 @@ m.testModule = class(nil, function(self)
 
 	-- self.fail = Fail(self)
 	self.skip = Skip(self)
+	self.fail = Fail(self)
 	self._testNames = {}
 end)
 
@@ -280,28 +281,61 @@ function m.run(scene)
 	for i, loadedModule in ipairs(loadedModules) do
 		print("---" .. loadedModuleNames[i] .. "---")
 		local testsRun = 0
+		local skips = 0
+		local passes = 0
+		local expectedPasses = 0
+		local unexpectedPasses = 0
 		local failures = 0
+		local expectedFailures = 0
+		local unexpectedFailures = 0
 
 		for j, testName in ipairs(loadedModule._testNames) do
 
 			scene:init()
 
+			-- skip this test if necessary
+
 			local skip = loadedModule.skip[testName]
 
 			if skip then
-				print(string.format("Skipping %s: %s", testName, skip))
+				if type(skip) == "string" then
+					print(string.format("Skipping %s: %s", testName, skip))
+				else
+					print("Skipping " .. testname)
+				end
+
+				skips = skips + 1
 				goto continue
 			end
 
+			-- else run the test
+			local fail = loadedModule.fail[testName]
 			local r, d = xpcall(loadedModule[testName], debug.traceback, scene)
 
-			if not r then
-				print(testName .. " gave the following error:")
+			if fail then
+				expectedFailures = expectedFailures + 1
 
-				-- indent the error message
-				print("    " .. d:gsub("\n", "\n    "))
+				if r then
+					print(testName .. " passed unexpectedly")
+					passes = passes + 1
+					unexpectedPasses = unexpectedPasses + 1
+				else
+					failures = failures + 1
+				end
+			else
+				expectedPasses = expectedPasses + 1
 
-				failures = failures + 1
+				if r then
+					passes = passes + 1
+				else
+					print(testName .. " failed unexpectedly:")
+
+					-- indent the error message
+					print("    " .. d:gsub("\n", "\n    "))
+
+					failures = failures + 1
+					unexpectedFailures = unexpectedFailures + 1
+				end
 			end
 
 			testsRun = testsRun + 1
@@ -309,10 +343,33 @@ function m.run(scene)
 			::continue::
 		end
 
-		print("Completed " .. testsRun .. " tests. Assertion failures: " .. failures)
+		local passNoun = "pass"
+		if passes ~= 1 then
+			passNoun = "passes"
+		end
+
+		local failNoun = "failure"
+		if failures ~= 1 then
+			failNoun = "failures"
+		end
+
+		print(string.format("Completed %d tests", testsRun))
+		print(string.format(
+			"%d %s, including %d unexpected",
+			passes,
+			passNoun,
+			unexpectedPasses
+		))
+		print(string.format(
+			"%d %s, including %d unexpected",
+			failures,
+			failNoun,
+			unexpectedFailures
+		))
+		print(string.format("%d skipped", skips))
 	end
 
-	print("All tests complete")
+	print("---All tests complete---")
 end
 
 ---got == true.
