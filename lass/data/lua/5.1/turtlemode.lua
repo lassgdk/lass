@@ -277,8 +277,17 @@ function m.run(scene)
 		loadedModuleNames[#loadedModuleNames + 1] = v
 	end
 
+	local testsRunTotal = 0
+	local skipsTotal = 0
+	local passesTotal = 0
+	local expectedPassesTotal = 0
+	local unexpectedPassesTotal = 0
+	local failuresTotal = 0
+	local expectedFailuresTotal = 0
+	local unexpectedFailuresTotal = 0
 
 	for i, loadedModule in ipairs(loadedModules) do
+
 		print("---" .. loadedModuleNames[i] .. "---")
 		local testsRun = 0
 		local skips = 0
@@ -367,9 +376,42 @@ function m.run(scene)
 			unexpectedFailures
 		))
 		print(string.format("%d skipped", skips))
+
+		testsRunTotal = testsRunTotal + testsRun
+		skipsTotal = skipsTotal + skips
+		passesTotal = passesTotal + passes
+		expectedPassesTotal = expectedPassesTotal + expectedPasses
+		unexpectedPassesTotal = unexpectedPassesTotal + unexpectedPasses
+		failuresTotal = failuresTotal + failures
+		expectedFailuresTotal = expectedFailuresTotal + expectedFailures
+		unexpectedFailuresTotal = unexpectedFailuresTotal + unexpectedFailures
+	end
+
+	local passNoun = "pass"
+	if passesTotal ~= 1 then
+		passNoun = "passes"
+	end
+
+	local failNoun = "failure"
+	if failuresTotal ~= 1 then
+		failNoun = "failures"
 	end
 
 	print("---All tests complete---")
+	print(string.format("Completed %d tests", testsRunTotal))
+	print(string.format(
+		"%d %s, including %d unexpected",
+		passesTotal,
+		passNoun,
+		unexpectedPassesTotal
+	))
+	print(string.format(
+		"%d %s, including %d unexpected",
+		failuresTotal,
+		failNoun,
+		unexpectedFailuresTotal
+	))
+	print(string.format("%d skipped", skipsTotal))
 end
 
 ---got == true.
