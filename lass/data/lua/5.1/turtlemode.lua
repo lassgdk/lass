@@ -435,16 +435,21 @@ end
 
 ---exp == got.
 function m.assertEqual(exp, got, tol, msg)
+
 	tol, msg = tol_or_msg(tol, msg)
-	if type(exp) == "number" and type(got) == "number" then
+
+	if type(exp) ~= "number" or type(got) ~= "number" then
+	   	wraptest(exp == got, msg, string.format("Expected %q, got %q", tostring(exp), tostring(got)))
+	elseif tol == 0 then
+		wraptest(exp == got, msg, string.format("Expected %s, got %s", tostring(exp), tostring(got)))
+   	else
    		wraptest(
    			math.abs(exp - got) <= tol,
    			msg,
    			string.format("Expected %s +/- %s, got %s", tostring(exp), tostring(tol), tostring(got))
    		)
-	else
-	   	wraptest(exp == got, msg, string.format("Expected %q, got %q", tostring(exp), tostring(got)))
-	end
+   	end
+
 end
 
 ---exp ~= got.
