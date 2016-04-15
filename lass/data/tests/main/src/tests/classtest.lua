@@ -2,6 +2,9 @@ local class = require "lass.class"
 local turtlemode = require("turtlemode")
 
 local classtest = turtlemode.testModule()
+local assertEqual = turtlemode.assertEqual
+local assertNotEqual = turtlemode.assertNotEqual
+
 
 local function testMemberAssignment(object, varName, varValue)
 	--ensure that assignment to an instance member works
@@ -11,7 +14,7 @@ local function testMemberAssignment(object, varName, varValue)
 
 	--did the assignment work at all?
 	object[varName] = varValue
-	assert(object[varName] ~= nil, "assigning member to class instance failed")
+	assertNotEqual(object[varName] ~= nil, "assigning member to class instance failed")
 
 	local repr = ""
 	if type(varName) == "string" then
@@ -21,10 +24,7 @@ local function testMemberAssignment(object, varName, varValue)
 	end
 
 	--did the assignment match what we put in?
-	assert(
-		object[varName] == varValue,
-		repr .. "should be " .. tostring(varValue) .. " but is instead " .. tostring(object[varName])
-	)
+	assertEqual(object[varName], varValue)
 end
 
 local function testClassDefine(scene)
@@ -62,8 +62,8 @@ function classtest.testClassInheritance(scene)
 	end)
 
 	local pom = Dog(3, "pomeranian")
-	assert(pom.legs == 3, "pom.legs should be 3 but is instead " .. tostring(pom.legs))
-	assert(pom.breed == "pomeranian", "pom.breed should be 'pomeranian' but is instead " .. pom.breed)
+	assertEqual(pom.legs, 3)
+	assertEqual(pom.breed, "pomeranian")
 end
 
 function classtest.testNilInit(scene)
@@ -73,13 +73,11 @@ function classtest.testNilInit(scene)
 
 	testMemberAssignment(a, "x", 3)
 	a:init()
-	assert(a.x ~= nil,
-		"class instance 'a' lost member 'x' after instance:init()")
+	assertNotEqual(a.x, nil, "class instance 'a' lost member 'x' after instance:init()")
 
 	testMemberAssignment(a, "x", 3)
 	Animal.init(a)
-	assert(a.x ~= nil,
-		"class instance 'a' lost member 'x' after Class.init(instance)")
+	assertNotEqual(a.x, nil, "class instance 'a' lost member 'x' after Class.init(instance)")
 end
 
 function classtest.testInstanceOf(scene)
@@ -102,15 +100,3 @@ function classtest.testInstanceOf(scene)
 end
 
 return classtest
-
--- function main()
-
--- 	testClassDefine()
--- 	testClassInheritance()
--- 	testNilInit()
--- 	testInstanceOf()
-
--- 	print("testing complete with no assertion failures")
--- end
-
--- main()
