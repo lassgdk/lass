@@ -1,9 +1,11 @@
 local geometry = require("lass.geometry")
+local helpers = require("tests.geometrytest.helpers")
 local class = require("lass.class")
 local turtlemode = require("turtlemode")
-local helpers = require("tests.geometrytest.helpers")
 
 local shapetest = turtlemode.testModule()
+local assertEqual = turtlemode.assertEqual
+local assertNotEqual = turtlemode.assertNotEqual
 
 
 local function testBasicRectangleRotation(size)
@@ -16,10 +18,10 @@ local function testBasicRectangleRotation(size)
     repeat
         r = r:globalRectangle(t)
 
-        assert(r.width == size, "rectangle width changed after a rotation of " .. t.rotation)
-        assert(r.height == size, "rectangle height changed after a rotation of " .. t.rotation)
-        assert(r.position.x == 0, "rectangle x position changed after a rotation of " .. t.rotation)
-        assert(r.position.y == 0, "rectangle y position changed after a rotation of " .. t.rotation)
+        assertEqual(r.width, size, "rectangle width changed after a rotation of " .. t.rotation)
+        assertEqual(r.height, size, "rectangle height changed after a rotation of " .. t.rotation)
+        assertEqual(r.position.x, 0, "rectangle x position changed after a rotation of " .. t.rotation)
+        assertEqual(r.position.y, 0, "rectangle y position changed after a rotation of " .. t.rotation)
 
         t.rotation = t.rotation + 90
     until(t.rotation == 0)
@@ -43,59 +45,59 @@ local function testRectanglePositionWithRotation(rotation)
 
     t = geometry.Transform({x=1}, rotation)
     r2 = r1:globalRectangle(t)
-    assert(r2.width == width, "rectangle width changed by moving position, rotation is " .. rotation)
-    assert(r2.height == height, "rectangle height changed by moving position, rotation is " .. rotation)
-    assert(r2.position.x == 1, "rectangle x position wasn't transformed, rotation is " .. rotation)
-    assert(r2.position.y == 0, "rectangle y position was incorrectly transformed, rotation is " .. rotation)
+    assertEqual(r2.width, width, "rectangle width changed by moving position, rotation is " .. rotation)
+    assertEqual(r2.height, height, "rectangle height changed by moving position, rotation is " .. rotation)
+    assertEqual(r2.position.x, 1, "rectangle x position wasn't transformed, rotation is " .. rotation)
+    assertEqual(r2.position.y, 0, "rectangle y position was incorrectly transformed, rotation is " .. rotation)
 
     t = geometry.Transform({x=-1}, rotation)
     r2 = r1:globalRectangle(t)
-    assert(r2.width == width, "rectangle width changed after transforming rectangle position")
-    assert(r2.height == height, "rectangle height changed after transforming rectangle position")
-    assert(r2.position.x == -1, "rectangle x position wasn't transformed, rotation is " .. rotation)
-    assert(r2.position.y == 0, "rectangle y position was incorrectly transformed, rotation is " .. rotation)
+    assertEqual(r2.width, width, "rectangle width changed after transforming rectangle position")
+    assertEqual(r2.height, height, "rectangle height changed after transforming rectangle position")
+    assertEqual(r2.position.x, -1, "rectangle x position wasn't transformed, rotation is " .. rotation)
+    assertEqual(r2.position.y, 0, "rectangle y position was incorrectly transformed, rotation is " .. rotation)
 
     t = geometry.Transform({y=1}, rotation)
     r2 = r1:globalRectangle(t)
-    assert(r2.width == width, "rectangle width changed after transforming rectangle position")
-    assert(r2.height == height, "rectangle height changed after transforming rectangle position")
-    assert(r2.position.x == 0, "rectangle x position was incorrectly transformed, rotation is " .. rotation)
-    assert(r2.position.y == 1, "rectangle y position wasn't transformed, rotation is " .. rotation)
+    assertEqual(r2.width, width, "rectangle width changed after transforming rectangle position")
+    assertEqual(r2.height, height, "rectangle height changed after transforming rectangle position")
+    assertEqual(r2.position.x, 0, "rectangle x position was incorrectly transformed, rotation is " .. rotation)
+    assertEqual(r2.position.y, 1, "rectangle y position wasn't transformed, rotation is " .. rotation)
 
     t = geometry.Transform({y=-1}, rotation)
     r2 = r1:globalRectangle(t)
-    assert(r2.width == width, "rectangle width changed after transforming rectangle position")
-    assert(r2.height == height, "rectangle height changed after transforming rectangle position")
-    assert(r2.position.x == 0, "rectangle x position was incorrectly transformed, rotation is " .. rotation)
-    assert(r2.position.y == -1, "rectangle y position wasn't transformed, rotation is " .. rotation)
+    assertEqual(r2.width, width, "rectangle width changed after transforming rectangle position")
+    assertEqual(r2.height, height, "rectangle height changed after transforming rectangle position")
+    assertEqual(r2.position.x, 0, "rectangle x position was incorrectly transformed, rotation is " .. rotation)
+    assertEqual(r2.position.y, -1, "rectangle y position wasn't transformed, rotation is " .. rotation)
 
     t = geometry.Transform({x=1, y=1}, rotation)
     r2 = r1:globalRectangle(t)
-    assert(r2.width == width, "rectangle width changed after transforming rectangle position")
-    assert(r2.height == height, "rectangle height changed after transforming rectangle position")
-    assert(r2.position.x == 1, "rectangle x position wasn't transformed, rotation is " .. rotation)
-    assert(r2.position.y == 1, "rectangle y position wasn't transformed, rotation is " .. rotation)
+    assertEqual(r2.width, width, "rectangle width changed after transforming rectangle position")
+    assertEqual(r2.height, height, "rectangle height changed after transforming rectangle position")
+    assertEqual(r2.position.x, 1, "rectangle x position wasn't transformed, rotation is " .. rotation)
+    assertEqual(r2.position.y, 1, "rectangle y position wasn't transformed, rotation is " .. rotation)
 
     t = geometry.Transform({x=1, y=-1}, rotation)
     r2 = r1:globalRectangle(t)
-    assert(r2.width == width, "rectangle width changed after transforming rectangle position")
-    assert(r2.height == height, "rectangle height changed after transforming rectangle position")
-    assert(r2.position.x == 1, "rectangle x position wasn't transformed, rotation is " .. rotation)
-    assert(r2.position.y == -1, "rectangle y position wasn't transformed, rotation is " .. rotation)
+    assertEqual(r2.width, width, "rectangle width changed after transforming rectangle position")
+    assertEqual(r2.height, height, "rectangle height changed after transforming rectangle position")
+    assertEqual(r2.position.x, 1, "rectangle x position wasn't transformed, rotation is " .. rotation)
+    assertEqual(r2.position.y, -1, "rectangle y position wasn't transformed, rotation is " .. rotation)
 
     t = geometry.Transform({x=-1, y=-1}, rotation)
     r2 = r1:globalRectangle(t)
-    assert(r2.width == width, "rectangle width changed after transforming rectangle position")
-    assert(r2.height == height, "rectangle height changed after transforming rectangle position")
-    assert(r2.position.x == -1, "rectangle x position wasn't transformed, rotation is " .. rotation)
-    assert(r2.position.y == -1, "rectangle y position wasn't transformed, rotation is " .. rotation)
+    assertEqual(r2.width, width, "rectangle width changed after transforming rectangle position")
+    assertEqual(r2.height, height, "rectangle height changed after transforming rectangle position")
+    assertEqual(r2.position.x, -1, "rectangle x position wasn't transformed, rotation is " .. rotation)
+    assertEqual(r2.position.y, -1, "rectangle y position wasn't transformed, rotation is " .. rotation)
 
     t = geometry.Transform({x=-1, y=1}, rotation)
     r2 = r1:globalRectangle(t)
-    assert(r2.width == width, "rectangle width changed after transforming rectangle position")
-    assert(r2.height == height, "rectangle height changed after transforming rectangle position")
-    assert(r2.position.x == -1, "rectangle x position wasn't transformed, rotation is " .. rotation)
-    assert(r2.position.y == 1, "rectangle y position wasn't transformed, rotation is " .. rotation)
+    assertEqual(r2.width, width, "rectangle width changed after transforming rectangle position")
+    assertEqual(r2.height, height, "rectangle height changed after transforming rectangle position")
+    assertEqual(r2.position.x, -1, "rectangle x position wasn't transformed, rotation is " .. rotation)
+    assertEqual(r2.position.y, 1, "rectangle y position wasn't transformed, rotation is " .. rotation)
 
 end
 
@@ -106,10 +108,10 @@ function shapetest.testGlobalRectangle()
     local t = geometry.Transform()
 
     local r2 = r1:globalRectangle(t)
-    assert(r2.width == 1, "rectangle width changed from a transform that does nothing")
-    assert(r2.height == 1, "rectangle height changed from a transform that does nothing")
-    assert(r2.position.x == 0, "rectangle x position changed from a transform that does nothing")
-    assert(r2.position.y == 0, "rectangle y position changed from a transform that does nothing")
+    assertEqual(r2.width, 1, "rectangle width changed from a transform that does nothing")
+    assertEqual(r2.height, 1, "rectangle height changed from a transform that does nothing")
+    assertEqual(r2.position.x, 0, "rectangle x position changed from a transform that does nothing")
+    assertEqual(r2.position.y, 0, "rectangle y position changed from a transform that does nothing")
 
 
     --[[origin based rotation]]
@@ -123,23 +125,23 @@ function shapetest.testGlobalRectangle()
 
     t = geometry.Transform(nil, 0)
     r2 = r1:globalRectangle(t)
-    assert(r2.position.x == 0, "rectangle didn't rotate position correctly")
-    assert(r2.position.y == 1, "rectangle didn't rotate position correctly")
+    assertEqual(r2.position.x, 0)
+    assertEqual(r2.position.y, 1)
 
     t.rotation = 90
     r2 = r1:globalRectangle(t)
-    assert(r2.position.x == 1, "rectangle didn't rotate position correctly")
-    assert(r2.position.y == 0, "rectangle didn't rotate position correctly")
+    assertEqual(r2.position.x, 1)
+    assertEqual(r2.position.y, 0)
 
     t.rotation = 180
     r2 = r1:globalRectangle(t)
-    assert(r2.position.x == 0, "rectangle didn't rotate position correctly")
-    assert(r2.position.y == -1, "rectangle didn't rotate position correctly")
+    assertEqual(r2.position.x, 0)
+    assertEqual(r2.position.y, -1)
 
     t.rotation = 270
     r2 = r1:globalRectangle(t)
-    assert(r2.position.x == -1, "rectangle didn't rotate position correctly")
-    assert(r2.position.y == 0, "rectangle didn't rotate position correctly")
+    assertEqual(r2.position.x, -1)
+    assertEqual(r2.position.y, 0)
 
 
     --[[basic size transform]]
@@ -147,24 +149,24 @@ function shapetest.testGlobalRectangle()
 
     t = geometry.Transform(nil, nil, {x=2})
     r2 = r1:globalRectangle(t)
-    assert(r2.width == 2, "rectangle width didn't get transformed by 2")
-    assert(r2.height == 1, "rectangle height changed from a transform that does nothing to height")
-    assert(r2.position.x == 1, "rectangle x position changed from a transform that does nothing to position x")
-    assert(r2.position.y == 1, "rectangle y position changed from a transform that does nothing to position y")
+    assertEqual(r2.width, 2)
+    assertEqual(r2.height, 1)
+    assertEqual(r2.position.x, 1)
+    assertEqual(r2.position.y, 1)
 
     t = geometry.Transform(nil, nil, {y=2})
     r2 = r1:globalRectangle(t)
-    assert(r2.width == 1, "rectangle width changed from a transform that does nothing to width")
-    assert(r2.height == 2, "rectangle height didn't get transformed by 2")
-    assert(r2.position.x == 1, "rectangle x position changed from a transform that does nothing to position x")
-    assert(r2.position.y == 1, "rectangle y position changed from a transform that does nothing to position y")
+    assertEqual(r2.width, 1)
+    assertEqual(r2.height, 2)
+    assertEqual(r2.position.x, 1)
+    assertEqual(r2.position.y, 1)
 
     t = geometry.Transform(nil, nil, {x=2, y=2})
     r2 = r1:globalRectangle(t)
-    assert(r2.width == 2, "rectangle width didn't get transformed by 2")
-    assert(r2.height == 2, "rectangle height didn't get transformed by 2")
-    assert(r2.position.x == 1, "rectangle x position changed from a transform that does nothing to position x")
-    assert(r2.position.y == 1, "rectangle y position changed from a transform that does nothing to position y")
+    assertEqual(r2.width, 2)
+    assertEqual(r2.height, 2)
+    assertEqual(r2.position.x, 1)
+    assertEqual(r2.position.y, 1)
 
 
     --[[rotation of an uneven rectangle]]
@@ -172,31 +174,31 @@ function shapetest.testGlobalRectangle()
 
     t = geometry.Transform(nil, 0)
     r2 = r1:globalRectangle(t)
-    assert(r2.width == 1, "rectangle width didn't get rotated correctly")
-    assert(r2.height == 2, "rectangle height didn't get rotated correctly")
-    assert(r2.position.x == 0, "rectangle x position changed from a transform that does nothing to position x")
-    assert(r2.position.y == 0, "rectangle y position changed from a transform that does nothing to position y")
+    assertEqual(r2.width, 1)
+    assertEqual(r2.height, 2)
+    assertEqual(r2.position.x, 0)
+    assertEqual(r2.position.y, 0)
 
     t.rotation = 90
     r2 = r1:globalRectangle(t)
-    assert(r2.width == 2, "rectangle width didn't get rotated correctly")
-    assert(r2.height == 1, "rectangle height didn't get rotated correctly")
-    assert(r2.position.x == 0, "rectangle x position changed from a transform that does nothing to position x")
-    assert(r2.position.y == 0, "rectangle y position changed from a transform that does nothing to position y")
+    assertEqual(r2.width, 2)
+    assertEqual(r2.height, 1)
+    assertEqual(r2.position.x, 0)
+    assertEqual(r2.position.y, 0)
 
     t.rotation = 180
     r2 = r1:globalRectangle(t)
-    assert(r2.width == 1, "rectangle width didn't get rotated correctly")
-    assert(r2.height == 2, "rectangle height didn't get rotated correctly")
-    assert(r2.position.x == 0, "rectangle x position changed from a transform that does nothing to position x")
-    assert(r2.position.y == 0, "rectangle y position changed from a transform that does nothing to position y")
+    assertEqual(r2.width, 1)
+    assertEqual(r2.height, 2)
+    assertEqual(r2.position.x, 0)
+    assertEqual(r2.position.y, 0)
 
     t.rotation = 270
     r2 = r1:globalRectangle(t)
-    assert(r2.width == 2, "rectangle width didn't get rotated correctly")
-    assert(r2.height == 1, "rectangle height didn't get rotated correctly")
-    assert(r2.position.x == 0, "rectangle x position changed from a transform that does nothing to position x")
-    assert(r2.position.y == 0, "rectangle y position changed from a transform that does nothing to position y")
+    assertEqual(r2.width, 2)
+    assertEqual(r2.height, 1)
+    assertEqual(r2.position.x, 0)
+    assertEqual(r2.position.y, 0)
 
 
     --[[basic position transform]]
@@ -214,23 +216,23 @@ function shapetest.testGlobalRectangle()
 
     t = geometry.Transform({x=2, y=2})
     r2 = r1:globalRectangle(t)
-    assert(r2.position.x == 2, "rectangle x position wasn't transformed correctly")
-    assert(r2.position.y == 3, "rectangle y position wasn't transformed correctly")
+    assertEqual(r2.position.x, 2)
+    assertEqual(r2.position.y, 3)
 
     t.rotation = 90
     r2 = r1:globalRectangle(t)
-    assert(r2.position.x == 3, "rectangle x position wasn't transformed correctly")
-    assert(r2.position.y == 2, "rectangle y position wasn't transformed correctly")
+    assertEqual(r2.position.x, 3)
+    assertEqual(r2.position.y, 2)
 
     t.rotation = 180
     r2 = r1:globalRectangle(t)
-    assert(r2.position.x == 2, "rectangle x position wasn't transformed correctly")
-    assert(r2.position.y == 1, "rectangle y position wasn't transformed correctly")
+    assertEqual(r2.position.x, 2)
+    assertEqual(r2.position.y, 1)
 
     t.rotation = 270
     r2 = r1:globalRectangle(t)
-    assert(r2.position.x == 1, "rectangle x position wasn't transformed correctly")
-    assert(r2.position.y == 2, "rectangle y position wasn't transformed correctly")
+    assertEqual(r2.position.x, 1)
+    assertEqual(r2.position.y, 2)
 
 
     --[[rotation with size transform]]
@@ -238,18 +240,18 @@ function shapetest.testGlobalRectangle()
 
     t = geometry.Transform(nil, 90, {x=2, y=3})
     r2 = r1:globalRectangle(t)
-    assert(r2.width == 3, "rectangle width wasn't resized and/or rotated correctly")
-    assert(r2.height == 2, "rectangle height wasn't resized and/or rotated correctly")
+    assertEqual(r2.width, 3)
+    assertEqual(r2.height, 2)
 
     t.rotation = 180
     r2 = r1:globalRectangle(t)
-    assert(r2.width == 2, "rectangle width wasn't resized and/or rotated correctly")
-    assert(r2.height == 3, "rectangle height wasn't resized and/or rotated correctly")
+    assertEqual(r2.width, 2)
+    assertEqual(r2.height, 3)
 
     t.rotation = 270
     r2 = r1:globalRectangle(t)
-    assert(r2.width == 3, "rectangle width wasn't resized and/or rotated correctly")
-    assert(r2.height == 2, "rectangle height wasn't resized and/or rotated correctly")
+    assertEqual(r2.width, 3)
+    assertEqual(r2.height, 2)
 
 
     --[[testing all three transform options together]]
@@ -257,18 +259,16 @@ function shapetest.testGlobalRectangle()
 
     t = geometry.Transform({x=1, y=-1}, 90, {x=3, y=0.5})
     r2 = r1:globalRectangle(t)
-    assert(r2.width == 1, "rectangle width wasn't transformed correctly")
-    assert(r2.height == 3, "rectangle height wasn't transformed correctly")
-    assert(r2.position.x == 2, "rectangle x position wasn't transformed correctly")
-    assert(r2.position.y == -1, "rectangle y position wasn't transformed correctly")
+    assertEqual(r2.width, 1)
+    assertEqual(r2.height, 3)
+    assertEqual(r2.position.x, 2)
+    assertEqual(r2.position.y, -1)
 
 end
 
 function shapetest.testCircleCreation()
 
     --[[incorrect creation attempts]]
-    assert(pcall(geometry.Circle) ~= true, "circle incorrectly created with no arguments")
-
     helpers.assertIncorrectValues(geometry.Circle, "circle", {"radius"}, 0, true, true)
 
 
@@ -277,46 +277,44 @@ function shapetest.testCircleCreation()
 
     assert(class.instanceof(c, geometry.Circle), "circle should be valid as a circle")
 
-    assert(type(c.radius) == "number", "circle radius is not number")
-    assert(c.radius == 0, "circle radius changed from given value of 0")
+    assertEqual(type(c.radius), "number")
+    assertEqual(c.radius, 0, "circle default radius is not 0")
 
     assert(class.instanceof(c.position, geometry.Vector2), "circle position is not Vector2")
-    assert(c.position.x == 0, "circle default x position is not 0")
-    assert(c.position.y == 0, "circle default y position is not 0")
+    assertEqual(c.position.x, 0, "circle default x position is not 0")
+    assertEqual(c.position.y, 0, "circle default y position is not 0")
 
 
     --[[creation with Vector2]]
     c = geometry.Circle(1, geometry.Vector2(0, 0))
 
-    assert(type(c.radius) == "number", "circle radius is not number")
-    assert(c.radius == 1, "circle radius changed from given value of 1")
-    assert(class.instanceof(c.position, geometry.Vector2), "circle position is not Vector2")
-    assert(c.position.x == 0, "circle x position changed from given value of 0")
-    assert(c.position.y == 0, "circle y position changed from given value of 0")
+    assertEqual(type(c.radius), "number")
+    assertEqual(c.radius, 1)
+    assert(class.instanceof(c.position, geometry.Vector2))
+    assertEqual(c.position.x, 0)
+    assertEqual(c.position.y, 0)
 
     c = geometry.Circle(1, geometry.Vector2(1, 1))
-    assert(c.position.x == 1, "circle x position changed from given value of 1")
-    assert(c.position.y == 1, "circle y position changed from given value of 1")
+    assertEqual(c.position.x, 1)
+    assertEqual(c.position.y, 1)
 
     c = geometry.Circle(1, geometry.Vector2(-1, -1))
-    assert(c.position.x == -1, "circle x position changed from given value of -1")
-    assert(c.position.y == -1, "circle y position changed from given value of -1")
+    assertEqual(c.position.x, -1)
+    assertEqual(c.position.y, -1)
 
 end
 
 function shapetest.testRectangleCreation()
 
     --[[incorrect creation attempts]]
-    assert(pcall(geometry.Rectangle) ~= true, "rectangle incorrectly created with no arguments")
-    assert(pcall(geometry.Rectangle, 0) ~= true, "rectangle incorrectly created with only one argument")
-
+    assertEqual(pcall(geometry.Rectangle), false, "rectangle incorrectly created with no arguments")
     helpers.assertIncorrectValues(geometry.Rectangle, "rectangle", {"width", "height"}, 1, true, true)
 
 
     --[[verify boundary conditions for size]]
     local r = geometry.Rectangle(0, 0)
-    assert(r.width == 0, "rectangle width of 0 should be possible")
-    assert(r.height == 0, "rectangle height of 0 should be possible")
+    assertEqual(r.width, 0, "rectangle width of 0 should be possible")
+    assertEqual(r.height, 0, "rectangle height of 0 should be possible")
 
 
     --[[basic creation]]
@@ -324,35 +322,35 @@ function shapetest.testRectangleCreation()
 
     assert(class.instanceof(r, geometry.Rectangle), "rectangle should be valid as a rectangle")
 
-    assert(type(r.width) == "number", "rectangle width is not number")
-    assert(type(r.height) == "number", "rectangle height is not number")
-    assert(r.width == 1, "rectangle width changed from given value of 1")
-    assert(r.height == 1, "rectangle height changed from given value of 1")
+    assertEqual(type(r.width), "number", "rectangle width is not number")
+    assertEqual(type(r.height), "number", "rectangle height is not number")
+    assertEqual(r.width, 1, "rectangle width changed from given value of 1")
+    assertEqual(r.height, 1, "rectangle height changed from given value of 1")
 
     assert(class.instanceof(r.position, geometry.Vector2), "rectangle position is not Vector2")
-    assert(r.position.x == 0, "rectangle default x position is not 0")
-    assert(r.position.y == 0, "rectangle default y position is not 0")
+    assertEqual(r.position.x, 0, "rectangle default x position is not 0")
+    assertEqual(r.position.y, 0, "rectangle default y position is not 0")
 
 
     --[[creation with Vector2]]
     r = geometry.Rectangle(1, 1, geometry.Vector2(0, 0))
 
-    assert(type(r.width) == "number", "rectangle width is not number")
-    assert(type(r.height) == "number", "rectangle height is not number")
-    assert(r.width == 1, "rectangle width changed from given value of 1")
-    assert(r.height == 1, "rectangle height changed from given value of 1")
+    assertEqual(type(r.width), "number")
+    assertEqual(type(r.height), "number")
+    assertEqual(r.width, 1)
+    assertEqual(r.height, 1)
 
-    assert(class.instanceof(r.position, geometry.Vector2), "rectangle position is not Vector2")
-    assert(r.position.x == 0, "rectangle x position changed from given value of 0")
-    assert(r.position.y == 0, "rectangle y position changed from given value of 0")
+    assert(class.instanceof(r.position, geometry.Vector2))
+    assertEqual(r.position.x, 0)
+    assertEqual(r.position.y, 0)
 
     r = geometry.Rectangle(1, 1, geometry.Vector2(1, 1))
-    assert(r.position.x == 1, "rectangle x position changed from given value of 1")
-    assert(r.position.y == 1, "rectangle y position changed from given value of 1")
+    assertEqual(r.position.x, 1)
+    assertEqual(r.position.y, 1)
 
     r = geometry.Rectangle(1, 1, geometry.Vector2(-1, -1))
-    assert(r.position.x == -1, "rectangle x position changed from given value of -1")
-    assert(r.position.y == -1, "rectangle y position changed from given value of -1")
+    assertEqual(r.position.x, -1)
+    assertEqual(r.position.y, -1)
 
 end
 
@@ -379,12 +377,12 @@ function shapetest.testCircleWithRadiusZero()
     local t1, t2 = geometry.Transform(geometry.Vector3(0,0)), geometry.Transform(geometry.Vector3(4,0))
 
     assert(geometry.intersecting(c1, c2), "circles at same position aren't intersecting")
-    assert(not geometry.intersecting(c1, c2, t1, t2), "circles should not be intersecting")
+    assertEqual(geometry.intersecting(c1, c2, t1, t2), false, "circles should not be intersecting")
 
     local v = geometry.Vector2(0,0)
     assert(geometry.intersecting(c1, v), "circle should contain vector")
     v.x = 0.0001
-    assert(not geometry.intersecting(c1, v), "circle should not contain vector")
+    assertEqual(geometry.intersecting(c1, v), false, "circle should not contain vector")
 
 end
 
@@ -400,18 +398,19 @@ function shapetest.testIntersectingRectanglesAndVectors()
 
     t2.position.y = 2.5
     colliding, data = geometry.intersecting(r1, r2, t1, t2, true, true)
-    assert(colliding and data.shortestOverlap == 0, "rectangles should be touching with overlap of 0")
+    assertEqual(colliding and data.shortestOverlap, 0, "rectangles should be touching with overlap of 0")
 
     t2.position.y = 2.50001
     colliding, data = geometry.intersecting(r1, r2, t1, t2, true, true)
-    assert(not colliding, "rectangles should not be touching")
+    assertEqual(colliding, false, "rectangles should not be touching")
 
     t2.position.y = 1.5
     colliding, data = geometry.intersecting(r1, r2, t1, t2, true, true)
-    assert(colliding and data.shortestOverlap == 1, "rectangles should be touching with overlap of 1")
+    assertEqual(colliding and data.shortestOverlap, 1, "rectangles should be touching with overlap of 1")
 
     assert(geometry.intersecting(r1, geometry.Vector2(0.5, -1)), "rectangle should contain vector")
-    assert(not geometry.intersecting(r1, geometry.Vector2(0.5, 1.01)), "rectangle should not contain vector")
+    assertEqual(geometry.intersecting(r1, geometry.Vector2(0.5, 1.01)), false,
+        "rectangle should not contain vector")
 
 end
 
@@ -443,7 +442,7 @@ function shapetest.testIntersectingPolygonsAndVectors()
     t2.position.x = 200
     assert(geometry.intersecting(p1, p2, t1, t2), "polygons should be touching")
     t2.position.x = 200.001
-    assert(not geometry.intersecting(p1, p2, t1, t2), "polygons should not be touching")
+    assertEqual(geometry.intersecting(p1, p2, t1, t2), false, "polygons should not be touching")
 
     assert(geometry.intersecting(p1, geometry.Vector2(0,0)), "polygon should contain vector")
     assert(geometry.intersecting(geometry.Vector2(0,0), p1), "polygon should contain vector")
@@ -453,9 +452,12 @@ function shapetest.testIntersectingPolygonsAndVectors()
     assert(geometry.intersecting(geometry.Vector2(100,-50), p1), "polygon should contain vector")
     assert(p1:globalPolygon(t1):contains(geometry.Vector2(100,-50)), "polygon should contain vector")
 
-    assert(not geometry.intersecting(p1, geometry.Vector2(100,-50.0001)), "polygon should not contain vector")
-    assert(not geometry.intersecting(geometry.Vector2(100,-50.0001), p1), "polygon should not contain vector")
-    assert(not p1:globalPolygon(t1):contains(geometry.Vector2(100,-50.0001)), "polygon should not contain vector")
+    assertEqual(geometry.intersecting(p1, geometry.Vector2(100,-50.0001)), false,
+        "polygon should not contain vector")
+    assertEqual(geometry.intersecting(geometry.Vector2(100,-50.0001), p1), false,
+        "polygon should not contain vector")
+    assertEqual(p1:globalPolygon(t1):contains(geometry.Vector2(100,-50.0001)), false,
+        "polygon should not contain vector")
 end
 
 function shapetest.testIntersectingPolygonAndCircle()
@@ -502,11 +504,11 @@ function shapetest.testIntersectingPolygonAndCircle()
 
     t2.position.y = 25
     r, d = geometry.intersecting(pol, cir, t1, t2)
-    assert(r and d.shortestOverlap == 0, "figures should be intersecting with overlap of 0")
+    assertEqual(r and d.shortestOverlap, 0, "figures should be intersecting with overlap of 0")
 
     t2.position.y = 0
     r, d = geometry.intersecting(pol, cir, t1, t2)
-    assert(r and d.shortestOverlap == cir.radius,
+    assertEqual(r and d.shortestOverlap, cir.radius,
         "figures should be intersecting with overlap of " .. cir.radius)
 end
 

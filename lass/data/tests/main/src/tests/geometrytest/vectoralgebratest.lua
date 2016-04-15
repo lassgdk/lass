@@ -4,6 +4,8 @@ local class = require("lass.class")
 local turtlemode = require("turtlemode")
 
 local vectoralgebratest = turtlemode.testModule()
+local assertEqual = turtlemode.assertEqual
+local assertNotEqual = turtlemode.assertNotEqual
 
 -- [[notes]]
 -- cross multiplication / division of Vector2 and 3 is not tested, as it is not possible
@@ -59,10 +61,10 @@ function vectoralgebratest.testVector2Add()
     --[[basic usage]]
     local v1 = geometry.Vector2()
     local r = v1 + v1
-    assert(r.x == 0, "0 + 0 didn't equal 0")
-    assert(r.y == 0, "0 + 0 didn't equal 0")
+    assertEqual(r.x, 0)
+    assertEqual(r.y, 0)
     assert(class.instanceof(r, geometry.Vector2), "Vector2 should be valid as Vector2")
-    assert(class.instanceof(r, geometry.Vector3) == false, "Vector2 shouldn't be valid as Vector3")
+    assertEqual(class.instanceof(r, geometry.Vector3), false, "Vector2 shouldn't be valid as Vector3")
 
 
     --[[operator order]]
@@ -70,16 +72,16 @@ function vectoralgebratest.testVector2Add()
     local v2 = geometry.Vector2(2, 10)
 
     r = v1 + v1
-    assert(r.x == 2, "1 + 1 didn't become 2")
-    assert(r.y == 10, "5 + 5 didn't become 10")
+    assertEqual(r.x, 2)
+    assertEqual(r.y, 10)
 
     r = v1 + v2
-    assert(r.x == 3, "1 + 2 didn't become 3")
-    assert(r.y == 15, "5 + 10 didn't become 15")
+    assertEqual(r.x, 3)
+    assertEqual(r.y, 15)
 
     r = v2 + v1
-    assert(r.x == 3, "2 + 1 didn't become 3")
-    assert(r.y == 15, "10 + 5 didn't become 15")
+    assertEqual(r.x, 3)
+    assertEqual(r.y, 15)
 
 
     --[[using tables]]
@@ -87,18 +89,18 @@ function vectoralgebratest.testVector2Add()
     local t = {x=100, y=200, z=300}
 
     r = v1 + t
-    assert(r.x == 110, "10 + 100 didn't become 110")
-    assert(r.y == 220, "20 + 200 didn't become 220")
-    assert(r.z == nil, "Vector2 shouldn't have a z value")
+    assertEqual(r.x, 110)
+    assertEqual(r.y, 220)
+    assertEqual(r.z, nil, "Vector2 shouldn't have a z value")
     assert(class.instanceof(r, geometry.Vector2), "Vector2 should be valid as Vector2")
-    assert(class.instanceof(r, geometry.Vector3) == false, "Vector2 shouldn't be valid as Vector3")
+    assertEqual(class.instanceof(r, geometry.Vector3), false, "Vector2 shouldn't be valid as Vector3")
 
     r = t + v1
-    assert(r.x == 110, "100 + 10 didn't become 110")
-    assert(r.y == 220, "200 + 20 didn't become 220")
-    assert(r.z == nil, "Vector2 shouldn't have a z value")
+    assertEqual(r.x, 110)
+    assertEqual(r.y, 220)
+    assertEqual(r.z, nil, "Vector2 shouldn't have a z value")
     assert(class.instanceof(r, geometry.Vector2), "Vector2 should be valid as Vector2")
-    assert(class.instanceof(r, geometry.Vector3) == false, "Vector2 shouldn't be valid as Vector3")
+    assertEqual(class.instanceof(r, geometry.Vector3), false, "Vector2 shouldn't be valid as Vector3")
 
 end
 
@@ -108,9 +110,11 @@ function vectoralgebratest.testVector3Add()
     --[[basic usage]]
     local v1 = geometry.Vector3()
     local r = v1 + v1
-    assert(r.x == 0, "0 + 0 didn't equal 0")
-    assert(r.y == 0, "0 + 0 didn't equal 0")
-    assert(r.z == 0, "0 + 0 didn't equal 0")
+    assertEqual(r.x, 0)
+    assertEqual(r.y, 0)
+    assertEqual(r.z, 0)
+    assert(class.instanceof(r, geometry.Vector2), "Vector3 should be valid as Vector2")
+    assert(class.instanceof(r, geometry.Vector3), "Vector3 should be valid as Vector3")
 
 
     --[[operator order]]
@@ -118,19 +122,19 @@ function vectoralgebratest.testVector3Add()
     local v2 = geometry.Vector3(2, 10, 20)
 
     r = v1 + v1
-    assert(r.x == 2, "1 + 1 didn't become 2")
-    assert(r.y == 10, "5 + 5 didn't become 10")
-    assert(r.z == 20, "10 + 10 didn't become 20")
+    assertEqual(r.x, 2)
+    assertEqual(r.y, 10)
+    assertEqual(r.z, 20)
 
     r = v1 + v2
-    assert(r.x == 3, "1 + 2 didn't become 3")
-    assert(r.y == 15, "5 + 10 didn't become 15")
-    assert(r.z == 30, "10 + 20 didn't become 30")
+    assertEqual(r.x, 3)
+    assertEqual(r.y, 15)
+    assertEqual(r.z, 30)
 
     r = v2 + v1
-    assert(r.x == 3, "2 + 1 didn't become 3")
-    assert(r.y == 15, "10 + 5 didn't become 15")
-    assert(r.z == 30, "20 + 10 didn't become 30")
+    assertEqual(r.x, 3)
+    assertEqual(r.y, 15)
+    assertEqual(r.z, 30)
 
 
     --[[using tables]]
@@ -138,16 +142,16 @@ function vectoralgebratest.testVector3Add()
     local t = {x=100, y=200, z=300}
 
     r = v1 + t
-    assert(r.x == 110, "10 + 100 didn't become 110")
-    assert(r.y == 220, "20 + 200 didn't become 220")
-    assert(r.z == 330, "30 + 300 didn't become 330")
+    assertEqual(r.x, 110)
+    assertEqual(r.y, 220)
+    assertEqual(r.z, 330)
     assert(class.instanceof(r, geometry.Vector2), "Vector3 should be valid as Vector2")
     assert(class.instanceof(r, geometry.Vector3), "Vector3 should be valid as Vector3")
 
     r = t + v1
-    assert(r.x == 110, "100 + 10 didn't become 110")
-    assert(r.y == 220, "200 + 20 didn't become 220")
-    assert(r.z == 330, "300 + 30 didn't become 330")
+    assertEqual(r.x, 110)
+    assertEqual(r.y, 220)
+    assertEqual(r.z, 330)
     assert(class.instanceof(r, geometry.Vector2), "Vector3 should be valid as Vector2")
     assert(class.instanceof(r, geometry.Vector3), "Vector3 should be valid as Vector3")
 
@@ -163,16 +167,16 @@ function vectoralgebratest.testVector2And3Add()
     local r = v2 + v3
     assert(class.instanceof(r, geometry.Vector2), "Vector3 should be valid as Vector2")
     assert(class.instanceof(r, geometry.Vector3), "addition with Vector3 didn't return Vector3")
-    assert(r.x == 0, "0 + 0 didn't equal 0")
-    assert(r.y == 0, "0 + 0 didn't equal 0")
-    assert(r.z == 0, "0 + 0 didn't equal 0")
+    assertEqual(r.x, 0)
+    assertEqual(r.y, 0)
+    assertEqual(r.z, 0)
 
     r = v3 + v2
     assert(class.instanceof(r, geometry.Vector2), "Vector3 should be valid as Vector2")
     assert(class.instanceof(r, geometry.Vector3), "addition with Vector3 didn't return Vector3")
-    assert(r.x == 0, "0 + 0 didn't equal 0")
-    assert(r.y == 0, "0 + 0 didn't equal 0")
-    assert(r.z == 0, "0 + 0 didn't equal 0")
+    assertEqual(r.x, 0)
+    assertEqual(r.y, 0)
+    assertEqual(r.z, 0)
 
 
     --[[operator order]]
@@ -180,14 +184,14 @@ function vectoralgebratest.testVector2And3Add()
     v3 = geometry.Vector3(10, 20, 30)
 
     r = v2 + v3
-    assert(r.x == 11, "1 + 10 didn't equal 11")
-    assert(r.y == 25, "5 + 20 didn't equal 25")
-    assert(r.z == 30, "0 + 30 didn't equal 30")
+    assertEqual(r.x, 11)
+    assertEqual(r.y, 25)
+    assertEqual(r.z, 30)
 
     r = v3 + v2
-    assert(r.x == 11, "10 + 1 didn't equal 11")
-    assert(r.y == 25, "20 + 5 didn't equal 25")
-    assert(r.z == 30, "30 + 0 didn't equal 30")
+    assertEqual(r.x, 11)
+    assertEqual(r.y, 25)
+    assertEqual(r.z, 30)
 
 end
 
@@ -197,8 +201,8 @@ function vectoralgebratest.testVector2Subtract()
     --[[basic usage]]
     local v1 = geometry.Vector2()
     local r = v1 - v1
-    assert(r.x == 0, "0 - 0 didn't equal 0")
-    assert(r.y == 0, "0 - 0 didn't equal 0")
+    assertEqual(r.x, 0)
+    assertEqual(r.y, 0)
 
 
     --[[operator order]]
@@ -206,16 +210,16 @@ function vectoralgebratest.testVector2Subtract()
     local v2 = geometry.Vector2(2, 10)
 
     r = v1 - v1
-    assert(r.x == 0, "1 - 1 didn't become 0")
-    assert(r.y == 0, "5 - 5 didn't become 0")
+    assertEqual(r.x, 0)
+    assertEqual(r.y, 0)
 
     r = v1 - v2
-    assert(r.x == -1, "1 - 2 didn't become -1")
-    assert(r.y == -5, "5 - 10 didn't become -5")
+    assertEqual(r.x, -1)
+    assertEqual(r.y, -5)
 
     r = v2 - v1
-    assert(r.x == 1, "2 - 1 didn't become 1")
-    assert(r.y == 5, "10 - 5 didn't become 5")
+    assertEqual(r.x, 1)
+    assertEqual(r.y, 5)
 
 
     --[[using tables]]
@@ -223,18 +227,18 @@ function vectoralgebratest.testVector2Subtract()
     local t = {x=11, y=22, z=33}
 
     r = v1 - t
-    assert(r.x == -1, "10 - 11 didn't become -1")
-    assert(r.y == -2, "20 - 22 didn't become -2")
-    assert(r.z == nil, "Vector2 shouldn't have a z value")
+    assertEqual(r.x, -1)
+    assertEqual(r.y, -2)
+    assertEqual(r.z, nil, "Vector2 shouldn't have a z value")
     assert(class.instanceof(r, geometry.Vector2), "Vector2 should be valid as Vector2")
-    assert(class.instanceof(r, geometry.Vector3) == false, "Vector3 shouldn't be valid as Vector3")
+    assertEqual(class.instanceof(r, geometry.Vector3), false, "Vector3 shouldn't be valid as Vector3")
 
     r = t - v1
-    assert(r.x == 1, "11 - 10 didn't become 1")
-    assert(r.y == 2, "22 - 20 didn't become 2")
-    assert(r.z == nil, "Vector2 shouldn't have a z value")
+    assertEqual(r.x, 1)
+    assertEqual(r.y, 2)
+    assertEqual(r.z, nil, "Vector2 shouldn't have a z value")
     assert(class.instanceof(r, geometry.Vector2), "Vector2 should be valid as Vector2")
-    assert(class.instanceof(r, geometry.Vector3) == false, "Vector2 shouldn't be valid as Vector3")
+    assertEqual(class.instanceof(r, geometry.Vector3), false, "Vector2 shouldn't be valid as Vector3")
 
 end
 
@@ -244,9 +248,9 @@ function vectoralgebratest.testVector3Subtract()
     --[[basic usage]]
     local v1 = geometry.Vector3()
     local r = v1 - v1
-    assert(r.x == 0, "0 - 0 didn't equal 0")
-    assert(r.y == 0, "0 - 0 didn't equal 0")
-    assert(r.z == 0, "0 - 0 didn't equal 0")
+    assert(r.x == 0)
+    assert(r.y == 0)
+    assert(r.z == 0)
 
 
     --[[operator order]]
@@ -254,19 +258,19 @@ function vectoralgebratest.testVector3Subtract()
     local v2 = geometry.Vector3(2, 10, 20)
 
     r = v1 - v1
-    assert(r.x == 0, "1 - 1 didn't become 0")
-    assert(r.y == 0, "5 - 5 didn't become 0")
-    assert(r.z == 0, "10 - 10 didn't become 0")
+    assert(r.x == 0)
+    assert(r.y == 0)
+    assert(r.z == 0)
 
     r = v1 - v2
-    assert(r.x == -1, "1 - 2 didn't become -1")
-    assert(r.y == -5, "5 - 10 didn't become -5")
-    assert(r.z == -10, "10 - 20 didn't become -10")
+    assert(r.x == -1)
+    assert(r.y == -5)
+    assert(r.z == -10)
 
     r = v2 - v1
-    assert(r.x == 1, "2 - 1 didn't become 1")
-    assert(r.y == 5, "10 - 5 didn't become 5")
-    assert(r.z == 10, "20 - 10 didn't become 10")
+    assert(r.x == 1)
+    assert(r.y == 5)
+    assert(r.z == 10)
 
 
     --[[using tables]]
@@ -274,16 +278,16 @@ function vectoralgebratest.testVector3Subtract()
     local t = {x=11, y=22, z=33}
 
     r = v1 - t
-    assert(r.x == -1, "10 - 11 didn't become -1")
-    assert(r.y == -2, "20 - 22 didn't become -2")
-    assert(r.z == -3, "30 - 33 didn't become -3")
+    assert(r.x == -1)
+    assert(r.y == -2)
+    assert(r.z == -3)
     assert(class.instanceof(r, geometry.Vector2), "Vector3 should be valid as Vector2")
     assert(class.instanceof(r, geometry.Vector3), "Vector3 should be valid as Vector3")
 
     r = t - v1
-    assert(r.x == 1, "11 - 10 didn't become 1")
-    assert(r.y == 2, "22 - 20 didn't become 2")
-    assert(r.z == 3, "33 - 30 didn't become 3")
+    assert(r.x == 1)
+    assert(r.y == 2)
+    assert(r.z == 3)
     assert(class.instanceof(r, geometry.Vector2), "Vector3 should be valid as Vector2")
     assert(class.instanceof(r, geometry.Vector3), "Vector3 should be valid as Vector3")
 
@@ -299,16 +303,16 @@ function vectoralgebratest.testVector2And3Subtract()
     local r = v2 - v3
     assert(class.instanceof(r, geometry.Vector2), "Vector3 should be valid as Vector2")
     assert(class.instanceof(r, geometry.Vector3), "subtraction with Vector3 didn't return Vector3")
-    assert(r.x == 0, "0 - 0 didn't equal 0")
-    assert(r.y == 0, "0 - 0 didn't equal 0")
-    assert(r.z == 0, "0 - 0 didn't equal 0")
+    assert(r.x == 0)
+    assert(r.y == 0)
+    assert(r.z == 0)
 
     r = v3 - v2
     assert(class.instanceof(r, geometry.Vector2), "Vector3 should be valid as Vector2")
     assert(class.instanceof(r, geometry.Vector3), "subtraction with Vector3 didn't return Vector3")
-    assert(r.x == 0, "0 - 0 didn't equal 0")
-    assert(r.y == 0, "0 - 0 didn't equal 0")
-    assert(r.z == 0, "0 - 0 didn't equal 0")
+    assert(r.x == 0)
+    assert(r.y == 0)
+    assert(r.z == 0)
 
 
     --[[operator order]]
@@ -316,14 +320,14 @@ function vectoralgebratest.testVector2And3Subtract()
     v3 = geometry.Vector3(10, 20, 30)
 
     r = v2 - v3
-    assert(r.x == -9, "1 - 10 didn't equal -9")
-    assert(r.y == -15, "5 - 20 didn't equal -15")
-    assert(r.z == -30, "0 - 30 didn't equal -30")
+    assert(r.x == -9)
+    assert(r.y == -15)
+    assert(r.z == -30)
 
     r = v3 - v2
-    assert(r.x == 9, "10 - 1 didn't equal 9")
-    assert(r.y == 15, "20 - 5 didn't equal 15")
-    assert(r.z == 30, "30 - 0 didn't equal 30")
+    assert(r.x == 9)
+    assert(r.y == 15)
+    assert(r.z == 30)
 
 end
 
@@ -333,20 +337,20 @@ function vectoralgebratest.testVector2Multiply()
     --[[basic usage]]
     local v = geometry.Vector2()
     local r = v * 0
-    assert(r.x == 0, "0 * 0 didn't equal 0")
-    assert(r.y == 0, "0 * 0 didn't equal 0")
+    assert(r.x == 0)
+    assert(r.y == 0)
 
 
     --[[operator order]]
     v = geometry.Vector2(1, 2)
 
     r = v * 2
-    assert(r.x == 2, "1 * 2 didn't become 2")
-    assert(r.y == 4, "2 * 2 didn't become 4")
+    assert(r.x == 2)
+    assert(r.y == 4)
 
     r = 3 * v
-    assert(r.x == 3, "3 * 1 didn't become 3")
-    assert(r.y == 6, "3 * 2 didn't become 6")
+    assert(r.x == 3)
+    assert(r.y == 6)
 
 end
 
@@ -356,23 +360,23 @@ function vectoralgebratest.testVector3Multiply()
     --[[basic usage]]
     local v = geometry.Vector3()
     local r = v * 0
-    assert(r.x == 0, "0 * 0 didn't equal 0")
-    assert(r.y == 0, "0 * 0 didn't equal 0")
-    assert(r.z == 0, "0 * 0 didn't equal 0")
+    assert(r.x == 0)
+    assert(r.y == 0)
+    assert(r.z == 0)
 
 
     --[[operator order]]
     v = geometry.Vector3(1, 2, 3)
 
     r = v * 2
-    assert(r.x == 2, "1 * 2 didn't become 2")
-    assert(r.y == 4, "2 * 2 didn't become 4")
-    assert(r.z == 6, "3 * 2 didn't become 6")
+    assert(r.x == 2)
+    assert(r.y == 4)
+    assert(r.z == 6)
 
     r = 3 * v
-    assert(r.x == 3, "3 * 1 didn't become 3")
-    assert(r.y == 6, "3 * 2 didn't become 6")
-    assert(r.z == 9, "3 * 3 didn't become 9")
+    assert(r.x == 3)
+    assert(r.y == 6)
+    assert(r.z == 9)
 
 end
 
@@ -382,20 +386,20 @@ function vectoralgebratest.testVector2Divide()
     --[[basic usage]]
     local v = geometry.Vector2()
     local r = v / 1
-    assert(r.x == 0, "0 / 1 didn't equal 0")
-    assert(r.y == 0, "0 / 1 didn't equal 0")
+    assert(r.x == 0)
+    assert(r.y == 0)
 
 
     --[[operator order]]
     v = geometry.Vector2(4, 8)
 
     r = v / 2
-    assert(r.x == 2, "4 / 2 didn't become 2")
-    assert(r.y == 4, "8 / 2 didn't become 4")
+    assert(r.x == 2)
+    assert(r.y == 4)
 
     r = 4 / v
-    assert(r.x == 1, "4 / 4 didn't become 1")
-    assert(r.y == 2, "8 / 4 didn't become 2")
+    assert(r.x == 1)
+    assert(r.y == 2)
 
 end
 
@@ -405,23 +409,23 @@ function vectoralgebratest.testVector3Divide()
     --[[basic usage]]
     local v = geometry.Vector3()
     local r = v / 1
-    assert(r.x == 0, "0 / 1 didn't equal 0")
-    assert(r.y == 0, "0 / 1 didn't equal 0")
-    assert(r.z == 0, "0 / 1 didn't equal 0")
+    assert(r.x == 0)
+    assert(r.y == 0)
+    assert(r.z == 0)
 
 
     --[[operator order]]
     v = geometry.Vector3(4, 8, 16)
 
     r = v / 2
-    assert(r.x == 2, "4 / 2 didn't become 2")
-    assert(r.y == 4, "8 / 2 didn't become 4")
-    assert(r.z == 8, "16 / 2 didn't become 8")
+    assert(r.x == 2)
+    assert(r.y == 4)
+    assert(r.z == 8)
 
     r = 4 / v
-    assert(r.x == 1, "4 / 4 didn't become 1")
-    assert(r.y == 2, "8 / 4 didn't become 2")
-    assert(r.z == 4, "16 / 4 didn't become 4")
+    assert(r.x == 1)
+    assert(r.y == 2)
+    assert(r.z == 4)
 
 end
 
