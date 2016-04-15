@@ -315,14 +315,6 @@ function m.run(scene)
 		expectedFailures = 0,
 		unexpectedFailures = 0,
 	}
-	-- local testsRunTotal = 0
-	-- local skipsTotal = 0
-	-- local passesTotal = 0
-	-- local expectedPassesTotal = 0
-	-- local unexpectedPassesTotal = 0
-	-- local failuresTotal = 0
-	-- local expectedFailuresTotal = 0
-	-- local unexpectedFailuresTotal = 0
 
 	for i, loadedModule in ipairs(loadedModules) do
 
@@ -394,30 +386,6 @@ function m.run(scene)
 		end
 
 		printTestSummary(results)
-		-- local passNoun = "pass"
-		-- if passes ~= 1 then
-		-- 	passNoun = "passes"
-		-- end
-
-		-- local failNoun = "failure"
-		-- if failures ~= 1 then
-		-- 	failNoun = "failures"
-		-- end
-
-		-- print(string.format("Completed %d tests", testsRun))
-		-- print(string.format(
-		-- 	"%d %s, including %d unexpected",
-		-- 	passes,
-		-- 	passNoun,
-		-- 	unexpectedPasses
-		-- ))
-		-- print(string.format(
-		-- 	"%d %s, including %d unexpected",
-		-- 	failures,
-		-- 	failNoun,
-		-- 	unexpectedFailures
-		-- ))
-		-- print(string.format("%d skipped", skips))
 
 		resultsTotal.testsRun = resultsTotal.testsRun + results.testsRun
 		resultsTotal.skips = resultsTotal.skips + results.skips
@@ -432,31 +400,6 @@ function m.run(scene)
 	print("---All tests complete---")
 	printTestSummary(resultsTotal)
 
-	-- local passNoun = "pass"
-	-- if passesTotal ~= 1 then
-	-- 	passNoun = "passes"
-	-- end
-
-	-- local failNoun = "failure"
-	-- if failuresTotal ~= 1 then
-	-- 	failNoun = "failures"
-	-- end
-
-	-- print("---All tests complete---")
-	-- print(string.format("Completed %d tests", testsRunTotal))
-	-- print(string.format(
-	-- 	"%d %s, including %d unexpected",
-	-- 	passesTotal,
-	-- 	passNoun,
-	-- 	unexpectedPassesTotal
-	-- ))
-	-- print(string.format(
-	-- 	"%d %s, including %d unexpected",
-	-- 	failuresTotal,
-	-- 	failNoun,
-	-- 	unexpectedFailuresTotal
-	-- ))
-	-- print(string.format("%d skipped", skipsTotal))
 end
 
 ---got == true.
