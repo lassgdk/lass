@@ -115,13 +115,13 @@ function shapetest.testGlobalRectangle()
 
 
     --[[origin based rotation]]
-    for _, size in pairs({0, 1, 2, 5000000}) do
+    for _, size in pairs({1, 2, 50, 5000000}) do
         testBasicRectangleRotation(size)
     end
 
 
     --[[non-origin based rotation]]
-    r1 = geometry.Rectangle(0, 0, geometry.Vector2(0, 1))
+    r1 = geometry.Rectangle(1, 1, geometry.Vector2(0, 1))
 
     t = geometry.Transform(nil, 0)
     r2 = r1:globalRectangle(t)
@@ -269,16 +269,16 @@ end
 function shapetest.testCircleCreation()
 
     --[[incorrect creation attempts]]
-    helpers.assertIncorrectValues(geometry.Circle, "circle", {"radius"}, 0, {-1, {}})
+    helpers.assertIncorrectValues(geometry.Circle, "circle", {"radius"}, 1, {-1, {}, 0})
 
 
     --[[basic creation]]
-    local c = geometry.Circle(0)
+    local c = geometry.Circle(1)
 
     assert(class.instanceof(c, geometry.Circle), "circle should be valid as a circle")
 
     assertEqual(type(c.radius), "number")
-    assertEqual(c.radius, 0, "circle default radius is not 0")
+    assertEqual(c.radius, 1)
 
     assert(class.instanceof(c.position, geometry.Vector2), "circle position is not Vector2")
     assertEqual(c.position.x, 0, "circle default x position is not 0")
@@ -308,13 +308,7 @@ function shapetest.testRectangleCreation()
 
     --[[incorrect creation attempts]]
     assertEqual(pcall(geometry.Rectangle), false, "rectangle incorrectly created with no arguments")
-    helpers.assertIncorrectValues(geometry.Rectangle, "rectangle", {"width", "height"}, 1, {-1, {}})
-
-
-    --[[verify boundary conditions for size]]
-    local r = geometry.Rectangle(0, 0)
-    assertEqual(r.width, 0, "rectangle width of 0 should be possible")
-    assertEqual(r.height, 0, "rectangle height of 0 should be possible")
+    helpers.assertIncorrectValues(geometry.Rectangle, "rectangle", {"width", "height"}, 1, {-1, {}, 0})
 
 
     --[[basic creation]]
@@ -324,8 +318,8 @@ function shapetest.testRectangleCreation()
 
     assertEqual(type(r.width), "number", "rectangle width is not number")
     assertEqual(type(r.height), "number", "rectangle height is not number")
-    assertEqual(r.width, 1, "rectangle width changed from given value of 1")
-    assertEqual(r.height, 1, "rectangle height changed from given value of 1")
+    assertEqual(r.width, 1)
+    assertEqual(r.height, 1)
 
     assert(class.instanceof(r.position, geometry.Vector2), "rectangle position is not Vector2")
     assertEqual(r.position.x, 0, "rectangle default x position is not 0")
@@ -368,21 +362,6 @@ function shapetest.testIntersectingCirclesAndVectors()
 
     local v = geometry.Vector2(1,1)
     assert(geometry.intersecting(c1, v), "circle should contain vector")
-
-end
-
-function shapetest.testCircleWithRadiusZero()
-
-    local c1, c2 = geometry.Circle(0), geometry.Circle(1)
-    local t1, t2 = geometry.Transform(geometry.Vector3(0,0)), geometry.Transform(geometry.Vector3(4,0))
-
-    assert(geometry.intersecting(c1, c2), "circles at same position aren't intersecting")
-    assertEqual(geometry.intersecting(c1, c2, t1, t2), false, "circles should not be intersecting")
-
-    local v = geometry.Vector2(0,0)
-    assert(geometry.intersecting(c1, v), "circle should contain vector")
-    v.x = 0.0001
-    assertEqual(geometry.intersecting(c1, v), false, "circle should not contain vector")
 
 end
 
