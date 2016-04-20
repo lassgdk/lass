@@ -27,9 +27,10 @@ local function assertOperandsHaveXandY(a, b, otherAllowedType, otherAllowedTypeP
 	end
 end
 
-local function assertValueIsValidNumber(class, key, value, allowNegative)
+local function assertValueIsValidNumber(class, key, value, allowNegative, allowZero)
 
 	allowNegative = operators.nilOr(allowNegative, true)
+	allowZero = operators.nilOr(allowZero, true)
 
 	if type(value) ~= "number" then
 		error(class .. "." .. key .. " must be number")
@@ -41,6 +42,8 @@ local function assertValueIsValidNumber(class, key, value, allowNegative)
 		error(class .. "." .. key .. " cannot be NaN")
 	elseif (not allowNegative) and (value < 0) then
 		error(class .. "." .. key .. " must not be negative")
+	elseif (not allowZero) and (value == 0) then
+		error(class .. "." .. key .. " must not be zero")
 	end
 end
 
@@ -1036,6 +1039,12 @@ geometry = {
 	functions = functions
 }
 
+-- valid options:
+-- "number" is any number
+-- "number0+" is any positive number or zero
+-- "number+" is any positive number above zero
+-- any other string will be compared with the return value of type() (i.e., "table")
+-- a reference to a class will be compared with the return value of class.instanceof
 for i, gClassTable in ipairs({
 	{"Vector2", x="number", y="number"},
 	{"Vector3", x="number", y="number", z="number"},
@@ -1044,20 +1053,24 @@ for i, gClassTable in ipairs({
 	{"Circle", radius="number+", position={Vector2=Vector2}},
 	{"Polygon", vertices="table", position={Vector2=Vector2}},
 }) do
+
 	local gClass = gClassTable[1]
 	gClassTable[1] = nil
 
 	for property, propertyType in pairs(gClassTable) do
+
 		geometry[gClass]["__get"][property] = function(self)
 			return self["_" .. property]
 		end
 
-		if propertyType == "number" or propertyType == "number+" then
+		-- use this setter if the property is a number
+		if propertyType == "number" or propertyType == "number+" or propertyType == "number0+" then
 
-			local allowNegative = propertyType ~= "number+"
+			local allowNegative = propertyType == "number"
+			local allowZero = propertyType ~= "number+"
 
 			geometry[gClass]["__set"][property] = function(self, value)
-				assertValueIsValidNumber(gClass, property, value, allowNegative)
+				assertValueIsValidNumber(gClass, property, value, allowNegative, allowZero)
 
 				self["_" .. property] = value
 
@@ -1065,19 +1078,8 @@ for i, gClassTable in ipairs({
 					self.callback(self, property, value)
 				end
 			end
-		elseif type(propertyType) == "string" then
-			geometry[gClass]["__set"][property] = function(self, value)
-				assert(
-					type(value) == propertyType,
-					gClass .. "." .. property .. " must be " .. propertyType
-				)
 
-				self["_" .. property] = value
-
-				if self.callback then
-					self.callback(self, property, value)
-				end
-			end
+		-- use this setter if the property is a class instance
 		elseif type(propertyType) == "table" then
 
 			local name, cl = next(propertyType)
@@ -1094,7 +1096,24 @@ for i, gClassTable in ipairs({
 					self.callback(property, value)
 				end
 			end
+
+		-- use this setter if the property is anything other than a number or class instance
+		elseif type(propertyType) == "string" then
+
+			geometry[gClass]["__set"][property] = function(self, value)
+				assert(
+					type(value) == propertyType,
+					gClass .. "." .. property .. " must be " .. propertyType
+				)
+
+				self["_" .. property] = value
+
+				if self.callback then
+					self.callback(self, property, value)
+				end
+			end
 		end
+
 	end
 end
 
