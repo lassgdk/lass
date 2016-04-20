@@ -423,7 +423,6 @@ local Transform = class.define(function(self, position, rotation, size)
 end)
 
 function Transform.__get.rotation(self)
-
 	return self._rotation
 end
 
@@ -431,6 +430,21 @@ function Transform.__set.rotation(self, value)
 	assertValueIsValidNumber("transform", "rotation", value)
 	-- clamp rotation between 0 and 360 degrees (e.g., -290 => 70)
 	self._rotation = value % 360
+end
+
+function Transform.__get.size(self)
+	return self._size
+end
+
+function Transform.__set.size(self, value)
+
+	assert(class.instanceof(value, Vector3), "transform.size must be Vector3")
+
+	self._size = value
+
+	if self.callback then
+		self.callback(self, self._size, value)
+	end
 end
 
 --[[
@@ -1048,7 +1062,7 @@ geometry = {
 for i, gClassTable in ipairs({
 	{"Vector2", x="number", y="number"},
 	{"Vector3", x="number", y="number", z="number"},
-	{"Transform", position={Vector3=Vector3}, size={Vector3=Vector3}},
+	{"Transform", position={Vector3=Vector3}},
 	{"Rectangle", width="number+", height="number+", position={Vector2=Vector2}},
 	{"Circle", radius="number+", position={Vector2=Vector2}},
 	{"Polygon", vertices="table", position={Vector2=Vector2}},
