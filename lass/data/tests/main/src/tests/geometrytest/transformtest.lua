@@ -11,9 +11,7 @@ local assertNotEqual = turtlemode.assertNotEqual
 function transformtest.testTransformCreation()
 
     --[[incorrect creation]]
-    helpers.assertIncorrectValues(geometry.Transform, "transform", 
-                                  {"position", "rotation", "size"},
-                                  nil, false, false)
+    helpers.assertIncorrectValues(geometry.Transform, "transform", {"position", "rotation", "size"}, nil)
 
 
     --[[basic creation]]

@@ -1,20 +1,16 @@
 local helpers = {}
 
-function helpers.assertIncorrectValues(geometryClass, className, variables, default, useNegative, useTable)
+function helpers.assertIncorrectValues(geometryClass, className, variables, default, extraValues)
 
-    local badValues = {"1", false, math.huge, -math.huge, math.huge / math.huge}
+    local incorrectValues = {"1", false, math.huge, -math.huge, math.huge / math.huge}
 
-    -- sometimes negative values are allowed, so this is optional
-    if useNegative then
-        table.insert(badValues, -1)
+    if extraValues then
+        for _, extraValue in ipairs(extraValues) do
+            table.insert(incorrectValues, extraValue)
+        end
     end
 
-    -- sometimes table values, so this is optional
-    if useTable then
-        table.insert(badValues, {})
-    end
-
-    for _, badValue in ipairs(badValues) do
+    for _, incorrectValue in ipairs(incorrectValues) do
 
         local params = {}
         for i, _ in ipairs(variables) do
@@ -25,13 +21,13 @@ function helpers.assertIncorrectValues(geometryClass, className, variables, defa
         for i, var in ipairs(variables) do
 
             -- attempt to set a value to something incorrect
-            local success, result = pcall(function() instance[var] = badValue end)
+            local success, result = pcall(function() instance[var] = incorrectValue end)
             -- debug.log(result)
             if success then
-                error(className .. "." .. var .. " incorrectly set to " .. tostring(badValue))
+                error(className .. "." .. var .. " incorrectly set to " .. tostring(incorrectValue))
             end
 
-            params[i] = badValue
+            params[i] = incorrectValue
 
             -- attempt to make the class with a single incorrect value
             -- need to give unpack the number of variables, because if nil is the default,
@@ -39,7 +35,7 @@ function helpers.assertIncorrectValues(geometryClass, className, variables, defa
             success, result = pcall(geometryClass, unpack(params, 1, #variables))
             -- debug.log(result)
             if success then
-                error(className .. "." .. var .. " incorrectly created with " .. tostring(badValue))
+                error(className .. "." .. var .. " incorrectly created with " .. tostring(incorrectValue))
             end
 
             params[i] = default
