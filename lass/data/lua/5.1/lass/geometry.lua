@@ -1093,7 +1093,7 @@ for i, gClassTable in ipairs({
 				self["_" .. property] = value
 
 				if self.callback then
-					self.callback(property, value)
+					self.callback(self, property, value)
 				end
 			end
 
