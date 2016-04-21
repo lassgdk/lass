@@ -269,7 +269,8 @@ end
 function shapetest.testCircleCreation()
 
     --[[incorrect creation attempts]]
-    helpers.assertIncorrectValues(geometry.Circle, "circle", {"radius"}, 1, {-1, {}, 0})
+    helpers.assertIncorrectRunner("creation", geometry.Circle, "circle", {"radius"}, 1, {-1, {}, 0})
+    helpers.assertIncorrectRunner("setting", geometry.Circle, "circle", {"radius"}, 1, {-1, {}, 0})
 
 
     --[[basic creation]]
@@ -308,7 +309,8 @@ function shapetest.testRectangleCreation()
 
     --[[incorrect creation attempts]]
     assertEqual(pcall(geometry.Rectangle), false, "rectangle incorrectly created with no arguments")
-    helpers.assertIncorrectValues(geometry.Rectangle, "rectangle", {"width", "height"}, 1, {-1, {}, 0})
+    helpers.assertIncorrectRunner("creation", geometry.Rectangle, "rectangle", {"width", "height"}, 1, {-1, {}, 0})
+    helpers.assertIncorrectRunner("setting", geometry.Rectangle, "rectangle", {"width", "height"}, 1, {-1, {}, 0})
 
 
     --[[basic creation]]

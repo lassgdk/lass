@@ -438,12 +438,16 @@ end
 
 function Transform.__set.size(self, value)
 
-	assert(class.instanceof(value, Vector3), "transform.size must be Vector3")
+	assert(class.instanceof(value, Vector3), "Transform.size must be Vector3")
 
 	self._size = value
 
+	for i, axis in ipairs({"x", "y", "z"}) do
+		assertValueIsValidNumber("Transform.size", axis, self._size[axis], false, false)
+	end
+
 	if self.callback then
-		self.callback(self, self._size, value)
+		self.callback(self, "size", self._size)
 	end
 end
 

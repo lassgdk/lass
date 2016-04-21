@@ -8,10 +8,40 @@ local assertEqual = turtlemode.assertEqual
 local assertNotEqual = turtlemode.assertNotEqual
 
 
+local function testIncorrectTransformCreation()
+
+    local incorrectValues = {0, -1}
+
+    for _, incorrectValue in ipairs(incorrectValues) do
+
+        local params = {1, 1, 1}
+
+        for i, var in ipairs({"x", "y", "z"}) do
+
+            params[i] = incorrectValue
+
+            -- attempt to make the class with a single incorrect value
+            local success = pcall(geometry.Transform, nil, nil, geometry.Vector3(unpack(params)))
+            if success then
+                error("Transform.size." .. var .. " incorrectly created with " .. tostring(incorrectValue))
+            end
+        end
+
+    end
+
+end
+
+
 function transformtest.testTransformCreation()
 
     --[[incorrect creation]]
-    helpers.assertIncorrectValues(geometry.Transform, "transform", {"position", "rotation", "size"}, nil)
+    helpers.assertIncorrectRunner("creation", geometry.Transform, "transform", {"position", "rotation", "size"})
+    helpers.assertIncorrectRunner("setting", geometry.Transform, "transform", {"position", "rotation", "size"})
+    helpers.assertIncorrectRunner("setting", geometry.Transform, "transform",
+                                  {{"size", "x"}, {"size", "y"}, {"size", "z"}}, nil, {0, -1})
+
+    -- transform.size is unique in that it can't be 0 or negative
+    -- testIncorrectTransformCreation()
 
 
     --[[basic creation]]
@@ -167,7 +197,7 @@ end
 function transformtest.testTransformCreationWithVector2()
 
     --[[basic creation]]
-    local t = geometry.Transform(geometry.Vector2(), nil, geometry.Vector2())
+    local t = geometry.Transform(geometry.Vector2(), nil, geometry.Vector2(1, 1))
 
     assertEqual(t.position.x, 0, "transform x position didn't default to 0")
     assertEqual(t.position.y, 0, "transform y position didn't default to 0")
@@ -175,10 +205,9 @@ function transformtest.testTransformCreationWithVector2()
 
     assertEqual(t.rotation, 0, "transform rotation didn't default to 0")
 
-    -- Vector2 gives 0 by default for x/y
-    assertEqual(t.size.x, 0, "transform x size didn't default to 0")
-    assertEqual(t.size.y, 0, "transform y size didn't default to 0")
-    assertEqual(t.size.z, 1, "transform z size didn't default to 1")
+    assertEqual(t.size.x, 1)
+    assertEqual(t.size.y, 1)
+    assertEqual(t.size.z, 1)
 
 
     --[[using values]]

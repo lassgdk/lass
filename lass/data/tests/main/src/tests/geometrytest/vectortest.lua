@@ -11,7 +11,8 @@ local assertNotEqual = turtlemode.assertNotEqual
 function vectortest.testVector2Creation()
 
     --[[incorrect creation]]
-    helpers.assertIncorrectValues(geometry.Vector2, "vector2", {"x", "y"}, 0)
+    helpers.assertIncorrectRunner("creation", geometry.Vector2, "vector2", {"x", "y"}, 0)
+    helpers.assertIncorrectRunner("setting", geometry.Vector2, "vector2", {"x", "y"}, 0)
 
 
     --[[purely default creation]]
@@ -69,7 +70,8 @@ end
 function vectortest.testVector3Creation()
 
     --[[incorrect creation]]
-    helpers.assertIncorrectValues(geometry.Vector3, "vector3", {"x", "y", "z"}, 0)
+    helpers.assertIncorrectRunner("creation", geometry.Vector3, "vector3", {"x", "y", "z"}, 0)
+    helpers.assertIncorrectRunner("setting", geometry.Vector3, "vector3", {"x", "y", "z"}, 0)
 
 
     --[[purely default creation]]
