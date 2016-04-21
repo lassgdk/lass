@@ -1,5 +1,15 @@
 local helpers = {}
 
+local function repr(x)
+
+    if type(x) == "string" then
+        return string.format("%q", x)
+    else
+        return tostring(x)
+    end
+
+end
+
 local function assertIncorrectCreation(i, var, incorrectValue, params, geometryClass, numVars, className)
 
     params[i] = incorrectValue
@@ -10,7 +20,7 @@ local function assertIncorrectCreation(i, var, incorrectValue, params, geometryC
     local success, result = pcall(geometryClass, unpack(params, 1, numVars))
     -- debug.log(result)
     if success then
-        error(className .. "." .. var .. " incorrectly created with " .. tostring(incorrectValue))
+        error(className .. "." .. var .. " incorrectly created with " .. repr(incorrectValue))
     end
 
     -- params[i] = default
@@ -19,20 +29,23 @@ end
 local function assertIncorrectSetting(var, incorrectValue, params, geometryClass, className)
 
     local instance = geometryClass(unpack(params))
+    local varName = var
 
     -- if var points us to a subvalue, dig it out
     if type(var) == "table" then
-        -- local value = instance
-        for j, subkey in ipairs(var) do
-            instance = instance[subkey]
+        varName = ""
+        for j = 1, #var - 1 do
+            varName = varName .. var[j] .. "."
+            instance = instance[var[j]]
         end
+        varName = varName .. var[#var]
     end
     
-    -- attempt to set a value to something incorrect
     local success, result = pcall(function() instance[var] = incorrectValue end)
+    -- attempt to set a value to something incorrect
     debug.log(result)
     if success then
-        error(className .. "." .. var .. " incorrectly set to " .. tostring(incorrectValue))
+        error(className .. "." .. varName .. " incorrectly set to " .. repr(incorrectValue))
     end
 end
 
@@ -54,6 +67,7 @@ function helpers.assertIncorrectRunner(testType, geometryClass, className, varia
         end
 
         for i, var in ipairs(variables) do
+
             if testType == "creation" then
                 assertIncorrectCreation(i, var, incorrectValue, params, geometryClass, #variables, className)
             elseif testType == "setting" then
@@ -61,6 +75,7 @@ function helpers.assertIncorrectRunner(testType, geometryClass, className, varia
             else
                 error("Incorrect test type parameter")
             end
+
         end
     end
 
