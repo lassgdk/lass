@@ -436,6 +436,7 @@ function Transform.__get.size(self)
 	return self._size
 end
 
+-- TODO: make a callback for transform.size
 function Transform.__set.size(self, value)
 
 	assert(class.instanceof(value, Vector3), "Transform.size must be Vector3")

@@ -43,7 +43,7 @@ local function assertIncorrectSetting(var, incorrectValue, params, geometryClass
     
     local success, result = pcall(function() instance[var] = incorrectValue end)
     -- attempt to set a value to something incorrect
-    debug.log(result)
+    -- debug.log(result)
     if success then
         error(className .. "." .. varName .. " incorrectly set to " .. repr(incorrectValue))
     end

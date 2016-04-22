@@ -399,6 +399,7 @@ function GameEntity:rotateTo(angle)
 	self.transform.rotation = angle
 end
 
+-- TODO: don't allow size to be 0
 function GameEntity:resize(x, y, z, allowNegativeSize)
 
 	self.transform.size = self.transform.size + geometry.Vector3(x, y, z)
