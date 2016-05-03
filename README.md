@@ -30,8 +30,8 @@ Build and Install
 ### Linux, Windows, and OS X
 
 1. Download the Windows ("32-bit zipped") and OS X ("64-bit zipped") distributions of LÖVE 0.10.1 (https://love2d.org/).
-2. Unzip the Windows .zip file and move everything inside the main folder (but not the folder itself) to `engine/windows`.
-3. Unzip the OS X .zip file and move the love.app file to `engine/osx`.
+2. Unzip the Windows .zip file and move everything inside the main folder (but not the folder itself) to engine/windows.
+3. Unzip the OS X .zip file and move the love.app file to engine/osx.
 
 ### Additional instructions for Linux and OS X
 
@@ -74,7 +74,8 @@ There is no uninstall command in setup.py just yet, so if you wish to uninstall 
 2. Remove the Python library. Use the following command to find it: `python -c "import lass, os; print (os.path.dirname(lass.__file__))"`
 3. If you have chosen to install the Lua libraries to your system, then you can find and delete them in `/usr/local/share/lua/5.1`.
 
-**Windows**  
+### Windows
+
 Lass for Windows is entirely portable: the cx_setup.py script doesn't create any files other than those generated in the "dist" folder. Simply deleting the Lass program folder is enough to remove it from your system.
 
 Contribute
