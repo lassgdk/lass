@@ -14,7 +14,7 @@ local function testMemberAssignment(object, varName, varValue)
 
 	--did the assignment work at all?
 	object[varName] = varValue
-	assertNotEqual(object[varName] ~= nil, "assigning member to class instance failed")
+	assertNotEqual(object[varName], nil, "assigning member to class instance failed")
 
 	local repr = ""
 	if type(varName) == "string" then
