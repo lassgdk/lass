@@ -184,24 +184,24 @@ function coretest.testGameObjectMove(scene)
 
 
     --[[moving an object]]
-    object:move(5, 5)
-    object:move(0, 1)
-    assertEqual(object.transform.position, geometry.Vector3(5, 6, 0))
-    assertEqual(object.globalPosition, geometry.Vector3(5, 6, 0))
+    object:move(5, 5, 5)
+    object:move(0, 1, 2)
+    assertEqual(object.transform.position, geometry.Vector3(5, 6, 7))
+    assertEqual(object.globalPosition, geometry.Vector3(5, 6, 7))
 
-    object:move(-5, -6)
+    object:move(-5, -6, -7)
     assertEqual(object.transform.position, geometry.Vector3(0, 0, 0))
     assertEqual(object.globalPosition, geometry.Vector3(0, 0, 0))
 
 
     --[[moving a child]]
-    object:move(5, 5)
-    child:move(2, 1)
-    assertEqual(child.transform.position, geometry.Vector3(2, 1, 0))
-    assertEqual(child.globalPosition, geometry.Vector3(7, 6, 0))
+    object:move(5, 5, 5)
+    child:move(2, 1, -1)
+    assertEqual(child.transform.position, geometry.Vector3(2, 1, -1))
+    assertEqual(child.globalPosition, geometry.Vector3(7, 6, 4))
 
-    object:move(-5, -5)
-    child:move(-2, -1)
+    object:move(-5, -5, -5)
+    child:move(-2, -1, 1)
     assertEqual(child.transform.position, geometry.Vector3(0, 0, 0))
     assertEqual(child.globalPosition, geometry.Vector3(0, 0, 0))
 
@@ -250,26 +250,26 @@ function coretest.testGameObjectMoveTo(scene)
 
 
     --[[moving an object]]
-    object:moveTo(-2, 10)
-    assertEqual(object.transform.position, geometry.Vector3(-2, 10, 0))
-    assertEqual(object.globalPosition, geometry.Vector3(-2, 10, 0))
+    object:moveTo(-2, 10, 5)
+    assertEqual(object.transform.position, geometry.Vector3(-2, 10, 5))
+    assertEqual(object.globalPosition, geometry.Vector3(-2, 10, 5))
 
-    object:moveTo(0, 0)
+    object:moveTo(0, 0, 0)
     assertEqual(object.transform.position, geometry.Vector3(0, 0, 0))
     assertEqual(object.globalPosition, geometry.Vector3(0, 0, 0))
 
 
     --[[moving a child]]
-    object:moveTo(10, 10)
-    child:moveTo(-2, 5)
-    assertEqual(child.transform.position, geometry.Vector3(-2, 5, 0))
-    assertEqual(child.globalPosition, geometry.Vector3(8, 15, 0))
+    object:moveTo(10, 10, 10)
+    child:moveTo(-2, 5, 10)
+    assertEqual(child.transform.position, geometry.Vector3(-2, 5, 10))
+    assertEqual(child.globalPosition, geometry.Vector3(8, 15, 20))
 
-    object:moveTo(0, 0)
-    assertEqual(child.transform.position, geometry.Vector3(-2, 5, 0))
-    assertEqual(child.globalPosition, geometry.Vector3(-2, 5, 0))
+    object:moveTo(0, 0, 0)
+    assertEqual(child.transform.position, geometry.Vector3(-2, 5, 10))
+    assertEqual(child.globalPosition, geometry.Vector3(-2, 5, 10))
 
-    child:moveTo(0, 0)
+    child:moveTo(0, 0, 0)
     assertEqual(child.transform.position, geometry.Vector3(0, 0, 0))
     assertEqual(child.globalPosition, geometry.Vector3(0, 0, 0))
 
@@ -314,27 +314,27 @@ function coretest.testGameObjectMoveGlobal(scene)
 
 
     --[[moving an object]]
-    object:moveGlobal(5, 5)
-    object:moveGlobal(0, 1)
-    assertEqual(object.transform.position, geometry.Vector3(5, 6, 0))
-    assertEqual(object.globalPosition, geometry.Vector3(5, 6, 0))
+    object:moveGlobal(5, 5, 5)
+    object:moveGlobal(0, 1, 2)
+    assertEqual(object.transform.position, geometry.Vector3(5, 6, 7))
+    assertEqual(object.globalPosition, geometry.Vector3(5, 6, 7))
 
-    object:moveGlobal(-5, -6)
+    object:moveGlobal(-5, -6, -7)
     assertEqual(object.transform.position, geometry.Vector3(0, 0, 0))
     assertEqual(object.globalPosition, geometry.Vector3(0, 0, 0))
 
 
     --[[moving a child]]
-    object:moveGlobal(5, 5)
-    child:moveGlobal(0, 1)
-    assertEqual(child.transform.position, geometry.Vector3(0, 1,0))
-    assertEqual(child.globalPosition, geometry.Vector3(5, 6, 0))
+    object:moveGlobal(5, 5, 5)
+    child:moveGlobal(0, 1, 2)
+    assertEqual(child.transform.position, geometry.Vector3(0, 1, 2))
+    assertEqual(child.globalPosition, geometry.Vector3(5, 6, 7))
 
-    object:moveGlobal(-5, -5)
-    assertEqual(child.transform.position, geometry.Vector3(0, 1,0))
-    assertEqual(child.globalPosition, geometry.Vector3(0, 1,0))
+    object:moveGlobal(-5, -5, -5)
+    assertEqual(child.transform.position, geometry.Vector3(0, 1, 2))
+    assertEqual(child.globalPosition, geometry.Vector3(0, 1, 2))
 
-    child:moveGlobal(0, -1)
+    child:moveGlobal(0, -1, -2)
     assertEqual(child.transform.position, geometry.Vector3(0, 0, 0))
     assertEqual(child.globalPosition, geometry.Vector3(0, 0, 0))
 
@@ -379,26 +379,26 @@ function coretest.fail.testGameObjectMoveToGlobal(scene)
 
 
     --[[moving an object]]
-    object:moveToGlobal(-2, 10)
-    assertEqual(object.transform.position, geometry.Vector3(-2, 10, 0))
-    assertEqual(object.globalPosition, geometry.Vector3(-2, 10, 0))
+    object:moveToGlobal(-2, 10, 15)
+    assertEqual(object.transform.position, geometry.Vector3(-2, 10, 15))
+    assertEqual(object.globalPosition, geometry.Vector3(-2, 10, 15))
 
-    object:moveToGlobal(0, 0)
+    object:moveToGlobal(0, 0, 0)
     assertEqual(object.transform.position, geometry.Vector3(0, 0, 0))
     assertEqual(object.globalPosition, geometry.Vector3(0, 0, 0))
 
 
     --[[moving a child]]
-    object:moveToGlobal(-2, 10)
-    child:moveToGlobal(5, 5)
+    object:moveToGlobal(-2, 10, 20)
+    child:moveToGlobal(5, 5, 20)
     assertEqual(child.transform.position, geometry.Vector3(7, -5, 0))
-    assertEqual(child.globalPosition, geometry.Vector3(5, 5, 0))
+    assertEqual(child.globalPosition, geometry.Vector3(5, 5, 20))
 
-    object:moveToGlobal(0, 0)
-    assertEqual(child.transform.position, geometry.Vector3(7, -5, 0))
-    assertEqual(child.globalPosition, geometry.Vector3(7, -5, 0))
+    object:moveToGlobal(0, 0, 0)
+    assertEqual(child.transform.position, geometry.Vector3(7, -5, 20))
+    assertEqual(child.globalPosition, geometry.Vector3(7, -5, 20))
 
-    child:moveToGlobal(0, 0)
+    child:moveToGlobal(0, 0, 0)
     assertEqual(child.transform.position, geometry.Vector3(0, 0, 0))
     assertEqual(child.globalPosition, geometry.Vector3(0, 0, 0))
 
