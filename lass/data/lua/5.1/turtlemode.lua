@@ -305,6 +305,11 @@ function m.run(scene)
 		loadedModuleNames[#loadedModuleNames + 1] = v
 	end
 
+	local function _traceback(m, ...)
+		-- return debug.traceback(m, 4)
+		return debug.traceback(m, ...)
+	end
+
 	local resultsTotal = {
 		testsRun = 0,
 		skips = 0,
@@ -352,7 +357,7 @@ function m.run(scene)
 
 			-- else run the test
 			local fail = loadedModule.fail[testName]
-			local r, d = xpcall(loadedModule[testName], debug.traceback, scene)
+			local r, d = xpcall(loadedModule[testName], _traceback, scene)
 
 			if fail then
 				results.expectedFailures = results.expectedFailures + 1
@@ -434,7 +439,7 @@ end
 
 
 ---exp == got.
-function m.assertEqual(exp, got, tol, msg)
+function m.assertEqual(got, exp, tol, msg)
 
 	tol, msg = tol_or_msg(tol, msg)
 
@@ -453,7 +458,7 @@ function m.assertEqual(exp, got, tol, msg)
 end
 
 ---exp ~= got.
-function m.assertNotEqual(exp, got, msg)
+function m.assertNotEqual(got, exp, msg)
 	wraptest(exp ~= got,
 		msg,
 		"Expected something other than " .. tostring(exp)
@@ -461,7 +466,7 @@ function m.assertNotEqual(exp, got, msg)
 end
 
 ---val > lim.
-function m.assertGreater(lim, val, msg)
+function m.assertGreater(val, lim, msg)
 	wraptest(val > lim,
 		msg,
 		string.format("Expected a value > %s, got %s",
@@ -470,7 +475,7 @@ function m.assertGreater(lim, val, msg)
 end
 
 ---val >= lim.
-function m.assertGreaterOrEqual(lim, val, msg)
+function m.assertGreaterOrEqual(val, lim, msg)
 	wraptest(
 		val >= lim,
 		msg,
@@ -480,7 +485,7 @@ function m.assertGreaterOrEqual(lim, val, msg)
 end
 
 ---val < lim.
-function m.assertLess(lim, val, msg)
+function m.assertLess(val, lim, msg)
 	wraptest(
 		val < lim,
 		msg,
@@ -490,7 +495,7 @@ function m.assertLess(lim, val, msg)
 end
 
 ---val <= lim.
-function m.assertLessOrEqual(lim, val, msg)
+function m.assertLessOrEqual(val, lim, msg)
 	wraptest(
 		val <= lim,
 		msg,
@@ -500,7 +505,7 @@ function m.assertLessOrEqual(lim, val, msg)
 end
 
 ---#val == len.
-function m.assertLen(len, val, msg)
+function m.assertLen(val, len, msg)
 	wraptest(
 		#val == len,
 		msg,
@@ -510,7 +515,7 @@ function m.assertLen(len, val, msg)
 end
 
 ---#val ~= len.
-function m.assertNotLen(len, val, msg)
+function m.assertNotLen(val, len, msg)
 	wraptest(
 		#val ~= len,
 		msg,
@@ -519,7 +524,7 @@ function m.assertNotLen(len, val, msg)
 end
 
 ---Test that the string s matches the pattern exp.
-function m.assertMatch(pat, s, msg)
+function m.assertMatch(s, pat, msg)
 	s = tostring(s)
 	wraptest(
 		type(s) == "string" and s:match(pat),
@@ -533,7 +538,7 @@ function m.assertMatch(pat, s, msg)
 end
 
 ---Test that the string s doesn't match the pattern exp.
-function m.assertNotMatch(pat, s, msg)
+function m.assertNotMatch(s, pat, msg)
 	wraptest(
 		type(s) ~= "string" or not s:match(pat),
 		msg,
@@ -668,7 +673,7 @@ function m.assertNotUserdata(val, msg)
 end
 
 ---Test that a value has the expected metatable.
-function m.assertMetatable(exp, val, msg)
+function m.assertMetatable(val, exp, msg)
 	local mt = getmetatable(val)
 	wraptest(
 		mt == exp,
@@ -678,7 +683,7 @@ function m.assertMetatable(exp, val, msg)
 end
 
 ---Test that a value does not have a given metatable.
-function m.assertNotMetatable(exp, val, msg)
+function m.assertNotMetatable(val, exp, msg)
 	local mt = getmetatable(val)
 	wraptest(
 		mt ~= exp,
