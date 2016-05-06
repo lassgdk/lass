@@ -400,10 +400,25 @@ function GameEntity:moveToGlobal(x, y, z)
 	else
 		z = z or self.transform.position.z
 	end
-	
-	-- we need to change the local position so that the offset from the parent
-	-- positions us at the wanted global position
-	self:moveTo(geometry.Vector3(x,y,z) - self.parent.globalTransform.position)
+
+	local p = retrieveParentGlobalTransform(self)
+
+	-- we need to figure out the local position from the desired global
+	-- position. this is the inverse of what is done for __get.globalPosition
+	-- and __get.globalTransform. here are the steps:
+	--
+	-- 1. subtract the parent's global position from this global position
+	-- 2. rotate that counterclockwise by the parent's global rotation
+	-- 3. divide each axis of that by the corresponding axis from the parent's
+	-- global size
+
+	local position = (geometry.Vector3(x,y,z) - p.position):rotate(-p.rotation)
+
+	position.x = position.x / p.size.x
+	position.y = position.y / p.size.y
+	position.z = position.z / p.size.z
+
+	return self:moveTo(position)
 end
 
 function GameEntity:rotate(angle)
