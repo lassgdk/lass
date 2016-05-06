@@ -39,6 +39,8 @@ The command to compile and install Lass is `python setup.py install`.
 
 You may have to run it as root using the "sudo" prefix: `sudo python setup.py install`.
 
+If you want to install a copy of the Lua libraries to your system, use `python setup.py install_lua_libs` or `python setup.py install --install-lua-libs`.
+
 ### Additional instructions for Windows
 
 1. `python cx_setup.py build_exe` will create a new folder, called "dist", containing the compiled program.
