@@ -231,7 +231,7 @@ function GameEntity.__get.globalPosition(self)
 	local p = retrieveParentGlobalTransform(self)
 
 	if p == nil then
-		return geometry.Transform(t.position)
+		return geometry.Vector3(t.position)
 	end
 
 	return geometry.Vector3({
