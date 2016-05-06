@@ -101,8 +101,9 @@ GameEntity
 
 --[[internal]]
 
-local function retrieveParent(self)
-	-- returns the most suitable parent, 
+local function retrieveParentGlobalTransform(self)
+	-- returns the most suitable parent's global transform
+	-- or self's transform if self is a gameScene
 
 	if self.parent then
 		return self.parent.globalTransform
@@ -180,7 +181,7 @@ end)
 function GameEntity.__get.globalTransform(self)
 
 	local t = self.transform
-	local p = retrieveParent(self)
+	local p = retrieveParentGlobalTransform(self)
 
 	if p == nil then
 		return geometry.Transform(t)
@@ -213,7 +214,7 @@ end
 function GameEntity.__get.globalPosition(self)
 
 	local t = self.transform
-	local p = retrieveParent(self)
+	local p = retrieveParentGlobalTransform(self)
 
 	if p == nil then
 		return geometry.Transform(t.position)
@@ -235,7 +236,7 @@ end
 function GameEntity.__get.globalSize(self)
 
 	local t = self.transform
-	local p = retrieveParent(self)
+	local p = retrieveParentGlobalTransform(self)
 
 	if p == nil then
 		return geometry.Transform(t.size)
@@ -257,7 +258,7 @@ end
 function GameEntity.__get.globalRotation(self)
 
 	local t = self.transform
-	local p = retrieveParent(self)
+	local p = retrieveParentGlobalTransform(self)
 
 	if p == nil then
 		return geometry.Transform(t.rotation)
