@@ -220,13 +220,6 @@ end
 
 function GameEntity.__get.globalPosition(self)
 
-	-- how to get global position:
-	--
-	-- 1. multiply each axis of the local position by the corresponding axis
-	--    from the parent's global size
-	-- 2. rotate that clockwise by the parent's global rotation
-	-- 3. add that to the parent's global position
-
 	local t = self.transform
 	local p = retrieveParentGlobalTransform(self)
 
@@ -234,10 +227,17 @@ function GameEntity.__get.globalPosition(self)
 		return geometry.Vector3(t.position)
 	end
 
-	return geometry.Vector3({
-		x = p.position.x + (t.position.x * p.size.x),
-		y = p.position.y + (t.position.y * p.size.y),
-		z = p.position.z + (t.position.z * p.size.z),
+	-- how to get global position:
+	--
+	-- 1. multiply each axis of the local position by the corresponding axis
+	--    from the parent's global size
+	-- 2. rotate that clockwise by the parent's global rotation
+	-- 3. add that to the parent's global position
+
+	return p.position + geometry.Vector3({
+		x = t.position.x * p.size.x,
+		y = t.position.y * p.size.y,
+		z = t.position.z * p.size.z
 	}):rotate(p.rotation)
 
 end
