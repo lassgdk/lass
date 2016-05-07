@@ -6,6 +6,7 @@ require("lass.stdext")
 local bit = require("bit")
 local class = require("lass.class")
 local collections = require("lass.collections")
+local operators = require("lass.operators")
 local geometry = require("lass.geometry")
 local DelayObject = require("lass.delay")
 local Collider = nil
@@ -956,7 +957,10 @@ end
 
 local function maintainCollisions(self, colliderToCheck)
 
-	--collision stuff
+	-- this method helps keep Colliders' collidingWith and notCollidingWith
+	-- tables up to date, and is responsible for triggering collisionenter and
+	-- collisionexit callbacks
+
 	local collisionData = {}
 	local layers
 
@@ -1123,13 +1127,32 @@ local function maintainCollisions(self, colliderToCheck)
 	end
 end
 
+local function getGameObjects(self, nodes)
+
+	local gameObjects = {}
+	local i = 1
+
+	for _, node in ipairs(nodes) do
+
+		gameObjects[i] = node
+		i = i + 1
+
+		for _, child in ipairs(getGameObjects(self, node.children)) do
+			gameObjects[i] = child
+			i = i + 1
+		end
+	end
+
+	return gameObjects
+end
+
 --[[public]]
 
 local GameScene = class.define(GameEntity, function(self, transform)
 
 	self.timeScale = 1
 	self.frame = 1
-	self.gameObjects = {}
+	-- self.gameObjects = {}
 	self.globals = {}
 	self.globals.drawables = {}
 	self.globals.colliders = {}
@@ -1213,6 +1236,13 @@ local GameScene = class.define(GameEntity, function(self, transform)
 	GameEntity.init(self, transform)
 end)
 
+function GameScene.__get.gameObjects(self)
+
+	return getGameObjects(self, self.children)
+end
+
+GameScene.__set.gameObjects = false
+
 function GameScene:loadSettings(settingsFile)
 
 	self.settings = createSettingsTable(love.filesystem.load(settingsFile)())
@@ -1292,7 +1322,7 @@ function GameScene:addGameObject(gameObject)
 	assert(class.instanceof(gameObject, GameObject), "gameObject must be GameObject")
 
 	gameObject.gameScene = self
-	table.insert(self.gameObjects, gameObject)
+	-- table.insert(self.gameObjects, gameObject)
 	if gameObject.active == nil then
 		gameObject.active = true
 	else
@@ -1315,12 +1345,12 @@ function GameScene:removeGameObject(gameObject, removeDescendants)
 		self:removeEventListener(event, gameObject)
 	end
 
-	local index = collections.index(self.gameObjects, gameObject)
-	if index then
-		table.remove(self.gameObjects, index)
-	else
-		return
-	end
+	-- local index = collections.index(self.gameObjects, gameObject)
+	-- if index then
+	-- 	table.remove(self.gameObjects, index)
+	-- else
+	-- 	return
+	-- end
 
 	gameObject.gameScene = nil
 	self.__base.removeChild(self, gameObject, removeDescendants)
