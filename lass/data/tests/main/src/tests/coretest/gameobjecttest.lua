@@ -106,40 +106,6 @@ function gameobjecttest.testGameObjectMove(scene)
     assertEqual(child.transform.position, geometry.Vector3(0, 0, 0))
     assertEqual(child.globalPosition, geometry.Vector3(0, 0, 0))
 
-
-    --[[moving a child accounting for global size]]
-    object:resize(1, 1, 1)
-    child:move(2, 3, 4)
-    assertEqual(child.transform.position, geometry.Vector3(2, 3, 4))
-    assertEqual(child.globalPosition, geometry.Vector3(4, 6, 8))
-
-    object:resize(-1.5, -1.5, -1.5)
-    child:move(10, 11, 12)
-    assertEqual(child.transform.position, geometry.Vector3(12, 14, 16))
-    assertEqual(child.globalPosition, geometry.Vector3(6, 7, 8))
-
-    object:resize(0.5, 0.5, 0.5)
-    child:move(-12, -14, -16)
-    assertEqual(child.transform.position, geometry.Vector3(0, 0, 0))
-    assertEqual(child.globalPosition, geometry.Vector3(0, 0, 0))
-
-
-    --[[moving a child accounting for global rotation]]
-    -- z value doesn't get rotated, so it's ignored here
-    child:move(2, 4)
-    object:rotateTo(180)
-    assertEqual(child.transform.position, geometry.Vector3(2, 4, 0))
-    assertEqual(child.globalPosition, geometry.Vector3(-2, -4, 0))
-
-    child:move(2, 1)
-    assertEqual(child.transform.position, geometry.Vector3(4, 5, 0))
-    assertEqual(child.globalPosition, geometry.Vector3(-4, -5, 0))
-
-    child:move(2, 3)
-    object:rotateTo(90)
-    assertEqual(child.transform.position, geometry.Vector3(6, 8, 0))
-    assertEqual(child.globalPosition, geometry.Vector3(8, -6, 0))
-
 end
 
 function gameobjecttest.testGameObjectMoveTo(scene)
@@ -173,36 +139,6 @@ function gameobjecttest.testGameObjectMoveTo(scene)
     child:moveTo(0, 0, 0)
     assertEqual(child.transform.position, geometry.Vector3(0, 0, 0))
     assertEqual(child.globalPosition, geometry.Vector3(0, 0, 0))
-
-
-    --[[moving a child accounting for global size]]
-    child:moveTo(2, 2, 2)
-    object:resize(1, 1, 1)
-    assertEqual(child.transform.position, geometry.Vector3(2, 2, 2))
-    assertEqual(child.globalPosition, geometry.Vector3(4, 4, 4))
-
-    child:moveTo(2, 4, 8)
-    object:resize(-1.5, -1.5, -1.5)
-    assertEqual(child.transform.position, geometry.Vector3(2, 4, 8))
-    assertEqual(child.globalPosition, geometry.Vector3(1, 2, 4))
-
-    object:resize(0.5, 0.5, 0.5)
-    child:moveTo(0, 0, 0)
-    assertEqual(child.transform.position, geometry.Vector3(0, 0, 0))
-    assertEqual(child.globalPosition, geometry.Vector3(0, 0, 0))
-
-
-    --[[moving a child accounting for global rotation]]
-    -- z value doesn't get rotated, so it's ignored here
-    child:moveTo(2, 4)
-    object:rotateTo(180)
-    assertEqual(child.transform.position, geometry.Vector3(2, 4, 0))
-    assertEqual(child.globalPosition, geometry.Vector3(-2, -4, 0))
-
-    child:moveTo(2, 4)
-    object:rotateTo(90)
-    assertEqual(child.transform.position, geometry.Vector3(2, 4, 0))
-    assertEqual(child.globalPosition, geometry.Vector3(4, -2, 0))
 
 end
 
