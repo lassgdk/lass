@@ -302,11 +302,26 @@ function m.run(scene)
 	local loadedModules, loadedModuleNames = {}, {}
 	for i, v in ipairs(gatherTestFiles("tests")) do
 
-		local mod = love.filesystem.load(v)()
+		-- local result, mod = xpcall(love.filesystem.load, debug.traceback, v)
+		-- if result then
+		-- 	result, mod = pcall(mod)
+		-- else
+		-- 	debug.log(mod)
+		-- 	return
+		-- end
 
-		if mod then
-			loadedModules[#loadedModules + 1] = mod
+		local r, modPreExec = xpcall(love.filesystem.load, debug.traceback, v)
+		if not r then
+			print(modPreExec)
+			return
+		end
+
+		if modPreExec then
+			loadedModules[#loadedModules + 1] = modPreExec()
 			loadedModuleNames[#loadedModuleNames + 1] = v
+		else
+			debug.log(modPreExec)
+			return
 		end
 	end
 
