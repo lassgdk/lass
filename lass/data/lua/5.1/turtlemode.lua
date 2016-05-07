@@ -301,8 +301,13 @@ function m.run(scene)
 
 	local loadedModules, loadedModuleNames = {}, {}
 	for i, v in ipairs(gatherTestFiles("tests")) do
-		loadedModules[#loadedModules + 1] = love.filesystem.load(v)()
-		loadedModuleNames[#loadedModuleNames + 1] = v
+
+		local mod = love.filesystem.load(v)()
+
+		if mod then
+			loadedModules[#loadedModules + 1] = mod
+			loadedModuleNames[#loadedModuleNames + 1] = v
+		end
 	end
 
 	local function _traceback(m, ...)
