@@ -14,8 +14,18 @@ function m.testChildrenAndGameObjects(scene)
     assertEqual(helpers.numTreeNodes(scene), 1)
 
     local child = lass.GameObject(scene, "test child")
+    object:addChild(child)
     assertLen(scene.gameObjects, 2)
     assertEqual(helpers.numTreeNodes(scene), 2)
+
+    local grandchild = lass.GameObject(scene, "test grandchild")
+    child:addChild(grandchild)
+    assertLen(scene.gameObjects, 3)
+    assertEqual(helpers.numTreeNodes(scene), 3)
+
+    local object2 = lass.GameObject(scene, "test 2")
+    assertLen(scene.gameObjects, 4)
+    assertEqual(helpers.numTreeNodes(scene), 4)
 end
 
 return m
