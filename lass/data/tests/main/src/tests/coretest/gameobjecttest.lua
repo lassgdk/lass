@@ -268,25 +268,6 @@ function gameobjecttest.testGameObjectMoveToGlobal(scene)
     assertEqual(child.transform.position, geometry.Vector3(-3, -7.5, 12))
     assertEqual(child.globalPosition, geometry.Vector3(10, 20, 30))
 
-	-- 1. subtract the parent's global position from this global position
-	-- 2. rotate that counterclockwise by the parent's global rotation
-	-- 3. divide each axis of that by the corresponding axis from the parent's
-	-- global size
-
-    --[[
-	parent:
-		pos: 4, 5, 6
-		global pos: 4, 5, 6
-		size: 0.5
-		rot: 270
-	child:
-		desired global pos: 0, 0, 0
-
-		-4, -5, -6
-		-5, 4, -6
-    ]]
-
-
     object:resize(-1.5, -1.5, -1.5) --size is now 0.5
     object:rotateTo(90)
     child:moveToGlobal(-3, 7, 18)
