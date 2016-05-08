@@ -16,9 +16,7 @@ function m.searchTreeDepth(list, value, depth)
                 return found
             end
         end
-
     end
-
 end
 
 function m.searchTreeCount(list, value, count)
@@ -37,7 +35,17 @@ function m.searchTreeCount(list, value, count)
     end
 
     return count
+end
 
+function m.numTreeNodes(entity)
+
+    local count = 0
+
+    for i, child in ipairs(entity.children) do
+        count = count + 1 + m.numTreeNodes(child)
+    end
+
+    return count
 end
 
 return m
