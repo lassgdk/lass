@@ -1,50 +1,11 @@
 local lass = require("lass")
 local geometry = require("lass.geometry")
 local turtlemode = require("turtlemode")
+local helpers = require("tests.coretest.helpers")
 
 local gameobjecttest = turtlemode.testModule()
 local assertEqual = turtlemode.assertEqual
 
-
-local function searchTreeDepth(list, value, depth)
-
-    if depth == nil then
-        depth = 1
-    end
-
-    for i, entity in ipairs(list) do
-
-        if entity == value then
-            return depth
-        else
-            local found = searchTreeDepth(entity.children, value, depth+1)
-            if found then
-                return found
-            end
-        end
-
-    end
-
-end
-
-local function searchTreeCount(list, value, count)
-
-    if count == nil then
-        count = 0
-    end
-
-    for i, entity in ipairs(list) do
-
-        if entity == value then
-            count = count + 1
-        end
-        count = searchTreeCount(entity.children, value, count)
-
-    end
-
-    return count
-
-end
 
 function gameobjecttest.testGlobalTransformGetters(scene)
 
@@ -57,7 +18,7 @@ function gameobjecttest.testGlobalTransformGetters(scene)
         geometry.Transform(geometry.Vector3(5, 15, 25), 180, geometry.Vector3(5, 6, 7))
     )
     object:addChild(child)
-
+    
     local gt = child.globalTransform
     assertEqual(gt.position, child.globalPosition)
     assertEqual(gt.rotation, child.globalRotation)
@@ -499,7 +460,7 @@ function gameobjecttest.testGameObjectRemovalWithoutChildren(scene)
 
     scene:removeGameObject(object)
     assertEqual(object.active, false, "object was not deactivated")
-    assertEqual(searchTreeDepth(scene.children, object), nil)
+    assertEqual(helpers.searchTreeDepth(scene.children, object), nil)
 
     -- a second call should produce no error
     scene:removeGameObject(object)
@@ -510,7 +471,7 @@ function gameobjecttest.testGameObjectRemovalWithoutChildren(scene)
 
     object:destroy()
     assertEqual(object.active, false, "object was not deactivated")
-    assertEqual(searchTreeDepth(scene.children, object), nil)
+    assertEqual(helpers.searchTreeDepth(scene.children, object), nil)
 
     -- a second call should produce no error
     object:destroy()
@@ -521,7 +482,7 @@ function gameobjecttest.testGameObjectRemovalWithoutChildren(scene)
 
     scene:removeChild(object)
     assertEqual(object.active, true, "object was incorrectly deactivated")
-    assertEqual(searchTreeDepth(scene.children, object), nil)
+    assertEqual(helpers.searchTreeDepth(scene.children, object), nil)
 
 
     --[[GameObject:removeChild]]
@@ -529,7 +490,7 @@ function gameobjecttest.testGameObjectRemovalWithoutChildren(scene)
 
     object:removeChild(object)
     assertEqual(object.active, true, "object was incorrectly deactivated")
-    assertEqual(searchTreeDepth(scene.children, object), 1)
+    assertEqual(helpers.searchTreeDepth(scene.children, object), 1)
 
 end
 
@@ -542,8 +503,8 @@ function gameobjecttest.testGameObjectRemovalWithChildren(scene)
 
     scene:removeGameObject(object, true)
     assertEqual(child.active, false, "child was not deactivated")
-    assertEqual(searchTreeDepth(scene.children, child), nil, "child was not removed from scene")
-    -- assertEqual(searchTreeDepth(object.children, child), nil, "child was not removed from object")
+    assertEqual(helpers.searchTreeDepth(scene.children, child), nil, "child was not removed from scene")
+    -- assertEqual(helpers.searchTreeDepth(object.children, child), nil, "child was not removed from object")
 
     object = lass.GameObject(scene, "test")
     child = lass.GameObject(scene, "test child")
@@ -551,13 +512,13 @@ function gameobjecttest.testGameObjectRemovalWithChildren(scene)
 
     scene:removeGameObject(object, false)
     assertEqual(child.active, true, "child was incorrectly deactivated")
-    assertEqual(searchTreeDepth(scene.children, child), 1, "child was not made a child of the scene")
-    assertEqual(searchTreeCount(scene.children, child), 1, "child reference count is incorrect")
+    assertEqual(helpers.searchTreeDepth(scene.children, child), 1, "child was not made a child of the scene")
+    assertEqual(helpers.searchTreeCount(scene.children, child), 1, "child reference count is incorrect")
 
     scene:removeGameObject(child)
     assertEqual(child.active, false, "child was not deactivated")
-    assertEqual(searchTreeDepth(scene.children, child), nil, "child was not removed from scene")
-    -- assertEqual(searchTreeDepth(object.children, child), nil, "child was not removed from object")
+    assertEqual(helpers.searchTreeDepth(scene.children, child), nil, "child was not removed from scene")
+    -- assertEqual(helpers.searchTreeDepth(object.children, child), nil, "child was not removed from object")
 
 
     --[[GameObject:destroy]]
@@ -567,7 +528,7 @@ function gameobjecttest.testGameObjectRemovalWithChildren(scene)
 
     object:destroy(true)
     assertEqual(child.active, false, "child was not deactivated")
-    assertEqual(searchTreeDepth(scene.children, child), nil, "child was not removed from scene")
+    assertEqual(helpers.searchTreeDepth(scene.children, child), nil, "child was not removed from scene")
 
     object = lass.GameObject(scene, "test")
     child = lass.GameObject(scene, "test child")
@@ -575,8 +536,8 @@ function gameobjecttest.testGameObjectRemovalWithChildren(scene)
 
     object:destroy(false)
     assertEqual(child.active, true, "child was incorrectly deactivated")
-    assertEqual(searchTreeDepth(scene.children, child), 1, "child was not made a child of the scene")
-    assertEqual(searchTreeCount(scene.children, child), 1, "child reference count is incorrect")
+    assertEqual(helpers.searchTreeDepth(scene.children, child), 1, "child was not made a child of the scene")
+    assertEqual(helpers.searchTreeCount(scene.children, child), 1, "child reference count is incorrect")
 
     -- this shouldn't do anything, since the object was already destroyed
     object:destroy(true)
@@ -584,7 +545,7 @@ function gameobjecttest.testGameObjectRemovalWithChildren(scene)
 
     child:destroy()
     assertEqual(child.active, false, "child was not deactivated")
-    assertEqual(searchTreeDepth(scene.children, child), nil, "child was not removed from scene")
+    assertEqual(helpers.searchTreeDepth(scene.children, child), nil, "child was not removed from scene")
 
     -- a second call should produce no error
     child:destroy()
@@ -597,8 +558,8 @@ function gameobjecttest.testGameObjectRemovalWithChildren(scene)
 
     scene:removeChild(object, true)
     assertEqual(child.active, true, "child was incorrectly deactivated")
-    assertEqual(searchTreeDepth(scene.children, child), nil, "child was not removed from scene")
-    assertEqual(searchTreeDepth(object.children, child), 1, "child was incorrectly removed from object")
+    assertEqual(helpers.searchTreeDepth(scene.children, child), nil, "child was not removed from scene")
+    assertEqual(helpers.searchTreeDepth(object.children, child), 1, "child was incorrectly removed from object")
 
     object = lass.GameObject(scene, "test")
     child = lass.GameObject(scene, "test child")
@@ -606,19 +567,19 @@ function gameobjecttest.testGameObjectRemovalWithChildren(scene)
 
     scene:removeChild(child)
     assertEqual(child.active, true, "child was incorrectly deactivated")
-    assertEqual(searchTreeDepth(scene.children, child), 2,
+    assertEqual(helpers.searchTreeDepth(scene.children, child), 2,
         "child was removed from scene children, even though it's not a direct child")
-    assertEqual(searchTreeDepth(object.children, child), 1, "child was incorrectly removed from object")
+    assertEqual(helpers.searchTreeDepth(object.children, child), 1, "child was incorrectly removed from object")
 
     scene:removeChild(object, false)
     assertEqual(child.active, true, "child was incorrectly deactivated")
-    assertEqual(searchTreeDepth(scene.children, child), 1, "child was not made a child of the scene")
-    assertEqual(searchTreeCount(scene.children, child), 1, "child reference count is incorrect")
-    assertEqual(searchTreeDepth(object.children, child), 1, "child was incorrectly removed from object")
+    assertEqual(helpers.searchTreeDepth(scene.children, child), 1, "child was not made a child of the scene")
+    assertEqual(helpers.searchTreeCount(scene.children, child), 1, "child reference count is incorrect")
+    assertEqual(helpers.searchTreeDepth(object.children, child), 1, "child was incorrectly removed from object")
 
     scene:removeChild(child)
     assertEqual(child.active, true, "child was incorrectly deactivated")
-    assertEqual(searchTreeDepth(scene.children, child), nil, "child was not removed from scene")
+    assertEqual(helpers.searchTreeDepth(scene.children, child), nil, "child was not removed from scene")
 
 
     --[[GameObject:removeChild]]
@@ -628,12 +589,12 @@ function gameobjecttest.testGameObjectRemovalWithChildren(scene)
 
     child:removeChild(child)
     assertEqual(child.active, true, "child was incorrectly deactivated")
-    assertEqual(searchTreeDepth(scene.children, child), 2, "child was incorrectly removed from scene children")
+    assertEqual(helpers.searchTreeDepth(scene.children, child), 2, "child was incorrectly removed from scene children")
 
     object:removeChild(child)
     assertEqual(child.active, true, "child was incorrectly deactivated")
-    assertEqual(searchTreeDepth(scene.children, child), nil, "child was not removed from scene")
-    assertEqual(searchTreeDepth(object.children, child), nil, "child was not removed from object")
+    assertEqual(helpers.searchTreeDepth(scene.children, child), nil, "child was not removed from scene")
+    assertEqual(helpers.searchTreeDepth(object.children, child), nil, "child was not removed from object")
 
 end
 
