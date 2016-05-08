@@ -227,7 +227,7 @@ function gameobjecttest.testGameObjectMoveGlobal(scene)
 
 end
 
-function gameobjecttest.fail.testGameObjectMoveToGlobal(scene)
+function gameobjecttest.testGameObjectMoveToGlobal(scene)
 
     --[[setup]]
     local object = lass.GameObject(scene, "test")
@@ -252,8 +252,8 @@ function gameobjecttest.fail.testGameObjectMoveToGlobal(scene)
     assertEqual(child.globalPosition, geometry.Vector3(5, 5, 20))
 
     object:moveToGlobal(0, 0, 0)
-    assertEqual(child.transform.position, geometry.Vector3(7, -5, 20))
-    assertEqual(child.globalPosition, geometry.Vector3(7, -5, 20))
+    assertEqual(child.transform.position, geometry.Vector3(7, -5, 0))
+    assertEqual(child.globalPosition, geometry.Vector3(7, -5, 0))
 
     child:moveToGlobal(0, 0, 0)
     assertEqual(child.transform.position, geometry.Vector3(0, 0, 0))
