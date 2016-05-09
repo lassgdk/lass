@@ -289,6 +289,10 @@ m.testModule = class(nil, function(self, super)
 		self.skip = Skip(self)
 		self.fail = Fail(self)
 		return
+	elseif type(super) == "string" then
+		super = require(super)
+	elseif type(super) ~= "table" then
+		error("super testModule must be table or name of module")
 	end
 
 	for i, testName in ipairs(super._testNames) do
@@ -369,6 +373,10 @@ function m.run(scene)
 			unexpectedFailures = 0,
 		}
 
+		if loadedModule.setup then
+			loadedModule:setup()
+		end
+
 		for j, testName in ipairs(loadedModule._testNames) do
 
 			scene:init()
@@ -421,6 +429,10 @@ function m.run(scene)
 			results.testsRun = results.testsRun + 1
 
 			::continue::
+		end
+
+		if loadedModule.teardown then
+			loadedModule:teardown()
 		end
 
 		printTestSummary(results)
