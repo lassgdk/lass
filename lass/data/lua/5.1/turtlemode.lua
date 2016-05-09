@@ -305,7 +305,7 @@ end)
 
 function m.testModule:__newindex(key, value)
 
-	if startsWith(key, "test") or endsWith(key, "test") then
+	if type(value) == "function" and (startsWith(key, "test") or endsWith(key, "test")) then
 		self._testNames[#self._testNames + 1] = key
 	end
 	rawset(self, key, value)
