@@ -281,12 +281,26 @@ end
 public
 ]]
 
-m.testModule = class(nil, function(self)
+m.testModule = class(nil, function(self, super)
 
 	-- self.fail = Fail(self)
 	self.skip = Skip(self)
 	self.fail = Fail(self)
 	self._testNames = {}
+
+	if not super then
+		return
+	end
+
+	for i, testName in ipairs(super._testNames) do
+		self[testName] = super[testName]
+	end
+
+	for k, v in pairs(super) do
+		if not self[k] then
+			self[k] = v
+		end
+	end
 end)
 
 function m.testModule:__newindex(key, value)
