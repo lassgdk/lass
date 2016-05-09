@@ -283,12 +283,11 @@ public
 
 m.testModule = class(nil, function(self, super)
 
-	-- self.fail = Fail(self)
-	self.skip = Skip(self)
-	self.fail = Fail(self)
 	self._testNames = {}
 
 	if not super then
+		self.skip = Skip(self)
+		self.fail = Fail(self)
 		return
 	end
 
@@ -382,7 +381,7 @@ function m.run(scene)
 				if type(skip) == "string" then
 					print(string.format("Skipping %s: %s", testName, skip))
 				else
-					print("Skipping " .. testname)
+					print("Skipping " .. testName)
 				end
 
 				results.skips = results.skips + 1
