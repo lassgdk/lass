@@ -3,9 +3,9 @@ local turtlemode = require("turtlemode")
 local helpers = require("tests.coretest.helpers")
 local assertLen, assertEqual = turtlemode.assertLen, turtlemode.assertEqual
 
-local m = turtlemode.testModule()
+local GameSceneTest = turtlemode.testModule("tests.coretest.gameentitytest")
 
-function m.testChildrenAndGameObjects(scene)
+function GameSceneTest:testChildrenAndGameObjects(scene)
 
     assertLen(scene.gameObjects, 0)
 
@@ -28,4 +28,4 @@ function m.testChildrenAndGameObjects(scene)
     assertEqual(helpers.numTreeNodes(scene), 4)
 end
 
-return m
+return GameSceneTest

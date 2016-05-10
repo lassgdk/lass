@@ -48,14 +48,14 @@ local function _assertIncorrectVectorAlgebra(vectorName, vector)
     end
 end
 
-function vectoralgebratest.assertIncorrectVectorAlgebra()
+function vectoralgebratest:assertIncorrectVectorAlgebra()
     -- tests all possible cases of Vector2/3 algebra that should crash
     _assertIncorrectVectorAlgebra("Vector2", geometry.Vector2)
     _assertIncorrectVectorAlgebra("Vector3", geometry.Vector3)
 end
 
 
-function vectoralgebratest.testVector2Add()
+function vectoralgebratest:testVector2Add()
     -- testing accessing Vector2.__add is intentionally not covered, as it is not the proper usage
 
     --[[basic usage]]
@@ -104,7 +104,7 @@ function vectoralgebratest.testVector2Add()
 
 end
 
-function vectoralgebratest.testVector3Add()
+function vectoralgebratest:testVector3Add()
     -- testing accessing Vector3.__add is intentionally not covered, as it is not the proper usage
 
     --[[basic usage]]
@@ -157,7 +157,7 @@ function vectoralgebratest.testVector3Add()
 
 end
 
-function vectoralgebratest.testVector2And3Add()
+function vectoralgebratest:testVector2And3Add()
     -- test vector addition that crosses vector 2 and 3
 
     --[[basic usage]]
@@ -195,7 +195,7 @@ function vectoralgebratest.testVector2And3Add()
 
 end
 
-function vectoralgebratest.testVector2Subtract()
+function vectoralgebratest:testVector2Subtract()
     -- testing accessing Vector2.__sub is intentionally not covered, as it is not the proper usage
 
     --[[basic usage]]
@@ -242,7 +242,7 @@ function vectoralgebratest.testVector2Subtract()
 
 end
 
-function vectoralgebratest.testVector3Subtract()
+function vectoralgebratest:testVector3Subtract()
     -- testing accessing Vector3.__sub is intentionally not covered, as it is not the proper usage
 
     --[[basic usage]]
@@ -293,7 +293,7 @@ function vectoralgebratest.testVector3Subtract()
 
 end
 
-function vectoralgebratest.testVector2And3Subtract()
+function vectoralgebratest:testVector2And3Subtract()
     -- test vector subtraction that crosses vector 2 and 3
 
     --[[basic usage]]
@@ -331,7 +331,7 @@ function vectoralgebratest.testVector2And3Subtract()
 
 end
 
-function vectoralgebratest.testVector2Multiply()
+function vectoralgebratest:testVector2Multiply()
     -- testing accessing Vector2.__mul is intentionally not covered, as it is not the proper usage
 
     --[[basic usage]]
@@ -354,7 +354,7 @@ function vectoralgebratest.testVector2Multiply()
 
 end
 
-function vectoralgebratest.testVector3Multiply()
+function vectoralgebratest:testVector3Multiply()
     -- testing accessing Vector3.__mul is intentionally not covered, as it is not the proper usage
 
     --[[basic usage]]
@@ -380,7 +380,7 @@ function vectoralgebratest.testVector3Multiply()
 
 end
 
-function vectoralgebratest.testVector2Divide()
+function vectoralgebratest:testVector2Divide()
     -- testing accessing Vector2.__div is intentionally not covered, as it is not the proper usage
 
     --[[basic usage]]
@@ -403,7 +403,7 @@ function vectoralgebratest.testVector2Divide()
 
 end
 
-function vectoralgebratest.testVector3Divide()
+function vectoralgebratest:testVector3Divide()
     -- testing accessing Vector3.__div is intentionally not covered, as it is not the proper usage
 
     --[[basic usage]]

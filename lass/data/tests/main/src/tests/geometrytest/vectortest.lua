@@ -8,7 +8,7 @@ local assertEqual = turtlemode.assertEqual
 local assertNotEqual = turtlemode.assertNotEqual
 
 
-function vectortest.testVector2Creation()
+function vectortest:testVector2Creation()
 
     --[[incorrect creation]]
     helpers.assertIncorrectRunner("creation", geometry.Vector2, "vector2", {"x", "y"}, 0)
@@ -67,7 +67,7 @@ function vectortest.testVector2Creation()
 
 end
 
-function vectortest.testVector3Creation()
+function vectortest:testVector3Creation()
 
     --[[incorrect creation]]
     helpers.assertIncorrectRunner("creation", geometry.Vector3, "vector3", {"x", "y", "z"}, 0)
@@ -133,7 +133,7 @@ function vectortest.testVector3Creation()
 
 end
 
-function vectortest.testVector2CreationWithVectors()
+function vectortest:testVector2CreationWithVectors()
 
     --[[creation with Vector2]]
     local v = geometry.Vector2(geometry.Vector2())
@@ -182,7 +182,7 @@ function vectortest.testVector2CreationWithVectors()
 
 end
 
-function vectortest.testVector3CreationWithVectors()
+function vectortest:testVector3CreationWithVectors()
 
     --[[creation with Vector2]]
     local v = geometry.Vector3(geometry.Vector2())
@@ -235,7 +235,7 @@ function vectortest.testVector3CreationWithVectors()
 
 end
 
-function vectortest.testVectorComparison()
+function vectortest:testVectorComparison()
 
 
     --[[vector2 to vector2]]
@@ -285,7 +285,7 @@ function vectortest.testVectorComparison()
 
 end
 
-function vectortest.testUnaryMinus()
+function vectortest:testUnaryMinus()
 
     --[[testing with Vector2]]
     local v2 = geometry.Vector2()
@@ -316,7 +316,7 @@ function vectortest.testUnaryMinus()
 
 end
 
-function vectortest.testVector2MagnitudeAndSqrMagnitude()
+function vectortest:testVector2MagnitudeAndSqrMagnitude()
 
     --[[0,0 to 0,0]]
     local origin = geometry.Vector2()
@@ -364,7 +364,7 @@ function vectortest.testVector2MagnitudeAndSqrMagnitude()
 
 end
 
-function vectortest.testVector3MagnitudeAndSqrMagnitude()
+function vectortest:testVector3MagnitudeAndSqrMagnitude()
 
     --[[0,0,0 to 0,0,0]]
     local origin = geometry.Vector3()
@@ -412,7 +412,7 @@ function vectortest.testVector3MagnitudeAndSqrMagnitude()
 
 end
 
-function vectortest.testVectorToString()
+function vectortest:testVectorToString()
 
     --[[testing Vector2]]
     local v2 = geometry.Vector2()
@@ -459,7 +459,7 @@ function vectortest.testVectorToString()
 
 end
 
-function vectortest.testVectorDot()
+function vectortest:testVectorDot()
 
     --[[testing Vector2]]
     local v1 = geometry.Vector2()
@@ -506,7 +506,7 @@ function vectortest.testVectorDot()
 
 end
 
-function vectortest.testVector2Project()
+function vectortest:testVector2Project()
 
     --[[incorrect usage]]
     local v2 = geometry.Vector2()
@@ -665,7 +665,7 @@ function vectortest.testVector2Project()
 
 end
 
-function vectortest.testVector2Angle()
+function vectortest:testVector2Angle()
 
     local degrees_conv = 180/math.pi
 
@@ -710,7 +710,7 @@ function vectortest.testVector2Angle()
 
 end
 
-function vectortest.testVector3Angle()
+function vectortest:testVector3Angle()
 
     --[[basic usage]]
     local v3 = geometry.Vector3()

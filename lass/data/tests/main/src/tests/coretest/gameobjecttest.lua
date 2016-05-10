@@ -7,7 +7,7 @@ local gameobjecttest = turtlemode.testModule()
 local assertEqual = turtlemode.assertEqual
 
 
-function gameobjecttest.testGlobalTransformGetters(scene)
+function gameobjecttest:testGlobalTransformGetters(scene)
 
     --[[setup]]
     -- position, rotation, size
@@ -26,7 +26,7 @@ function gameobjecttest.testGlobalTransformGetters(scene)
 
 end
 
-function gameobjecttest.testGameObjectMove(scene)
+function gameobjecttest:testGameObjectMove(scene)
 
     --[[setup]]
     local object = lass.GameObject(scene, "test")
@@ -69,7 +69,7 @@ function gameobjecttest.testGameObjectMove(scene)
 
 end
 
-function gameobjecttest.testGameObjectMoveTo(scene)
+function gameobjecttest:testGameObjectMoveTo(scene)
 
     --[[setup]]
     local object = lass.GameObject(scene, "test")
@@ -103,7 +103,7 @@ function gameobjecttest.testGameObjectMoveTo(scene)
 
 end
 
-function gameobjecttest.testGameObjectMoveGlobal(scene)
+function gameobjecttest:testGameObjectMoveGlobal(scene)
 
     --[[setup]]
     local object = lass.GameObject(scene, "test")
@@ -188,7 +188,7 @@ function gameobjecttest.testGameObjectMoveGlobal(scene)
 
 end
 
-function gameobjecttest.testGameObjectMoveToGlobal(scene)
+function gameobjecttest:testGameObjectMoveToGlobal(scene)
 
     --[[setup]]
     local object = lass.GameObject(scene, "test")
@@ -243,7 +243,7 @@ function gameobjecttest.testGameObjectMoveToGlobal(scene)
 
 end
 
-function gameobjecttest.testGameObjectResizing(scene)
+function gameobjecttest:testGameObjectResizing(scene)
 
     --[[setup]]
     local object = lass.GameObject(scene, "test")
@@ -286,7 +286,7 @@ function gameobjecttest.testGameObjectResizing(scene)
 
 end
 
-function gameobjecttest.testGameObjectChildResizing(scene)
+function gameobjecttest:testGameObjectChildResizing(scene)
 
     --[[setup]]
     local object = lass.GameObject(scene, "test")
@@ -344,7 +344,7 @@ function gameobjecttest.testGameObjectChildResizing(scene)
 
 end
 
-function gameobjecttest.testGameObjectRotation(scene)
+function gameobjecttest:testGameObjectRotation(scene)
 
     --[[setup]]
     local object = lass.GameObject(scene, "test")
@@ -398,7 +398,7 @@ function gameobjecttest.testGameObjectRotation(scene)
 
 end
 
-function gameobjecttest.testGameObjectChildRotation(scene)
+function gameobjecttest:testGameObjectChildRotation(scene)
 
     --[[setup]]
     local object = lass.GameObject(scene, "test")
@@ -453,7 +453,7 @@ function gameobjecttest.testGameObjectChildRotation(scene)
 
 end
 
-function gameobjecttest.testGameObjectRemovalWithoutChildren(scene)
+function gameobjecttest:testGameObjectRemovalWithoutChildren(scene)
 
     --[[GameScene:removeGameObject]]
     local object = lass.GameObject(scene, "testing object")
@@ -494,7 +494,7 @@ function gameobjecttest.testGameObjectRemovalWithoutChildren(scene)
 
 end
 
-function gameobjecttest.testGameObjectRemovalWithChildren(scene)
+function gameobjecttest:testGameObjectRemovalWithChildren(scene)
 
     --[[GameScene:removeGameObject]]
     local object = lass.GameObject(scene, "test")
