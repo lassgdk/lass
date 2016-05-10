@@ -926,6 +926,8 @@ local function createSettingsTable(settings, defaults)
 	defaultsFallback = require("lass.defaults")
 	defaults = defaults or defaultsFallback
 
+	debug.log("oh")
+
 	for sectionName, section in pairs(defaultsFallback) do
 
 		if not settings[sectionName] then
@@ -1149,7 +1151,7 @@ end
 
 --[[public]]
 
-local GameScene = class.define(GameEntity, function(self, transform)
+local GameScene = class.define(GameEntity, function(self, transform, settings)
 
 	self.timeScale = 1
 	self.frame = 1
@@ -1234,6 +1236,8 @@ local GameScene = class.define(GameEntity, function(self, transform)
 	self:addEvent("physicsPreUpdate")
 	self:addEvent("physicsPostUpdate")
 
+	debug.log("init called")
+
 	GameEntity.init(self, transform)
 end)
 
@@ -1246,7 +1250,14 @@ GameScene.__set.gameObjects = false
 
 function GameScene:loadSettings(settingsFile)
 
-	self.settings = createSettingsTable(love.filesystem.load(settingsFile)())
+	local settings
+	if type(settingsFile) == "string" then
+		settings = love.filesystem.load(settingsFile)()
+	elseif type(settingsFile) == "table" then
+		settings = settingsFile
+	end
+
+	self.settings = createSettingsTable(settings)
 end
 
 function GameScene:load(src)

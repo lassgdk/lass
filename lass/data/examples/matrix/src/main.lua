@@ -14,7 +14,9 @@ function love.load()
 	scene:loadSettings("settings.lua")
 
 	-- if opts.scene is nil, firstScene from settings.lua will be used
+	debug.log("preload")
 	scene:load(opts.scene)
+	debug.log("postload")
 end
 
 for i, f in ipairs({
