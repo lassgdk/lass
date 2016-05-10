@@ -398,7 +398,7 @@ function m.run(scene)
 
 			-- else run the test
 			local fail = loadedModule.fail[testName]
-			local r, d = xpcall(loadedModule[testName], _traceback, scene)
+			local r, d = xpcall(loadedModule[testName], _traceback, loadedModule, scene)
 
 			if fail then
 				results.expectedFailures = results.expectedFailures + 1

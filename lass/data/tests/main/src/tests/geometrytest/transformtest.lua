@@ -8,7 +8,7 @@ local assertEqual = turtlemode.assertEqual
 local assertNotEqual = turtlemode.assertNotEqual
 
 
-function transformtest.testTransformCreation()
+function transformtest:testTransformCreation()
 
     --[[incorrect creation]]
     helpers.assertIncorrectValues(geometry.Transform, "transform", 
@@ -115,7 +115,7 @@ function transformtest.testTransformCreation()
     
 end
 
-function transformtest.testTransformCreationWithTransform()
+function transformtest:testTransformCreationWithTransform()
 
     --[[basic creation]]
     local t1 = geometry.Transform()
@@ -166,7 +166,7 @@ function transformtest.testTransformCreationWithTransform()
 
 end
 
-function transformtest.testTransformCreationWithVector2()
+function transformtest:testTransformCreationWithVector2()
 
     --[[basic creation]]
     local t = geometry.Transform(geometry.Vector2(), nil, geometry.Vector2())

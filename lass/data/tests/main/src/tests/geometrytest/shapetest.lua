@@ -101,7 +101,7 @@ local function testRectanglePositionWithRotation(rotation)
 
 end
 
-function shapetest.testGlobalRectangle()
+function shapetest:testGlobalRectangle()
 
     --[[default transform]]
     local r1 = geometry.Rectangle(1, 1)
@@ -266,7 +266,7 @@ function shapetest.testGlobalRectangle()
 
 end
 
-function shapetest.testCircleCreation()
+function shapetest:testCircleCreation()
 
     --[[incorrect creation attempts]]
     helpers.assertIncorrectValues(geometry.Circle, "circle", {"radius"}, 0, true, true)
@@ -304,7 +304,7 @@ function shapetest.testCircleCreation()
 
 end
 
-function shapetest.testRectangleCreation()
+function shapetest:testRectangleCreation()
 
     --[[incorrect creation attempts]]
     assertEqual(pcall(geometry.Rectangle), false, "rectangle incorrectly created with no arguments")
@@ -354,7 +354,7 @@ function shapetest.testRectangleCreation()
 
 end
 
-function shapetest.testIntersectingCirclesAndVectors()
+function shapetest:testIntersectingCirclesAndVectors()
 
     local c1, c2 = geometry.Circle(3), geometry.Circle(1)
     local t1, t2 = geometry.Transform(geometry.Vector3(0,0)), geometry.Transform(geometry.Vector3(4,0))
@@ -371,7 +371,7 @@ function shapetest.testIntersectingCirclesAndVectors()
 
 end
 
-function shapetest.testCircleWithRadiusZero()
+function shapetest:testCircleWithRadiusZero()
 
     local c1, c2 = geometry.Circle(0), geometry.Circle(1)
     local t1, t2 = geometry.Transform(geometry.Vector3(0,0)), geometry.Transform(geometry.Vector3(4,0))
@@ -386,7 +386,7 @@ function shapetest.testCircleWithRadiusZero()
 
 end
 
-function shapetest.testIntersectingRectanglesAndVectors()
+function shapetest:testIntersectingRectanglesAndVectors()
 
     local r1, r2 = geometry.Rectangle(1,2), geometry.Rectangle(1,3)
     local t1, t2 = geometry.Transform(geometry.Vector3(0,0)), geometry.Transform(geometry.Vector3(0,0))
@@ -414,7 +414,7 @@ function shapetest.testIntersectingRectanglesAndVectors()
 
 end
 
-function shapetest.testIntersectingRectangleAndCircle()
+function shapetest:testIntersectingRectangleAndCircle()
 
     local rec, cir = geometry.Rectangle(1,2), geometry.Circle(3)
     local t1, t2 = geometry.Transform(geometry.Vector3(0,0)), geometry.Transform(geometry.Vector3(0,0))
@@ -428,7 +428,7 @@ function shapetest.testIntersectingRectangleAndCircle()
 
 end
 
-function shapetest.testIntersectingPolygonsAndVectors()
+function shapetest:testIntersectingPolygonsAndVectors()
 
     local p1 = geometry.Polygon({-100, -50, 100, -50, 0, 50})
     local p2 = geometry.Polygon({-10, -5, 10, -5, 0, 5})
@@ -460,7 +460,7 @@ function shapetest.testIntersectingPolygonsAndVectors()
         "polygon should not contain vector")
 end
 
-function shapetest.testIntersectingPolygonAndCircle()
+function shapetest:testIntersectingPolygonAndCircle()
 
     local pol = geometry.Rectangle(10,3):toPolygon()
     local cir = geometry.Circle(2)
@@ -512,7 +512,7 @@ function shapetest.testIntersectingPolygonAndCircle()
         "figures should be intersecting with overlap of " .. cir.radius)
 end
 
-function shapetest.testIntersectingPolygons()
+function shapetest:testIntersectingPolygons()
 
     local p1 = geometry.Polygon({-100, -50, 100, -50, 0, 50})
     local p2 = geometry.Polygon({-100, -50, 100, -50, 0, 50})
