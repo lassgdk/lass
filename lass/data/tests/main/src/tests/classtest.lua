@@ -44,7 +44,7 @@ local function testClassDefine(scene)
 	end
 end
 
-function classtest.testClassInheritance(scene)
+function classtest:testClassInheritance(scene)
 	--ensure that class inheritance (and self.__base) works
 
 	local Being = class.define()
@@ -66,7 +66,7 @@ function classtest.testClassInheritance(scene)
 	assertEqual(pom.breed, "pomeranian")
 end
 
-function classtest.testNilInit(scene)
+function classtest:testNilInit(scene)
 
 	local Animal = class.define()
 	local a = Animal()
@@ -80,7 +80,7 @@ function classtest.testNilInit(scene)
 	assertNotEqual(a.x, nil, "class instance 'a' lost member 'x' after Class.init(instance)")
 end
 
-function classtest.testInstanceOf(scene)
+function classtest:testInstanceOf(scene)
 
 	local Animal = class.define()
 	local Dog = class.define(Animal)
