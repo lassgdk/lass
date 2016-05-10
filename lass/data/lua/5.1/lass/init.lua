@@ -920,13 +920,100 @@ GameScene
 
 --[[internal]]
 
+local function initGameScene(self, transform)
+	--init the GameScene without reloading settings
+
+	self.timeScale = 1
+	self.frame = 1
+	-- self.gameObjects = {}
+	self.globals = {}
+	self.globals.drawables = {}
+	self.globals.colliders = {}
+	self.globals.canvases = {}
+	self.globals.cameras = {}
+	self.globals.events = {}
+	self.globals.physicsFixtures = {}
+	self.globals.physicsWorld = love.physics.newWorld(0, 0, true)
+	self.globals.physicsLayers = {}
+
+	self.globals.physicsWorld:setCallbacks(
+		function(fixture1, fixture2, contact)
+			-- debug.log("begin contact",
+			-- 	self.globals.physicsFixtures[fixture1].gameObject.name,
+			-- 	self.globals.physicsFixtures[fixture2].gameObject.name,
+			-- 	self.frame)
+			-- local x1, y1, x2, y2 = contact:getPositions()
+			-- debug.log(x1, y1, x2, y2)
+			local collider1 = self.globals.physicsFixtures[fixture1]
+			local collider2 = self.globals.physicsFixtures[fixture2]
+
+			local data = {frame = self.frame}
+			collider1.collidingWith[collider2] = data
+			collider2.collidingWith[collider1] = collections.copy(data)
+
+			self.globals.contact = contact
+		end,
+
+		--end contact
+		function(fixture1, fixture2, contact)
+			-- debug.log("end contact",
+			-- 	self.globals.physicsFixtures[fixture1].gameObject.name,
+			-- 	self.globals.physicsFixtures[fixture2].gameObject.name,
+			-- 	self.frame)
+			-- local x1, y1, x2, y2 = contact:getPositions()
+			-- debug.log(x1, y1, x2, y2)
+			local collider1 = self.globals.physicsFixtures[fixture1]
+			local collider2 = self.globals.physicsFixtures[fixture2]
+
+			local data = {frame = self.frame}
+			collider1.notCollidingWith[collider2] = data
+			collider2.notCollidingWith[collider1] = collections.copy(data)
+			-- debug.log("end contact", self.frame, collider1.gameObject.name, collider2.gameObject.name)
+		end,
+
+		--pre-solve
+		nil,
+
+		--post-solve
+		function(fixture1, fixture2, contact, normalImpulse1, tangentImpulse1, normalImpulse2, tangentImpulse2)
+			-- debug.log(contact == self.globals.contact, normalImpulse1, normalImpulse2, tangentImpulse1, tangentImpulse2, self.frame)
+			local collider1 = self.globals.physicsFixtures[fixture1]
+			local collider2 = self.globals.physicsFixtures[fixture2]
+
+			local data = {
+				frame = self.frame,
+				normalImpulses = {normalImpulse1, normalImpulse2},
+				tangentImpulses = {tangentImpulse1, tangentImpulse2},
+			}
+			collider1.collidingWith[collider2] = data
+			collider2.collidingWith[collider1] = collections.deepcopy(data)
+		end
+	)
+
+	self.globals.physicsWorld:setContactFilter(function(fixture1, fixture2)
+
+		local collider1 = self.globals.physicsFixtures[fixture1]
+		local collider2 = self.globals.physicsFixtures[fixture2]
+
+		local mask1, mask2 = collider1.mask, collider2.mask
+		local cat1, cat2 = collider1.category, collider2.category
+
+		local r = (bit.band(cat1, mask2) ~= 0) or (bit.band(cat2, mask1) ~= 0)
+		-- debug.log(r)
+		return r
+	end)
+
+	self:addEvent("physicsPreUpdate")
+	self:addEvent("physicsPostUpdate")
+
+	GameEntity.init(self, transform)
+end
+
 local function createSettingsTable(settings, defaults)
 
 	settings = settings or {}
 	defaultsFallback = require("lass.defaults")
 	defaults = defaults or defaultsFallback
-
-	debug.log("oh")
 
 	for sectionName, section in pairs(defaultsFallback) do
 
@@ -1153,92 +1240,8 @@ end
 
 local GameScene = class.define(GameEntity, function(self, transform, settings)
 
-	self.timeScale = 1
-	self.frame = 1
-	-- self.gameObjects = {}
-	self.globals = {}
-	self.globals.drawables = {}
-	self.globals.colliders = {}
-	self.globals.canvases = {}
-	self.globals.cameras = {}
-	self.globals.events = {}
-	self.globals.physicsFixtures = {}
-	self.globals.physicsWorld = love.physics.newWorld(0, 0, true)
-	self.globals.physicsLayers = {}
-
-	self.globals.physicsWorld:setCallbacks(
-		function(fixture1, fixture2, contact)
-			-- debug.log("begin contact",
-			-- 	self.globals.physicsFixtures[fixture1].gameObject.name,
-			-- 	self.globals.physicsFixtures[fixture2].gameObject.name,
-			-- 	self.frame)
-			-- local x1, y1, x2, y2 = contact:getPositions()
-			-- debug.log(x1, y1, x2, y2)
-			local collider1 = self.globals.physicsFixtures[fixture1]
-			local collider2 = self.globals.physicsFixtures[fixture2]
-
-			local data = {frame = self.frame}
-			collider1.collidingWith[collider2] = data
-			collider2.collidingWith[collider1] = collections.copy(data)
-
-			self.globals.contact = contact
-		end,
-
-		--end contact
-		function(fixture1, fixture2, contact)
-			-- debug.log("end contact",
-			-- 	self.globals.physicsFixtures[fixture1].gameObject.name,
-			-- 	self.globals.physicsFixtures[fixture2].gameObject.name,
-			-- 	self.frame)
-			-- local x1, y1, x2, y2 = contact:getPositions()
-			-- debug.log(x1, y1, x2, y2)
-			local collider1 = self.globals.physicsFixtures[fixture1]
-			local collider2 = self.globals.physicsFixtures[fixture2]
-
-			local data = {frame = self.frame}
-			collider1.notCollidingWith[collider2] = data
-			collider2.notCollidingWith[collider1] = collections.copy(data)
-			-- debug.log("end contact", self.frame, collider1.gameObject.name, collider2.gameObject.name)
-		end,
-
-		--pre-solve
-		nil,
-
-		--post-solve
-		function(fixture1, fixture2, contact, normalImpulse1, tangentImpulse1, normalImpulse2, tangentImpulse2)
-			-- debug.log(contact == self.globals.contact, normalImpulse1, normalImpulse2, tangentImpulse1, tangentImpulse2, self.frame)
-			local collider1 = self.globals.physicsFixtures[fixture1]
-			local collider2 = self.globals.physicsFixtures[fixture2]
-
-			local data = {
-				frame = self.frame,
-				normalImpulses = {normalImpulse1, normalImpulse2},
-				tangentImpulses = {tangentImpulse1, tangentImpulse2},
-			}
-			collider1.collidingWith[collider2] = data
-			collider2.collidingWith[collider1] = collections.deepcopy(data)
-		end
-	)
-
-	self.globals.physicsWorld:setContactFilter(function(fixture1, fixture2)
-
-		local collider1 = self.globals.physicsFixtures[fixture1]
-		local collider2 = self.globals.physicsFixtures[fixture2]
-
-		local mask1, mask2 = collider1.mask, collider2.mask
-		local cat1, cat2 = collider1.category, collider2.category
-
-		local r = (bit.band(cat1, mask2) ~= 0) or (bit.band(cat2, mask1) ~= 0)
-		-- debug.log(r)
-		return r
-	end)
-
-	self:addEvent("physicsPreUpdate")
-	self:addEvent("physicsPostUpdate")
-
-	debug.log("init called")
-
-	GameEntity.init(self, transform)
+	initGameScene(self, transform)
+	self:loadSettings(settings)
 end)
 
 function GameScene.__get.gameObjects(self)
@@ -1282,7 +1285,7 @@ function GameScene:load(src)
 		assert(src.settings, "src.settings is required")
 	end
 
-	self:init()
+	initGameScene(self)
 	self.source = source
 
 	--scene settings (overrides settings.lua)
