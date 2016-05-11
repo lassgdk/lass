@@ -5,6 +5,10 @@ local assertLen, assertEqual = turtlemode.assertLen, turtlemode.assertEqual
 
 local GameSceneTest = turtlemode.testModule("tests.coretest.gameentitytest")
 
+function GameSceneTest.fixtures.scene(self)
+    return lass.GameScene()
+end
+
 function GameSceneTest:testChildrenAndGameObjects(scene)
 
     assertLen(scene.gameObjects, 0)
