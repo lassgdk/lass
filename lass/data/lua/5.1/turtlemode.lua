@@ -277,6 +277,20 @@ function Fail:__newindex(key, value)
 	end
 end
 
+local Fixtures = class(nil, function(self)
+	self._fixtureNames = {}
+end)
+
+function Fixtures:__newindex(key, value)
+
+	if type(value) == "function" then
+		rawset(self, key, value)
+		self._fixtureNames[#self._fixtureNames + 1] = key
+	else
+		rawset(self, key, value)
+	end
+end
+
 --[[
 public
 ]]
@@ -288,6 +302,7 @@ m.testModule = class(nil, function(self, super)
 	if not super then
 		self.skip = Skip(self)
 		self.fail = Fail(self)
+		self.fixtures = Fixtures()
 		return
 	elseif type(super) == "string" then
 		super = require(super)
@@ -397,8 +412,16 @@ function m.run(scene)
 			end
 
 			-- else run the test
+
 			local fail = loadedModule.fail[testName]
-			local r, d = xpcall(loadedModule[testName], _traceback, loadedModule, scene)
+
+			local fixtures = {}
+			for i, fixtureName in ipairs(loadedModule.fixtures._fixtureNames) do
+				-- print(fixtureName, loadedModule.fixtures[fixtureName])
+				fixtures[i] = loadedModule.fixtures[fixtureName](loadedModule)
+			end
+
+			local r, d = xpcall(loadedModule[testName], _traceback, loadedModule, unpack(fixtures))
 
 			if fail then
 				results.expectedFailures = results.expectedFailures + 1
