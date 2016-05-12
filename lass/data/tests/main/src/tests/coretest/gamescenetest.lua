@@ -3,7 +3,7 @@ local turtlemode = require("turtlemode")
 local helpers = require("tests.coretest.helpers")
 local assertLen, assertEqual = turtlemode.assertLen, turtlemode.assertEqual
 
-local GameSceneTest = turtlemode.testModule("tests.coretest.gameentitytest")
+local GameSceneTest = turtlemode.testModule()
 
 function GameSceneTest.fixtures.scene(self)
     return lass.GameScene()

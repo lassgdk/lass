@@ -3,31 +3,35 @@ local geometry = require("lass.geometry")
 local turtlemode = require("turtlemode")
 local helpers = require("tests.coretest.helpers")
 
-local GameObjectTest = turtlemode.testModule()
+local GameObjectTest = turtlemode.testModule("tests.coretest.gameentitytest")
 local assertEqual = turtlemode.assertEqual
 
 function GameObjectTest.fixtures.scene(self)
 	return lass.GameScene()
 end
 
-function GameObjectTest:testGlobalTransformGetters(scene)
-
-    --[[setup]]
-    -- position, rotation, size
-    local object = lass.GameObject(scene, "test",
-        geometry.Transform(geometry.Vector3(10, 20, 30), 90, geometry.Vector3(2, 3, 4))
-    )
-    local child = lass.GameObject(scene, "test child",
-        geometry.Transform(geometry.Vector3(5, 15, 25), 180, geometry.Vector3(5, 6, 7))
-    )
-    object:addChild(child)
-    
-    local gt = child.globalTransform
-    assertEqual(gt.position, child.globalPosition)
-    assertEqual(gt.rotation, child.globalRotation)
-    assertEqual(gt.size, child.globalSize)
-
+function GameObjectTest:createEntity(scene, name, transform, parent)
+    return lass.GameObject(scene, name, transform, parent)
 end
+
+-- function GameObjectTest:testGlobalTransformGetters(scene)
+
+--     --[[setup]]
+--     -- position, rotation, size
+--     local object = lass.GameObject(scene, "test",
+--         geometry.Transform(geometry.Vector3(10, 20, 30), 90, geometry.Vector3(2, 3, 4))
+--     )
+--     local child = lass.GameObject(scene, "test child",
+--         geometry.Transform(geometry.Vector3(5, 15, 25), 180, geometry.Vector3(5, 6, 7))
+--     )
+--     object:addChild(child)
+    
+--     local gt = child.globalTransform
+--     assertEqual(gt.position, child.globalPosition)
+--     assertEqual(gt.rotation, child.globalRotation)
+--     assertEqual(gt.size, child.globalSize)
+
+-- end
 
 function GameObjectTest:testGameObjectMove(scene)
 
