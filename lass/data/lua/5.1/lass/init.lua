@@ -254,6 +254,7 @@ function GameEntity.__get.globalSize(self)
 	local p = retrieveParentGlobalTransform(self)
 
 	if p == nil then
+		debug.log("no parent")
 		return geometry.Transform(t.size)
 	end
 
