@@ -362,7 +362,7 @@ end
 function GameEntity:moveTo(x, y, z)
 
 	if type(x) == "table" then
-		z = x.z or self.transform.position.z
+		x.z = x.z or self.transform.position.z
 	else
 		z = z or self.transform.position.z
 	end
