@@ -254,8 +254,7 @@ function GameEntity.__get.globalSize(self)
 	local p = retrieveParentGlobalTransform(self)
 
 	if p == nil then
-		debug.log("no parent")
-		return geometry.Transform(t.size)
+		return geometry.Vector3(t.size)
 	end
 
 	return geometry.Vector3({
@@ -277,7 +276,7 @@ function GameEntity.__get.globalRotation(self)
 	local p = retrieveParentGlobalTransform(self)
 
 	if p == nil then
-		return geometry.Transform(t.rotation)
+		return t.rotation
 	end
 
 	return t.rotation + p.rotation
