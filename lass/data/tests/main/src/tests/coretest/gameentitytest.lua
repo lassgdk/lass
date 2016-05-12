@@ -32,169 +32,169 @@ function GameEntityTest:testGlobalTransformGetters(scene)
 
 end
 
--- function GameObjectTest:testGameObjectMove(scene)
+function GameEntityTest:testGameEntityMove(scene)
 
---     --[[setup]]
---     local object = lass.GameObject(scene, "test")
+    --[[setup]]
+    local object = self:createEntity(scene, "test")
 
---     assertEqual(object.transform.position, geometry.Vector3(0, 0, 0),
---         "default object local position is incorrect")
---     assertEqual(object.globalPosition, geometry.Vector3(0, 0, 0),
---         "default object global position is incorrect")
+    assertEqual(object.transform.position, geometry.Vector3(0, 0, 0),
+        "default object local position is incorrect")
+    assertEqual(object.globalPosition, geometry.Vector3(0, 0, 0),
+        "default object global position is incorrect")
 
---     local child = lass.GameObject(scene, "test child")
---     object:addChild(child)
+    local child = self:createEntity(scene, "test child")
+    object:addChild(child)
 
---     assertEqual(object.transform.position, geometry.Vector3(0, 0, 0),
---         "default child local position is incorrect")
---     assertEqual(object.globalPosition, geometry.Vector3(0, 0, 0),
---         "default child global position is incorrect")
-
-
---     --[[moving an object]]
---     object:move(5, 5, 5)
---     object:move(0, 1, 2)
---     assertEqual(object.transform.position, geometry.Vector3(5, 6, 7))
---     assertEqual(object.globalPosition, geometry.Vector3(5, 6, 7))
-
---     object:move(-5, -6, -7)
---     assertEqual(object.transform.position, geometry.Vector3(0, 0, 0))
---     assertEqual(object.globalPosition, geometry.Vector3(0, 0, 0))
+    assertEqual(object.transform.position, geometry.Vector3(0, 0, 0),
+        "default child local position is incorrect")
+    assertEqual(object.globalPosition, geometry.Vector3(0, 0, 0),
+        "default child global position is incorrect")
 
 
---     --[[moving a child]]
---     object:move(5, 5, 5)
---     child:move(2, 1, -1)
---     assertEqual(child.transform.position, geometry.Vector3(2, 1, -1))
---     assertEqual(child.globalPosition, geometry.Vector3(7, 6, 4))
+    --[[moving an object]]
+    object:move(5, 5, 5)
+    object:move(0, 1, 2)
+    assertEqual(object.transform.position, geometry.Vector3(5, 6, 7))
+    assertEqual(object.globalPosition, geometry.Vector3(5, 6, 7))
 
---     object:move(-5, -5, -5)
---     child:move(-2, -1, 1)
---     assertEqual(child.transform.position, geometry.Vector3(0, 0, 0))
---     assertEqual(child.globalPosition, geometry.Vector3(0, 0, 0))
-
--- end
-
--- function GameObjectTest:testGameObjectMoveTo(scene)
-
---     --[[setup]]
---     local object = lass.GameObject(scene, "test")
---     local child = lass.GameObject(scene, "test child")
---     object:addChild(child)
+    object:move(-5, -6, -7)
+    assertEqual(object.transform.position, geometry.Vector3(0, 0, 0))
+    assertEqual(object.globalPosition, geometry.Vector3(0, 0, 0))
 
 
---     --[[moving an object]]
---     object:moveTo(-2, 10, 5)
---     assertEqual(object.transform.position, geometry.Vector3(-2, 10, 5))
---     assertEqual(object.globalPosition, geometry.Vector3(-2, 10, 5))
+    --[[moving a child]]
+    object:move(5, 5, 5)
+    child:move(2, 1, -1)
+    assertEqual(child.transform.position, geometry.Vector3(2, 1, -1))
+    assertEqual(child.globalPosition, geometry.Vector3(7, 6, 4))
 
---     object:moveTo(0, 0, 0)
---     assertEqual(object.transform.position, geometry.Vector3(0, 0, 0))
---     assertEqual(object.globalPosition, geometry.Vector3(0, 0, 0))
+    object:move(-5, -5, -5)
+    child:move(-2, -1, 1)
+    assertEqual(child.transform.position, geometry.Vector3(0, 0, 0))
+    assertEqual(child.globalPosition, geometry.Vector3(0, 0, 0))
 
+end
 
---     --[[moving a child]]
---     object:moveTo(10, 10, 10)
---     child:moveTo(-2, 5, 10)
---     assertEqual(child.transform.position, geometry.Vector3(-2, 5, 10))
---     assertEqual(child.globalPosition, geometry.Vector3(8, 15, 20))
+function GameEntityTest:testGameEntityMoveTo(scene)
 
---     object:moveTo(0, 0, 0)
---     assertEqual(child.transform.position, geometry.Vector3(-2, 5, 10))
---     assertEqual(child.globalPosition, geometry.Vector3(-2, 5, 10))
-
---     child:moveTo(0, 0, 0)
---     assertEqual(child.transform.position, geometry.Vector3(0, 0, 0))
---     assertEqual(child.globalPosition, geometry.Vector3(0, 0, 0))
-
--- end
-
--- function GameObjectTest:testGameObjectMoveGlobal(scene)
-
---     --[[setup]]
---     local object = lass.GameObject(scene, "test")
---     local child = lass.GameObject(scene, "test child")
---     object:addChild(child)
+    --[[setup]]
+    local object = self:createEntity(scene, "test")
+    local child = self:createEntity(scene, "test child")
+    object:addChild(child)
 
 
---     --[[moving an object]]
---     object:moveGlobal(5, 5, 5)
---     object:moveGlobal(0, 1, 2)
---     assertEqual(object.transform.position, geometry.Vector3(5, 6, 7))
---     assertEqual(object.globalPosition, geometry.Vector3(5, 6, 7))
+    --[[moving an object]]
+    object:moveTo(-2, 10, 5)
+    assertEqual(object.transform.position, geometry.Vector3(-2, 10, 5))
+    assertEqual(object.globalPosition, geometry.Vector3(-2, 10, 5))
 
---     object:moveGlobal(-5, -6, -7)
---     assertEqual(object.transform.position, geometry.Vector3(0, 0, 0))
---     assertEqual(object.globalPosition, geometry.Vector3(0, 0, 0))
-
-
---     --[[moving a child]]
---     object:moveGlobal(5, 5, 5)
---     child:moveGlobal(0, 1, 2)
---     assertEqual(child.transform.position, geometry.Vector3(0, 1, 2))
---     assertEqual(child.globalPosition, geometry.Vector3(5, 6, 7))
-
---     object:moveGlobal(-5, -5, -5)
---     assertEqual(child.transform.position, geometry.Vector3(0, 1, 2))
---     assertEqual(child.globalPosition, geometry.Vector3(0, 1, 2))
-
---     child:moveGlobal(0, -1, -2)
---     assertEqual(child.transform.position, geometry.Vector3(0, 0, 0))
---     assertEqual(child.globalPosition, geometry.Vector3(0, 0, 0))
+    object:moveTo(0, 0, 0)
+    assertEqual(object.transform.position, geometry.Vector3(0, 0, 0))
+    assertEqual(object.globalPosition, geometry.Vector3(0, 0, 0))
 
 
---     --[[moving a child accounting for a non-zero global transform]]
---     object:moveTo(4, 5, 6)
---     object:resize(1, 1, 1)
---     object:rotateTo(180)
---     child:moveGlobal(6, 15, 24)
---     assertEqual(child.transform.position, geometry.Vector3(-3, -7.5, 12))
---     assertEqual(child.globalPosition, geometry.Vector3(10, 20, 30))
+    --[[moving a child]]
+    object:moveTo(10, 10, 10)
+    child:moveTo(-2, 5, 10)
+    assertEqual(child.transform.position, geometry.Vector3(-2, 5, 10))
+    assertEqual(child.globalPosition, geometry.Vector3(8, 15, 20))
 
---     -- object:resize(-1.5, -1.5, -1.5)
---     -- object:rotateTo(90)
---     -- child:moveGlobal(-7, -13, -12)
---     -- assertEqual(child.transform.position, geometry.Vector3(-10, -1, 30))
---     -- assertEqual(child.globalPosition, geometry.Vector3(-3, 7, 18))
+    object:moveTo(0, 0, 0)
+    assertEqual(child.transform.position, geometry.Vector3(-2, 5, 10))
+    assertEqual(child.globalPosition, geometry.Vector3(-2, 5, 10))
 
---     -- object:resize(0.5, 0.5, 0.5)
---     -- object:rotateTo(270)
---     -- child:moveToGlobal(0, 0, 0)
---     -- assertEqual(child.transform.position, geometry.Vector3(-4, -5, -6))
---     -- assertEqual(child.globalPosition, geometry.Vector3(0, 0, 0))
+    child:moveTo(0, 0, 0)
+    assertEqual(child.transform.position, geometry.Vector3(0, 0, 0))
+    assertEqual(child.globalPosition, geometry.Vector3(0, 0, 0))
+
+end
+
+function GameEntityTest:testGameEntityMoveGlobal(scene)
+
+    --[[setup]]
+    local object = self:createEntity(scene, "test")
+    local child = self:createEntity(scene, "test child")
+    object:addChild(child)
 
 
---     -- object:moveTo(1, 2, 3)
---     -- object:resize(1, 1, 1)
---     -- object:rotateTo(180)
---     -- -- this is just to help keep track
---     -- assertEqual(child.globalPosition, geometry.Vector3(1, 2, 3))
+    --[[moving an object]]
+    object:moveGlobal(5, 5, 5)
+    object:moveGlobal(0, 1, 2)
+    assertEqual(object.transform.position, geometry.Vector3(5, 6, 7))
+    assertEqual(object.globalPosition, geometry.Vector3(5, 6, 7))
 
---     -- child:moveGlobal(4, 8, 12)
---     -- assertEqual(child.transform.position, geometry.Vector3(-2, -4, 6))
---     -- assertEqual(child.globalPosition, geometry.Vector3(5, 10, 15))
+    object:moveGlobal(-5, -6, -7)
+    assertEqual(object.transform.position, geometry.Vector3(0, 0, 0))
+    assertEqual(object.globalPosition, geometry.Vector3(0, 0, 0))
 
---     -- object:resize(-1.5, -1.5, -1.5)
---     -- object:rotateTo(90)
---     -- -- this is just to help keep track
---     -- assertEqual(child.globalPosition, geometry.Vector3(-1, 3, 6))
 
---     -- child:moveGlobal(-3, 5, 6)
---     -- assertEqual(child.transform.position, geometry.Vector3(-12, -10, 18))
---     -- assertEqual(child.globalPosition, geometry.Vector3(-4, 8, 12))
+    --[[moving a child]]
+    object:moveGlobal(5, 5, 5)
+    child:moveGlobal(0, 1, 2)
+    assertEqual(child.transform.position, geometry.Vector3(0, 1, 2))
+    assertEqual(child.globalPosition, geometry.Vector3(5, 6, 7))
 
---     -- object:resize(0.5, 0.5, 0.5)
---     -- object:rotateTo(270)
---     -- -- this is just to help keep track
---     -- assertEqual(child.globalPosition, geometry.Vector3(11, -10, 21))
+    object:moveGlobal(-5, -5, -5)
+    assertEqual(child.transform.position, geometry.Vector3(0, 1, 2))
+    assertEqual(child.globalPosition, geometry.Vector3(0, 1, 2))
 
---     -- child:moveGlobal(-11, 10, -21)
---     -- assertEqual(child.transform.position, geometry.Vector3(-2, 1, -3))
---     -- assertEqual(child.globalPosition, geometry.Vector3(0, 0, 0))
+    child:moveGlobal(0, -1, -2)
+    assertEqual(child.transform.position, geometry.Vector3(0, 0, 0))
+    assertEqual(child.globalPosition, geometry.Vector3(0, 0, 0))
 
--- end
 
--- function GameObjectTest:testGameObjectMoveToGlobal(scene)
+    --[[moving a child accounting for a non-zero global transform]]
+    object:moveTo(4, 5, 6)
+    object:resize(1, 1, 1)
+    object:rotateTo(180)
+    child:moveGlobal(6, 15, 24)
+    assertEqual(child.transform.position, geometry.Vector3(-3, -7.5, 12))
+    assertEqual(child.globalPosition, geometry.Vector3(10, 20, 30))
+
+    -- object:resize(-1.5, -1.5, -1.5)
+    -- object:rotateTo(90)
+    -- child:moveGlobal(-7, -13, -12)
+    -- assertEqual(child.transform.position, geometry.Vector3(-10, -1, 30))
+    -- assertEqual(child.globalPosition, geometry.Vector3(-3, 7, 18))
+
+    -- object:resize(0.5, 0.5, 0.5)
+    -- object:rotateTo(270)
+    -- child:moveToGlobal(0, 0, 0)
+    -- assertEqual(child.transform.position, geometry.Vector3(-4, -5, -6))
+    -- assertEqual(child.globalPosition, geometry.Vector3(0, 0, 0))
+
+
+    -- object:moveTo(1, 2, 3)
+    -- object:resize(1, 1, 1)
+    -- object:rotateTo(180)
+    -- -- this is just to help keep track
+    -- assertEqual(child.globalPosition, geometry.Vector3(1, 2, 3))
+
+    -- child:moveGlobal(4, 8, 12)
+    -- assertEqual(child.transform.position, geometry.Vector3(-2, -4, 6))
+    -- assertEqual(child.globalPosition, geometry.Vector3(5, 10, 15))
+
+    -- object:resize(-1.5, -1.5, -1.5)
+    -- object:rotateTo(90)
+    -- -- this is just to help keep track
+    -- assertEqual(child.globalPosition, geometry.Vector3(-1, 3, 6))
+
+    -- child:moveGlobal(-3, 5, 6)
+    -- assertEqual(child.transform.position, geometry.Vector3(-12, -10, 18))
+    -- assertEqual(child.globalPosition, geometry.Vector3(-4, 8, 12))
+
+    -- object:resize(0.5, 0.5, 0.5)
+    -- object:rotateTo(270)
+    -- -- this is just to help keep track
+    -- assertEqual(child.globalPosition, geometry.Vector3(11, -10, 21))
+
+    -- child:moveGlobal(-11, 10, -21)
+    -- assertEqual(child.transform.position, geometry.Vector3(-2, 1, -3))
+    -- assertEqual(child.globalPosition, geometry.Vector3(0, 0, 0))
+
+end
+
+-- function GameEntityTest:testGameObjectMoveToGlobal(scene)
 
 --     --[[setup]]
 --     local object = lass.GameObject(scene, "test")
@@ -249,7 +249,7 @@ end
 
 -- end
 
--- function GameObjectTest:testGameObjectResizing(scene)
+-- function GameEntityTest:testGameObjectResizing(scene)
 
 --     --[[setup]]
 --     local object = lass.GameObject(scene, "test")
@@ -292,7 +292,7 @@ end
 
 -- end
 
--- function GameObjectTest:testGameObjectChildResizing(scene)
+-- function GameEntityTest:testGameObjectChildResizing(scene)
 
 --     --[[setup]]
 --     local object = lass.GameObject(scene, "test")
@@ -350,7 +350,7 @@ end
 
 -- end
 
--- function GameObjectTest:testGameObjectRotation(scene)
+-- function GameEntityTest:testGameObjectRotation(scene)
 
 --     --[[setup]]
 --     local object = lass.GameObject(scene, "test")
@@ -404,7 +404,7 @@ end
 
 -- end
 
--- function GameObjectTest:testGameObjectChildRotation(scene)
+-- function GameEntityTest:testGameObjectChildRotation(scene)
 
 --     --[[setup]]
 --     local object = lass.GameObject(scene, "test")
@@ -459,7 +459,7 @@ end
 
 -- end
 
--- function GameObjectTest:testGameObjectRemovalWithoutChildren(scene)
+-- function GameEntityTest:testGameObjectRemovalWithoutChildren(scene)
 
 --     --[[GameScene:removeGameObject]]
 --     local object = lass.GameObject(scene, "testing object")
@@ -500,7 +500,7 @@ end
 
 -- end
 
--- function GameObjectTest:testGameObjectRemovalWithChildren(scene)
+-- function GameEntityTest:testGameObjectRemovalWithChildren(scene)
 
 --     --[[GameScene:removeGameObject]]
 --     local object = lass.GameObject(scene, "test")
