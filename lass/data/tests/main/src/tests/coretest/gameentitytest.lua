@@ -2,6 +2,7 @@ local lass = require("lass")
 local geometry = require("lass.geometry")
 local turtlemode = require("turtlemode")
 local assertLen, assertEqual = turtlemode.assertLen, turtlemode.assertEqual
+local helpers = require("tests.coretest.helpers")
 
 local GameEntityTest = turtlemode.testModule()
 
@@ -447,5 +448,20 @@ function GameEntityTest:testGameEntityChildRotation(scene)
     assertEqual(child.globalRotation, 359)
 
 end
+
+function GameEntityTest:testGameEntityRemoveChild(scene)
+
+    local object = self:createEntity(scene, "test")
+    local child = self:createEntity(scene, "test child", nil, object)
+
+    object:removeChild(child)
+    assertEqual(helpers.searchTreeDepth(object.children, object), nil)
+
+    --edge case, testing removing an object from itself
+    child = self:createEntity(scene, "test child", nil, object)
+    child:removeChild(child)
+    assertEqual(helpers.searchTreeDepth(object.children, child), 1)
+end
+
 
 return GameEntityTest
