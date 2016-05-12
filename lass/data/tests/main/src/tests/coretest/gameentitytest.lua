@@ -110,6 +110,21 @@ function GameEntityTest:testGameEntityMoveTo(scene)
     assertEqual(child.transform.position, geometry.Vector3(0, 0, 0))
     assertEqual(child.globalPosition, geometry.Vector3(0, 0, 0))
 
+
+    --[[excluding the z parameter]]
+    object:moveTo(0, 0, 10)
+
+    object:moveTo(7, 8)
+    assertEqual(object.transform.position, geometry.Vector3(7, 8, 10))
+    assertEqual(object.globalPosition, geometry.Vector3(7, 8, 10))
+
+    -- using a table for x
+    object:moveTo({x = 2, y = 5})
+    assertEqual(object.transform.position, geometry.Vector3(2, 5, 10))
+    assertEqual(object.globalPosition, geometry.Vector3(2, 5, 10))
+
+
+
 end
 
 function GameEntityTest:testGameEntityMoveGlobal(scene)
