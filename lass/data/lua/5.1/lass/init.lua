@@ -553,7 +553,9 @@ local GameObject = class.define(GameEntity, function(self, gameScene, name, tran
 	self.name = string.format(name)
 
 	GameEntity.init(self, transform)
-	gameScene:addGameObject(self)
+
+	self.gameScene = gameScene
+	self.active = true
 
 	--if parent is specified, it must be a GameObject
 	if parent then
