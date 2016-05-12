@@ -169,46 +169,17 @@ function GameEntityTest:testGameEntityMoveGlobal(scene)
     assertEqual(child.transform.position, geometry.Vector3(-3, -7.5, 12))
     assertEqual(child.globalPosition, geometry.Vector3(10, 20, 30))
 
-    -- object:resize(-1.5, -1.5, -1.5)
-    -- object:rotateTo(90)
-    -- child:moveGlobal(-7, -13, -12)
-    -- assertEqual(child.transform.position, geometry.Vector3(-10, -1, 30))
-    -- assertEqual(child.globalPosition, geometry.Vector3(-3, 7, 18))
+    object:resize(-1.5, -1.5, -1.5) --size is now 0.5
+    object:rotateTo(90)
+    child:moveGlobal(-3.25, 0.5, 6)
+    assertEqual(child.transform.position, geometry.Vector3(-4, -14, 24))
+    assertEqual(child.globalPosition, geometry.Vector3(-3, 7, 18))
 
-    -- object:resize(0.5, 0.5, 0.5)
-    -- object:rotateTo(270)
-    -- child:moveToGlobal(0, 0, 0)
-    -- assertEqual(child.transform.position, geometry.Vector3(-4, -5, -6))
-    -- assertEqual(child.globalPosition, geometry.Vector3(0, 0, 0))
-
-
-    -- object:moveTo(1, 2, 3)
-    -- object:resize(1, 1, 1)
-    -- object:rotateTo(180)
-    -- -- this is just to help keep track
-    -- assertEqual(child.globalPosition, geometry.Vector3(1, 2, 3))
-
-    -- child:moveGlobal(4, 8, 12)
-    -- assertEqual(child.transform.position, geometry.Vector3(-2, -4, 6))
-    -- assertEqual(child.globalPosition, geometry.Vector3(5, 10, 15))
-
-    -- object:resize(-1.5, -1.5, -1.5)
-    -- object:rotateTo(90)
-    -- -- this is just to help keep track
-    -- assertEqual(child.globalPosition, geometry.Vector3(-1, 3, 6))
-
-    -- child:moveGlobal(-3, 5, 6)
-    -- assertEqual(child.transform.position, geometry.Vector3(-12, -10, 18))
-    -- assertEqual(child.globalPosition, geometry.Vector3(-4, 8, 12))
-
-    -- object:resize(0.5, 0.5, 0.5)
-    -- object:rotateTo(270)
-    -- -- this is just to help keep track
-    -- assertEqual(child.globalPosition, geometry.Vector3(11, -10, 21))
-
-    -- child:moveGlobal(-11, 10, -21)
-    -- assertEqual(child.transform.position, geometry.Vector3(-2, 1, -3))
-    -- assertEqual(child.globalPosition, geometry.Vector3(0, 0, 0))
+    object:resize(0.5, 0.5, 0.5) --size is now 1
+    object:rotateTo(270)
+    child:moveGlobal(-18, -1, -30)
+    assertEqual(child.transform.position, geometry.Vector3(-5, 4, -6))
+    assertEqual(child.globalPosition, geometry.Vector3(0, 0, 0))
 
 end
 
