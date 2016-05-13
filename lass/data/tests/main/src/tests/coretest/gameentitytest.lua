@@ -1,7 +1,10 @@
 local lass = require("lass")
 local geometry = require("lass.geometry")
 local turtlemode = require("turtlemode")
-local assertLen, assertEqual = turtlemode.assertLen, turtlemode.assertEqual
+local assertLen, assertEqual, assertNotEqual =
+    turtlemode.assertLen,
+    turtlemode.assertEqual,
+    turtlemode.assertNotEqual
 local helpers = require("tests.coretest.helpers")
 
 local GameEntityTest = turtlemode.testModule()
@@ -453,9 +456,19 @@ function GameEntityTest:testRemoveChild(scene)
 
     local object = self:createEntity(scene, "test")
     local child = self:createEntity(scene, "test child", nil, object)
+    local grandchild = self:createEntity(scene, "test child", nil, child)
 
     object:removeChild(child)
     assertEqual(helpers.searchTreeDepth(object.children, object), nil)
+    assertEqual(helpers.searchTreeDepth(object.children, grandchild), nil)
+
+    object:addChild(child)
+    object:removeChild(child, false) --don't remove grandchild
+    assertEqual(helpers.searchTreeDepth(object.children, object), nil)
+    assertEqual(helpers.searchTreeDepth(object.children, grandchild), 1)
+
+    object:removeChild(self:createEntity(scene, "anonymous"))
+    assertEqual(helpers.searchTreeDepth(object.children, grandchild), 1)
 
     --edge case, testing removing an object from itself
     child = self:createEntity(scene, "test child", nil, object)

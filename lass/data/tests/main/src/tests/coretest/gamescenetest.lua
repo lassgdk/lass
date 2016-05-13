@@ -1,9 +1,14 @@
 local lass = require("lass")
 local turtlemode = require("turtlemode")
 local helpers = require("tests.coretest.helpers")
+local GameEntityTest = require("tests.coretest.gameentitytest")
 local assertLen, assertEqual = turtlemode.assertLen, turtlemode.assertEqual
 
 local GameSceneTest = turtlemode.testModule()
+
+function GameSceneTest:createEntity(scene, name, transform, parent)
+    return lass.GameScene(transform, parent)
+end
 
 function GameSceneTest.fixtures.scene(self)
     return lass.GameScene()
