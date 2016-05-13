@@ -33,10 +33,9 @@ function GameEntityTest:testGlobalTransformGetters(scene)
     assertEqual(gt.position, child.globalPosition)
     assertEqual(gt.rotation, child.globalRotation)
     assertEqual(gt.size, child.globalSize)
-
 end
 
-function GameEntityTest:testGameEntityMove(scene)
+function GameEntityTest:testMove(scene)
 
     --[[setup]]
     local object = self:createEntity(scene, "test")
@@ -79,7 +78,7 @@ function GameEntityTest:testGameEntityMove(scene)
 
 end
 
-function GameEntityTest:testGameEntityMoveTo(scene)
+function GameEntityTest:testMoveTo(scene)
 
     --[[setup]]
     local object = self:createEntity(scene, "test")
@@ -128,7 +127,7 @@ function GameEntityTest:testGameEntityMoveTo(scene)
 
 end
 
-function GameEntityTest:testGameEntityMoveGlobal(scene)
+function GameEntityTest:testMoveGlobal(scene)
 
     --[[setup]]
     local object = self:createEntity(scene, "test")
@@ -184,7 +183,7 @@ function GameEntityTest:testGameEntityMoveGlobal(scene)
 
 end
 
-function GameEntityTest:testGameEntityMoveToGlobal(scene)
+function GameEntityTest:testMoveToGlobal(scene)
 
     --[[setup]]
     local object = self:createEntity(scene, "test")
@@ -239,7 +238,7 @@ function GameEntityTest:testGameEntityMoveToGlobal(scene)
 
 end
 
-function GameEntityTest:testGameEntityResizing(scene)
+function GameEntityTest:testResizing(scene)
 
     --[[setup]]
     local object = self:createEntity(scene, "test")
@@ -282,7 +281,7 @@ function GameEntityTest:testGameEntityResizing(scene)
 
 end
 
-function GameEntityTest:testGameEntityChildResizing(scene)
+function GameEntityTest:testChildResizing(scene)
 
     --[[setup]]
     local object = self:createEntity(scene, "test")
@@ -340,7 +339,7 @@ function GameEntityTest:testGameEntityChildResizing(scene)
 
 end
 
-function GameEntityTest:testGameEntityRotate(scene)
+function GameEntityTest:testRotate(scene)
 
     --[[setup]]
     local object = self:createEntity(scene, "test")
@@ -369,7 +368,7 @@ function GameEntityTest:testGameEntityRotate(scene)
     assertEqual(object.globalRotation, 50)
 end
 
-function GameEntityTest:testGameEntityRotateTo(scene)
+function GameEntityTest:testRotateTo(scene)
 
     local object = self:createEntity(scene, "test")
 
@@ -395,7 +394,7 @@ function GameEntityTest:testGameEntityRotateTo(scene)
 
 end
 
-function GameEntityTest:testGameEntityChildRotate(scene)
+function GameEntityTest:testChildRotate(scene)
 
     --[[setup]]
     local object = self:createEntity(scene, "test")
@@ -426,7 +425,7 @@ function GameEntityTest:testGameEntityChildRotate(scene)
     assertEqual(child.globalRotation, 30)
 end
 
-function GameEntityTest:testGameEntityChildRotateTo(scene)
+function GameEntityTest:testChildRotateTo(scene)
 
     local object = self:createEntity(scene, "test")
     local child = self:createEntity(scene, "test child", nil, object)
@@ -448,10 +447,9 @@ function GameEntityTest:testGameEntityChildRotateTo(scene)
     child:rotateTo(-361)
     assertEqual(child.transform.rotation, 359)
     assertEqual(child.globalRotation, 359)
-
 end
 
-function GameEntityTest:testGameEntityRemoveChild(scene)
+function GameEntityTest:testRemoveChild(scene)
 
     local object = self:createEntity(scene, "test")
     local child = self:createEntity(scene, "test child", nil, object)
