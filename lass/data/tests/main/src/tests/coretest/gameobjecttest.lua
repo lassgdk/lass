@@ -2,12 +2,16 @@ local lass = require("lass")
 local geometry = require("lass.geometry")
 local turtlemode = require("turtlemode")
 local helpers = require("tests.coretest.helpers")
+local GameEntityTest = require("tests.coretest.gameentitytest")
 
-local GameObjectTest = turtlemode.testModule("tests.coretest.gameentitytest")
-local assertEqual = turtlemode.assertEqual
+local GameObjectTest = turtlemode.testModule(GameEntityTest)
+local assertEqual, assertFalse, assertTrue =
+    turtlemode.assertEqual,
+    turtlemode.assertFalse,
+    turtlemode.assertTrue
 
 function GameObjectTest.fixtures.scene(self)
-	return lass.GameScene()
+    return lass.GameScene()
 end
 
 function GameObjectTest:createEntity(scene, name, transform, parent)
@@ -25,6 +29,21 @@ function GameObjectTest:testDestroy(scene)
 
     -- a second call should produce no error
     object:destroy()
+end
+
+function GameObjectTest:testRemoveChild(scene)
+
+    GameEntityTest.testRemoveChild(self, scene)
+
+    local object = self:createEntity(scene, "test")
+    local child = self:createEntity(scene, "test child", nil, object)
+
+    object:removeChild(child)
+    assertTrue(child.active, "child was incorrectly deactivated")
+
+    -- edge case: test removing object from itself
+    object:removeChild(object)
+    assertTrue(object.active, "object was incorrectly deactivated")
 end
 
 -- function GameObjectTest:testGameObjectRemovalWithoutChildren(scene)
@@ -57,14 +76,6 @@ end
 --     scene:removeChild(object)
 --     assertEqual(object.active, true, "object was incorrectly deactivated")
 --     assertEqual(helpers.searchTreeDepth(scene.children, object), nil)
-
-
---     --[[GameObject:removeChild]]
---     object = lass.GameObject(scene, "testing object")
-
---     object:removeChild(object)
---     assertEqual(object.active, true, "object was incorrectly deactivated")
---     assertEqual(helpers.searchTreeDepth(scene.children, object), 1)
 
 -- end
 
