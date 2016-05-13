@@ -921,7 +921,7 @@ GameScene
 
 --[[internal]]
 
-local function initGameScene(self, transform)
+local function initGameScene(self, transform, parent)
 	--init the GameScene without reloading settings
 
 	self.timeScale = 1
@@ -1000,14 +1000,13 @@ local function initGameScene(self, transform)
 		local cat1, cat2 = collider1.category, collider2.category
 
 		local r = (bit.band(cat1, mask2) ~= 0) or (bit.band(cat2, mask1) ~= 0)
-		-- debug.log(r)
 		return r
 	end)
 
 	self:addEvent("physicsPreUpdate")
 	self:addEvent("physicsPostUpdate")
 
-	GameEntity.init(self, transform)
+	GameEntity.init(self, transform, parent)
 end
 
 local function createSettingsTable(settings, defaults)
@@ -1239,9 +1238,9 @@ end
 
 --[[public]]
 
-local GameScene = class.define(GameEntity, function(self, transform, settings)
+local GameScene = class.define(GameEntity, function(self, transform, settings, parent)
 
-	initGameScene(self, transform)
+	initGameScene(self, transform, parent)
 	self:loadSettings(settings)
 end)
 
