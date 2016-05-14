@@ -28,9 +28,9 @@ function GameEntityTest:testGlobalTransformGetters(scene)
     local child = self:createEntity(
         scene,
         "test child",
-        geometry.Transform(geometry.Vector3(5, 15, 25), 180, geometry.Vector3(5, 6, 7))
+        geometry.Transform(geometry.Vector3(5, 15, 25), 180, geometry.Vector3(5, 6, 7)),
+        object
     )
-    object:addChild(child)
     
     local gt = child.globalTransform
     assertEqual(gt.position, child.globalPosition)
@@ -48,8 +48,7 @@ function GameEntityTest:testMove(scene)
     assertEqual(object.globalPosition, geometry.Vector3(0, 0, 0),
         "default object global position is incorrect")
 
-    local child = self:createEntity(scene, "test child")
-    object:addChild(child)
+    local child = self:createEntity(scene, "test child", nil, object)
 
     assertEqual(object.transform.position, geometry.Vector3(0, 0, 0),
         "default child local position is incorrect")
@@ -85,9 +84,7 @@ function GameEntityTest:testMoveTo(scene)
 
     --[[setup]]
     local object = self:createEntity(scene, "test")
-    local child = self:createEntity(scene, "test child")
-    object:addChild(child)
-
+    local child = self:createEntity(scene, "test child", nil, object)
 
     --[[moving an object]]
     object:moveTo(-2, 10, 5)
@@ -134,9 +131,7 @@ function GameEntityTest:testMoveGlobal(scene)
 
     --[[setup]]
     local object = self:createEntity(scene, "test")
-    local child = self:createEntity(scene, "test child")
-    object:addChild(child)
-
+    local child = self:createEntity(scene, "test child", nil, object)
 
     --[[moving an object]]
     object:moveGlobal(5, 5, 5)
@@ -190,8 +185,7 @@ function GameEntityTest:testMoveToGlobal(scene)
 
     --[[setup]]
     local object = self:createEntity(scene, "test")
-    local child = self:createEntity(scene, "test child")
-    object:addChild(child)
+    local child = self:createEntity(scene, "test child", nil, object)
 
 
     --[[moving an object]]
@@ -288,8 +282,7 @@ function GameEntityTest:testChildResizing(scene)
 
     --[[setup]]
     local object = self:createEntity(scene, "test")
-    local child = self:createEntity(scene, "test child")
-    object:addChild(child)
+    local child = self:createEntity(scene, "test child", nil, object)
 
     assertEqual(child.transform.size, geometry.Vector3(1, 1, 1))
     assertEqual(child.globalSize, geometry.Vector3(1, 1, 1))
