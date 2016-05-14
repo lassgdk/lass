@@ -446,7 +446,6 @@ function m.run(scene)
 			local r, d = xpcall(loadedModule[testName], _traceback, loadedModule, unpack(fixtures))
 
 			if fail then
-				debug.log(testName, loadedModule[testName], r, d)
 				results.expectedFailures = results.expectedFailures + 1
 
 				if r then

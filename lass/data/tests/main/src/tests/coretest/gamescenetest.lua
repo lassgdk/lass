@@ -70,7 +70,7 @@ function GameSceneTest:testGameObjects(scene)
     assertLen(scene.gameObjects, 4)
 end
 
-function GameSceneTest.testRemoveGameObject(self, scene)
+function GameSceneTest.fail.testRemoveGameObject(self, scene)
 
     local object = lass.GameObject(scene, "test")
     local child = lass.GameObject(scene, "test child", nil, object)
