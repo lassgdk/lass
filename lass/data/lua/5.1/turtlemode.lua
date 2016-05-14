@@ -324,7 +324,9 @@ m.testModule = class(nil, function(self, super)
 			self.skip = Skip(self)
 			for k2, v2 in pairs(v) do
 				if k2 ~= "_testModule" then
-					self.skip[k2] = v2
+					-- we use super[k2] instead of v2 because v2 doesn't
+					-- actually point to the function
+					self.skip[k2] = super[k2]
 				end
 			end
 
@@ -333,7 +335,7 @@ m.testModule = class(nil, function(self, super)
 			self.fail = Fail(self)
 			for k2, v2 in pairs(v) do
 				if k2 ~= "_testModule" then
-					self.fail[k2] = v2
+					self.fail[k2] = super[k2]
 				end
 			end
 
@@ -444,6 +446,7 @@ function m.run(scene)
 			local r, d = xpcall(loadedModule[testName], _traceback, loadedModule, unpack(fixtures))
 
 			if fail then
+				debug.log(testName, loadedModule[testName], r, d)
 				results.expectedFailures = results.expectedFailures + 1
 
 				if r then

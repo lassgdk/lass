@@ -413,7 +413,7 @@ function GameEntityTest:testChildRotate(scene)
     assertEqual(child.globalRotation, 30)
 end
 
-function GameEntityTest.testChildRotateTo(self,scene)
+function GameEntityTest:testChildRotateTo(scene)
 
     local object = self:createEntity(scene, "test")
     local child = self:createEntity(scene, "test child", nil, object)
