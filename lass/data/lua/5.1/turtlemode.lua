@@ -394,8 +394,6 @@ function m.run(scene)
 
 		for j, testName in ipairs(loadedModule._testNames) do
 
-			scene:init()
-
 			-- skip this test if necessary
 
 			local skip = loadedModule.skip[testName]

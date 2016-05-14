@@ -16,6 +16,26 @@ end
 --scene is actually nil in this case because there's no fixture for it.
 --however, subclasses like GameObjectTest may define one
 
+function GameEntityTest:testChildren(scene)
+
+    local object = self:createEntity(scene, "test")
+    local child = self:createEntity(scene, "test child", nil, object)
+    local grandchild = self:createEntity(scene, "test grandchild", nil, child)
+    local greatGrandchild = self:createEntity(scene, "test g-grandchild", nil, grandchild)
+
+    assertLen(object.children, 1)
+    assertEqual(helpers.numTreeNodes(object), 3)
+
+    assertLen(child.children, 1)
+    assertEqual(helpers.numTreeNodes(child), 2)
+
+    assertLen(grandchild.children, 1)
+    assertEqual(helpers.numTreeNodes(grandchild), 1)
+
+    assertLen(greatGrandchild.children, 0)
+    assertEqual(helpers.numTreeNodes(greatGrandchild), 0)
+end
+
 function GameEntityTest:testGlobalTransformGetters(scene)
 
     --[[setup]]
