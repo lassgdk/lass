@@ -8,41 +8,16 @@ local assertEqual = turtlemode.assertEqual
 local assertNotEqual = turtlemode.assertNotEqual
 
 
-local function testIncorrectTransformCreation()
-
-    local incorrectValues = {0, -1}
-
-    for _, incorrectValue in ipairs(incorrectValues) do
-
-        local params = {1, 1, 1}
-
-        for i, var in ipairs({"x", "y", "z"}) do
-
-            params[i] = incorrectValue
-
-            -- attempt to make the class with a single incorrect value
-            local success = pcall(geometry.Transform, nil, nil, geometry.Vector3(unpack(params)))
-            if success then
-                error("Transform.size." .. var .. " incorrectly created with " .. tostring(incorrectValue))
-            end
-        end
-
-    end
-
-end
-
-
 function transformtest.testTransformCreation()
 
     --[[incorrect creation]]
     helpers.assertIncorrectRunner("creation", geometry.Transform, "transform", {"position", "rotation", "size"})
-    helpers.assertIncorrectRunner("setting", geometry.Transform, "transform", {"position", "rotation", "size"})
+    helpers.assertIncorrectRunner("setting", geometry.Transform, "transform", {"position", "rotation"})
+    helpers.assertIncorrectRunner("setting", geometry.Transform, "transform", {"size"},
+                                  geometry.Vector3(1, 1, 1),
+                                  {geometry.Vector3(-1, -1, -1), geometry.Vector3(0, 0, 0)})
     helpers.assertIncorrectRunner("setting", geometry.Transform, "transform",
                                   {{"size", "x"}, {"size", "y"}, {"size", "z"}}, nil, {0, -1})
-
-    -- transform.size is unique in that it can't be 0 or negative
-    -- testIncorrectTransformCreation()
-
 
     --[[basic creation]]
     local t = geometry.Transform()
