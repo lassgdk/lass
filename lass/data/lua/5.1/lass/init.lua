@@ -297,10 +297,6 @@ function GameEntity:addChild(child, trackParent)
 	assert(class.instanceof(child, GameEntity), "child must be GameEntity")
 	assert(child ~= self, "circular reference: cannot add self as child")
 
-	if class.instanceof(child.parent, GameEntity) then
-		child.parent:removeChild(child)
-	end
-
 	if trackParent == nil then
 		trackParent = true
 	end
@@ -434,15 +430,9 @@ function GameEntity:rotateTo(angle)
 	self.transform.rotation = angle
 end
 
-function GameEntity:resize(x, y, z, allowNegativeSize)
+function GameEntity:resize(x, y, z)
 
 	self.transform.size = self.transform.size + geometry.Vector3(x, y, z)
-
-	if not allowNegativeSize then
-		for i, axis in ipairs({"x","y","z"}) do
-			if self.transform.size[axis] < 0 then self.transform.size[axis] = 0 end
-		end
-	end
 end
 
 function GameEntity:hasParent()
@@ -677,12 +667,6 @@ end
 -- 	end 
 -- end
 
-
-function GameObject:removeChild(child, removeDescendants)
-
-	GameEntity.removeChild(self, child, removeDescendants)	
-end
-
 function GameObject:destroy(destroyDescendants)
 	
 	if self.gameScene then
@@ -769,13 +753,12 @@ end
 function GameObject:addChild(child)
 
 	--if child is at the top of the hierarchy, push it down
-	-- child.gameScene:removeChild(child)
+	child.gameScene:removeChild(child)
 
-	-- if class.instanceof(child.parent, GameEntity) then
-	-- 	child.parent:removeChild(child)
-	-- end
-
-	GameEntity.addChild(self, child)
+	if class.instanceof(child.parent, GameObject) then
+		child.parent:removeChild(child)
+	end
+	self.__base.addChild(self, child)
 end
 
 function GameObject:addComponent(component, callAwake)

@@ -255,7 +255,7 @@ function GameEntityTest:testMoveToGlobal(scene)
 
 end
 
-function GameEntityTest:testResizing(scene)
+function GameEntityTest:testResize(scene)
 
     --[[setup]]
     local object = self:createEntity(scene, "test")
@@ -278,23 +278,12 @@ function GameEntityTest:testResizing(scene)
     assertEqual(object.globalSize, geometry.Vector3(9, 11, 14))
 
 
-    --[[testing useNegative]]
-    object:resize(-100, -100, -100, false)
-    assertEqual(object.transform.size, geometry.Vector3(0, 0, 0))
-    assertEqual(object.globalSize, geometry.Vector3(0, 0, 0))
+    --[[testing that allowNegativeSize was removed]]
+    local success = pcall(function() object:resize(-100, -100, -100, false) end)
+    assertEqual(success, false)
 
-    object:resize(-2, -4, -7, true)
-    assertEqual(object.transform.size, geometry.Vector3(-2, -4, -7))
-    assertEqual(object.globalSize, geometry.Vector3(-2, -4, -7))
-
-    object:resize(-2, -4, -7, false)
-    assertEqual(object.transform.size, geometry.Vector3(0, 0, 0))
-    assertEqual(object.globalSize, geometry.Vector3(0, 0, 0))
-
-    object:resize(-2, -4, -7, true)
-    object:resize(-2, -4, -7, true)
-    assertEqual(object.transform.size, geometry.Vector3(-4, -8, -14))
-    assertEqual(object.globalSize, geometry.Vector3(-4, -8, -14))
+    success = pcall(function() object:resize(-100, -100, -100, true) end)
+    assertEqual(success, false)
 
 end
 
