@@ -30,19 +30,26 @@ local function assertIncorrectSetting(var, incorrectValue, params, geometryClass
 
     local instance = geometryClass(unpack(params))
     local varName = var
+    local success = nil
+    local result = nil
 
     -- if var points us to a subvalue, dig it out
     if type(var) == "table" then
+
         varName = ""
         for j = 1, #var - 1 do
             varName = varName .. var[j] .. "."
             instance = instance[var[j]]
         end
         varName = varName .. var[#var]
+        
+        -- attempt to set a nested value to something incorrect
+        success, result = pcall(function() instance[var[#var]] = incorrectValue end)
+    else
+        -- attempt to set a value to something incorrect
+        success, result = pcall(function() instance[var] = incorrectValue end)
     end
-    
-    local success, result = pcall(function() instance[var] = incorrectValue end)
-    -- attempt to set a value to something incorrect
+
     -- debug.log(result)
     if success then
         error(className .. "." .. varName .. " incorrectly set to " .. repr(incorrectValue))
