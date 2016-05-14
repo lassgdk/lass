@@ -430,16 +430,9 @@ function GameEntity:rotateTo(angle)
 	self.transform.rotation = angle
 end
 
--- TODO: don't allow size to be 0
-function GameEntity:resize(x, y, z, allowNegativeSize)
+function GameEntity:resize(x, y, z)
 
 	self.transform.size = self.transform.size + geometry.Vector3(x, y, z)
-
-	if not allowNegativeSize then
-		for i, axis in ipairs({"x","y","z"}) do
-			if self.transform.size[axis] < 0 then self.transform.size[axis] = 0 end
-		end
-	end
 end
 
 function GameEntity:hasParent()
