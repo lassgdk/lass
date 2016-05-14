@@ -315,7 +315,29 @@ m.testModule = class(nil, function(self, super)
 	end
 
 	for k, v in pairs(super) do
-		if not self[k] then
+
+		-- if we copy skip and fail by reference instead of by value, then
+		-- marking new tests as "skip" or "fail" won't work
+
+		if k == "skip" then
+
+			self.skip = Skip(self)
+			for k2, v2 in pairs(v) do
+				if k2 ~= "_testModule" then
+					self.skip[k2] = v2
+				end
+			end
+
+		elseif k == "fail" then
+
+			self.fail = Fail(self)
+			for k2, v2 in pairs(v) do
+				if k2 ~= "_testModule" then
+					self.fail[k2] = v2
+				end
+			end
+
+		elseif not self[k] then
 			self[k] = v
 		end
 	end
