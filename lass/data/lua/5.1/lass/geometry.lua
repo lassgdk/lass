@@ -429,7 +429,7 @@ end
 function Transform.__set.rotation(self, value)
 
 	assertValueIsValidNumber("transform", "rotation", value)
-	
+
 	-- clamp rotation between 0 and 360 degrees (e.g., -290 => 70)
 	self._rotation = value % 360
 
@@ -447,11 +447,24 @@ function Transform.__set.size(self, value)
 
 	assert(class.instanceof(value, Vector3), "Transform.size must be Vector3")
 
-	self._size = value
-
 	for i, axis in ipairs({"x", "y", "z"}) do
-		assertValueIsValidNumber("Transform.size", axis, self._size[axis], false, false)
+		-- don't allow 0 or negative values for axes
+		assertValueIsValidNumber("Transform.size", axis, value[axis], false, false)
 	end
+
+	-- callback definition goes here
+	local oldCallback = value.callback
+    
+    value.callback = function(self, key, value)
+
+    	assertValueIsValidNumber("Transform.size", key, value, false, false)
+    	
+    	if oldCallback ~= nil then
+	    	oldCallback(self, key, value)
+	    end
+    end
+
+	self._size = value
 
 	if self.callback then
 		self.callback(self, "size", self._size)
