@@ -427,9 +427,15 @@ function Transform.__get.rotation(self)
 end
 
 function Transform.__set.rotation(self, value)
+
 	assertValueIsValidNumber("transform", "rotation", value)
+	
 	-- clamp rotation between 0 and 360 degrees (e.g., -290 => 70)
 	self._rotation = value % 360
+
+	if self.callback then
+		self.callback(self, "rotation", self._rotation)
+	end
 end
 
 function Transform.__get.size(self)
