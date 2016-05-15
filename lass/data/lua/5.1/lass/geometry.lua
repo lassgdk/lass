@@ -27,9 +27,10 @@ local function assertOperandsHaveXandY(a, b, otherAllowedType, otherAllowedTypeP
 	end
 end
 
-local function assertValueIsValidNumber(class, key, value, allowNegative)
+local function assertValueIsValidNumber(class, key, value, allowNegative, allowZero)
 
 	allowNegative = operators.nilOr(allowNegative, true)
+	allowZero = operators.nilOr(allowZero, true)
 
 	if type(value) ~= "number" then
 		error(class .. "." .. key .. " must be number")
@@ -41,6 +42,8 @@ local function assertValueIsValidNumber(class, key, value, allowNegative)
 		error(class .. "." .. key .. " cannot be NaN")
 	elseif (not allowNegative) and (value < 0) then
 		error(class .. "." .. key .. " must not be negative")
+	elseif (not allowZero) and (value == 0) then
+		error(class .. "." .. key .. " must not be zero")
 	end
 end
 
@@ -420,19 +423,51 @@ local Transform = class.define(function(self, position, rotation, size)
 end)
 
 function Transform.__get.rotation(self)
-
 	return self._rotation
 end
 
 function Transform.__set.rotation(self, value)
 
 	assertValueIsValidNumber("transform", "rotation", value)
-	
+
 	-- clamp rotation between 0 and 360 degrees (e.g., -290 => 70)
 	self._rotation = value % 360
 
 	if self.callback then
 		self.callback(self, "rotation", self._rotation)
+	end
+end
+
+function Transform.__get.size(self)
+	return self._size
+end
+
+-- TODO: make a callback for transform.size
+function Transform.__set.size(self, value)
+
+	assert(class.instanceof(value, Vector3), "Transform.size must be Vector3")
+
+	for i, axis in ipairs({"x", "y", "z"}) do
+		-- don't allow 0 or negative values for axes
+		assertValueIsValidNumber("Transform.size", axis, value[axis], false, false)
+	end
+
+	-- callback definition goes here
+	local oldCallback = value.callback
+    
+    value.callback = function(self, key, value)
+
+    	assertValueIsValidNumber("Transform.size", key, value, false, false)
+    	
+    	if oldCallback ~= nil then
+	    	oldCallback(self, key, value)
+	    end
+    end
+
+	self._size = value
+
+	if self.callback then
+		self.callback(self, "size", self._size)
 	end
 end
 
@@ -1042,28 +1077,38 @@ geometry = {
 	functions = functions
 }
 
+-- valid options:
+-- "number" is any number
+-- "number0+" is any positive number or zero
+-- "number+" is any positive number above zero
+-- any other string will be compared with the return value of type() (i.e., "table")
+-- a reference to a class will be compared with the return value of class.instanceof
 for i, gClassTable in ipairs({
 	{"Vector2", x="number", y="number"},
 	{"Vector3", x="number", y="number", z="number"},
-	{"Transform", position={Vector3=Vector3}, size={Vector3=Vector3}},
+	{"Transform", position={Vector3=Vector3}},
 	{"Rectangle", width="number+", height="number+", position={Vector2=Vector2}},
 	{"Circle", radius="number+", position={Vector2=Vector2}},
 	{"Polygon", vertices="table", position={Vector2=Vector2}},
 }) do
+
 	local gClass = gClassTable[1]
 	gClassTable[1] = nil
 
 	for property, propertyType in pairs(gClassTable) do
+
 		geometry[gClass]["__get"][property] = function(self)
 			return self["_" .. property]
 		end
 
-		if propertyType == "number" or propertyType == "number+" then
+		-- use this setter if the property is a number
+		if propertyType == "number" or propertyType == "number+" or propertyType == "number0+" then
 
-			local allowNegative = propertyType ~= "number+"
+			local allowNegative = propertyType == "number"
+			local allowZero = propertyType ~= "number+"
 
 			geometry[gClass]["__set"][property] = function(self, value)
-				assertValueIsValidNumber(gClass, property, value, allowNegative)
+				assertValueIsValidNumber(gClass, property, value, allowNegative, allowZero)
 
 				self["_" .. property] = value
 
@@ -1071,19 +1116,8 @@ for i, gClassTable in ipairs({
 					self.callback(self, property, value)
 				end
 			end
-		elseif type(propertyType) == "string" then
-			geometry[gClass]["__set"][property] = function(self, value)
-				assert(
-					type(value) == propertyType,
-					gClass .. "." .. property .. " must be " .. propertyType
-				)
 
-				self["_" .. property] = value
-
-				if self.callback then
-					self.callback(self, property, value)
-				end
-			end
+		-- use this setter if the property is a class instance
 		elseif type(propertyType) == "table" then
 
 			local name, cl = next(propertyType)
@@ -1097,10 +1131,27 @@ for i, gClassTable in ipairs({
 				self["_" .. property] = value
 
 				if self.callback then
-					self.callback(property, value)
+					self.callback(self, property, value)
+				end
+			end
+
+		-- use this setter if the property is anything other than a number or class instance
+		elseif type(propertyType) == "string" then
+
+			geometry[gClass]["__set"][property] = function(self, value)
+				assert(
+					type(value) == propertyType,
+					gClass .. "." .. property .. " must be " .. propertyType
+				)
+
+				self["_" .. property] = value
+
+				if self.callback then
+					self.callback(self, property, value)
 				end
 			end
 		end
+
 	end
 end
 
