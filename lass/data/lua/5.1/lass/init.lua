@@ -294,8 +294,6 @@ function GameEntity:addChild(child, trackParent)
 	assert(class.instanceof(child, GameEntity), "child must be GameEntity")
 	assert(child ~= self, "circular reference: cannot add self as child")
 
-
-
 	if class.instanceof(child.parent, GameEntity) then
 		child.parent:removeChild(child)
 	end
@@ -1344,23 +1342,6 @@ function GameScene:applySettings()
 	-- grav.x = grav.x / self.settings.physics.pixelsPerMeter
 	-- grav.y = grav.y / self.settings.physics.pixelsPerMeter
 	self.globals.physicsWorld:setGravity(grav.x, self.globals.ySign * grav.y)
-end
-
-function GameScene:addGameObject(gameObject)
-	--add a GameObject to this GameScene (call this from gameObject constructor)
-
-	assert(class.instanceof(gameObject, GameObject), "gameObject must be GameObject")
-
-	gameObject.gameScene = self
-	-- table.insert(self.gameObjects, gameObject)
-	if gameObject.active == nil then
-		gameObject.active = true
-	else
-		gameObject:activate()
-	end
-
-	--print("added " .. gameObject.name .. " to scene at " .. gameObject.transform.position.x)
-
 end
 
 function GameScene:removeGameObject(gameObject, removeDescendants)

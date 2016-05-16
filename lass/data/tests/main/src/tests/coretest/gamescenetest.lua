@@ -43,6 +43,7 @@ function GameSceneTest:testRemoveChild(scene)
     assertEqual(helpers.searchTreeDepth(object.children, child), 1, "child was incorrectly removed from object")
 
     scene:removeChild(object, false)
+    assertEqual(helpers.searchTreeDepth(scene.children, object), nil)
     assertEqual(child.active, true, "child was incorrectly deactivated")
     assertEqual(helpers.searchTreeDepth(scene.children, child), 1, "child was not made a child of the scene")
     assertEqual(helpers.searchTreeCount(scene.children, child), 1, "child reference count is incorrect")
