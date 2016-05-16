@@ -294,6 +294,10 @@ function GameEntity:addChild(child, trackParent)
 	assert(class.instanceof(child, GameEntity), "child must be GameEntity")
 	assert(child ~= self, "circular reference: cannot add self as child")
 
+	if collections.index(self.children, child) then
+		return
+	end
+
 	if class.instanceof(child.parent, GameEntity) then
 		child.parent:removeChild(child)
 	end
