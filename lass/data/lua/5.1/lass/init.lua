@@ -339,7 +339,7 @@ function GameEntity:removeChild(child, removeDescendants)
 	if index then
 		table.remove(self.children, index)
 	else
-		return
+		return false
 	end
 
 	child.parent = nil
@@ -349,6 +349,8 @@ function GameEntity:removeChild(child, removeDescendants)
 			self:addChild(grandchild)
 		end
 	end
+
+	return true
 end
 
 function GameEntity:update(dt, firstUpdate)
