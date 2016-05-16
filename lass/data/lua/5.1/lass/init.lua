@@ -291,9 +291,6 @@ end
 -- trackParent should normally be false if GameEntity is scene and child is GameObject
 function GameEntity:addChild(child, trackParent)
 
-	-- for k,v in pairs(child) do print(k,v) end
-	-- print(type(GameEntity))
-
 	assert(class.instanceof(child, GameEntity), "child must be GameEntity")
 	assert(child ~= self, "circular reference: cannot add self as child")
 
@@ -675,8 +672,17 @@ end
 
 
 function GameObject:removeChild(child, removeDescendants)
-	--todo: reattach removed child to scene
-	GameEntity.removeChild(self, child, removeDescendants)	
+
+	local result = GameEntity.removeChild(self, child, removeDescendants)
+
+	if not result then
+		return false
+	end
+
+	--reattach removed child to scene
+	if self.gameScene then
+		self.gameScene:addChild(child)
+	end
 end
 
 function GameObject:destroy(destroyDescendants)
