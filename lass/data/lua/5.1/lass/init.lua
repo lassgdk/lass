@@ -294,6 +294,8 @@ function GameEntity:addChild(child, trackParent)
 	assert(class.instanceof(child, GameEntity), "child must be GameEntity")
 	assert(child ~= self, "circular reference: cannot add self as child")
 
+
+
 	if class.instanceof(child.parent, GameEntity) then
 		child.parent:removeChild(child)
 	end
@@ -347,7 +349,7 @@ function GameEntity:removeChild(child, removeDescendants)
 		end
 	end
 
-	return true
+	return child
 end
 
 function GameEntity:update(dt, firstUpdate)
@@ -673,9 +675,9 @@ end
 
 function GameObject:removeChild(child, removeDescendants)
 
-	local result = GameEntity.removeChild(self, child, removeDescendants)
+	child = GameEntity.removeChild(self, child, removeDescendants)
 
-	if not result then
+	if not child then
 		return false
 	end
 
