@@ -70,7 +70,7 @@ function GameSceneTest:testGameObjects(scene)
     assertLen(scene.gameObjects, 4)
 end
 
-function GameSceneTest.fail.testRemoveGameObject(self, scene)
+function GameSceneTest:testRemoveGameObject(scene)
 
     local object = lass.GameObject(scene, "test")
     local child = lass.GameObject(scene, "test child", nil, object)
@@ -99,7 +99,6 @@ function GameSceneTest.fail.testRemoveGameObject(self, scene)
     assertEqual(helpers.searchTreeDepth(scene.children, child), 1, "child was not made a child of the scene")
     assertEqual(helpers.searchTreeCount(scene.children, child), 1, "child reference count is incorrect")
 
-    --currently failing:
     assertEqual(helpers.searchTreeDepth(object.children, child), nil, "child was not removed from object")
 
     scene:removeGameObject(child)

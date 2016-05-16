@@ -60,7 +60,7 @@ function GameObjectTest:testDestroy(scene)
     assertFalse(child.active, "object was reactivated")
 end
 
-function GameObjectTest:testRemoveChild(scene)
+function GameObjectTest.fail.testRemoveChild(self, scene)
 
     GameEntityTest.testRemoveChild(self, scene)
 
@@ -69,8 +69,9 @@ function GameObjectTest:testRemoveChild(scene)
 
     object:removeChild(child)
     assertTrue(child.active, "child was incorrectly deactivated")
-    assertEqual(helpers.searchTreeDepth(scene.children, child), nil, "child was not removed from scene")
     assertEqual(helpers.searchTreeDepth(object.children, child), nil, "child was not removed from object")
+    -- currently failing:
+    assertEqual(helpers.searchTreeDepth(scene.children, child), 1, "child was removed from scene")
 
     -- edge case: test removing object from itself
     object:removeChild(object)
