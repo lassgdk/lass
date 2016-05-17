@@ -5,12 +5,12 @@ local system = require("lass.system")
 local turtlemode = require("turtlemode")
 
 local scene = lass.GameScene()
-local opts = system.getopt(arg, "scene")
+local opts = system.getopt(arg, "s")
 
 function love.load()
 
 	math.randomseed(os.time())
-	turtlemode.run()
+	turtlemode.run(opts)
 
 	love.event.quit()
 end

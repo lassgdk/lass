@@ -112,7 +112,7 @@ local function endsWith(s, sub)
 	return string.find(s, sub, #sub) ~= nil
 end
 
-local function gatherTestFiles(dir)
+local function gatherTestFiles(dir, opts, ignoreArg)
 
 	dir = dir or ""
 	local files = {}
@@ -128,7 +128,11 @@ local function gatherTestFiles(dir)
 		local fullName = dir .. "/" .. v
 
 		--only gather files and folders whose names begin or end with "test"
-		if startsWith(v, testPrefixOrSuffix) or endsWith(v, testPrefixOrSuffix) then
+		if (
+			startsWith(v, testPrefixOrSuffix) or endsWith(v, testPrefixOrSuffix)
+		) and (
+			ignoreArg or v == arg[2] or not arg[2] or (opts and next(opts))
+		) then
 
 			--lua files
 			if love.filesystem.isFile(fullName) and string.find(v, ext, #ext) then
@@ -137,7 +141,7 @@ local function gatherTestFiles(dir)
 			-- folders
 			elseif love.filesystem.isDirectory(fullName) then
 
-				for i2, v2 in ipairs(gatherTestFiles(fullName)) do
+				for i2, v2 in ipairs(gatherTestFiles(fullName, opts, true)) do
 					files[#files + 1] = v2
 				end
 			end
@@ -356,19 +360,11 @@ end
 function m.run(opts)
 
 	local loadedModules, loadedModuleNames = {}, {}
-	for i, v in ipairs(gatherTestFiles("tests")) do
-
-		-- local result, mod = xpcall(love.filesystem.load, debug.traceback, v)
-		-- if result then
-		-- 	result, mod = pcall(mod)
-		-- else
-		-- 	debug.log(mod)
-		-- 	return
-		-- end
+	for i, v in ipairs(gatherTestFiles("tests", opts)) do
 
 		local r, modPreExec = xpcall(love.filesystem.load, debug.traceback, v)
 		if not r then
-			print(modPreExec)
+			print(modPreExec) --print error message
 			return
 		end
 
