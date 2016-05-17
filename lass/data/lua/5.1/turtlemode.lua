@@ -525,7 +525,11 @@ function m.run(opts)
 			loadedModule:teardown()
 		end
 
-		printTestSummary(results)
+		if functionNameToMatch and results.testsRun == 0 and results.skips == 0 then
+			print(string.format("%q could not be run", functionNameToMatch))
+		else
+			printTestSummary(results)
+		end
 
 		resultsTotal.testsRun = resultsTotal.testsRun + results.testsRun
 		resultsTotal.skips = resultsTotal.skips + results.skips
