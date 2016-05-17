@@ -10,8 +10,7 @@ local opts = system.getopt(arg, "scene")
 function love.load()
 
 	math.randomseed(os.time())
-	-- scene:loadSettings("settings.lua")
-	turtlemode.run(scene)
+	turtlemode.run()
 
 	love.event.quit()
 end

@@ -125,6 +125,11 @@ def main():
 				"default":"",
 				"help":"name of scene to play"
 			}),
+			(("--args",), {
+				"type":str,
+				"default":"",
+				"help":"args to pass to the game"
+			}),
 			(("-v", "--verbose"), {
 				"action":"store_true",
 				"default":False,

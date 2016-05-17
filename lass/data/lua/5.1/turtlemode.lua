@@ -353,7 +353,7 @@ function m.testModule:__newindex(key, value)
 	rawset(self, key, value)
 end
 
-function m.run(scene)
+function m.run(opts)
 
 	local loadedModules, loadedModuleNames = {}, {}
 	for i, v in ipairs(gatherTestFiles("tests")) do

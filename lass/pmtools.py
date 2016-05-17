@@ -49,7 +49,7 @@ class ProjectManager(object):
 
 		self.lua = lua or lupa.LuaRuntime(unpack_returned_tuples=True)
 
-	def buildGame(self, game, sendToTemp=False, examples=False, tests=False, target="l", packages=tuple()):
+	def buildGame(self, game, sendToTemp=False, examples=False, tests=False, target="l", packages=tuple(), **kwargs):
 		"""
 		build a .love file, plus optional binary distributions
 
@@ -213,6 +213,7 @@ class ProjectManager(object):
 
 		# argString = ""
 		args = ["--scene=" + scene] if scene else []
+		args += kwargs.get("args", "").split()
 
 		# os.system(_getLoveEngineCommand().format(game, argString))
 		proc = subprocess.Popen(self._getLoveEngineCommand(game, args), stdout=subprocess.PIPE)
