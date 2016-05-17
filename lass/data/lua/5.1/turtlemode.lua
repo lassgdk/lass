@@ -123,6 +123,29 @@ local function gatherTestFiles(dir, opts, ignoreArg)
 		error(string.format("'%s' is not a directory", dir))
 	end
 
+	-- find out if the user specified a specific module or function to run
+	-- TODO: revisit this when we have a better arg parsing library
+
+	local nameToMatch
+	local functionNameToMatch
+
+	if not ignoreArg and arg[2] and not (opts and next(opts)) then
+
+		local splitIndex = string.find(arg[2], ":")
+
+		if splitIndex and splitIndex ~= #arg[2] then
+			nameToMatch = string.sub(arg[2], 1, splitIndex-1)
+			functionNameToMatch = string.sub(arg[2], splitIndex+1, #arg[2])
+		else
+			nameToMatch = arg[2]
+		end
+	end
+
+	-- look through the directory for test files
+
+	-- tests/sometest/subtest/test.lua
+	-- 
+
 	for i, v in ipairs(love.filesystem.getDirectoryItems(dir)) do
 
 		local fullName = dir .. "/" .. v
@@ -131,24 +154,35 @@ local function gatherTestFiles(dir, opts, ignoreArg)
 		if (
 			startsWith(v, testPrefixOrSuffix) or endsWith(v, testPrefixOrSuffix)
 		) and (
-			ignoreArg or v == arg[2] or not arg[2] or (opts and next(opts))
+			not nameToMatch or startsWith(nameToMatch, fullName)
 		) then
 
 			--lua files
 			if love.filesystem.isFile(fullName) and string.find(v, ext, #ext) then
 
 				files[#files + 1] = fullName
+
 			-- folders
 			elseif love.filesystem.isDirectory(fullName) then
 
-				for i2, v2 in ipairs(gatherTestFiles(fullName, opts, true)) do
+				local _ignoreArg = false
+				if (
+					not nameToMatch
+					or nameToMatch == fullName
+					or nameToMatch == fullName .. "/"
+					or nameToMatch == fullName .. "\\"
+				) then
+					_ignoreArg = true
+				end
+
+				for i2, v2 in ipairs(gatherTestFiles(fullName, opts, _ignoreArg)) do
 					files[#files + 1] = v2
 				end
 			end
 		end
 	end
 
-	return files
+	return files, functionNameToMatch
 end
 
 local function printTestSummary(results)
@@ -360,7 +394,8 @@ end
 function m.run(opts)
 
 	local loadedModules, loadedModuleNames = {}, {}
-	for i, v in ipairs(gatherTestFiles("tests", opts)) do
+	local testFiles, functionNameToMatch = gatherTestFiles("tests", opts)
+	for i, v in ipairs(testFiles) do
 
 		local r, modPreExec = xpcall(love.filesystem.load, debug.traceback, v)
 		if not r then
@@ -415,6 +450,10 @@ function m.run(opts)
 		for j, testName in ipairs(loadedModule._testNames) do
 
 			-- skip this test if necessary
+
+			if functionNameToMatch and testName ~= functionNameToMatch then
+				goto continue
+			end
 
 			local skip = loadedModule.skip[testName]
 
