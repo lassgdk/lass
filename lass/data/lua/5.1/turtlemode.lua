@@ -182,7 +182,7 @@ local function gatherTestFiles(dir, opts, ignoreArg)
 		end
 	end
 
-	return files, functionNameToMatch
+	return files, functionNameToMatch, nameToMatch
 end
 
 local function printTestSummary(results)
@@ -394,7 +394,17 @@ end
 function m.run(opts)
 
 	local loadedModules, loadedModuleNames = {}, {}
-	local testFiles, functionNameToMatch = gatherTestFiles("tests", opts)
+	local testFiles, functionNameToMatch, nameToMatch = gatherTestFiles("tests", opts)
+
+	if #testFiles < 1 then
+		if nameToMatch then
+			print(nameToMatch .. " could not be loaded")
+		else
+			print("No test files found")
+		end
+		return
+	end
+
 	for i, v in ipairs(testFiles) do
 
 		local r, modPreExec = xpcall(love.filesystem.load, debug.traceback, v)
