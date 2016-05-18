@@ -299,6 +299,8 @@ function GameEntity:addChild(child, trackParent)
 		child.parent:removeChild(child)
 	end
 
+	-- this part should come after the removeChild call, as removeChild may
+	-- trigger another addChild call
 	if collections.index(self.children, child) then
 		return
 	end
