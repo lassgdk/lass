@@ -70,7 +70,8 @@ function class.metaclass:__newindex(key, value)
     elseif key == "__set" then
         rawset(self, key, class.SetterTable(self, value))
     else
-        class.bind(self, key, value)
+        -- class.bind(self, key, value)
+        rawset(self, key, value)
     end
 end
 
@@ -106,7 +107,7 @@ local function defineClass(base, init, noAccessors)
                 for k2, v2 in pairs(v) do
                     c[k][k2] = v2
                 end
- 
+
                 local m = getmetatable(v)
                 if m then
                     setmetatable(c[k], m)
@@ -206,9 +207,9 @@ local function defineClass(base, init, noAccessors)
 
     -- c.instanceof = function(self, ...)
 
-    --     for i, cl in ipairs({...}) do 
+    --     for i, cl in ipairs({...}) do
     --         local m = getmetatable(self)
-    --         while m do 
+    --         while m do
     --             if m == cl then return cl end
     --             m = m.__base
     --         end
@@ -296,8 +297,8 @@ function class.instanceof(object, ...)
     local objectClass = object.__class
 
     if objectClass then
-        for i, cl in ipairs({...}) do 
-            while objectClass do 
+        for i, cl in ipairs({...}) do
+            while objectClass do
                 if objectClass == cl then return cl end
                 objectClass = objectClass.__base
             end
@@ -393,13 +394,13 @@ for i, cl in ipairs({
         end
     end)
 
-    rawset(newCl, "__newindex", function(self, key, value)
-        if not accessorReserved[key] then
-            class.bind(self.__accessing, accessor, key, value)
-        else
-            rawset(self, key, value)
-        end
-    end)
+    -- rawset(newCl, "__newindex", function(self, key, value)
+    --     if not accessorReserved[key] then
+    --         class.bind(self.__accessing, accessor, key, value)
+    --     else
+    --         rawset(self, key, value)
+    --     end
+    -- end)
 end
 
 return class

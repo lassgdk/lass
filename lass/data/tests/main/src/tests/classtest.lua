@@ -54,11 +54,11 @@ function classtest:testClassInheritance(scene)
 		-- assert(self.legs ~= 4)
 
 		self.legs = legs or 4
-		self.__base.init(self)
+		Being.init(self)
 	end)
 	local Dog = class.define(Animal, function(self, legs, breed)
 		self.breed = breed or "unknown"
-		self.__base.init(self, legs)
+		Animal.init(self, legs)
 	end)
 
 	local pom = Dog(3, "pomeranian")
