@@ -9,7 +9,6 @@ local class = {}
 -- currently used to prevent running genericget if these keys are undefined,
 -- and to prevent these keys being passed to the AccessorTable constructor
 local reserved = {
-    __base = true,
     __class = true,
     __get = true,
     __set = true,
@@ -70,7 +69,6 @@ function class.metaclass:__newindex(key, value)
     elseif key == "__set" then
         rawset(self, key, class.SetterTable(self, value))
     else
-        -- class.bind(self, key, value)
         rawset(self, key, value)
     end
 end
@@ -146,12 +144,11 @@ local function defineClass(base, init, noAccessors)
             if not accessorReserved[key] and c.__get[key] then
                 return c.__get[key](self)
 
-            else
-                -- next, we check if the key is "__class"
-                if key == "__class" then
-                    return getmetatable(self)
-                end
+            -- next, we check if the key is "__class"
+            elseif key == "__class" then
+                return getmetatable(self)
 
+            else
                 -- next, we attempt to find the key on the class itself.
                 -- if it isn't found, metaclass.__index will attempt to find it in
                 -- the ancestor classes
@@ -205,19 +202,6 @@ local function defineClass(base, init, noAccessors)
         end
     end
 
-    -- c.instanceof = function(self, ...)
-
-    --     for i, cl in ipairs({...}) do
-    --         local m = getmetatable(self)
-    --         while m do
-    --             if m == cl then return cl end
-    --             m = m.__base
-    --         end
-    --     end
-
-    --     return false
-    -- end
-
     setmetatable(c, class.metaclass)
     c.init = init
 
@@ -233,48 +217,6 @@ end
 
 function class.define(base, init)
     return defineClass(base, init, false)
-end
-
-function class.bind(cl, ...)
-
-    local args = table.pack(...)
-    local key, value
-    local obj = cl
-
-    if #args == 0 then
-        error("key must not be nil")
-    elseif args.n <= 2 then
-        key = args[1]
-        value = args[2]
-    else
-        --for example, {"__get", "x"} becomes cl.__get.x
-        for i = 1, args.n - 2 do
-            obj = obj[args[i]]
-            key = args[i+1]
-        end
-
-        value = args[#args]
-
-        -- debug.log(obj, key, value)
-    end
-
-    if type(value) == "function" then
-        rawset(obj, key, function(first, ...)
-            if type(first) == "table" and first.__base == cl then
-                -- temporarily change base to prevent loop
-                first.__base = cl.__base
-                local r = table.pack(value(first, ...))
-
-                -- revert base and return everything
-                first.__base = nil
-                return unpack(r)
-            else
-                return value(first, ...)
-            end
-        end)
-    else
-        rawset(obj, key, value)
-    end
 end
 
 function class.instanceof(object, ...)
