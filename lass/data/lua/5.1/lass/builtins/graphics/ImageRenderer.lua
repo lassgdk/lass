@@ -19,7 +19,7 @@ local ImageRenderer = class.define(Renderer, function(self, arguments)
 	arguments.offset = geometry.Vector2(arguments.offset)
 	arguments.color = arguments.color or {255,255,255}
 
-	self.__base.init(self, arguments)
+	Renderer.init(self, arguments)
 end)
 
 function ImageRenderer:awake()
@@ -27,7 +27,7 @@ function ImageRenderer:awake()
 	local width, height = self.image:getDimensions()
 	self.shape = geometry.Rectangle(width, height, self.offset)
 
-	self.__base.awake(self)
+	Renderer.awake(self)
 end
 
 function ImageRenderer:draw()
@@ -61,7 +61,7 @@ function ImageRenderer:update()
 	self.shape.height = height
 	self.shape.position = self.offset
 
-	self.__base.update(self)
+	Renderer.update(self)
 end
 
 return ImageRenderer

@@ -35,7 +35,7 @@ local Collider = class.define(lass.Component, function(self, arguments)
 	arguments.solid = arguments.solid or false
 	arguments.restitution = arguments.restitution or 0
 
-	self.__base.init(self, arguments)
+	lass.Component.init(self, arguments)
 
 end)
 
@@ -422,7 +422,7 @@ function Collider:deactivate()
 		self.fixture:destroy()
 	end
 
-	self.__base.deactivate(self)
+	lass.Component.deactivate(self)
 end
 
 function Collider:isCollidingWith(other, direction, noFrameRepeat, storeCollisionData)

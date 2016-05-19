@@ -17,7 +17,7 @@ local AudioSource = class.define(lass.Component, function(self, arguments)
 	arguments.maxVolume = operators.nilOr(arguments.maxVolume, 1)
 	arguments.looping = operators.nilOr(arguments.looping, false)
 
-	self.__base.init(self, arguments)
+	lass.Component.init(self, arguments)
 
 end)
 

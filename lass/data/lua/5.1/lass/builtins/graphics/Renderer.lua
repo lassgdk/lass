@@ -12,7 +12,7 @@ local Renderer = class.define(lass.Component, function(self, arguments)
 
 	arguments.color = arguments.color or {0,0,0}
 	arguments.canvas = arguments.canvas or "main"
-	self.__base.init(self, arguments)
+	lass.Component.init(self, arguments)
 end)
 
 function Renderer:awake()
@@ -34,7 +34,7 @@ function Renderer:deactivate()
 		self.globals.drawables[self.gameObject] = nil
 	end
 
-	self.__base.deactivate(self)
+	lass.Component.deactivate(self)
 end
 
 function Renderer:resetCanvas()

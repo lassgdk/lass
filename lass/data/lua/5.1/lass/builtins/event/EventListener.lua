@@ -4,7 +4,7 @@ local class = require("lass.class")
 local EventListener = class.define(lass.Component, function(self, arguments)
 
 	arguments.event = arguments.event or ""
-	self.__base.init(self, arguments)
+	lass.Component.init(self, arguments)
 end)
 
 function EventListener:awake()

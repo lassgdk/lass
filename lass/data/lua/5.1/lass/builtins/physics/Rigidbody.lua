@@ -7,7 +7,7 @@ local Rigidbody = class.define(lass.Component, function(self, arguments)
 
 	arguments.velocity = geometry.Vector2(arguments.velocity)
 
-	self.__base.init(self, arguments)
+	lass.Component.init(self, arguments)
 end)
 
 function Rigidbody.__get.velocity(self)
@@ -80,7 +80,7 @@ end
 function Rigidbody:deactivate()
 
 	self.body:destroy()
-	self.__base.deactivate(self)
+	lass.Component.deactivate(self)
 end
 
 function Rigidbody.events.physicsPreUpdate.play(self, source, data)

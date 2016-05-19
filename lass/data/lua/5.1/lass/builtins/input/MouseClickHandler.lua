@@ -6,7 +6,7 @@ local collections = require("lass.collections")
 local MouseClickHandler = class.define(lass.Component, function(self, arguments)
 
 	arguments.targetArguments = arguments.targetArguments or {}
-	self.__base.init(self, arguments)
+	lass.Component.init(self, arguments)
 end)
 
 local function mouseEvent(self, f, x, y, button, clickedOnSelf)

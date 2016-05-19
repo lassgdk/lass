@@ -45,7 +45,7 @@ local PeriodicInterpolator = class.define(lass.Component, function(self, argumen
 	arguments.period = arguments.period or 1 --in seconds
 	arguments.sampleLength = arguments.sampleLength or math.pi*2 --math.huge is valid
 
-	self.__base.init(self, arguments)
+	lass.Component.init(self, arguments)
 end)
 
 function PeriodicInterpolator:awake()

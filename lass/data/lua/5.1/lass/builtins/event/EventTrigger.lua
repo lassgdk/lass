@@ -5,7 +5,7 @@ local geometry = require("lass.geometry")
 local EventTrigger = class.define(lass.Component, function(self, arguments)
 
 	arguments.events = arguments.events or {}
-	self.__base.init(self, arguments)
+	lass.Component.init(self, arguments)
 end)
 
 local function postEvents(self)

@@ -19,7 +19,7 @@ local TextRenderer = class.define(Renderer, function(self, arguments)
 	arguments.offset = geometry.Vector2(arguments.offset)
 	arguments.shearFactor = geometry.Vector2(arguments.shearFactor)
 
-	self.__base.init(self, arguments)
+	Renderer.init(self, arguments)
 
 	self.text = text
 end)
@@ -53,7 +53,7 @@ function TextRenderer.__set.text(self, value)
 		local _, lines = getFont(self):getWrap(value, self.box.width)
 		local lineHeight = getFont(self):getHeight()
 		local maxLines = self.box.height / lineHeight
-		
+
 		if #lines > maxLines then
 			value = string.join("\n", collections.copy(lines, 1, maxLines))
 		end

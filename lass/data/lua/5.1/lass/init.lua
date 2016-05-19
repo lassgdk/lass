@@ -67,7 +67,7 @@ end
 Component
 ]]
 
-local Component = class.define(function(self, arguments) 
+local Component = class.define(function(self, arguments)
 
 	self.gameObject = nil
 	for k, v in pairs(arguments) do
@@ -138,7 +138,7 @@ end
 -- 	end
 
 -- 	self.globalTransform = geometry.Transform({
--- 		position = p.position, 
+-- 		position = p.position,
 -- 		size = geometry.Vector3({
 -- 			x = t.size.x * p.size.x,
 -- 			y = t.size.y * p.size.y,
@@ -196,7 +196,7 @@ function GameEntity.__get.globalTransform(self)
 	-- 3. add that to the parent's global position
 
 	local gt = geometry.Transform({
-		position = p.position, 
+		position = p.position,
 		size = geometry.Vector3({
 			x = t.size.x * p.size.x,
 			y = t.size.y * p.size.y,
@@ -674,7 +674,7 @@ end
 -- 		for i, child in ipairs(self.children) do
 -- 			child:destroy(true)
 -- 		end
--- 	end 
+-- 	end
 -- end
 
 
@@ -693,7 +693,7 @@ function GameObject:removeChild(child, removeDescendants)
 end
 
 function GameObject:destroy(destroyDescendants)
-	
+
 	if self.gameScene then
 		self.gameScene:removeGameObject(self, destroyDescendants)
 	end
@@ -761,7 +761,7 @@ function GameObject:update(dt, firstUpdate)
 		end
 	end
 
-	self.__base.update(self, dt, firstUpdate)
+	GameEntity.update(self, dt, firstUpdate)
 end
 
 function GameObject:draw()
@@ -911,7 +911,7 @@ for i, f in ipairs({
 			end
 		end
 		if super then
-			self.__base[f](self, ...)
+			GameEntity[f](self, ...)
 		end
 	end
 end
@@ -931,7 +931,7 @@ for i, f in ipairs({"mousepressed", "mousereleased"}) do
 				component[f](component, x, y, button, r)
 			end
 		end
-		self.__base[f](self, x, y, button)
+		GameEntity[f](self, x, y, button)
 	end
 end
 
@@ -1124,7 +1124,7 @@ local function maintainCollisions(self, colliderToCheck)
 									layer[j].notCollidingWith[collider] = {frame = self.frame}
 								elseif col and not ncol then
 									r = true
-									-- if col.frame ~= self.frame then 
+									-- if col.frame ~= self.frame then
 									-- 	collider.collidingWith[layer[j]] = {frame = self.frame}
 									-- 	layer[j].collidingWith[collider] = {frame = self.frame}
 									-- end
@@ -1371,7 +1371,7 @@ function GameScene:removeGameObject(gameObject, removeDescendants)
 	-- end
 
 	gameObject.gameScene = nil
-	self.__base.removeChild(self, gameObject, removeDescendants)
+	GameEntity.removeChild(self, gameObject, removeDescendants)
 
 	if removeDescendants == true then
 		for i, child in ipairs(gameObject.children) do
@@ -1392,7 +1392,7 @@ function GameScene:update(dt)
 		-- debug.log("============================")
 		-- maintainTransform(self)
 		-- debug.log("updating SimpleRigidbody")
-		self.__base.update(self, dt * self.timeScale, self.frame)
+		GameEntity.update(self, dt * self.timeScale, self.frame)
 
 		self.globals.events.physicsPreUpdate:play(self)
 		self.globals.physicsWorld:update(dt * self.timeScale)
