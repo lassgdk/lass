@@ -89,7 +89,9 @@ class MainWindow(QtGui.QMainWindow):
 
     def newWindowActionTriggered(self):
 
-        MainWindow().show()
+        newWindow = MainWindow()
+        newWindow.reloadStyle()
+        newWindow.show()
 
 class GameObjectTreeContainer(QtGui.QWidget):
 
