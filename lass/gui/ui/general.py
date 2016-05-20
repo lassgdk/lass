@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 import os, sys
 from PySide import QtGui, QtCore, QtUiTools
-import lupa
 
 from . import loaders, modals
 from .. import resources, models, delegates, dialogs
@@ -30,8 +29,11 @@ class MainMenuBar(QtGui.QMenuBar):
         self.openAction = self.fileMenu.addAction("Open Project")
         self.openSceneAction = self.fileMenu.addAction("Open Scene")
 
+        self.newWindowAction = self.fileMenu.addAction("New Window")
+
         self.openSceneAction.setShortcut(QtGui.QKeySequence.Open)
         self.openSceneAction.triggered.connect(window.openSceneActionTriggered)
+        self.newWindowAction.triggered.connect(window.newWindowActionTriggered)
 
 class MainWindow(QtGui.QMainWindow):
 
@@ -84,6 +86,10 @@ class MainWindow(QtGui.QMainWindow):
         treeModel = self.gameObjectTreeContainer.gameObjectTree.model()
         treeModel.clearTree()
         treeModel.initializeTree(scene.gameObjects)
+
+    def newWindowActionTriggered(self):
+
+        MainWindow().show()
 
 class GameObjectTreeContainer(QtGui.QWidget):
 

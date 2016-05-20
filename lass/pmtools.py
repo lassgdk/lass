@@ -365,7 +365,10 @@ class Scene(object):
 				"transform": luatools.luaTableToDict(node.transform, self.lua) or {}
 			}}
 
-			o["children"] = self._gameObjects(node.children)
+			if node.children:
+				o["children"] = self._gameObjects(node.children)
+			else:
+				o["children"] = []
 
 			objects.append(o)
 
