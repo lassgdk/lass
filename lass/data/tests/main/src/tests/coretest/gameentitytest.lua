@@ -290,6 +290,20 @@ function GameEntityTest:testResize(scene)
     assertEqual(object.globalSize, geometry.Vector3(1, 1, 1))
 
 
+    --[[testing that zero/negative results are silent]]
+    object:resize(-1, 0, 0)
+    assertEqual(object.transform.size, geometry.Vector3(1, 1, 1))
+    assertEqual(object.globalSize, geometry.Vector3(1, 1, 1))
+
+    object:resize(0, -1, 0)
+    assertEqual(object.transform.size, geometry.Vector3(1, 1, 1))
+    assertEqual(object.globalSize, geometry.Vector3(1, 1, 1))
+
+    object:resize(0, 0, -1)
+    assertEqual(object.transform.size, geometry.Vector3(1, 1, 1))
+    assertEqual(object.globalSize, geometry.Vector3(1, 1, 1))
+
+
     --[[resizing with a child]]
     local child = self:createEntity(scene, "test child", nil, object)
 
@@ -315,15 +329,6 @@ function GameEntityTest:testResize(scene)
     child:resize(-3, -4, -5)
     assertEqual(child.transform.size, geometry.Vector3(1, 1, 1))
     assertEqual(child.globalSize, geometry.Vector3(1, 1, 1))
-
-
-    --[[testing that allowNegativeSize was removed]]
-    local success = pcall(function() object:resize(-100, -100, -100, false) end)
-    assertEqual(success, false)
-
-    -- test on child this time, since `object` was made useless by the above test
-    success = pcall(function() child:resize(-100, -100, -100, true) end)
-    assertEqual(success, false)
 
 end
 
