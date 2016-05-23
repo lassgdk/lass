@@ -19,9 +19,9 @@ function GameObjectTest.fixtures.scene(self)
     return lass.GameScene()
 end
 
-function GameObjectTest.fail.testDestroy(self, scene)
+function GameObjectTest.testDestroy(self, scene)
 
-    helpers.objectRemovalTestRunner(scene, "object")
+    self:objectRemovalTestRunner(scene, "object")
 end
 
 function GameObjectTest:testRemoveChild(scene)
