@@ -455,7 +455,11 @@ end
 
 function GameEntity:resize(x, y, z)
 
-	self.transform.size = self.transform.size + geometry.Vector3(x, y, z)
+	local result = self.transform.size + geometry.Vector3(x, y, z)
+
+	if result.x > 0 and result.y > 0 and result.z > 0 then
+		self.transform.size = result
+	end
 end
 
 function GameEntity:hasParent()
