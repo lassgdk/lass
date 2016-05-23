@@ -18,11 +18,10 @@ from ... import pmtools
 #     return ui
 
 class MainMenuBar(QtGui.QMenuBar):
-    def __init__(self, window):
+    def __init__(self, parent):
 
-        QtGui.QMenuBar.__init__(self)
+        QtGui.QMenuBar.__init__(self, parent)
 
-        self.window = window
         self.fileMenu = self.addMenu("File")
         self.newAction = self.fileMenu.addAction("New Project")
         self.newSceneAction = self.fileMenu.addAction("New Scene")
@@ -32,8 +31,8 @@ class MainMenuBar(QtGui.QMenuBar):
         self.newWindowAction = self.fileMenu.addAction("New Window")
 
         self.openSceneAction.setShortcut(QtGui.QKeySequence.Open)
-        self.openSceneAction.triggered.connect(window.openSceneActionTriggered)
-        self.newWindowAction.triggered.connect(window.newWindowActionTriggered)
+        self.openSceneAction.triggered.connect(parent.openSceneActionTriggered)
+        self.newWindowAction.triggered.connect(parent.newWindowActionTriggered)
 
 class MainWindow(QtGui.QMainWindow):
 
@@ -54,8 +53,8 @@ class MainWindow(QtGui.QMainWindow):
         self.splitter.setOrientation(QtCore.Qt.Horizontal)
         layout.addWidget(self.splitter)
 
-        self.gameObjectTreeContainer = GameObjectTreeContainer()
-        self.inspectorContainer = InspectorContainer()
+        self.gameObjectTreeContainer = GameObjectTreeContainer(self)
+        self.inspectorContainer = InspectorContainer(self)
         self.splitter.setChildrenCollapsible(False)
         self.splitter.addWidget(self.gameObjectTreeContainer)
         self.splitter.addWidget(self.inspectorContainer)
@@ -95,8 +94,8 @@ class MainWindow(QtGui.QMainWindow):
 
 class GameObjectTreeContainer(QtGui.QWidget):
 
-    def __init__(self):
-        QtGui.QWidget.__init__(self)
+    def __init__(self, parent):
+        QtGui.QWidget.__init__(self, parent)
 
         self.setObjectName("gameObjectTreeContainer")
         # self.resize(270, 458)
@@ -386,8 +385,8 @@ class CreateGameObjectButton(QtGui.QToolButton):
 
 class InspectorContainer(QtGui.QWidget):
 
-    def __init__(self):
-        QtGui.QWidget.__init__(self)
+    def __init__(self, parent):
+        QtGui.QWidget.__init__(self, parent)
 
         self.setObjectName("InspectorContainer")
         self.resize(290, 398)

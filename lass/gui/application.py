@@ -22,12 +22,15 @@ class Application(object):
         self.scenes = []
         self.currentSceneIndex = 0
         self.settings = {}
+        self.windows = []
 
     def run(self):
 
         from ui.general import MainWindow
 
         window = MainWindow()
+        self.windows.append(window)
+
         window.reloadStyle()
         window.show()
         return self.qApp.exec_()
