@@ -115,6 +115,19 @@ local function retrieveParentGlobalTransform(self)
 
 end
 
+local function findDescendantParent(self, descendant)
+	for i, child in ipairs(self.children) do
+		if child == descendant then
+			return self
+		else
+			local r = findDescendantParent(child, descendant)
+			if r then
+				return r
+			end
+		end
+	end
+end
+
 -- local function maintainTransform(self, updateDescendants, descendantToExclude)
 -- 	--maintain global position and rotation
 
@@ -350,7 +363,7 @@ function GameEntity:removeChild(child, removeDescendants)
 
 	if not removeDescendants then
 		for i, grandchild in ipairs(child.children) do
-				self:addChild(grandchild)
+			self:addChild(grandchild)
 		end
 	end
 
@@ -442,11 +455,7 @@ end
 
 function GameEntity:resize(x, y, z)
 
-	local result = self.transform.size + geometry.Vector3(x, y, z)
-
-	if result.x > 0 and result.y > 0 and result.z > 0 then
-		self.transform.size = result
-	end
+	self.transform.size = self.transform.size + geometry.Vector3(x, y, z)
 end
 
 function GameEntity:hasParent()
@@ -1367,25 +1376,19 @@ function GameScene:removeGameObject(gameObject, removeDescendants)
 		self:removeEventListener(event, gameObject)
 	end
 
-	-- local index = collections.index(self.gameObjects, gameObject)
-	-- if index then
-	-- 	table.remove(self.gameObjects, index)
-	-- else
-	-- 	return
-	-- end
+	if not GameEntity.removeChild(self, gameObject, removeDescendants) then
+		local parent = findDescendantParent(self, gameObject)
+		if not parent then
+			return false
+		end
+	end
 
 	gameObject.gameScene = nil
-	GameEntity.removeChild(self, gameObject, removeDescendants)
 
 	if removeDescendants == true then
 		for i, child in ipairs(gameObject.children) do
 			self:removeGameObject(child, true)
 		end
-	-- -- if this object has no parent, its children must become children of the scene
-	-- elseif not class.instanceof(gameObject.parent, GameObject) then
-	-- 	for i, child in ipairs(gameObject.children) do
-	-- 		self:addChild(child, false)
-	-- 	end
 	end
 end
 
