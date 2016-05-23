@@ -9,6 +9,7 @@ local helpers = require("tests.coretest.helpers")
 
 local GameEntityTest = turtlemode.testModule()
 
+
 function GameEntityTest:createEntity(scene, name, transform, parent)
     return lass.GameEntity(transform, parent)
 end

@@ -11,12 +11,12 @@ local assertEqual, assertFalse, assertTrue =
     turtlemode.assertTrue
 
 
-function GameObjectTest.fixtures.scene(self)
-    return lass.GameScene()
-end
-
 function GameObjectTest:createEntity(scene, name, transform, parent)
     return lass.GameObject(scene, name, transform, parent)
+end
+
+function GameObjectTest.fixtures.scene(self)
+    return lass.GameScene()
 end
 
 function GameObjectTest.fail.testDestroy(self, scene)
@@ -45,10 +45,7 @@ function GameObjectTest:testRemoveChild(scene)
     child:removeChild(child)
     assertEqual(child.active, true, "child was incorrectly deactivated")
     assertEqual(
-        helpers.searchTreeDepth(scene.children, child),
-        2,
-        "child was incorrectly removed from scene children"
-    )
+        helpers.searchTreeDepth(scene.children, child), 2, "child was incorrectly removed from scene children")
 
     object:removeChild(child)
     assertEqual(child.active, true, "child was incorrectly deactivated")
