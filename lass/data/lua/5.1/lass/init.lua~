@@ -11,6 +11,7 @@ local geometry = require("lass.geometry")
 local DelayObject = require("lass.delay")
 local Collider = nil
 
+
 --[[
 Event
 ]]
@@ -695,9 +696,8 @@ end
 -- end
 
 
-function GameObject:removeChild(child, removeDescendants, reattachToScene)
+function GameObject:removeChild(child, removeDescendants)
 
-	reattachToScene = operators.nilOr(reattachToScene, true)
 	child = GameEntity.removeChild(self, child, removeDescendants)
 
 	if not child then
@@ -705,7 +705,7 @@ function GameObject:removeChild(child, removeDescendants, reattachToScene)
 	end
 
 	--reattach removed child to scene
-	if reattachToScene and self.gameScene then
+	if self.gameScene then
 		self.gameScene:addChild(child)
 	end
 end
@@ -1274,39 +1274,6 @@ local function getGameObjects(self, nodes)
 	return gameObjects
 end
 
-local function removeGameObject(self, gameObject, removeDescendants, alreadyRemoved)
-
-	removeDescendants = operators.nilOr(removeDescendants, true)
-
-	if not alreadyRemoved and not GameEntity.removeChild(self, gameObject, removeDescendants) then
-		local parent = findDescendantParent(self, gameObject)
-		if not parent then
-			return false
-		end
-		-- debug.log(parent.name, gameObject.name)
-		parent:removeChild(gameObject, removeDescendants, false)
-
-		-- debug.log(findDescendantParent(parent, gameObject))
-	end
-
-	-- false, because we'll deactivate the descendants later
-	gameObject:deactivate(false)
-
-	for i, event in ipairs(collections.copy(gameObject.events)) do
-		self:removeEventListener(event, gameObject)
-	end
-
-	gameObject.gameScene = nil
-
-	if removeDescendants == true then
-		for i, child in ipairs(gameObject.children) do
-			removeGameObject(self, child, true, true)
-		end
-	end
-
-	return gameObject
-end
-
 --[[public]]
 
 local GameScene = class.define(GameEntity, function(self, transform, settings, parent)
@@ -1403,7 +1370,31 @@ function GameScene:applySettings()
 end
 
 function GameScene:removeGameObject(gameObject, removeDescendants)
-	return removeGameObject(self, gameObject, removeDescendants, false)
+
+	gameObject:deactivate(false)
+
+	if removeDescendants == nil then
+		removeDescendants = true
+	end
+
+	for i, event in ipairs(collections.copy(gameObject.events)) do
+		self:removeEventListener(event, gameObject)
+	end
+
+	if not GameEntity.removeChild(self, gameObject, removeDescendants) then
+		local parent = findDescendantParent(self, gameObject)
+		if not parent then
+			return false
+		end
+	end
+
+	gameObject.gameScene = nil
+
+	if removeDescendants == true then
+		for i, child in ipairs(gameObject.children) do
+			self:removeGameObject(child, true)
+		end
+	end
 end
 
 function GameScene:update(dt)
