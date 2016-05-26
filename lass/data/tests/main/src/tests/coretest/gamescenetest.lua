@@ -11,6 +11,17 @@ function GameSceneTest:createEntity(scene, name, transform, parent)
     return lass.GameScene(transform, nil, parent)
 end
 
+function GameObjectTest:entityToString(entity)
+
+    if entity.__tostring then
+        return tostring(entity)
+    end
+
+    -- example: "GameScene 0x81dbc0"
+    return string.gsub(tostring(entity), "table:", "GameScene")
+end
+
+
 function GameSceneTest.fixtures.scene(self)
     return lass.GameScene()
 end

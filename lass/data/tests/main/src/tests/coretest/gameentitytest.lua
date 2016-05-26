@@ -16,6 +16,41 @@ function GameEntityTest:createEntity(scene, name, transform, parent)
     return lass.GameEntity(transform, parent)
 end
 
+local function treeToString(self, entity, level)
+
+    s = ""
+
+    for i, child in ipairs(entity.children) do
+
+        local indent = ""
+        for j = 1, level-1 do
+            indent = indent .. "  "
+        end
+
+        s = s .. indent .. self:entityToString(entity) .. "\n" .. treeToString(self, child, level+1)
+    end
+    
+    return s
+end
+
+function GameEntityTest:treeToString(entity)
+    return treeToString(self, entity, 1)
+end
+
+function GameEntityTest:entityToString(entity)
+
+    if entity.__tostring then
+        return tostring(entity)
+    end
+
+    -- example: "GameEntity 0x81dbc0"
+    return string.gsub(tostring(entity), "table:", "GameEntity")
+end
+
+function GameEntityTest:errorMessageWithTree(entity, msg)
+    return msg .. "\n" .. self:treeToString(entity)
+end
+
 --scene is actually nil in this case because there's no fixture for it.
 --however, subclasses like GameObjectTest may define one
 
