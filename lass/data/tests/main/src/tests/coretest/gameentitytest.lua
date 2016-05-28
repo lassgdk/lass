@@ -1,4 +1,5 @@
 local lass = require("lass")
+local class = require("lass.class")
 local geometry = require("lass.geometry")
 local turtlemode = require("turtlemode")
 local assertLen, assertEqual, assertNotEqual, assertFalse =
@@ -18,16 +19,15 @@ end
 
 local function treeToString(self, entity, level)
 
-    s = ""
+    local indent = ""
+    for j = 1, level-1 do
+        indent = indent .. "  "
+    end
+
+    local s = indent .. self:entityToString(entity) .. "\n"
 
     for i, child in ipairs(entity.children) do
-
-        local indent = ""
-        for j = 1, level-1 do
-            indent = indent .. "  "
-        end
-
-        s = s .. indent .. self:entityToString(entity) .. "\n" .. treeToString(self, child, level+1)
+        s = s .. treeToString(self, child, level+1)
     end
     
     return s
@@ -42,9 +42,24 @@ function GameEntityTest:entityToString(entity)
     if entity.__tostring then
         return tostring(entity)
     end
+    
+    local cl = class.instanceof(entity, lass.GameObject, lass.GameScene)
+    local name = ""
+    
+    if cl == lass.GameObject then
+        name = "GameObject"
+    elseif cl == lass.GameScene then
+        name = "GameScene"
+    end
 
     -- example: "GameEntity 0x81dbc0"
-    return string.gsub(tostring(entity), "table:", "GameEntity")
+
+    local s = string.gsub(tostring(entity), "table:", name)
+    if entity.name then
+        s = s .. string.format(" (%q)", entity.name)
+    end
+    
+    return s
 end
 
 function GameEntityTest:errorMessageWithTree(entity, msg)
@@ -558,7 +573,9 @@ function GameEntityTest:objectRemovalTestRunner(scene, functionType)
     objectRemoval(self, scene, functionType, object, false)
     assertEqual(child.active, true, "child was incorrectly deactivated")
     assertEqual(helpers.searchTreeDepth(scene.children, child), 1, "child was not made a child of the scene")
-    assertEqual(helpers.searchTreeCount(scene.children, child), 1, "child reference count is incorrect")
+    assertEqual(helpers.searchTreeCount(scene.children, child), 1,
+        self:errorMessageWithTree(scene, "child reference count is incorrect")
+    )
 
     -- this shouldn't do anything, since the object was already destroyed
     objectRemoval(self, scene, functionType, object, true)
@@ -592,7 +609,7 @@ function GameEntityTest:objectRemovalTestRunner(scene, functionType)
     assertEqual(grandchild.active, true, "grandchild was incorrectly deactivated")
     assertEqual(
         helpers.searchTreeDepth(scene.children, grandchild), 1,
-        "grandchild was not made a child of the scene")
+        self:errorMessageWithTree(scene, "grandchild was not made a child of the scene"))
     assertEqual(
         helpers.searchTreeCount(scene.children, grandchild), 1,
         "grandchild reference count is incorrect")

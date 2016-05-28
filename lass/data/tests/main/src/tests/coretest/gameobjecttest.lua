@@ -14,18 +14,18 @@ local assertEqual, assertFalse, assertTrue =
 function GameObjectTest:createEntity(scene, name, transform, parent)
     return lass.GameObject(scene, name, transform, parent)
 end
-
-function GameObjectTest:entityToString(entity)
-
-    if entity.__tostring then
-        return tostring(entity)
-    end
-
-    -- example: 'GameObject 0x81dbc0 ("My Object")'
-    return
-        string.gsub(tostring(entity), "table:", "GameObject") ..
-        string.format(" (%q)", entity.name)
-end
+-- 
+-- function GameObjectTest:entityToString(entity)
+-- 
+--     if entity.__tostring then
+--         return tostring(entity)
+--     end
+-- 
+--     -- example: 'GameObject 0x81dbc0 ("My Object")'
+--     return
+--         string.gsub(tostring(entity), "table:", "GameObject") ..
+--         string.format(" (%q)", entity.name)
+-- end
 
 function GameObjectTest.fixtures.scene(self)
     return lass.GameScene()
