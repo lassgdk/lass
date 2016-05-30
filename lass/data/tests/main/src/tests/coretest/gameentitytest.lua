@@ -608,11 +608,11 @@ function GameEntityTest:objectRemovalTestRunner(scene, functionType)
 
     assertEqual(grandchild.active, true, "grandchild was incorrectly deactivated")
     assertEqual(
-        helpers.searchTreeDepth(scene.children, grandchild), 1,
-        self:errorMessageWithTree(scene, "grandchild was not made a child of the scene"))
+        helpers.searchTreeDepth(object.children, grandchild), 1,
+        self:errorMessageWithTree(scene, "grandchild was not made a child of object"))
     assertEqual(
         helpers.searchTreeCount(scene.children, grandchild), 1,
-        "grandchild reference count is incorrect")
+        self:errorMessageWithTree(scene, "grandchild reference count is incorrect"))
 
 end
 
