@@ -309,7 +309,8 @@ function GameEntity:addChild(child, trackParent)
 
 
 	if class.instanceof(child.parent, GameEntity) then
-		child.parent:removeChild(child)
+		-- third argument is used by GameObject--prevents reattaching to scene
+		child.parent:removeChild(child, false, false)
 	end
 
 	-- this part should come after the removeChild call, as removeChild may
@@ -363,6 +364,7 @@ function GameEntity:removeChild(child, removeDescendants)
 
 	if not removeDescendants then
 		for i, grandchild in ipairs(child.children) do
+			-- remove grandchildren from child, and attach them to this entity
 			self:addChild(grandchild)
 		end
 	end
@@ -669,31 +671,6 @@ function GameObject.fromPrefab(scene, object, parent)
 
 	return gameObject
 end
-
--- function GameObject:destroy(destroyDescendants)
-
--- 	if destroyDescendants == nil then
--- 		destroyDescendants = true
--- 	end
-
--- 	-- if we attempt to destroy the components while looping through self.components,
--- 	-- the table will shrink. so we create a copy
--- 	local toDestroy = collections.copy(self.components)
--- 	for i, component in ipairs(toDestroy) do
--- 		component:destroy()
--- 	end
-
--- 	-- remove this object from its parent. if not destroyDescendants, attach children
--- 	-- to parent
-
--- 	self.parent:removeChild(self, destroyDescendants)
--- 	if destroyDescendants then
--- 		for i, child in ipairs(self.children) do
--- 			child:destroy(true)
--- 		end
--- 	end
--- end
-
 
 function GameObject:removeChild(child, removeDescendants, reattachToScene)
 
@@ -1015,7 +992,6 @@ local function initGameScene(self, transform, parent)
 
 		--post-solve
 		function(fixture1, fixture2, contact, normalImpulse1, tangentImpulse1, normalImpulse2, tangentImpulse2)
-			-- debug.log(contact == self.globals.contact, normalImpulse1, normalImpulse2, tangentImpulse1, tangentImpulse2, self.frame)
 			local collider1 = self.globals.physicsFixtures[fixture1]
 			local collider2 = self.globals.physicsFixtures[fixture2]
 
@@ -1283,7 +1259,6 @@ local function removeGameObject(self, gameObject, removeDescendants, alreadyRemo
 		if not parent then
 			return false
 		end
-		-- debug.log(parent.name, gameObject.name)
 		parent:removeChild(gameObject, removeDescendants, false)
 
 		-- debug.log(findDescendantParent(parent, gameObject))
