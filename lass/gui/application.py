@@ -1,41 +1,33 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import sys, linecache
+import sys, linecache, os
+from six import text_type
 from PySide import QtGui
 from ..pmtools import ProjectManager
 
-class Application(object):
+class Project(object):
 
-    gameObjectDataHeaders = ["name", "prefab", "events", "components", "prefabComponents"]
-    gameObjectDataDefaults = {
-        "name": "Game Object",
-        "prefab": "",
-        "events": [],
-        "components": [],
-        "prefabComponents": []
-    }
+    def __init__(self, directory):
 
-    def __init__(self, qApp, projectManager):
-        self.qApp = qApp
-        self.projectManager = projectManager
+        if not isinstance(o, text_type):
+            raise TypeError("directory must be string")
+
+        self.directory = os.path.abspath(os.path.expandvars(directory))
         self.scenes = []
         self.currentSceneIndex = 0
         self.settings = {}
-        self.windows = []
+        self.projectManager = ProjectManager()
 
-    def run(self):
+    def isFileInProject(self, fileName):
 
-        from ui.general import MainWindow
-
-        window = MainWindow()
-        self.windows.append(window)
-
-        window.reloadStyle()
-        window.show()
-        return self.qApp.exec_()
+        # we intentionally don't follow symlinks
+        return os.path.abspath(os.path.expandvars(fileName)).startswith(self.directory)
 
     def loadScene(self, fileName):
+
+        if not self.isFileInProject(fileName):
+            return False
 
         scene = self.projectManager.loadScene(fileName)
 
@@ -48,9 +40,52 @@ class Application(object):
 
     def loadPrefab(self, fileName):
 
+        if not self.isFileInProject(fileName):
+            return False
+
         return self.projectManager.loadPrefab(fileName)
 
+
+class Application(object):
+
+    gameObjectDataHeaders = ["name", "prefab", "events", "components", "prefabComponents"]
+    gameObjectDataDefaults = {
+        "name": "Game Object",
+        "prefab": "",
+        "events": [],
+        "components": [],
+        "prefabComponents": []
+    }
+
+    def __init__(self, qApp):
+        self.qApp = qApp
+        self.projects = {}
+
+    def run(self):
+
+        from ui.general import MainWindow
+
+        window = MainWindow()
+        window.reloadStyle()
+        window.show()
+
+        return self.qApp.exec_()
+        
+    def project(self, window):
+
+        return self.projects[window]
+
+    def setProject(self, window, directory):
+
+        self.projects[window] = Project(directory)
+
+    def removeProject(self, window):
+
+        self.projects.pop(window)
+
     def exceptionString(self):
+        #why is this even here?
+
         exc_type, exc_obj, tb = sys.exc_info()
         f = tb.tb_frame
         lineno = tb.tb_lineno
@@ -59,4 +94,4 @@ class Application(object):
         line = linecache.getline(filename, lineno, f.f_globals)
         return '{} in {}, line {}: {}'.format(exc_obj.__class__.__name__, filename, lineno, exc_obj)
 
-app = Application(QtGui.QApplication(sys.argv), ProjectManager())
+app = Application(QtGui.QApplication(sys.argv))

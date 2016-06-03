@@ -20,25 +20,30 @@ from ... import pmtools
 class MainMenuBar(QtGui.QMenuBar):
     def __init__(self, parent):
 
-        QtGui.QMenuBar.__init__(self, parent)
+        QtGui.QMenuBar.__init__(self)
 
         self.fileMenu = self.addMenu("File")
-        self.newAction = self.fileMenu.addAction("New Project")
+        self.newProjectAction = self.fileMenu.addAction("New Project")
+        self.newProjectInNewWindowAction = self.fileMenu.addAction("New Project in New Window")
         self.newSceneAction = self.fileMenu.addAction("New Scene")
-        self.openAction = self.fileMenu.addAction("Open Project")
+        self.openProjectAction = self.fileMenu.addAction("Open Project")
+        self.openProjectInNewWindowAction = self.fileMenu.addAction("Open Project in New Window")
         self.openSceneAction = self.fileMenu.addAction("Open Scene")
 
-        self.newWindowAction = self.fileMenu.addAction("New Window")
-
         self.openSceneAction.setShortcut(QtGui.QKeySequence.Open)
+
+        self.newProjectAction.triggered.connect(parent.newProjectActionTriggered)
+        self.newProjectInNewWindowAction.triggered.connect(parent.newProjectInNewWindowActionTriggered)
+        self.newSceneAction.triggered.connect(parent.newSceneActionTriggered)
+        self.openProjectAction.triggered.connect(parent.openProjectActionTriggered)
+        self.openProjectInNewWindowAction.triggered.connect(parent.openProjectInNewWindowActionTriggered)
         self.openSceneAction.triggered.connect(parent.openSceneActionTriggered)
-        self.newWindowAction.triggered.connect(parent.newWindowActionTriggered)
 
 class MainWindow(QtGui.QMainWindow):
 
     def __init__(self):
         QtGui.QMainWindow.__init__(self)
-
+        
         self.central = QtGui.QWidget(self)
         layout = QtGui.QHBoxLayout()
         self.central.setLayout(layout)
@@ -86,11 +91,28 @@ class MainWindow(QtGui.QMainWindow):
         treeModel.clearTree()
         treeModel.initializeTree(scene.gameObjects)
 
-    def newWindowActionTriggered(self):
+    def newProjectActionTriggered(self):
+        pass
+
+    def newProjectInNewWindowActionTriggered(self):
 
         newWindow = MainWindow()
         newWindow.reloadStyle()
         newWindow.show()
+        self.newWindow = newWindow
+        # newWindow.newProjectActionTriggered()
+
+    def newSceneActionTriggered(self):
+        pass
+
+    def openProjectActionTriggered(self):
+        pass
+
+    def openProjectInNewWindowActionTriggered(self):
+        pass
+
+    def openSceneActionTriggered(self):
+        pass
 
 class GameObjectTreeContainer(QtGui.QWidget):
 
