@@ -74,6 +74,34 @@ class MainWindow(QtGui.QMainWindow):
         with open(os.path.join(pmtools.DIR_LASS_DATA, "gui", "main.qss")) as styleSheetFile:
             self.setStyleSheet(styleSheetFile.read())
 
+    def newProjectActionTriggered(self):
+        pass
+
+    def newProjectInNewWindowActionTriggered(self):
+
+        newWindow = MainWindow()
+        newWindow.reloadStyle()
+        newWindow.show()
+        app.addWindow(newWindow)
+
+        newWindow.newProjectActionTriggered()
+
+    def newSceneActionTriggered(self):
+        pass
+
+    def openProjectActionTriggered(self):
+        pass
+
+    def openProjectInNewWindowActionTriggered(self):
+
+        newWindow = MainWindow()
+        newWindow.reloadStyle()
+        newWindow.show()
+        app.addWindow(newWindow)
+
+        newWindow.openProjectActionTriggered()
+
+
     def openSceneActionTriggered(self):
 
         try:
@@ -90,29 +118,6 @@ class MainWindow(QtGui.QMainWindow):
         treeModel = self.gameObjectTreeContainer.gameObjectTree.model()
         treeModel.clearTree()
         treeModel.initializeTree(scene.gameObjects)
-
-    def newProjectActionTriggered(self):
-        pass
-
-    def newProjectInNewWindowActionTriggered(self):
-
-        newWindow = MainWindow()
-        newWindow.reloadStyle()
-        newWindow.show()
-        self.newWindow = newWindow
-        # newWindow.newProjectActionTriggered()
-
-    def newSceneActionTriggered(self):
-        pass
-
-    def openProjectActionTriggered(self):
-        pass
-
-    def openProjectInNewWindowActionTriggered(self):
-        pass
-
-    def openSceneActionTriggered(self):
-        pass
 
 class GameObjectTreeContainer(QtGui.QWidget):
 

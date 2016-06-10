@@ -70,16 +70,23 @@ class Application(object):
         window.show()
 
         return self.qApp.exec_()
-        
+
     def project(self, window):
 
         return self.projects[window]
 
+    def addWindow(self, window):
+
+        self.projects[window] = None
+
     def setProject(self, window, directory):
 
-        self.projects[window] = Project(directory)
+        if directory:
+            self.projects[window] = Project(directory)
+        else:
+            self.projects[window] = None
 
-    def removeProject(self, window):
+    def removeWindow(self, window):
 
         self.projects.pop(window)
 
