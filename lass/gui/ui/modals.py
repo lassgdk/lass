@@ -15,7 +15,7 @@ class ErrorMessageBox(QtGui.QMessageBox):
             flags=QtCore.Qt.WindowFlags(QtCore.Qt.WindowCloseButtonHint)
         )
 
-        if traceback:
+        if trace:
             self.setDetailedText(traceback.format_exc(trace))
 
 class CouldNotParseSceneMB(ErrorMessageBox):
