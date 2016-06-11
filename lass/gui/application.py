@@ -8,16 +8,20 @@ from ..pmtools import ProjectManager
 
 class Project(object):
 
-    def __init__(self, directory):
+    def __init__(self, directory, initialize=False):
 
-        if not isinstance(o, text_type):
+        if not isinstance(directory, text_type):
             raise TypeError("directory must be string")
 
         self.directory = os.path.abspath(os.path.expandvars(directory))
+        self.projectManager = ProjectManager()
+
+        if not initialize:
+            self.projectManager.assertProjectIsValid(self.directory)
+
         self.scenes = []
         self.currentSceneIndex = 0
         self.settings = {}
-        self.projectManager = ProjectManager()
 
     def isFileInProject(self, fileName):
 

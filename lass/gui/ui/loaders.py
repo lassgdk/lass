@@ -8,12 +8,14 @@ from ..application import app
 
 def _loadPrefabOrScene(module_type, parent):
 
+    project = app.project(parent)
+
     if module_type == "prefab":
-        method = app.loadPrefab
+        method = project.loadPrefab
         dialogName = "Prefab"
         args = ("Load Prefab", ".", "Prefab files (*.prefab.lua);; Lua files (*.lua)")#, ~QtGui.QFileDialog.HideNameFilterDetails)
     elif module_type == "scene":
-        method = app.loadScene
+        method = project.loadScene
         dialogName = "Scene"
         args = ("Open Scene", ".", "Scene files (*.scene.lua);; Lua files (*.lua)")#, ~QtGui.QFileDialog.HideNameFilterDetails)
     else:
@@ -60,3 +62,8 @@ def loadPrefab(parent):
 
 def loadScene(parent):
     return _loadPrefabOrScene("scene", parent)
+
+def loadProject(parent):
+
+    fname =  QtGui.QFileDialog.getExistingDirectory(parent, "Open Project")
+    return fname

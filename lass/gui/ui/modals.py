@@ -65,3 +65,14 @@ class CouldNotLoadPrefabMB(ErrorMessageBox):
             dialogs.errors["couldNotLoadPrefab"],
             trace
         )
+
+class CouldNotOpenProjectMB(ErrorMessageBox):
+
+    def __init__(self, parent, exception):
+
+        ErrorMessageBox.__init__(
+            self,
+            parent,
+            "Could not open project",
+            dialogs.errors["couldNotOpenProject"].format(exception)
+        )

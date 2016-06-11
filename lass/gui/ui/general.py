@@ -90,7 +90,12 @@ class MainWindow(QtGui.QMainWindow):
         pass
 
     def openProjectActionTriggered(self):
-        pass
+
+        projectDirectory = loaders.loadProject(self)
+        try:
+            app.setProject(self, projectDirectory)
+        except OSError as e:
+            modals.CouldNotOpenProjectMB(self, e).exec_()
 
     def openProjectInNewWindowActionTriggered(self):
 

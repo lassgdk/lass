@@ -95,14 +95,7 @@ class ProjectManager(object):
 		else:
 			buildPath = os.path.join(projPath, "build")
 
-		sourcePath = os.path.join(projPath, "src")
-
-		#make sure project exists and can be compiled
-		try:
-			if not "main.lua" in os.listdir(sourcePath):
-				raise OSError("Cannot find main.lua in project")
-		except OSError as e:
-			raise OSError("Cannot find " + sourcePath)
+		self.assertProjectIsValid(projPath)
 
 		if not sendToTemp and not "build" in os.listdir(projPath):
 			os.mkdir(buildPath)
@@ -255,31 +248,6 @@ class ProjectManager(object):
 		module = self._loadLuaModule(fileName)
 		return Prefab(fileName, module, self.lua)
 
-
-	# def loadPrefab(self, fileName):
-
-	#helper functions
-
-	# def _luaTableToObjectList(self, table):
-
-	# 	if lupa.lua_type(table) != "table":
-	# 		return
-
-	# 	gameObjects = []
-
-	# 	for i, node in luatools.ipairs(table):
-	# 		o = {"data": {
-	# 			"name": six.text_type(node.name) or "",
-	# 			"components": luatools.luaTableToDict(node.components, self.lua) or {},
-	# 			"transform": luatools.luaTableToDict(node.transform, self.lua) or {}
-	# 		}}
-
-	# 		o["children"] = self._luaTableToObjectList(node.children)
-
-	# 		gameObjects.append(o)
-
-	# 	return gameObjects
-
 	def findGame(self, game, *folders):
 		"""
 		search through list of folders until game project is found
@@ -344,6 +312,19 @@ class ProjectManager(object):
 		with open(exeFileNameFull, "ab") as exeFile, open(loveFileNameFull, "rb") as loveFile:
 			bytes = loveFile.read()
 			exeFile.write(bytes)
+
+	def assertProjectIsValid(self, projPath):
+
+		sourcePath = os.path.join(projPath, "src")
+		
+		#make sure project exists and can be compiled
+		try:
+			l = os.listdir(sourcePath)
+		except OSError as e:
+			raise OSError("Cannot find " + sourcePath)
+
+		if not "main.lua" in l:
+			raise OSError("Cannot find main.lua in project")
 
 class Scene(object):
 
