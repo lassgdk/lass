@@ -8,7 +8,14 @@ from ..application import app
 
 def _loadPrefabOrScene(module_type, parent):
 
-    project = app.project(parent)
+    try:
+        project = app.project(parent)
+    except KeyError:
+        # as long as load actions are disabled until the window is associated
+        # with a project, it should not be possible to reach this point.
+        # however, it's still good to have a fallback
+        modals.CouldNotPerformActionWithoutProjectMB(parent).exec_()
+        return
 
     if module_type == "prefab":
         method = project.loadPrefab
@@ -31,14 +38,14 @@ def _loadPrefabOrScene(module_type, parent):
         r = method(fname)
     except lupa.LuaError:
         if module_type == "prefab":
-            errorMessageBox = modals.CouldNotParsePrefabMB(parent, sys.exc_info()[2])
+            errorMessageBox = modals.CouldNotParsePrefabMB(parent, trace=sys.exc_info()[2])
         else:
-            errorMessageBox = modals.CouldNotParseSceneMB(parent, sys.exc_info()[2])
+            errorMessageBox = modals.CouldNotParseSceneMB(parent, trace=sys.exc_info()[2])
     except Exception as e:
         if module_type == "prefab":
-            errorMessageBox = modals.CouldNotLoadPrefabMB(parent, sys.exc_info()[2])
+            errorMessageBox = modals.CouldNotLoadPrefabMB(parent, trace=sys.exc_info()[2])
         else:
-            errorMessageBox = modals.CouldNotLoadSceneMB(parent, sys.exc_info()[2])
+            errorMessageBox = modals.CouldNotLoadSceneMB(parent, trace=sys.exc_info()[2])
 
     if errorMessageBox:
         return errorMessageBox.exec_()
@@ -55,7 +62,7 @@ def loadPrefab(parent):
     try:
         prefab.toGameObject()
     except (lupa.LuaError, AttributeError):
-        modals.CouldNotParsePrefabMB(parent, sys.exc_info()[2]).exec_()
+        modals.CouldNotParsePrefabMB(parent, trace=sys.exc_info()[2]).exec_()
         return
 
     return prefab

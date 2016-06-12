@@ -1,7 +1,26 @@
 errors = {
-    "couldNotParseScene": "The requested scene file could not be parsed. This may be because the file is corrupt, or because it is not a proper scene file.\n\n(Remember, other files, such as prefabs and scripts, may also use the .lua extension.)",
-    "couldNotLoadScene": "The requested scene file could not be loaded.",
-    "couldNotParsePrefab": "The requested prefab file could not be parsed. This may be because the file is corrupt, or because it is not a proper prefab file.\n\n(Remember, other files, such as scenes and scripts, may also use the .lua extension.)",
-    "couldNotLoadPrefab": "The requested prefab file could not be loaded.",
-    "couldNotOpenProject": "An error occurred while trying to load the project:\n{}"
+    "couldNotParseScene": {
+        "title": "Could not load scene",
+        "body": "The requested scene file could not be parsed. This may be because the file is corrupt, or because it is not a proper scene file.\n\n(Remember, other files, such as prefabs and scripts, may also use the .lua extension.)"
+    },
+    "couldNotLoadScene": {
+        "title": "Could not load scene",
+        "body": "The requested scene file could not be loaded."
+    },
+    "couldNotParsePrefab": {
+        "title": "Could not load prefab",
+        "body": "The requested prefab file could not be parsed. This may be because the file is corrupt, or because it is not a proper prefab file.\n\n(Remember, other files, such as scenes and scripts, may also use the .lua extension.)"
+    },
+    "couldNotLoadPrefab": {
+        "title": "Could not load prefab",
+        "body": "The requested prefab file could not be loaded."
+    },
+    "couldNotOpenProject": {
+        "title": "Could not open project",
+        "body": "An error occurred while trying to open the project:\n{}"
+    },
+    "couldNotPerformActionWithoutProject": {
+        "title": "No project",
+        "body": "You cannot perform this action because you haven't opened or created a project yet."
+    }
 }

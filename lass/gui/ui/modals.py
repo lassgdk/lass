@@ -4,7 +4,15 @@ from .. import dialogs
 
 class ErrorMessageBox(QtGui.QMessageBox):
 
-    def __init__(self, parent, title, text, trace=None):
+    def __init__(self, parent, title=None, text=None, trace=None, formatArgs=tuple()):
+        
+        if title == None:
+            title = self.messageTitle
+        if text == None:
+            text = self.messageText
+
+        text = text.format(*formatArgs)
+
         QtGui.QMessageBox.__init__(
             self,
             QtGui.QMessageBox.Critical,
@@ -18,61 +26,16 @@ class ErrorMessageBox(QtGui.QMessageBox):
         if trace:
             self.setDetailedText(traceback.format_exc(trace))
 
-class CouldNotParseSceneMB(ErrorMessageBox):
+def _createEMBClass(name, dialogKey):
 
-    def __init__(self, parent, trace):
-
-        ErrorMessageBox.__init__(
-            self,
-            parent,
-            "Could not load scene",
-            dialogs.errors["couldNotParseScene"],
-            trace
-        )
-
-class CouldNotLoadSceneMB(ErrorMessageBox):
-
-    def __init__(self, parent, trace):
-
-        ErrorMessageBox.__init__(
-            self,
-            parent,
-            "Could not load scene",
-            dialogs.errors["couldNotLoadScene"],
-            trace
-        )
-
-class CouldNotParsePrefabMB(ErrorMessageBox):
-
-    def __init__(self, parent, trace):
-
-        ErrorMessageBox.__init__(
-            self,
-            parent,
-            "Could not load scene",
-            dialogs.errors["couldNotParsePrefab"],
-            trace
-        )
-
-class CouldNotLoadPrefabMB(ErrorMessageBox):
-
-    def __init__(self, parent, trace):
-
-        ErrorMessageBox.__init__(
-            self,
-            parent,
-            "Could not load prefab",
-            dialogs.errors["couldNotLoadPrefab"],
-            trace
-        )
-
-class CouldNotOpenProjectMB(ErrorMessageBox):
-
-    def __init__(self, parent, exception):
-
-        ErrorMessageBox.__init__(
-            self,
-            parent,
-            "Could not open project",
-            dialogs.errors["couldNotOpenProject"].format(exception)
-        )
+    globals()[name] = type(name, (ErrorMessageBox,), {
+        "messageText": dialogs.errors[dialogKey]["body"],
+        "messageTitle": dialogs.errors[dialogKey]["title"]
+    })
+    
+_createEMBClass("CouldNotParseSceneMB", "couldNotParseScene")
+_createEMBClass("CouldNotLoadSceneMB", "couldNotLoadScene")
+_createEMBClass("CouldNotParsePrefabMB", "couldNotParsePrefab")
+_createEMBClass("CouldNotLoadPrefabMB", "couldNotLoadPrefab")
+_createEMBClass("CouldNotOpenProjectMB", "couldNotOpenProject")
+_createEMBClass("CouldNotPerformActionWithoutProjectMB", "couldNotPerformActionWithoutProject")

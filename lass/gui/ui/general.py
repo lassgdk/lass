@@ -7,6 +7,8 @@ from .. import resources, models, delegates, dialogs
 from ..application import app
 from ... import pmtools
 
+import sip
+
 # def loadUi(filename):
 
 #     loader = QtUiTools.QUiLoader()
@@ -18,6 +20,7 @@ from ... import pmtools
 #     return ui
 
 class MainMenuBar(QtGui.QMenuBar):
+
     def __init__(self, parent):
 
         QtGui.QMenuBar.__init__(self)
@@ -39,16 +42,52 @@ class MainMenuBar(QtGui.QMenuBar):
         self.openProjectInNewWindowAction.triggered.connect(parent.openProjectInNewWindowActionTriggered)
         self.openSceneAction.triggered.connect(parent.openSceneActionTriggered)
 
+        # self.newSceneAction.setEnabled(False)
+        # self.openSceneAction.setEnabled(False)
+
 class MainWindow(QtGui.QMainWindow):
 
     def __init__(self):
         QtGui.QMainWindow.__init__(self)
-        
+
+        self.setMenuBar(MainMenuBar(self))
+        self.setWindowState(QtCore.Qt.WindowMaximized)
+
         self.central = QtGui.QWidget(self)
-        layout = QtGui.QHBoxLayout()
-        self.central.setLayout(layout)
         self.central.setObjectName("central")
         self.setCentralWidget(self.central)
+        layout = QtGui.QHBoxLayout()
+        self.central.setLayout(layout)
+
+        self.startupFrame = QtGui.QFrame(self)
+        layout.addWidget(self.startupFrame)
+
+        self.startupFrame.setLayout(QtGui.QHBoxLayout())
+        self.startupFrame.setObjectName("startupFrame")
+
+        self.startupNewProjectButton = QtGui.QToolButton(self)
+        self.startupNewProjectButton.setText("New Project")
+        self.startupNewProjectButton.setObjectName("startupNewProjectButton")
+        self.startupFrame.layout().addWidget(self.startupNewProjectButton)
+        self.startupNewProjectButton.clicked.connect(self.newProjectActionTriggered)
+
+        self.startupOpenProjectButton = QtGui.QToolButton(self)
+        self.startupOpenProjectButton.setText("Open Project")
+        self.startupOpenProjectButton.setObjectName("startupOpenProjectButton")
+        self.startupFrame.layout().addWidget(self.startupOpenProjectButton)
+        self.startupOpenProjectButton.clicked.connect(self.openProjectActionTriggered)
+
+        # prevent one of the buttons from starting in focus
+        self.startupFrame.setFocus()
+
+    def showWorkspace(self):
+
+        self.central.layout().removeWidget(self.startupFrame)
+        self.startupFrame.hide()
+
+        del self.startupFrame
+        del self.startupNewProjectButton
+        del self.startupOpenProjectButton
 
         self.statusbar = QtGui.QStatusBar(self)
         self.statusbar.setObjectName("statusbar")
@@ -56,7 +95,7 @@ class MainWindow(QtGui.QMainWindow):
 
         self.splitter = QtGui.QSplitter(self)
         self.splitter.setOrientation(QtCore.Qt.Horizontal)
-        layout.addWidget(self.splitter)
+        self.central.layout().addWidget(self.splitter)
 
         self.gameObjectTreeContainer = GameObjectTreeContainer(self)
         self.inspectorContainer = InspectorContainer(self)
@@ -67,15 +106,13 @@ class MainWindow(QtGui.QMainWindow):
         self.gameObjectTreeContainer.gameObjectTree.dragStarted.connect(self.reloadStyle)
         self.gameObjectTreeContainer.gameObjectTree.dropStarted.connect(self.reloadStyle)
 
-        self.setMenuBar(MainMenuBar(self))
-        self.setWindowState(QtCore.Qt.WindowMaximized)
 
     def reloadStyle(self):
         with open(os.path.join(pmtools.DIR_LASS_DATA, "gui", "main.qss")) as styleSheetFile:
             self.setStyleSheet(styleSheetFile.read())
 
     def newProjectActionTriggered(self):
-        pass
+        self.showWorkspace()
 
     def newProjectInNewWindowActionTriggered(self):
 
@@ -92,10 +129,16 @@ class MainWindow(QtGui.QMainWindow):
     def openProjectActionTriggered(self):
 
         projectDirectory = loaders.loadProject(self)
+        if not projectDirectory:
+            return
+
         try:
             app.setProject(self, projectDirectory)
         except OSError as e:
-            modals.CouldNotOpenProjectMB(self, e).exec_()
+            modals.CouldNotOpenProjectMB(self, formatArgs=(e,)).exec_()
+            return
+
+        self.showWorkspace()
 
     def openProjectInNewWindowActionTriggered(self):
 
@@ -117,7 +160,7 @@ class MainWindow(QtGui.QMainWindow):
         try:
             gameObjects = scene.gameObjects
         except AttributeError:
-            modals.CouldNotParseSceneMB(self, sys.exc_info()[2]).exec_()
+            modals.CouldNotParseSceneMB(self, trace=sys.exc_info()[2]).exec_()
             return
 
         treeModel = self.gameObjectTreeContainer.gameObjectTree.model()
