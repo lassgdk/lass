@@ -5,6 +5,7 @@ build
 record.txt
 venv
 setup.cfg
+*.orig
 
 notes
 ignore
