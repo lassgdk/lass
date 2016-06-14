@@ -112,6 +112,8 @@ class MainWindow(QtGui.QMainWindow):
     def newProjectActionTriggered(self):
 
         projectDirectory = filedialogs.newProject(self)
+        if not projectDirectory:
+            return
 
         try:
             app.setProject(self, projectDirectory, initialize=True)
