@@ -76,6 +76,8 @@ class Application(object):
         window.reloadStyle()
         window.show()
 
+        self.addWindow(window)
+
         return self.qApp.exec_()
 
     def project(self, window):
