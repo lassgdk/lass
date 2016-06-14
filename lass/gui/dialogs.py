@@ -1,4 +1,8 @@
 errors = {
+    "genericError": {
+        "title": "Error",
+        "body": "An unexpected error occurred."
+    },
     "couldNotParseScene": {
         "title": "Could not load scene",
         "body": "The requested scene file could not be parsed. This may be because the file is corrupt, or because it is not a proper scene file.\n\n(Remember, other files, such as prefabs and scripts, may also use the .lua extension.)"

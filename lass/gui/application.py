@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys, linecache, os
-from six import text_type
+from six import string_types
 from PySide import QtGui
 from ..pmtools import ProjectManager
 
@@ -10,7 +10,8 @@ class Project(object):
 
     def __init__(self, directory, initialize=False):
 
-        if not isinstance(directory, text_type):
+        print directory
+        if not isinstance(directory, string_types):
             raise TypeError("directory must be string")
 
         self.directory = os.path.abspath(os.path.expandvars(directory))
@@ -18,6 +19,8 @@ class Project(object):
 
         if not initialize:
             self.projectManager.assertProjectIsValid(self.directory)
+        else:
+            self.projectManager.newGame(self.directory)
 
         self.scenes = []
         self.currentSceneIndex = 0
@@ -83,10 +86,10 @@ class Application(object):
 
         self.projects[window] = None
 
-    def setProject(self, window, directory):
+    def setProject(self, window, directory, initialize=False):
 
         if directory:
-            self.projects[window] = Project(directory)
+            self.projects[window] = Project(directory, initialize)
         else:
             self.projects[window] = None
 

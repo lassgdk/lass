@@ -32,7 +32,8 @@ def _createEMBClass(name, dialogKey):
         "messageText": dialogs.errors[dialogKey]["body"],
         "messageTitle": dialogs.errors[dialogKey]["title"]
     })
-    
+
+_createEMBClass("GenericErrorMB", "genericError")
 _createEMBClass("CouldNotParseSceneMB", "couldNotParseScene")
 _createEMBClass("CouldNotLoadSceneMB", "couldNotLoadScene")
 _createEMBClass("CouldNotParsePrefabMB", "couldNotParsePrefab")

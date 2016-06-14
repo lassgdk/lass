@@ -74,3 +74,8 @@ def loadProject(parent):
 
     fname =  QtGui.QFileDialog.getExistingDirectory(parent, "Open Project")
     return fname
+
+def newProject(parent):
+
+    fname, _ = QtGui.QFileDialog.getSaveFileName(parent, "Create New Project")
+    return fname

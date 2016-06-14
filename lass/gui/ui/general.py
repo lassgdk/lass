@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 import os, sys
 from PySide import QtGui, QtCore, QtUiTools
 
-from . import loaders, modals
+from . import filedialogs, modals
 from .. import resources, models, delegates, dialogs
 from ..application import app
 from ... import pmtools
@@ -112,6 +112,15 @@ class MainWindow(QtGui.QMainWindow):
             self.setStyleSheet(styleSheetFile.read())
 
     def newProjectActionTriggered(self):
+
+        projectDirectory = filedialogs.newProject(self)
+
+        try:
+            app.setProject(self, projectDirectory, initialize=True)
+        except:
+            modals.GenericErrorMB(self, trace=sys.exc_info()[2]).exec_()
+            return
+
         self.showWorkspace()
 
     def newProjectInNewWindowActionTriggered(self):
@@ -128,7 +137,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def openProjectActionTriggered(self):
 
-        projectDirectory = loaders.loadProject(self)
+        projectDirectory = filedialogs.loadProject(self)
         if not projectDirectory:
             return
 
@@ -153,7 +162,7 @@ class MainWindow(QtGui.QMainWindow):
     def openSceneActionTriggered(self):
 
         try:
-            scene, sceneIndex = loaders.loadScene(self)
+            scene, sceneIndex = filedialogs.loadScene(self)
         except TypeError:
             return
 
@@ -363,7 +372,7 @@ class GameObjectTree(QtGui.QTreeView):
 
     def createGameObjectFromPrefab(self):
 
-        prefab = loaders.loadPrefab(self)
+        prefab = filedialogs.loadPrefab(self)
         if not prefab:
             return
 
