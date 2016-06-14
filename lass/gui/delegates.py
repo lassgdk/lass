@@ -1,7 +1,7 @@
 from PySide import QtGui
 
-from ui.editors import TreeItemLineEditor
 from six import string_types
+from .ui.editors import TreeItemLineEditor
 
 class TreeItemDelegate(QtGui.QStyledItemDelegate):
 

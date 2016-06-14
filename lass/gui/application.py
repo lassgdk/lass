@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
 import sys, linecache, os
 from six import string_types
 from PySide import QtGui
@@ -10,7 +11,6 @@ class Project(object):
 
     def __init__(self, directory, initialize=False):
 
-        print directory
         if not isinstance(directory, string_types):
             raise TypeError("directory must be string")
 
@@ -70,7 +70,7 @@ class Application(object):
 
     def run(self):
 
-        from ui.general import MainWindow
+        from .ui.general import MainWindow
 
         window = MainWindow()
         window.reloadStyle()

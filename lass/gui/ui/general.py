@@ -7,8 +7,6 @@ from .. import resources, models, delegates, dialogs
 from ..application import app
 from ... import pmtools
 
-import sip
-
 # def loadUi(filename):
 
 #     loader = QtUiTools.QUiLoader()
