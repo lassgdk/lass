@@ -8,14 +8,20 @@ from ..application import app
 
 def _loadPrefabOrScene(module_type, parent):
 
+    noProject = False
+
     try:
         project = app.project(parent)
+        noProject = not project
     except KeyError:
-        # as long as load actions are disabled until the window is associated
-        # with a project, it should not be possible to reach this point.
-        # however, it's still good to have a fallback
-        modals.CouldNotPerformActionWithoutProjectMB(parent).exec_()
-        return
+        noProject = True
+    finally:
+        if noProject:
+            # as long as load actions are disabled until the window is
+            # associated with a project, it should not be possible to reach this
+            # point. however, it's still good to have a fallback
+            modals.CouldNotPerformActionWithoutProjectMB(parent).exec_()
+            return
 
     if module_type == "prefab":
         method = project.loadPrefab
