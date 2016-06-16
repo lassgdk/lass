@@ -40,8 +40,8 @@ class MainMenuBar(QtGui.QMenuBar):
         self.openProjectInNewWindowAction.triggered.connect(parent.openProjectInNewWindowActionTriggered)
         self.openSceneAction.triggered.connect(parent.openSceneActionTriggered)
 
-        # self.newSceneAction.setEnabled(False)
-        # self.openSceneAction.setEnabled(False)
+        self.newSceneAction.setEnabled(False)
+        self.openSceneAction.setEnabled(False)
 
 class MainWindow(QtGui.QMainWindow):
 
@@ -104,6 +104,8 @@ class MainWindow(QtGui.QMainWindow):
         self.gameObjectTreeContainer.gameObjectTree.dragStarted.connect(self.reloadStyle)
         self.gameObjectTreeContainer.gameObjectTree.dropStarted.connect(self.reloadStyle)
 
+        self.menuBar().newSceneAction.setEnabled(True)
+        self.menuBar().openSceneAction.setEnabled(True)
 
     def reloadStyle(self):
         with open(os.path.join(pmtools.DIR_LASS_DATA, "gui", "main.qss")) as styleSheetFile:
