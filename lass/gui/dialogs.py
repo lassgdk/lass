@@ -26,5 +26,11 @@ errors = {
     "couldNotPerformActionWithoutProject": {
         "title": "No project",
         "body": "You cannot perform this action because you haven't opened or created a project yet."
+    },
+}
+alerts = {
+    "confirmImportExternalAsset": {
+        "title": "External file",
+        "body": "You are attempting to open a file that exists outside of the current project. To do this, you will need to import it. Do you want to import the file?"
     }
 }

@@ -5,7 +5,7 @@ from .. import dialogs
 class ErrorMessageBox(QtGui.QMessageBox):
 
     def __init__(self, parent, title=None, text=None, trace=None, formatArgs=tuple()):
-        
+
         if title == None:
             title = self.messageTitle
         if text == None:
@@ -20,11 +20,28 @@ class ErrorMessageBox(QtGui.QMessageBox):
             text,
             QtGui.QMessageBox.Ok,
             parent,
-            flags=QtCore.Qt.WindowFlags(QtCore.Qt.WindowCloseButtonHint)
+            # flags=QtCore.Qt.WindowFlags(QtCore.Qt.WindowCloseButtonHint)
         )
 
         if trace:
             self.setDetailedText(traceback.format_exc(trace))
+
+class ConfirmImportExternalAssetMB(QtGui.QMessageBox):
+
+    def __init__(self, parent):
+
+        dialog = dialogs.alerts["confirmImportExternalAsset"]
+
+        QtGui.QMessageBox.__init__(
+            self,
+            QtGui.QMessageBox.Question,
+            dialog["title"],
+            dialog["body"],
+            QtGui.QMessageBox.Open | QtGui.QMessageBox.Cancel,
+            parent
+        )
+
+        self.button(QtGui.QMessageBox.Open).setText("Import")
 
 def _createEMBClass(name, dialogKey):
 

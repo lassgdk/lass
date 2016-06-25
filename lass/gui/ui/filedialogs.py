@@ -1,12 +1,26 @@
 from __future__ import unicode_literals
-import sys, traceback
+import sys, traceback, os, shutil
 import lupa
 from PySide import QtGui
 
 from . import modals
 from ..application import app
 
-def _loadPrefabOrScene(module_type, parent):
+def importAsset(parent, fileName=""):
+
+    try:
+        project = app.project(parent)
+        noProject = not project
+    except KeyError:
+        noProject = True
+    finally:
+        if noProject:
+            return
+
+    shutil.copy(fileName, project.sourceDirectory)
+    return os.path.join(project.sourceDirectory, os.path.basename(fileName))
+
+def _loadPrefabOrScene(module_type, parent, fileName=""):
 
     noProject = False
 
@@ -18,7 +32,7 @@ def _loadPrefabOrScene(module_type, parent):
     finally:
         if noProject:
             # as long as load actions are disabled until the window is
-            # associated with a project, it should not be possible to reach this
+            # associated with a project, we should not be possible to reach this
             # point. however, it's still good to have a fallback
             modals.CouldNotPerformActionWithoutProjectMB(parent).exec_()
             return
@@ -26,11 +40,11 @@ def _loadPrefabOrScene(module_type, parent):
     if module_type == "prefab":
         method = project.loadPrefab
         dialogName = "Prefab"
-        args = ("Load Prefab", ".", "Prefab files (*.prefab.lua);; Lua files (*.lua)")#, ~QtGui.QFileDialog.HideNameFilterDetails)
+        args = ("Load Prefab", project.sourceDirectory, "Prefab files (*.prefab.lua);; Lua files (*.lua)")
     elif module_type == "scene":
         method = project.loadScene
         dialogName = "Scene"
-        args = ("Open Scene", ".", "Scene files (*.scene.lua);; Lua files (*.lua)")#, ~QtGui.QFileDialog.HideNameFilterDetails)
+        args = ("Open Scene", project.sourceDirectory, "Scene files (*.scene.lua);; Lua files (*.lua)")
     else:
         return
 
@@ -40,6 +54,19 @@ def _loadPrefabOrScene(module_type, parent):
     if not fname:
         return
 
+    # if the file is outside of the project directory, we should ask if the user
+    # wants to import it
+    if not os.path.abspath(fname).startswith(project.sourceDirectory):
+        buttonPressed = modals.ConfirmImportExternalAssetMB(parent).exec_()
+        if buttonPressed != QtGui.QMessageBox.Open:
+            return
+
+        try:
+            fname = importAsset(parent, fileName=fname)
+        except:
+            return modals.GenericErrorMB(parent, trace=sys.exc_info()[2])._exec()
+
+    # parse the prefab or scene
     try:
         r = method(fname)
     except lupa.LuaError:
@@ -58,9 +85,9 @@ def _loadPrefabOrScene(module_type, parent):
 
     return r
 
-def loadPrefab(parent):
+def loadPrefab(parent, fileName=""):
 
-    prefab = _loadPrefabOrScene("prefab", parent)
+    prefab = _loadPrefabOrScene("prefab", parent, fileName)
 
     if not prefab:
         return
@@ -73,12 +100,12 @@ def loadPrefab(parent):
 
     return prefab
 
-def loadScene(parent):
-    return _loadPrefabOrScene("scene", parent)
+def loadScene(parent, fileName=""):
+    return _loadPrefabOrScene("scene", parent, fileName)
 
 def loadProject(parent):
 
-    fname =  QtGui.QFileDialog.getExistingDirectory(parent, "Open Project")
+    fname = QtGui.QFileDialog.getExistingDirectory(parent, "Open Project")
     return fname
 
 def newProject(parent):

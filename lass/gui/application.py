@@ -26,6 +26,10 @@ class Project(object):
         self.currentSceneIndex = 0
         self.settings = {}
 
+    @property
+    def sourceDirectory(self):
+        return self.projectManager.sourceDirectory(self.directory)
+
     def isFileInProject(self, fileName):
 
         # we intentionally don't follow symlinks

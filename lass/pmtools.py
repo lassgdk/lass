@@ -326,6 +326,9 @@ class ProjectManager(object):
 		if not "main.lua" in l:
 			raise OSError("Cannot find main.lua in project")
 
+	def sourceDirectory(self, projectDirectory):
+		return os.path.join(projectDirectory, "src")
+
 class Scene(object):
 
 	def __init__(self, name, data, lua):
