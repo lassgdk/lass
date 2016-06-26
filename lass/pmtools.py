@@ -225,7 +225,8 @@ class ProjectManager(object):
 
 	def _loadLuaModule(self, fileName):
 
-		self.lua.execute("t = loadfile('{}')".format(fileName))
+		# use multi-line lua string to escape any backslashes
+		self.lua.execute("t = loadfile([[{}]])".format(fileName))
 		module = None
 
 		if self.lua.globals().t:
