@@ -26,11 +26,11 @@ class ErrorMessageBox(QtGui.QMessageBox):
         if trace:
             self.setDetailedText(traceback.format_exc(trace))
 
-class ConfirmImportExternalAssetMB(QtGui.QMessageBox):
+class ConfirmImportAssetMB(QtGui.QMessageBox):
 
     def __init__(self, parent):
 
-        dialog = dialogs.alerts["confirmImportExternalAsset"]
+        dialog = dialogs.alerts["confirmImportAsset"]
 
         QtGui.QMessageBox.__init__(
             self,
@@ -57,3 +57,4 @@ _createEMBClass("CouldNotParsePrefabMB", "couldNotParsePrefab")
 _createEMBClass("CouldNotLoadPrefabMB", "couldNotLoadPrefab")
 _createEMBClass("CouldNotOpenProjectMB", "couldNotOpenProject")
 _createEMBClass("CouldNotPerformActionWithoutProjectMB", "couldNotPerformActionWithoutProject")
+_createEMBClass("CouldNotImportAssetMB", "couldNotImportAsset")

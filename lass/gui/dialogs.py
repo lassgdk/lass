@@ -21,16 +21,20 @@ errors = {
     },
     "couldNotOpenProject": {
         "title": "Could not open project",
-        "body": "An error occurred while trying to open the project:\n{}"
+        "body": "An error occurred while trying to open the project:\n\n{}"
     },
     "couldNotPerformActionWithoutProject": {
         "title": "No project",
         "body": "You cannot perform this action because you haven't opened or created a project yet."
     },
+    "couldNotImportAsset": {
+        "title": "Import failed",
+        "body": "An error occurred while trying to import the asset:\n\n{}"
+    }
 }
 alerts = {
-    "confirmImportExternalAsset": {
+    "confirmImportAsset": {
         "title": "External file",
-        "body": "You are attempting to open a file that exists outside of the current project. To do this, you will need to import it. Do you want to import the file?"
+        "body": "You are attempting to open a file that exists outside of the current project. To do so, you will need to import it. This will copy the file to the project's \"src\" directory, unless there is a name conflict.\n\nDo you want to import the file?"
     }
 }

@@ -17,6 +17,8 @@ def importAsset(parent, fileName=""):
         if noProject:
             return
 
+    if os.path.exists(os.path.join(project.sourceDirectory, os.path.basename(fileName))):
+        raise OSError("'{}' already exists".format(os.path.basename(fileName)))
     shutil.copy(fileName, project.sourceDirectory)
     return os.path.join(project.sourceDirectory, os.path.basename(fileName))
 
@@ -57,14 +59,18 @@ def _loadPrefabOrScene(module_type, parent, fileName=""):
     # if the file is outside of the project directory, we should ask if the user
     # wants to import it
     if not os.path.abspath(fname).startswith(project.sourceDirectory):
-        buttonPressed = modals.ConfirmImportExternalAssetMB(parent).exec_()
+        buttonPressed = modals.ConfirmImportAssetMB(parent).exec_()
         if buttonPressed != QtGui.QMessageBox.Open:
             return
 
         try:
             fname = importAsset(parent, fileName=fname)
+            if not fname:
+                return
+        except OSError as e:
+            return modals.CouldNotImportAssetMB(parent, formatArgs=[e]).exec_()
         except:
-            return modals.GenericErrorMB(parent, trace=sys.exc_info()[2])._exec()
+            return modals.GenericErrorMB(parent, trace=sys.exc_info()[2]).exec_()
 
     # parse the prefab or scene
     try:
